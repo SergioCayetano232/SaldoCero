@@ -107,3 +107,24 @@ h1 {
 .formulario-gasto button:hover {
   background-color: #0a5f5e;
 }
+
+.resumen-totales {
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.fila-balance {
+  gap: 12px;
+}
+
+.positivo {
+  color: #2e9e5b;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.negativo {
+  color: #d1495b;
+  font-weight: 600;
+  white-space: nowrap;
+}

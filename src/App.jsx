@@ -58,6 +58,29 @@ function App() {
     return viajero ? viajero.nombre : "¿?";
   }
 
+  // --- CÁLCULOS ---
+  // Se recalculan solos en cada render, a partir de viajeros y gastos.
+
+  // Total gastado en el viaje.
+  const total = gastos.reduce((suma, gasto) => suma + gasto.importe, 0);
+
+  // Parte que le corresponde a cada persona (a partes iguales).
+  const partePorPersona = viajeros.length > 0 ? total / viajeros.length : 0;
+
+  // Para cada viajero calculamos cuánto ha puesto y su balance.
+  const balances = viajeros.map((viajero) => {
+    // Sumamos los gastos que pagó esta persona.
+    const puesto = gastos
+      .filter((gasto) => gasto.pagadorId === viajero.id)
+      .reduce((suma, gasto) => suma + gasto.importe, 0);
+
+    // Balance = lo que ha puesto menos lo que le tocaba.
+    // Positivo -> le deben. Negativo -> debe.
+    const balance = puesto - partePorPersona;
+
+    return { ...viajero, puesto, balance };
+  });
+
   return (
     <div className="app">
       <h1>SaldoCero</h1>
@@ -169,6 +192,34 @@ function App() {
           </>
         )}
       </section>
+
+      {/* ---------- RESUMEN ---------- */}
+      {gastos.length > 0 && (
+        <section className="tarjeta">
+          <h2>Resumen</h2>
+
+          <p className="resumen-totales">
+            Total gastado: <strong>{total.toFixed(2)} €</strong>
+            <br />
+            Por persona: <strong>{partePorPersona.toFixed(2)} €</strong>
+          </p>
+
+          <ul className="lista">
+            {balances.map((viajero) => (
+              <li key={viajero.id} className="fila-balance">
+                <span>
+                  <strong>{viajero.nombre}</strong> ha puesto{" "}
+                  {viajero.puesto.toFixed(2)} €
+                </span>
+                <span className={viajero.balance >= 0 ? "positivo" : "negativo"}>
+                  {viajero.balance >= 0 ? "le deben " : "debe "}
+                  {Math.abs(viajero.balance).toFixed(2)} €
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }
