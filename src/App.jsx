@@ -81,6 +81,25 @@ function App() {
     return { ...viajero, puesto, balance };
   });
 
+  // --- LE TOCA PAGAR A ---
+  // La persona con el balance más bajo (la que menos ha aportado).
+  let leTocaPagar = null; // null significa "no hay a quién señalar todavía"
+
+  if (balances.length > 0) {
+    const balanceMin = Math.min(...balances.map((v) => v.balance));
+    const balanceMax = Math.max(...balances.map((v) => v.balance));
+
+    // Si la diferencia entre el que más y el que menos ha puesto es mínima,
+    // está todo igualado y puede pagar cualquiera.
+    if (balanceMax - balanceMin < 0.01) {
+      leTocaPagar = { igualados: true };
+    } else {
+      // Buscamos a la persona que tiene ese balance más bajo.
+      const persona = balances.find((v) => v.balance === balanceMin);
+      leTocaPagar = { igualados: false, nombre: persona.nombre };
+    }
+  }
+
   return (
     <div className="app">
       <h1>SaldoCero</h1>
@@ -203,6 +222,18 @@ function App() {
             <br />
             Por persona: <strong>{partePorPersona.toFixed(2)} €</strong>
           </p>
+
+          {leTocaPagar && (
+            <div className="le-toca">
+              {leTocaPagar.igualados ? (
+                <>✅ Está todo igualado, puede pagar cualquiera.</>
+              ) : (
+                <>
+                  👉 Le toca pagar a <strong>{leTocaPagar.nombre}</strong>
+                </>
+              )}
+            </div>
+          )}
 
           <ul className="lista">
             {balances.map((viajero) => (

@@ -128,3 +128,12 @@ h1 {
   font-weight: 600;
   white-space: nowrap;
 }
+
+.le-toca {
+  background-color: #fdebd6;
+  border: 1px solid #f4a259;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  font-size: 15px;
+}
