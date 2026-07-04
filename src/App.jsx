@@ -100,6 +100,50 @@ function App() {
     }
   }
 
+  // --- SALDAR CUENTAS ---
+  // Calculamos quién paga a quién para dejar a todos a cero.
+  function calcularPagos() {
+    // Separamos en dos grupos y trabajamos con COPIAS para no tocar los balances.
+    // deudores: los que deben (balance negativo) -> guardamos cuánto deben (en positivo).
+    const deudores = balances
+      .filter((v) => v.balance < -0.01)
+      .map((v) => ({ nombre: v.nombre, cantidad: -v.balance }))
+      .sort((a, b) => b.cantidad - a.cantidad); // de mayor a menor deuda
+
+    // acreedores: a los que les deben (balance positivo).
+    const acreedores = balances
+      .filter((v) => v.balance > 0.01)
+      .map((v) => ({ nombre: v.nombre, cantidad: v.balance }))
+      .sort((a, b) => b.cantidad - a.cantidad);
+
+    const pagos = [];
+    let i = 0; // índice del deudor actual
+    let j = 0; // índice del acreedor actual
+
+    while (i < deudores.length && j < acreedores.length) {
+      // El pago es el menor de lo que uno debe y lo que al otro le deben.
+      const cantidad = Math.min(deudores[i].cantidad, acreedores[j].cantidad);
+
+      pagos.push({
+        de: deudores[i].nombre,
+        a: acreedores[j].nombre,
+        cantidad: cantidad,
+      });
+
+      // Restamos lo pagado a ambos.
+      deudores[i].cantidad -= cantidad;
+      acreedores[j].cantidad -= cantidad;
+
+      // Si un deudor ya no debe nada, pasamos al siguiente. Igual con acreedores.
+      if (deudores[i].cantidad < 0.01) i++;
+      if (acreedores[j].cantidad < 0.01) j++;
+    }
+
+    return pagos;
+  }
+
+  const pagos = calcularPagos();
+
   return (
     <div className="app">
       <h1>SaldoCero</h1>
@@ -249,6 +293,27 @@ function App() {
               </li>
             ))}
           </ul>
+
+          {/* Cómo saldar las cuentas */}
+          <div className="saldar">
+            <h3>Cómo saldar cuentas</h3>
+            {pagos.length === 0 ? (
+              <p className="vacio">
+                Cuentas saldadas. Nadie debe nada. 🎉
+              </p>
+            ) : (
+              <ul className="lista">
+                {pagos.map((pago, indice) => (
+                  <li key={indice}>
+                    <span>
+                      <strong>{pago.de}</strong> paga{" "}
+                      {pago.cantidad.toFixed(2)} € a <strong>{pago.a}</strong>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </section>
       )}
     </div>
