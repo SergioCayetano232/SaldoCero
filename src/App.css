@@ -78,3 +78,32 @@ h1 {
 .boton-quitar:hover {
   color: #a5384689;
 }
+.formulario-gasto {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.formulario-gasto select,
+.formulario-gasto input {
+  padding: 10px 12px;
+  border: 1px solid #cdd6dc;
+  border-radius: 8px;
+  font-size: 15px;
+  width: 100%;
+}
+
+.formulario-gasto button {
+  padding: 10px 16px;
+  background-color: #0e7c7b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.formulario-gasto button:hover {
+  background-color: #0a5f5e;
+}
