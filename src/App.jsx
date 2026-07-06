@@ -78,6 +78,17 @@ function App() {
     setGastos(gastos.filter((gasto) => gasto.id !== id));
   }
 
+  // Borra todo para empezar un viaje nuevo (pide confirmación antes).
+  function empezarDeCero() {
+    const confirmado = window.confirm(
+      "¿Seguro que quieres empezar de cero? Se borrarán todos los viajeros y gastos."
+    );
+    if (!confirmado) return; // si dice que no, no hacemos nada
+
+    setViajeros([]);
+    setGastos([]);
+  }
+
   // Busca el nombre de un viajero a partir de su id (para mostrarlo en la lista).
   function nombrePagador(id) {
     const viajero = viajeros.find((v) => v.id === id);
@@ -341,6 +352,13 @@ function App() {
             )}
           </div>
         </section>
+      )}
+
+      {/* Botón para reiniciar todo */}
+      {(viajeros.length > 0 || gastos.length > 0) && (
+        <button className="boton-reiniciar" onClick={empezarDeCero}>
+          Empezar de cero
+        </button>
       )}
     </div>
   );
