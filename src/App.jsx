@@ -1,16 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
   // --- Viajeros ---
-  const [viajeros, setViajeros] = useState([]);
+  // Al arrancar, intentamos cargar los viajeros guardados en el navegador.
+  const [viajeros, setViajeros] = useState(() => {
+    try {
+      const guardado = localStorage.getItem("saldocero-viajeros");
+      return guardado ? JSON.parse(guardado) : [];
+    } catch {
+      return [];
+    }
+  });
   const [nombre, setNombre] = useState("");
 
   // --- Gastos ---
-  const [gastos, setGastos] = useState([]);
+  // Igual con los gastos.
+  const [gastos, setGastos] = useState(() => {
+    try {
+      const guardado = localStorage.getItem("saldocero-gastos");
+      return guardado ? JSON.parse(guardado) : [];
+    } catch {
+      return [];
+    }
+  });
   const [pagadorId, setPagadorId] = useState(""); // quién pagó (id del viajero)
   const [importe, setImporte] = useState(""); // cuánto
   const [concepto, setConcepto] = useState(""); // en qué
+
+  // Cada vez que cambian los viajeros, los guardamos en el navegador.
+  useEffect(() => {
+    localStorage.setItem("saldocero-viajeros", JSON.stringify(viajeros));
+  }, [viajeros]);
+
+  // Cada vez que cambian los gastos, los guardamos.
+  useEffect(() => {
+    localStorage.setItem("saldocero-gastos", JSON.stringify(gastos));
+  }, [gastos]);
 
   function anadirViajero() {
     const nombreLimpio = nombre.trim();
