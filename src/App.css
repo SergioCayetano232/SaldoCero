@@ -1,116 +1,169 @@
+/* ===== Base ===== */
 .app {
-  max-width: 560px;
+  max-width: 580px;
   margin: 0 auto;
 }
 
-h1 {
+/* ===== Cabecera ===== */
+.cabecera {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.cabecera h1 {
+  font-size: 40px;
+  letter-spacing: -1px;
   color: #0e7c7b;
 }
 
+.cabecera h1 span {
+  color: #f4a259;
+}
+
+.cabecera p {
+  color: #6b7c85;
+  margin-top: 4px;
+}
+
+/* ===== Tarjetas ===== */
 .tarjeta {
   background-color: #ffffff;
-  border: 1px solid #e1e7eb;
-  border-radius: 16px;
-  padding: 20px;
-  margin-top: 20px;
+  border: 1px solid #e8edf0;
+  border-radius: 18px;
+  padding: 22px;
+  margin-top: 18px;
+  box-shadow: 0 1px 2px rgba(16, 48, 59, 0.04),
+    0 10px 30px rgba(16, 48, 59, 0.05);
 }
 
 .tarjeta h2 {
-  margin-bottom: 12px;
+  font-size: 20px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
+/* ===== Formularios ===== */
 .fila-formulario {
   display: flex;
   gap: 8px;
   margin-bottom: 16px;
 }
 
-.fila-formulario input {
-  flex: 1;
-  padding: 10px 12px;
-  border: 1px solid #cdd6dc;
-  border-radius: 8px;
-  font-size: 15px;
+.formulario-gasto {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
 }
 
-.fila-formulario button {
-  padding: 10px 16px;
+input,
+select {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid #d4dde2;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  color: #1a2b33;
+  background-color: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #0e7c7b;
+  box-shadow: 0 0 0 3px rgba(14, 124, 123, 0.15);
+}
+
+/* ===== Botones ===== */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s, transform 0.05s;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+.fila-formulario button,
+.formulario-gasto button {
+  padding: 11px 18px;
   background-color: #0e7c7b;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 15px;
-  cursor: pointer;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
-.fila-formulario button:hover {
+.fila-formulario button:hover,
+.formulario-gasto button:hover {
   background-color: #0a5f5e;
 }
 
-.vacio {
-  color: #6b7c85;
-  font-style: italic;
-}
-
+/* ===== Listas ===== */
 .lista {
   list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .lista li {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 12px;
-  border: 1px solid #e1e7eb;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  gap: 12px;
+  padding: 12px 14px;
+  background-color: #fbfcfd;
+  border: 1px solid #eaeff2;
+  border-radius: 10px;
 }
 
 .boton-quitar {
   background: none;
   border: none;
   color: #d1495b;
-  font-size: 16px;
-  cursor: pointer;
+  font-size: 15px;
   padding: 4px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
 }
 
 .boton-quitar:hover {
-  color: #a5384689;
-}
-.formulario-gasto {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
+  background-color: #fdecef;
 }
 
-.formulario-gasto select,
-.formulario-gasto input {
-  padding: 10px 12px;
-  border: 1px solid #cdd6dc;
-  border-radius: 8px;
-  font-size: 15px;
-  width: 100%;
+/* ===== Estados vacíos ===== */
+.vacio {
+  color: #8a99a1;
+  font-style: italic;
+  font-size: 14px;
 }
 
-.formulario-gasto button {
-  padding: 10px 16px;
-  background-color: #0e7c7b;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  cursor: pointer;
-}
-
-.formulario-gasto button:hover {
-  background-color: #0a5f5e;
-}
-
+/* ===== Resumen ===== */
 .resumen-totales {
   margin-bottom: 16px;
-  line-height: 1.6;
+  line-height: 1.7;
+  color: #435660;
+}
+
+.resumen-totales strong {
+  color: #1a2b33;
+}
+
+.le-toca {
+  background-color: #fdebd6;
+  border: 1px solid #f4a259;
+  border-radius: 12px;
+  padding: 13px 15px;
+  margin-bottom: 18px;
+  font-size: 15px;
 }
 
 .fila-balance {
@@ -129,38 +182,41 @@ h1 {
   white-space: nowrap;
 }
 
-.le-toca {
-  background-color: #fdebd6;
-  border: 1px solid #f4a259;
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin-bottom: 16px;
-  font-size: 15px;
-}
-
+/* ===== Saldar cuentas ===== */
 .saldar {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid #e1e7eb;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #eaeff2;
 }
 
 .saldar h3 {
+  font-size: 17px;
   margin-bottom: 12px;
 }
 
+/* ===== Botón reiniciar ===== */
 .boton-reiniciar {
   display: block;
-  margin: 24px auto 0;
-  padding: 10px 20px;
+  margin: 28px auto 8px;
+  padding: 10px 22px;
   background-color: white;
   color: #d1495b;
   border: 1px solid #d1495b;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 15px;
-  cursor: pointer;
 }
 
 .boton-reiniciar:hover {
   background-color: #d1495b;
   color: white;
+}
+
+/* ===== Móvil ===== */
+@media (max-width: 620px) {
+  .cabecera h1 {
+    font-size: 32px;
+  }
+  .tarjeta {
+    padding: 18px;
+  }
 }

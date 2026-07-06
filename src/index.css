@@ -5,8 +5,10 @@
 }
 
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   background-color: #f4f6f8;
   color: #1a2b33;
-  padding: 24px;
+  padding: 32px 20px 60px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
 }

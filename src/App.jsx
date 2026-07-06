@@ -183,12 +183,14 @@ function App() {
 
   return (
     <div className="app">
-      <h1>SaldoCero</h1>
-      <p>Repartimos los gastos del viaje entre todos.</p>
+      <header className="cabecera">
+        <h1>Saldo<span>Cero</span></h1>
+        <p>Repartimos los gastos del viaje entre todos.</p>
+      </header>
 
       {/* ---------- VIAJEROS ---------- */}
       <section className="tarjeta">
-        <h2>Viajeros</h2>
+        <h2>🧳 Viajeros</h2>
 
         <div className="fila-formulario">
           <input
@@ -226,7 +228,7 @@ function App() {
 
       {/* ---------- GASTOS ---------- */}
       <section className="tarjeta">
-        <h2>Gastos</h2>
+        <h2>🧾 Gastos</h2>
 
         {viajeros.length === 0 ? (
           <p className="vacio">
@@ -296,7 +298,7 @@ function App() {
       {/* ---------- RESUMEN ---------- */}
       {gastos.length > 0 && (
         <section className="tarjeta">
-          <h2>Resumen</h2>
+          <h2>📊 Resumen</h2>
 
           <p className="resumen-totales">
             Total gastado: <strong>{total.toFixed(2)} €</strong>
