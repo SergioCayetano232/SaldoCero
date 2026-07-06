@@ -1,16 +1,68 @@
-# React + Vite
+# SaldoCero 💸
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Una pequeña app web para repartir los gastos de un viaje entre amigos. Nació de
+un problema de siempre: vuelves de un finde fuera y nadie se aclara con quién
+pagó qué ni cuánto debe cada uno. SaldoCero lleva esas cuentas por ti.
 
-Currently, two official plugins are available:
+Añades a la gente del viaje, vas apuntando los gastos según quién paga cada
+cosa, y la app te dice al momento cuánto ha puesto cada uno, a quién le toca
+soltar la cartera la próxima vez y, al final, quién le tiene que pagar a quién
+para que todos queden a cero.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Pruébala aquí: https://saldo-cero-eight.vercel.app/
 
-## React Compiler
+## Qué hace
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Añadir y quitar a los viajeros.
+- Apuntar gastos indicando quién pagó, cuánto y en concepto de qué.
+- Calcular automáticamente el total, lo que le toca a cada uno y su balance.
+- Avisar de a quién le toca pagar la próxima, que es al que menos ha puesto hasta ahora.
+- Al terminar el viaje, decir quién paga a quién para saldar las cuentas.
+- Guardar todo en el navegador, para que no se pierda al recargar la página.
+- Un botón para empezar de cero cuando arranca un viaje nuevo.
 
-## Expanding the ESLint configuration
+## Cómo funcionan las cuentas
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Parto de que todos comparten los gastos a partes iguales. Con eso, para cada
+persona calculo su balance: lo que ha pagado menos lo que le tocaría pagar,
+es decir, el total dividido entre el número de viajeros. Si el balance sale
+positivo, ha puesto de más y le deben; si sale negativo, debe.
+
+Para saldar las cuentas voy emparejando al que más debe con al que más se le
+debe y paso el dinero entre ellos hasta que todos quedan a cero, buscando que
+haya que hacer los menos pagos posibles.
+
+## Con qué está hecho
+
+- React para la interfaz.
+- Vite como entorno de desarrollo.
+- JavaScript y CSS puro, sin librerías de estilos.
+- localStorage para guardar los datos en el navegador.
+
+Lo monté sin base de datos a propósito, para centrarme en la lógica del reparto
+y en manejar bien el estado de React.
+
+## Ejecutarlo en tu ordenador
+
+```bash
+git clone https://github.com/SergioCayetano232/SaldoCero.git
+cd SaldoCero
+npm install
+npm run dev
+```
+
+Y abres la dirección que salga en la terminal, normalmente
+http://localhost:5173.
+
+## Cosas que me gustaría añadir más adelante
+
+- Poder compartir un mismo viaje entre varios móviles, que necesitaría una base
+  de datos en la nube.
+- Que un gasto se pueda repartir solo entre algunas personas, no siempre entre
+  todas.
+- Guardar varios viajes distintos.
+
+## Licencia
+
+Este proyecto está publicado bajo la licencia MIT. Puedes usarlo, modificarlo y
+compartirlo libremente.
