@@ -47,8 +47,14 @@
 /* ===== Formularios ===== */
 .fila-formulario {
   display: flex;
+  align-items: center;
   gap: 8px;
   margin-bottom: 16px;
+}
+
+/* El selector de viajes es la última fila de su tarjeta, no lleva nada debajo. */
+.tarjeta .fila-formulario:last-child {
+  margin-bottom: 0;
 }
 
 .formulario-gasto {
@@ -137,6 +143,73 @@ button:active {
 
 .boton-quitar:hover {
   background-color: #fdecef;
+}
+
+/* ===== Participantes de un gasto ===== */
+.participantes {
+  border: 1px dashed #d4dde2;
+  border-radius: 10px;
+  padding: 12px 13px;
+}
+
+.participantes-titulo {
+  font-size: 14px;
+  color: #6b7c85;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.casillas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.casilla {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border: 1px solid #d4dde2;
+  border-radius: 999px;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.casilla:hover {
+  border-color: #0e7c7b;
+}
+
+.casilla input {
+  width: auto;
+  margin: 0;
+  accent-color: #0e7c7b;
+  cursor: pointer;
+}
+
+.casilla:has(input:checked) {
+  background-color: #e6f2f2;
+  border-color: #0e7c7b;
+  color: #0a5f5e;
+}
+
+/* Botón que parece un enlace, para el "marcar todos". */
+.enlace {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #0e7c7b;
+  font-size: 13px;
+  text-decoration: underline;
+}
+
+/* Letra pequeña bajo un gasto o un balance. */
+.reparto {
+  color: #8a99a1;
+  font-size: 13px;
 }
 
 /* ===== Estados vacíos ===== */
