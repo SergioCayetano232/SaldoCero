@@ -219,6 +219,48 @@ button:active {
   font-size: 14px;
 }
 
+.cargando {
+  text-align: center;
+  padding: 40px 0;
+}
+
+/* ===== Errores ===== */
+.error {
+  background-color: #fdecef;
+  border: 1px solid #d1495b;
+  color: #a13549;
+  border-radius: 12px;
+  padding: 13px 15px;
+  margin-top: 18px;
+  font-size: 15px;
+}
+
+/* ===== Código del viaje ===== */
+.codigo {
+  flex: 1;
+  padding: 11px 13px;
+  background-color: #e6f2f2;
+  border: 1px dashed #0e7c7b;
+  border-radius: 10px;
+  color: #0a5f5e;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Al escribir el código, que se lea igual de claro. */
+.campo-codigo {
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
 /* ===== Resumen ===== */
 .resumen-totales {
   margin-bottom: 16px;

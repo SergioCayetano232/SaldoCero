@@ -4,28 +4,29 @@ Una pequeña app web para repartir los gastos de un viaje entre amigos. Nació d
 un problema de siempre: vuelves de un finde fuera y nadie se aclara con quién
 pagó qué ni cuánto debe cada uno. SaldoCero lleva esas cuentas por ti.
 
-Añades a la gente del viaje, vas apuntando los gastos según quién paga cada
-cosa, y la app te dice al momento cuánto ha puesto cada uno, a quién le toca
-soltar la cartera la próxima vez y, al final, quién le tiene que pagar a quién
-para que todos queden a cero.
+Creas el viaje, le pasas el código a los demás y ya podéis apuntar gastos
+todos desde vuestro móvil. La app te dice al momento cuánto ha puesto cada
+uno, a quién le toca soltar la cartera la próxima vez y, al final, quién le
+tiene que pagar a quién para que todos queden a cero.
 
 Pruébala aquí: https://saldo-cero-eight.vercel.app/
 
 ## Qué hace
 
+- Crear un viaje y entrar en el de otro con su código.
+- Apuntar gastos desde varios móviles a la vez, en el mismo viaje.
 - Añadir y quitar a los viajeros.
 - Apuntar gastos indicando quién pagó, cuánto y en concepto de qué.
+- Repartir un gasto solo entre algunos, que no siempre come todo el mundo.
 - Calcular automáticamente el total, lo que le toca a cada uno y su balance.
 - Avisar de a quién le toca pagar la próxima, que es al que menos ha puesto hasta ahora.
 - Al terminar el viaje, decir quién paga a quién para saldar las cuentas.
-- Guardar todo en el navegador, para que no se pierda al recargar la página.
-- Un botón para empezar de cero cuando arranca un viaje nuevo.
 
 ## Cómo funcionan las cuentas
 
-Parto de que todos comparten los gastos a partes iguales. Con eso, para cada
-persona calculo su balance: lo que ha pagado menos lo que le tocaría pagar,
-es decir, el total dividido entre el número de viajeros. Si el balance sale
+Cada gasto se reparte a partes iguales, pero solo entre la gente que va en él.
+Así que voy gasto por gasto sumándole a cada participante su parte, y al final
+el balance de una persona es lo que ha pagado menos lo que le tocaba. Si sale
 positivo, ha puesto de más y le deben; si sale negativo, debe.
 
 Para saldar las cuentas voy emparejando al que más debe con al que más se le
@@ -37,17 +38,29 @@ haya que hacer los menos pagos posibles.
 - React para la interfaz.
 - Vite como entorno de desarrollo.
 - JavaScript y CSS puro, sin librerías de estilos.
-- localStorage para guardar los datos en el navegador.
+- Supabase (Postgres) para guardar los viajes.
 
-Lo monté sin base de datos a propósito, para centrarme en la lógica del reparto
-y en manejar bien el estado de React.
+No hay login. Lo que hace de llave es el código del viaje: el navegador lo manda
+en cada petición y las reglas de la base de datos solo te dejan tocar el viaje
+al que pertenece. La lista de viajes no se puede consultar, así que no se pueden
+ir pescando códigos por ahí.
 
 ## Ejecutarlo en tu ordenador
+
+Necesitas un proyecto de Supabase, que es gratis.
 
 ```bash
 git clone https://github.com/SergioCayetano232/SaldoCero.git
 cd SaldoCero
 npm install
+cp .env.example .env
+```
+
+En `.env` pones la URL y la clave anon de tu proyecto, que están en Supabase
+en Project Settings > API. Luego pegas el contenido de `supabase/esquema.sql`
+en el SQL Editor y le das a Run, que eso te crea las tablas y los permisos.
+
+```bash
 npm run dev
 ```
 
@@ -56,11 +69,9 @@ http://localhost:5173.
 
 ## Cosas que me gustaría añadir más adelante
 
-- Poder compartir un mismo viaje entre varios móviles, que necesitaría una base
-  de datos en la nube.
-- Que un gasto se pueda repartir solo entre algunas personas, no siempre entre
-  todas.
-- Guardar varios viajes distintos.
+- Poder editar un gasto ya apuntado, no solo borrarlo y volver a meterlo.
+- Que cada uno pueda poner un gasto en su moneda.
+- Guardar el histórico de viajes de cada persona.
 
 ## Licencia
 

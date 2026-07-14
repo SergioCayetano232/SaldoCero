@@ -1,121 +1,191 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import "./App.css";
-import { cargarViajes, guardarViajes, nuevoId, viajeVacio } from "./almacenamiento";
+import * as datos from "./datos";
+import { hayConexion, usarCodigo } from "./supabase";
 import { calcularBalances } from "./calculos";
-import SelectorViajes from "./componentes/SelectorViajes";
+import Entrada from "./componentes/Entrada";
+import BarraViaje from "./componentes/BarraViaje";
 import Viajeros from "./componentes/Viajeros";
 import Gastos from "./componentes/Gastos";
 import Resumen from "./componentes/Resumen";
 
+// El viaje que hay que abrir al arrancar: el del enlace compartido (#ABC123),
+// o el último en el que estuviste. Vacío si no hay ninguno.
+function codigoDeArranque() {
+  if (!hayConexion) return "";
+  return window.location.hash.slice(1) || datos.codigoRecordado();
+}
+
 function App() {
-  const [viajes, setViajes] = useState(cargarViajes);
-  // Abrimos el primero, que es donde estaba el usuario la última vez.
-  const [viajeId, setViajeId] = useState(() => viajes[0].id);
+  const [viaje, setViaje] = useState(null); // null = todavía no has entrado en ninguno
+  // Solo salimos cargando si de verdad hay un viaje que recuperar.
+  const [cargando, setCargando] = useState(() => codigoDeArranque() !== "");
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    guardarViajes(viajes);
-  }, [viajes]);
+    const codigo = codigoDeArranque();
+    if (!codigo) return;
 
-  const viaje = viajes.find((v) => v.id === viajeId) ?? viajes[0];
+    datos
+      .abrirViaje(codigo)
+      .then(setViaje)
+      .catch(() => datos.olvidarCodigo()) // el código ya no vale, a la pantalla de entrada
+      .finally(() => setCargando(false));
+  }, []);
+
+  // El viaje de ahora mismo, para poder leerlo desde la escucha sin que esta
+  // dependa de él (si dependiera, cada cambio la desmontaría y volvería a montar).
+  const viajeActual = useRef(viaje);
+
+  useEffect(() => {
+    viajeActual.current = viaje;
+  }, [viaje]);
+
+  // Nos vamos enterando de lo que apunten los demás.
+  const viajeId = viaje?.id;
+
+  useEffect(() => {
+    if (!viajeId) return;
+
+    return datos.escucharCambios(() => viajeActual.current, setViaje);
+  }, [viajeId]);
+
+  // Todas las operaciones fallan igual: avisamos y dejamos el viaje como estaba.
+  const hacer = useCallback(
+    async (operacion) => {
+      setError("");
+      try {
+        await operacion();
+        setViaje(await datos.refrescarViaje(viaje));
+      } catch (fallo) {
+        setError(fallo.message);
+      }
+    },
+    [viaje]
+  );
+
+  async function crearViaje(nombre) {
+    setCargando(true);
+    setError("");
+    try {
+      setViaje(await datos.crearViaje(nombre));
+    } catch (fallo) {
+      setError(fallo.message);
+    } finally {
+      setCargando(false);
+    }
+  }
+
+  async function entrarEnViaje(codigo) {
+    setCargando(true);
+    setError("");
+    try {
+      setViaje(await datos.abrirViaje(codigo));
+    } catch (fallo) {
+      setError(fallo.message);
+    } finally {
+      setCargando(false);
+    }
+  }
+
+  function salirDelViaje() {
+    datos.olvidarCodigo();
+    usarCodigo("");
+    window.location.hash = "";
+    setViaje(null);
+    setError("");
+  }
+
+  function vaciarViaje() {
+    const confirmado = window.confirm(
+      `¿Seguro que quieres vaciar "${viaje.nombre}"? Se borran sus viajeros y gastos para todos.`
+    );
+    if (!confirmado) return;
+
+    hacer(() => datos.vaciarViaje(viaje.id));
+  }
+
+  // Sin las claves de Supabase no hay nada que hacer.
+  if (!hayConexion) {
+    return (
+      <div className="app">
+        <Cabecera />
+        <section className="tarjeta">
+          <p className="error">
+            Falta configurar Supabase. Copia <code>.env.example</code> a{" "}
+            <code>.env</code> y pon ahí la URL y la clave de tu proyecto.
+          </p>
+        </section>
+      </div>
+    );
+  }
+
+  if (cargando && !viaje) {
+    return (
+      <div className="app">
+        <Cabecera />
+        <p className="vacio cargando">Cargando…</p>
+      </div>
+    );
+  }
+
+  if (!viaje) {
+    return (
+      <div className="app">
+        <Cabecera />
+        <Entrada
+          onCrear={crearViaje}
+          onEntrar={entrarEnViaje}
+          cargando={cargando}
+          error={error}
+        />
+      </div>
+    );
+  }
+
   const { viajeros, gastos } = viaje;
-
-  // Toca solo el viaje abierto y deja los demás como estaban.
-  function cambiarViaje(cambios) {
-    setViajes(viajes.map((v) => (v.id === viaje.id ? { ...v, ...cambios } : v)));
-  }
-
-  function crearViaje() {
-    const nombre = window.prompt("¿Cómo se llama el viaje?", "Viaje nuevo");
-    if (nombre === null) return;
-
-    const viajeNuevo = viajeVacio(nombre.trim() || "Viaje nuevo");
-    setViajes([...viajes, viajeNuevo]);
-    setViajeId(viajeNuevo.id);
-  }
-
-  function borrarViaje() {
-    const confirmado = window.confirm(
-      `¿Seguro que quieres borrar "${viaje.nombre}"? Se pierden sus viajeros y gastos.`
-    );
-    if (!confirmado) return;
-
-    const quedan = viajes.filter((v) => v.id !== viaje.id);
-    setViajes(quedan);
-    setViajeId(quedan[0].id);
-  }
-
-  function anadirViajero(nombre) {
-    cambiarViaje({ viajeros: [...viajeros, { id: nuevoId(), nombre }] });
-  }
-
-  function quitarViajero(id) {
-    cambiarViaje({
-      viajeros: viajeros.filter((viajero) => viajero.id !== id),
-      gastos: gastos
-        // Fuera los gastos que pagó.
-        .filter((gasto) => gasto.pagadorId !== id)
-        // Y que no siga repartiendo los de los demás.
-        .map((gasto) =>
-          gasto.participantes
-            ? { ...gasto, participantes: gasto.participantes.filter((p) => p !== id) }
-            : gasto
-        ),
-    });
-  }
-
-  function anadirGasto(gasto) {
-    cambiarViaje({ gastos: [...gastos, { id: nuevoId(), ...gasto }] });
-  }
-
-  function quitarGasto(id) {
-    cambiarViaje({ gastos: gastos.filter((gasto) => gasto.id !== id) });
-  }
-
-  function empezarDeCero() {
-    const confirmado = window.confirm(
-      "¿Seguro que quieres vaciar este viaje? Se borrarán sus viajeros y gastos."
-    );
-    if (!confirmado) return;
-
-    cambiarViaje({ viajeros: [], gastos: [] });
-  }
-
   const balances = calcularBalances(viajeros, gastos);
 
   return (
     <div className="app">
-      <header className="cabecera">
-        <h1>
-          Saldo<span>Cero</span>
-        </h1>
-        <p>Repartimos los gastos del viaje entre todos.</p>
-      </header>
+      <Cabecera />
 
-      <SelectorViajes
-        viajes={viajes}
-        viajeId={viaje.id}
-        onCambiar={setViajeId}
-        onCrear={crearViaje}
-        onBorrar={borrarViaje}
+      <BarraViaje viaje={viaje} onSalir={salirDelViaje} />
+
+      {error && <p className="error">{error}</p>}
+
+      <Viajeros
+        viajeros={viajeros}
+        onAnadir={(nombre) => hacer(() => datos.anadirViajero(viaje.id, nombre))}
+        onQuitar={(id) => hacer(() => datos.quitarViajero(id))}
       />
-
-      <Viajeros viajeros={viajeros} onAnadir={anadirViajero} onQuitar={quitarViajero} />
 
       <Gastos
         viajeros={viajeros}
         gastos={gastos}
-        onAnadir={anadirGasto}
-        onQuitar={quitarGasto}
+        onAnadir={(gasto) => hacer(() => datos.anadirGasto(viaje.id, gasto))}
+        onQuitar={(id) => hacer(() => datos.quitarGasto(id))}
       />
 
       {gastos.length > 0 && <Resumen balances={balances} gastos={gastos} />}
 
       {(viajeros.length > 0 || gastos.length > 0) && (
-        <button className="boton-reiniciar" onClick={empezarDeCero}>
+        <button className="boton-reiniciar" onClick={vaciarViaje}>
           Vaciar este viaje
         </button>
       )}
     </div>
+  );
+}
+
+function Cabecera() {
+  return (
+    <header className="cabecera">
+      <h1>
+        Saldo<span>Cero</span>
+      </h1>
+      <p>Repartimos los gastos del viaje entre todos.</p>
+    </header>
   );
 }
 

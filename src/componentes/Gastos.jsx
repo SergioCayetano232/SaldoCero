@@ -29,7 +29,7 @@ function Gastos({ viajeros, gastos, onAnadir, onQuitar }) {
     if (marcados.length === 0) return; // con quién lo repartimos, entonces
 
     onAnadir({
-      pagadorId: Number(pagadorId),
+      pagadorId,
       importe: importeNumero,
       concepto: concepto.trim() === "" ? "Gasto" : concepto.trim(),
       participantes: marcados,
