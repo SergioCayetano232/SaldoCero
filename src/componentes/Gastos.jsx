@@ -78,6 +78,8 @@ function Gastos({ viajeros, gastos, onAnadir, onEditar, onQuitar }) {
   // "cena · entre Ana y Luis", para saber de un vistazo cómo se repartió.
   function textoReparto(gasto) {
     const suyos = participantesDeGasto(gasto, viajeros);
+    // Puede quedarse sin nadie si borras a los que iban en él.
+    if (suyos.length === 0) return "sin nadie a quien repartirlo";
     if (suyos.length === viajeros.length) return "entre todos";
 
     return `entre ${suyos.map((v) => v.nombre).join(", ")}`;
@@ -85,7 +87,7 @@ function Gastos({ viajeros, gastos, onAnadir, onEditar, onQuitar }) {
 
   return (
     <section className="tarjeta">
-      <h2>🧾 Gastos</h2>
+      <h2><span className="icono">🧾</span> Gastos</h2>
 
       {viajeros.length === 0 ? (
         <p className="vacio">Primero añade viajeros para poder registrar gastos.</p>
@@ -174,11 +176,13 @@ function Gastos({ viajeros, gastos, onAnadir, onEditar, onQuitar }) {
               {gastos.map((gasto) => (
                 <li key={gasto.id} className={gasto.id === editando ? "editandose" : ""}>
                   <span>
-                    <strong>{nombrePagador(gasto.pagadorId)}</strong> pagó{" "}
-                    {gasto.importe.toFixed(2)} € · {gasto.concepto}
+                    <span className="gasto-concepto">{gasto.concepto}</span>
                     <br />
-                    <small className="reparto">{textoReparto(gasto)}</small>
+                    <small className="reparto">
+                      {nombrePagador(gasto.pagadorId)} · {textoReparto(gasto)}
+                    </small>
                   </span>
+                  <span className="gasto-importe">{gasto.importe.toFixed(2)} €</span>
                   <span className="acciones">
                     <button
                       className="boton-editar"

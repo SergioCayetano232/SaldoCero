@@ -1,3 +1,44 @@
+/* Los colores, sombras y medidas del sistema, en un solo sitio. */
+:root {
+  /* Teal de marca, del más claro al más oscuro. */
+  --teal-50: #eef7f6;
+  --teal-100: #d3ebe9;
+  --teal-300: #7cc4c0;
+  --teal-500: #0e7c7b;
+  --teal-600: #0a6564;
+  --teal-700: #084f4e;
+
+  /* Naranja, para lo que tiene que llamar la atención. */
+  --naranja-100: #fdeee0;
+  --naranja-400: #f4a259;
+  --naranja-500: #e8862e;
+
+  /* Grises con un puntito de verde, que peguen con el teal. */
+  --tinta: #14262c;
+  --tinta-suave: #47616b;
+  --tinta-tenue: #7b929b;
+  --linea: #e3ecee;
+  --papel: #ffffff;
+  --fondo: #f2f6f5;
+
+  --verde: #1d8a5f;
+  --verde-fondo: #e6f4ec;
+  --rojo: #c8443f;
+  --rojo-fondo: #fdeceb;
+
+  /* Sombras en capas, que se vean mullidas y no planas. */
+  --sombra-sm: 0 1px 2px rgba(20, 38, 44, 0.05);
+  --sombra-md: 0 1px 2px rgba(20, 38, 44, 0.04), 0 8px 24px rgba(20, 38, 44, 0.06);
+  --sombra-lg: 0 2px 4px rgba(20, 38, 44, 0.05), 0 18px 44px rgba(20, 38, 44, 0.1);
+
+  --radio: 16px;
+  --radio-sm: 10px;
+  --radio-pastilla: 999px;
+
+  --fuente-titulo: "Outfit", system-ui, sans-serif;
+  --fuente: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -5,10 +46,43 @@
 }
 
 body {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  background-color: #f4f6f8;
-  color: #1a2b33;
-  padding: 32px 20px 60px;
-  line-height: 1.4;
+  font-family: var(--fuente);
+  background-color: var(--fondo);
+  /* Un par de luces de color muy suaves, para que el fondo no sea plano. */
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(14, 124, 123, 0.1), transparent),
+    radial-gradient(ellipse 60% 40% at 90% 5%, rgba(244, 162, 89, 0.09), transparent);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: var(--tinta);
+  padding: 28px 18px 72px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--fuente-titulo);
+  letter-spacing: -0.02em;
+}
+
+/* Que se vea bien por dónde vas al ir con el teclado. */
+:focus-visible {
+  outline: 2px solid var(--teal-500);
+  outline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+  body {
+    padding: 20px 14px 56px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

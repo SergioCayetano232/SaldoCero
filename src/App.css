@@ -1,47 +1,108 @@
 /* ===== Base ===== */
 .app {
-  max-width: 580px;
+  max-width: 620px;
   margin: 0 auto;
 }
 
 /* ===== Cabecera ===== */
 .cabecera {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 26px;
 }
 
 .cabecera h1 {
-  font-size: 40px;
-  letter-spacing: -1px;
-  color: #0e7c7b;
+  font-size: 44px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  color: var(--teal-600);
+  line-height: 1.05;
 }
 
 .cabecera h1 span {
-  color: #f4a259;
+  /* El "Cero" en degradado naranja, que es el guiño de la marca. */
+  background: linear-gradient(135deg, var(--naranja-400), var(--naranja-500));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .cabecera p {
-  color: #6b7c85;
-  margin-top: 4px;
+  color: var(--tinta-tenue);
+  margin-top: 6px;
+  font-size: 15px;
 }
 
 /* ===== Tarjetas ===== */
 .tarjeta {
-  background-color: #ffffff;
-  border: 1px solid #e8edf0;
-  border-radius: 18px;
-  padding: 22px;
-  margin-top: 18px;
-  box-shadow: 0 1px 2px rgba(16, 48, 59, 0.04),
-    0 10px 30px rgba(16, 48, 59, 0.05);
+  background-color: var(--papel);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  padding: 24px;
+  margin-top: 16px;
+  box-shadow: var(--sombra-md);
 }
 
 .tarjeta h2 {
-  font-size: 20px;
-  margin-bottom: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 18px;
   display: flex;
   align-items: center;
   gap: 8px;
+  color: var(--tinta-suave);
+}
+
+/* El emoji del título, un poco más discreto. */
+.tarjeta h2 .icono {
+  font-size: 15px;
+  opacity: 0.85;
+}
+
+/* ===== La tarjeta del viaje abierto ===== */
+.tarjeta-viaje {
+  /* Un filito de color arriba, para que destaque sobre las demás. */
+  border-top: 3px solid var(--teal-500);
+}
+
+.viaje-titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.viaje-emoji {
+  font-size: 21px;
+}
+
+.viaje-nombre {
+  font-size: 23px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--tinta);
+  /* Manda sobre las cabeceras normales, así que no va en mayúsculas. */
+  text-transform: none;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.boton-salir {
+  color: var(--tinta-tenue);
+  font-size: 15px;
+  padding: 6px 9px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.boton-salir:hover {
+  background-color: var(--rojo-fondo);
+  color: var(--rojo);
 }
 
 /* ===== Formularios ===== */
@@ -49,7 +110,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 /* El selector de viajes es la última fila de su tarjeta, no lleva nada debajo. */
@@ -61,55 +122,72 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--linea);
 }
 
 input,
 select {
   width: 100%;
-  padding: 11px 13px;
-  border: 1px solid #d4dde2;
-  border-radius: 10px;
+  padding: 11px 14px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-sm);
   font-size: 15px;
   font-family: inherit;
-  color: #1a2b33;
-  background-color: #fff;
+  color: var(--tinta);
+  background-color: var(--papel);
   transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+input::placeholder {
+  color: var(--tinta-tenue);
 }
 
 input:focus,
 select:focus {
   outline: none;
-  border-color: #0e7c7b;
-  box-shadow: 0 0 0 3px rgba(14, 124, 123, 0.15);
+  border-color: var(--teal-300);
+  box-shadow: 0 0 0 3px var(--teal-50);
 }
 
-/* ===== Botones ===== */
-button {
-  font-family: inherit;
+select {
   cursor: pointer;
-  transition: background-color 0.15s, transform 0.05s;
+  appearance: none;
+  /* La flechita, dibujada aquí para no depender de una imagen. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%237b929b' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  background: none;
+  transition: background-color 0.15s, transform 0.1s, box-shadow 0.15s;
 }
 
 button:active {
-  transform: scale(0.98);
+  transform: translateY(1px);
 }
 
 .fila-formulario button,
 .formulario-gasto button {
-  padding: 11px 18px;
-  background-color: #0e7c7b;
+  padding: 11px 20px;
+  background: linear-gradient(180deg, var(--teal-500), var(--teal-600));
   color: white;
-  border: none;
-  border-radius: 10px;
+  border-radius: var(--radio-sm);
   font-size: 15px;
   font-weight: 500;
   white-space: nowrap;
+  box-shadow: var(--sombra-sm);
 }
 
 .fila-formulario button:hover,
 .formulario-gasto button:hover {
-  background-color: #0a5f5e;
+  background: linear-gradient(180deg, var(--teal-600), var(--teal-700));
 }
 
 /* ===== Listas ===== */
@@ -117,32 +195,39 @@ button:active {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
 .lista li {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  padding: 12px 14px;
-  background-color: #fbfcfd;
-  border: 1px solid #eaeff2;
-  border-radius: 10px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--linea);
+  font-size: 15px;
+}
+
+.lista li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.lista li:first-child {
+  padding-top: 0;
 }
 
 .boton-quitar {
-  background: none;
-  border: none;
-  color: #d1495b;
+  color: var(--rojo);
   font-size: 15px;
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 6px 9px;
+  border-radius: 8px;
   flex-shrink: 0;
+  opacity: 0.55;
 }
 
 .boton-quitar:hover {
-  background-color: #fdecef;
+  background-color: var(--rojo-fondo);
+  opacity: 1;
 }
 
 /* Los dos botones que lleva cada gasto a la derecha. */
@@ -153,24 +238,25 @@ button:active {
 }
 
 .boton-editar {
-  background: none;
-  border: none;
-  font-size: 15px;
-  padding: 4px 8px;
-  border-radius: 6px;
+  font-size: 14px;
+  padding: 6px 9px;
+  border-radius: 8px;
   flex-shrink: 0;
+  opacity: 0.55;
 }
 
 .boton-editar:hover {
-  background-color: #eef4f7;
+  background-color: var(--teal-50);
+  opacity: 1;
 }
 
 /* El gasto que estás tocando, resaltado para no perderlo de vista. */
 .editandose {
-  background-color: #fff8e6;
-  border-radius: 8px;
-  padding-left: 8px;
-  padding-right: 8px;
+  background-color: var(--naranja-100);
+  border-radius: var(--radio-sm);
+  padding-left: 12px;
+  padding-right: 12px;
+  box-shadow: inset 3px 0 0 var(--naranja-400);
 }
 
 .fila-botones {
@@ -183,38 +269,39 @@ button:active {
 }
 
 .boton-cancelar {
-  background-color: #eef2f4;
-  color: #4a5b66;
+  background: var(--fondo) !important;
+  color: var(--tinta-suave) !important;
+  box-shadow: none !important;
 }
 
 .boton-cancelar:hover {
-  background-color: #dfe6ea;
+  background: var(--linea) !important;
 }
 
 /* Cuando no hay nadie marcado no se puede añadir el gasto. */
 .aviso {
-  color: #b3541e;
+  color: var(--naranja-500);
+  font-weight: 500;
 }
 
 .formulario-gasto button:disabled {
-  background-color: #c3cdd3;
+  background: var(--linea) !important;
+  color: var(--tinta-tenue) !important;
   cursor: not-allowed;
-}
-
-.formulario-gasto button:disabled:hover {
-  background-color: #c3cdd3;
+  box-shadow: none !important;
 }
 
 /* ===== Participantes de un gasto ===== */
 .participantes {
-  border: 1px dashed #d4dde2;
-  border-radius: 10px;
-  padding: 12px 13px;
+  border: 1px dashed var(--linea);
+  border-radius: var(--radio-sm);
+  padding: 13px;
+  background-color: #fafcfc;
 }
 
 .participantes-titulo {
-  font-size: 14px;
-  color: #6b7c85;
+  font-size: 13px;
+  color: var(--tinta-suave);
   margin-bottom: 10px;
   display: flex;
   align-items: center;
@@ -224,174 +311,361 @@ button:active {
 .casillas {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 7px;
 }
 
 .casilla {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 11px;
-  border: 1px solid #d4dde2;
-  border-radius: 999px;
+  padding: 6px 12px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-pastilla);
   font-size: 14px;
   cursor: pointer;
   user-select: none;
+  background-color: var(--papel);
+  transition: all 0.15s;
 }
 
 .casilla:hover {
-  border-color: #0e7c7b;
+  border-color: var(--teal-300);
 }
 
 .casilla input {
   width: auto;
   margin: 0;
-  accent-color: #0e7c7b;
+  accent-color: var(--teal-500);
   cursor: pointer;
 }
 
 .casilla:has(input:checked) {
-  background-color: #e6f2f2;
-  border-color: #0e7c7b;
-  color: #0a5f5e;
+  background-color: var(--teal-50);
+  border-color: var(--teal-300);
+  color: var(--teal-700);
+  font-weight: 500;
 }
 
 /* Botón que parece un enlace, para el "marcar todos". */
 .enlace {
-  background: none;
-  border: none;
-  padding: 0;
-  color: #0e7c7b;
+  color: var(--teal-500);
   font-size: 13px;
+  font-weight: 500;
   text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* El gasto en la lista: concepto arriba, quién y cuánto abajo. */
+.gasto-concepto {
+  font-weight: 500;
+}
+
+.gasto-importe {
+  font-family: var(--fuente-titulo);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--tinta);
+  white-space: nowrap;
+  margin-left: auto;
+  padding-right: 4px;
 }
 
 /* Letra pequeña bajo un gasto o un balance. */
 .reparto {
-  color: #8a99a1;
+  color: var(--tinta-tenue);
   font-size: 13px;
+}
+
+/* ===== Los tres pasos de la pantalla de entrada ===== */
+.como-va {
+  list-style: none;
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.como-va li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--tinta-suave);
+}
+
+.paso-num {
+  width: 25px;
+  height: 25px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background-color: var(--teal-100);
+  color: var(--teal-700);
+  font-size: 12px;
+  font-weight: 600;
 }
 
 /* ===== Estados vacíos ===== */
 .vacio {
-  color: #8a99a1;
-  font-style: italic;
+  color: var(--tinta-tenue);
   font-size: 14px;
 }
 
 .cargando {
   text-align: center;
-  padding: 40px 0;
+  padding: 60px 0;
 }
 
 /* ===== Errores ===== */
 .error {
-  background-color: #fdecef;
-  border: 1px solid #d1495b;
-  color: #a13549;
-  border-radius: 12px;
-  padding: 13px 15px;
-  margin-top: 18px;
-  font-size: 15px;
+  background-color: var(--rojo-fondo);
+  border: 1px solid rgba(200, 68, 63, 0.25);
+  color: var(--rojo);
+  padding: 13px 16px;
+  border-radius: var(--radio-sm);
+  font-size: 14px;
+  margin-top: 16px;
 }
 
-/* ===== Código del viaje ===== */
+/* ===== El código del viaje ===== */
 .codigo {
-  flex: 1;
-  padding: 11px 13px;
-  background-color: #e6f2f2;
-  border: 1px dashed #0e7c7b;
-  border-radius: 10px;
-  color: #0a5f5e;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 19px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-align: center;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--teal-600);
+  background-color: var(--teal-50);
+  border: 1px dashed var(--teal-300);
+  padding: 10px 16px;
+  border-radius: var(--radio-sm);
   cursor: pointer;
+  flex: 1;
+  text-align: center;
+  transition: background-color 0.15s;
 }
 
-/* Al escribir el código, que se lea igual de claro. */
+.codigo:hover {
+  background-color: var(--teal-100);
+}
+
 .campo-codigo {
-  letter-spacing: 2px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-button:disabled {
-  opacity: 0.55;
-  cursor: default;
-}
-
 /* ===== Resumen ===== */
-.resumen-totales {
-  margin-bottom: 16px;
-  line-height: 1.7;
-  color: #435660;
+/* El total es lo primero que quieres ver al abrir la app. */
+.total-destacado {
+  background: linear-gradient(135deg, var(--teal-600), var(--teal-500));
+  border-radius: var(--radio);
+  padding: 22px 24px;
+  margin-bottom: 20px;
+  color: white;
+  box-shadow: var(--sombra-lg);
 }
 
-.resumen-totales strong {
-  color: #1a2b33;
+.total-etiqueta {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  opacity: 0.75;
+  font-weight: 500;
+}
+
+.total-cifra {
+  font-family: var(--fuente-titulo);
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-top: 2px;
+}
+
+.total-detalle {
+  font-size: 13px;
+  opacity: 0.8;
+  margin-top: 4px;
 }
 
 .le-toca {
-  background-color: #fdebd6;
-  border: 1px solid #f4a259;
-  border-radius: 12px;
-  padding: 13px 15px;
+  background-color: var(--naranja-100);
+  border: 1px solid rgba(244, 162, 89, 0.35);
+  padding: 13px 16px;
+  border-radius: var(--radio-sm);
+  font-size: 15px;
   margin-bottom: 18px;
+}
+
+/* Cada persona con su barra, para comparar de un vistazo. */
+.fila-balance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.balance-quien {
+  flex: 1;
+  min-width: 0;
+}
+
+.balance-nombre {
+  font-weight: 600;
   font-size: 15px;
 }
 
-.fila-balance {
-  gap: 12px;
+.barra {
+  height: 6px;
+  background-color: var(--fondo);
+  border-radius: var(--radio-pastilla);
+  overflow: hidden;
+  margin-top: 7px;
 }
 
-.positivo {
-  color: #2e9e5b;
+.barra-relleno {
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal-300), var(--teal-500));
+  border-radius: var(--radio-pastilla);
+  transition: width 0.35s ease;
+}
+
+.balance-cifra {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.balance-importe {
+  font-family: var(--fuente-titulo);
   font-weight: 600;
+  font-size: 17px;
   white-space: nowrap;
 }
 
-.negativo {
-  color: #d1495b;
-  font-weight: 600;
-  white-space: nowrap;
+.balance-texto {
+  font-size: 12px;
+  color: var(--tinta-tenue);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.positivo .balance-importe {
+  color: var(--verde);
+}
+
+.negativo .balance-importe {
+  color: var(--rojo);
 }
 
 /* ===== Saldar cuentas ===== */
 .saldar {
   margin-top: 22px;
-  padding-top: 18px;
-  border-top: 1px solid #eaeff2;
+  padding-top: 20px;
+  border-top: 1px solid var(--linea);
 }
 
 .saldar h3 {
-  font-size: 17px;
-  margin-bottom: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 14px;
 }
 
-/* ===== Botón reiniciar ===== */
-.boton-reiniciar {
-  display: block;
-  margin: 28px auto 8px;
-  padding: 10px 22px;
-  background-color: white;
-  color: #d1495b;
-  border: 1px solid #d1495b;
-  border-radius: 10px;
+.pago {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 14px;
+  background-color: var(--teal-50);
+  border-radius: var(--radio-sm);
+  margin-bottom: 8px;
   font-size: 15px;
 }
 
+.pago:last-child {
+  margin-bottom: 0;
+}
+
+.pago-flecha {
+  color: var(--teal-500);
+  flex-shrink: 0;
+}
+
+.pago-cantidad {
+  margin-left: auto;
+  font-family: var(--fuente-titulo);
+  font-weight: 600;
+  color: var(--teal-700);
+  white-space: nowrap;
+}
+
+.saldadas {
+  text-align: center;
+  padding: 22px;
+  background-color: var(--verde-fondo);
+  border-radius: var(--radio-sm);
+  color: var(--verde);
+  font-weight: 500;
+}
+
+/* ===== Vaciar viaje ===== */
+.boton-reiniciar {
+  display: block;
+  margin: 22px auto 0;
+  padding: 10px 18px;
+  color: var(--tinta-tenue);
+  font-size: 14px;
+  border-radius: var(--radio-sm);
+}
+
 .boton-reiniciar:hover {
-  background-color: #d1495b;
-  color: white;
+  color: var(--rojo);
+  background-color: var(--rojo-fondo);
 }
 
 /* ===== Móvil ===== */
-@media (max-width: 620px) {
+/* Los input llevan width:100%, así que dentro de un flex hay que dejarles
+   encoger o se salen de la pantalla. */
+.fila-formulario input,
+.fila-formulario select {
+  min-width: 0;
+  flex: 1;
+}
+
+@media (max-width: 560px) {
   .cabecera h1 {
-    font-size: 32px;
+    font-size: 34px;
   }
+
   .tarjeta {
-    padding: 18px;
+    padding: 18px 16px;
+  }
+
+  .total-cifra {
+    font-size: 30px;
+  }
+
+  /* Campo arriba y botón debajo, que en el móvil no caben al lado. */
+  .fila-formulario {
+    flex-wrap: wrap;
+  }
+
+  .fila-formulario input,
+  .fila-formulario select,
+  .fila-formulario .codigo {
+    flex: 1 1 100%;
+  }
+
+  .fila-formulario button {
+    flex: 1;
+  }
+
+  /* Los gastos, en dos líneas: concepto arriba, importe con los botones. */
+  .gasto-importe {
+    font-size: 15px;
+  }
+
+  .lista li {
+    gap: 8px;
   }
 }

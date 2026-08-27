@@ -179,3 +179,14 @@ describe("calcularPagos", () => {
     expect(pagos.every((p) => p.cantidad > 0.01)).toBe(true);
   });
 });
+
+describe("gastos que se quedan sin gente", () => {
+  it("un gasto sin participantes válidos no rompe las cuentas", () => {
+    // Pasa si borras a los viajeros que iban en un gasto.
+    const bal = calcularBalances(viajeros, [gasto("a", 50, ["z"])]);
+
+    // Ana lo pagó, pero no hay entre quién repartirlo.
+    expect(bal.find((v) => v.id === "a").puesto).toBe(50);
+    expect(bal.every((v) => v.tocaPagar === 0)).toBe(true);
+  });
+});

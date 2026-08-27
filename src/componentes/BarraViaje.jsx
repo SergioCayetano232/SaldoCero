@@ -11,17 +11,20 @@ function BarraViaje({ viaje, onSalir }) {
   }
 
   return (
-    <section className="tarjeta">
-      <h2>🗺️ {viaje.nombre}</h2>
+    <section className="tarjeta tarjeta-viaje">
+      <div className="viaje-titulo">
+        <span className="viaje-emoji">🗺️</span>
+        <h2 className="viaje-nombre">{viaje.nombre}</h2>
+        <button className="boton-salir" onClick={onSalir} title="Salir del viaje">
+          ✕
+        </button>
+      </div>
 
       <div className="fila-formulario">
         <span className="codigo" onClick={copiar} title="Copiar">
           {viaje.codigo}
         </span>
         <button onClick={copiar}>{copiado ? "¡Copiado!" : "Copiar código"}</button>
-        <button className="boton-quitar" onClick={onSalir} title="Salir del viaje">
-          ✕
-        </button>
       </div>
 
       <p className="vacio">Pásales el código y entran a este mismo viaje.</p>

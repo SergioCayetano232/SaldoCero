@@ -8,7 +8,7 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
   return (
     <>
       <section className="tarjeta">
-        <h2>🗺️ Empezar un viaje</h2>
+        <h2><span className="icono">🗺️</span> Empezar un viaje</h2>
 
         <div className="fila-formulario">
           <input
@@ -30,7 +30,7 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
       </section>
 
       <section className="tarjeta">
-        <h2>🔑 Entrar en uno</h2>
+        <h2><span className="icono">🔑</span> Entrar en uno</h2>
 
         <div className="fila-formulario">
           <input
@@ -53,6 +53,21 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
       </section>
 
       {error && <p className="error">{error}</p>}
+
+      <ul className="como-va">
+        <li>
+          <span className="paso-num">1</span>
+          Creas el viaje y les pasas el código
+        </li>
+        <li>
+          <span className="paso-num">2</span>
+          Cada uno apunta lo que va pagando
+        </li>
+        <li>
+          <span className="paso-num">3</span>
+          Al volver, te decimos quién le debe a quién
+        </li>
+      </ul>
     </>
   );
 }

@@ -13,7 +13,7 @@ function Viajeros({ viajeros, onAnadir, onQuitar }) {
 
   return (
     <section className="tarjeta">
-      <h2>🧳 Viajeros</h2>
+      <h2><span className="icono">🧳</span> Viajeros</h2>
 
       <div className="fila-formulario">
         <input

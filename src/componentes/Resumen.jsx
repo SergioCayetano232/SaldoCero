@@ -5,13 +5,21 @@ function Resumen({ balances, gastos }) {
   const leTocaPagar = calcularLeTocaPagar(balances);
   const pagos = calcularPagos(balances);
 
+  // Las barras se miden contra el que más ha puesto.
+  const maxPuesto = Math.max(...balances.map((v) => v.puesto), 0);
+
   return (
     <section className="tarjeta">
-      <h2>📊 Resumen</h2>
+      <h2><span className="icono">📊</span> Resumen</h2>
 
-      <p className="resumen-totales">
-        Total gastado: <strong>{total.toFixed(2)} €</strong>
-      </p>
+      <div className="total-destacado">
+        <div className="total-etiqueta">Total del viaje</div>
+        <div className="total-cifra">{total.toFixed(2)} €</div>
+        <div className="total-detalle">
+          {gastos.length} {gastos.length === 1 ? "gasto" : "gastos"} · {balances.length}{" "}
+          {balances.length === 1 ? "viajero" : "viajeros"}
+        </div>
+      </div>
 
       {leTocaPagar && (
         <div className="le-toca">
@@ -27,16 +35,32 @@ function Resumen({ balances, gastos }) {
 
       <ul className="lista">
         {balances.map((viajero) => (
-          <li key={viajero.id} className="fila-balance">
-            <span>
-              <strong>{viajero.nombre}</strong> ha puesto {viajero.puesto.toFixed(2)} €
-              <br />
-              <small className="reparto">le tocan {viajero.tocaPagar.toFixed(2)} €</small>
-            </span>
-            <span className={viajero.balance >= 0 ? "positivo" : "negativo"}>
-              {viajero.balance >= 0 ? "le deben " : "debe "}
-              {Math.abs(viajero.balance).toFixed(2)} €
-            </span>
+          <li
+            key={viajero.id}
+            className={`fila-balance ${viajero.balance >= 0 ? "positivo" : "negativo"}`}
+          >
+            <div className="balance-quien">
+              <div className="balance-nombre">{viajero.nombre}</div>
+              <div className="barra">
+                <div
+                  className="barra-relleno"
+                  style={{ width: maxPuesto > 0 ? `${(viajero.puesto / maxPuesto) * 100}%` : "0%" }}
+                />
+              </div>
+              <small className="reparto">
+                puso {viajero.puesto.toFixed(2)} € · le tocan {viajero.tocaPagar.toFixed(2)} €
+              </small>
+            </div>
+
+            <div className="balance-cifra">
+              <div className="balance-importe">
+                {viajero.balance >= 0 ? "+" : "−"}
+                {Math.abs(viajero.balance).toFixed(2)} €
+              </div>
+              <div className="balance-texto">
+                {viajero.balance >= 0 ? "le deben" : "debe"}
+              </div>
+            </div>
           </li>
         ))}
       </ul>
@@ -44,18 +68,16 @@ function Resumen({ balances, gastos }) {
       <div className="saldar">
         <h3>Cómo saldar cuentas</h3>
         {pagos.length === 0 ? (
-          <p className="vacio">Cuentas saldadas. Nadie debe nada. 🎉</p>
+          <p className="saldadas">🎉 Cuentas saldadas. Nadie debe nada.</p>
         ) : (
-          <ul className="lista">
-            {pagos.map((pago, indice) => (
-              <li key={indice}>
-                <span>
-                  <strong>{pago.de}</strong> paga {pago.cantidad.toFixed(2)} € a{" "}
-                  <strong>{pago.a}</strong>
-                </span>
-              </li>
-            ))}
-          </ul>
+          pagos.map((pago, indice) => (
+            <div className="pago" key={indice}>
+              <strong>{pago.de}</strong>
+              <span className="pago-flecha">→</span>
+              <strong>{pago.a}</strong>
+              <span className="pago-cantidad">{pago.cantidad.toFixed(2)} €</span>
+            </div>
+          ))
         )}
       </div>
     </section>
