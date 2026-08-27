@@ -1,14 +1,43 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { participantesDeGasto } from "../calculos";
+import { MONEDAS, cambio, conMoneda } from "../monedas";
 
-function Gastos({ viajeros, gastos, onAnadir, onEditar, onQuitar }) {
+function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar }) {
   const [pagadorId, setPagadorId] = useState("");
   const [importe, setImporte] = useState("");
+  const [moneda, setMoneda] = useState(monedaViaje);
   const [concepto, setConcepto] = useState("");
+  // El cambio que nos ha dado la API, con la moneda a la que corresponde.
+  // Así sabemos si lo que tenemos guardado sirve para la moneda de ahora.
+  const [cambioTraido, setCambioTraido] = useState(null);
+
+  // Si pagas en la moneda del viaje, uno por uno. Si no, lo que diga la API,
+  // y undefined mientras está de camino.
+  const tasa =
+    moneda === monedaViaje
+      ? 1
+      : cambioTraido?.moneda === moneda
+        ? cambioTraido.tasa
+        : undefined;
   // Entre quiénes se reparte. null = no lo has tocado, así que van todos.
   const [participantes, setParticipantes] = useState(null);
   // El gasto que estás tocando ahora mismo. Vacío si estás apuntando uno nuevo.
   const [editando, setEditando] = useState(null);
+
+  // Cada vez que cambias de moneda, preguntamos a cuánto está.
+  useEffect(() => {
+    if (moneda === monedaViaje) return;
+
+    let vigente = true;
+
+    cambio(moneda, monedaViaje).then((tasa) => {
+      if (vigente) setCambioTraido({ moneda, tasa });
+    });
+
+    return () => {
+      vigente = false;
+    };
+  }, [moneda, monedaViaje]);
 
   const todosLosIds = viajeros.map((v) => v.id);
   // Mientras no toques las casillas, el gasto va entre todos.
@@ -25,6 +54,7 @@ function Gastos({ viajeros, gastos, onAnadir, onEditar, onQuitar }) {
 
   function limpiar() {
     setImporte("");
+    setMoneda(monedaViaje);
     setConcepto("");
     setParticipantes(null);
     setEditando(null);
@@ -35,6 +65,7 @@ function Gastos({ viajeros, gastos, onAnadir, onEditar, onQuitar }) {
     setEditando(gasto.id);
     setPagadorId(gasto.pagadorId);
     setImporte(String(gasto.importe));
+    setMoneda(gasto.moneda ?? monedaViaje);
     setConcepto(gasto.concepto);
     setParticipantes(participantesDeGasto(gasto, viajeros).map((v) => v.id));
   }
@@ -46,9 +77,15 @@ function Gastos({ viajeros, gastos, onAnadir, onEditar, onQuitar }) {
     if (isNaN(importeNumero) || importeNumero <= 0) return;
     if (marcados.length === 0) return;
 
+    // Sin cambio no podemos convertir, así que no dejamos guardarlo a medias.
+    if (typeof tasa !== "number") return;
+
     const gasto = {
       pagadorId,
       importe: importeNumero,
+      moneda,
+      // Lo guardamos ya convertido: si mañana cambia el cambio, este viaje no.
+      importeConvertido: Number((importeNumero * tasa).toFixed(2)),
       concepto: concepto.trim() === "" ? "Gasto" : concepto.trim(),
       participantes: marcados,
     };
@@ -103,14 +140,49 @@ function Gastos({ viajeros, gastos, onAnadir, onEditar, onQuitar }) {
               ))}
             </select>
 
-            <input
-              type="number"
-              placeholder="Importe (€)"
-              min="0"
-              step="0.01"
-              value={importe}
-              onChange={(e) => setImporte(e.target.value)}
-            />
+            <div className="fila-importe">
+              <input
+                type="number"
+                placeholder="Importe"
+                min="0"
+                step="0.01"
+                value={importe}
+                onChange={(e) => setImporte(e.target.value)}
+              />
+              <select
+                className="selector-moneda"
+                value={moneda}
+                onChange={(e) => setMoneda(e.target.value)}
+                title="¿En qué moneda se pagó?"
+              >
+                {MONEDAS.map((m) => (
+                  <option key={m.codigo} value={m.codigo}>
+                    {m.codigo}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {moneda !== monedaViaje && (
+              <p className="conversion">
+                {tasa === undefined ? (
+                  <>Mirando a cuánto está el cambio…</>
+                ) : tasa === null ? (
+                  <span className="aviso">
+                    No hemos podido saber el cambio. Apúntalo en {monedaViaje}.
+                  </span>
+                ) : importe > 0 ? (
+                  <>
+                    Son <strong>{conMoneda(importe * tasa, monedaViaje)}</strong> · 1{" "}
+                    {moneda} = {tasa.toFixed(4)} {monedaViaje}
+                  </>
+                ) : (
+                  <>
+                    1 {moneda} = {tasa.toFixed(4)} {monedaViaje}
+                  </>
+                )}
+              </p>
+            )}
 
             <input
               type="text"
@@ -155,7 +227,7 @@ function Gastos({ viajeros, gastos, onAnadir, onEditar, onQuitar }) {
 
             {editando ? (
               <div className="fila-botones">
-                <button onClick={guardar} disabled={marcados.length === 0}>
+                <button onClick={guardar} disabled={marcados.length === 0 || typeof tasa !== "number"}>
                   Guardar cambios
                 </button>
                 <button className="boton-cancelar" onClick={cancelar}>
@@ -163,7 +235,7 @@ function Gastos({ viajeros, gastos, onAnadir, onEditar, onQuitar }) {
                 </button>
               </div>
             ) : (
-              <button onClick={guardar} disabled={marcados.length === 0}>
+              <button onClick={guardar} disabled={marcados.length === 0 || typeof tasa !== "number"}>
                 Añadir gasto
               </button>
             )}
@@ -182,7 +254,14 @@ function Gastos({ viajeros, gastos, onAnadir, onEditar, onQuitar }) {
                       {nombrePagador(gasto.pagadorId)} · {textoReparto(gasto)}
                     </small>
                   </span>
-                  <span className="gasto-importe">{gasto.importe.toFixed(2)} €</span>
+                  <span className="gasto-importe">
+                    {conMoneda(gasto.importe, gasto.moneda ?? monedaViaje)}
+                    {gasto.moneda && gasto.moneda !== monedaViaje && (
+                      <small className="gasto-convertido">
+                        {conMoneda(gasto.importeConvertido, monedaViaje)}
+                      </small>
+                    )}
+                  </span>
                   <span className="acciones">
                     <button
                       className="boton-editar"

@@ -1,6 +1,7 @@
 import { calcularLeTocaPagar, calcularPagos, calcularTotal } from "../calculos";
+import { conMoneda } from "../monedas";
 
-function Resumen({ balances, gastos }) {
+function Resumen({ balances, gastos, monedaViaje = "EUR" }) {
   const total = calcularTotal(gastos);
   const leTocaPagar = calcularLeTocaPagar(balances);
   const pagos = calcularPagos(balances);
@@ -14,7 +15,7 @@ function Resumen({ balances, gastos }) {
 
       <div className="total-destacado">
         <div className="total-etiqueta">Total del viaje</div>
-        <div className="total-cifra">{total.toFixed(2)} €</div>
+        <div className="total-cifra">{conMoneda(total, monedaViaje)}</div>
         <div className="total-detalle">
           {gastos.length} {gastos.length === 1 ? "gasto" : "gastos"} · {balances.length}{" "}
           {balances.length === 1 ? "viajero" : "viajeros"}
@@ -48,14 +49,15 @@ function Resumen({ balances, gastos }) {
                 />
               </div>
               <small className="reparto">
-                puso {viajero.puesto.toFixed(2)} € · le tocan {viajero.tocaPagar.toFixed(2)} €
+                puso {conMoneda(viajero.puesto, monedaViaje)} · le tocan{" "}
+                {conMoneda(viajero.tocaPagar, monedaViaje)}
               </small>
             </div>
 
             <div className="balance-cifra">
               <div className="balance-importe">
                 {viajero.balance >= 0 ? "+" : "−"}
-                {Math.abs(viajero.balance).toFixed(2)} €
+                {conMoneda(Math.abs(viajero.balance), monedaViaje)}
               </div>
               <div className="balance-texto">
                 {viajero.balance >= 0 ? "le deben" : "debe"}
@@ -75,7 +77,7 @@ function Resumen({ balances, gastos }) {
               <strong>{pago.de}</strong>
               <span className="pago-flecha">→</span>
               <strong>{pago.a}</strong>
-              <span className="pago-cantidad">{pago.cantidad.toFixed(2)} €</span>
+              <span className="pago-cantidad">{conMoneda(pago.cantidad, monedaViaje)}</span>
             </div>
           ))
         )}

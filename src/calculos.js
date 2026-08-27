@@ -11,8 +11,14 @@ export function participantesDeGasto(gasto, viajeros) {
   return viajeros.filter((viajero) => gasto.participantes.includes(viajero.id));
 }
 
+// Lo que cuenta un gasto para las cuentas: siempre en la moneda del viaje.
+// Los gastos de antes de las monedas no traen convertido, y esos ya iban en ella.
+export function importeDeGasto(gasto) {
+  return gasto.importeConvertido ?? gasto.importe;
+}
+
 export function calcularTotal(gastos) {
-  return gastos.reduce((suma, gasto) => suma + gasto.importe, 0);
+  return gastos.reduce((suma, gasto) => suma + importeDeGasto(gasto), 0);
 }
 
 // Cuánto ha puesto cada uno, cuánto le tocaba y su balance.
@@ -23,14 +29,16 @@ export function calcularBalances(viajeros, gastos) {
   const tocaPagar = new Map(viajeros.map((viajero) => [viajero.id, 0]));
 
   for (const gasto of gastos) {
+    const importe = importeDeGasto(gasto);
+
     if (puesto.has(gasto.pagadorId)) {
-      puesto.set(gasto.pagadorId, puesto.get(gasto.pagadorId) + gasto.importe);
+      puesto.set(gasto.pagadorId, puesto.get(gasto.pagadorId) + importe);
     }
 
     const participantes = participantesDeGasto(gasto, viajeros);
     if (participantes.length === 0) continue;
 
-    const parte = gasto.importe / participantes.length;
+    const parte = importe / participantes.length;
     for (const participante of participantes) {
       tocaPagar.set(participante.id, tocaPagar.get(participante.id) + parte);
     }

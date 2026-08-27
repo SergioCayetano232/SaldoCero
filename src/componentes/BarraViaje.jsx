@@ -15,6 +15,7 @@ function BarraViaje({ viaje, onSalir }) {
       <div className="viaje-titulo">
         <span className="viaje-emoji">🗺️</span>
         <h2 className="viaje-nombre">{viaje.nombre}</h2>
+        <span className="viaje-moneda">{viaje.moneda ?? "EUR"}</span>
         <button className="boton-salir" onClick={onSalir} title="Salir del viaje">
           ✕
         </button>

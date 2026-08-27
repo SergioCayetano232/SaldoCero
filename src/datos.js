@@ -13,6 +13,9 @@ function fallo(error, mensaje) {
 
 // El código del último viaje, para reabrirlo al volver a entrar.
 const CLAVE_ULTIMO = "saldocero-ultimo-codigo";
+// Y los viajes por los que has pasado, para no ir buscando códigos por el chat.
+const CLAVE_HISTORICO = "saldocero-historico";
+const CUANTOS_GUARDAMOS = 8;
 
 export function recordarCodigo(codigo) {
   localStorage.setItem(CLAVE_ULTIMO, codigo);
@@ -26,13 +29,41 @@ export function olvidarCodigo() {
   localStorage.removeItem(CLAVE_ULTIMO);
 }
 
-export async function crearViaje(nombre) {
-  const { data, error } = await supabase.rpc("crear_viaje", { nombre_viaje: nombre });
+// Los viajes en los que has estado, el último primero.
+export function historial() {
+  try {
+    const guardado = JSON.parse(localStorage.getItem(CLAVE_HISTORICO) ?? "[]");
+    return Array.isArray(guardado) ? guardado : [];
+  } catch {
+    // Si alguien lo ha tocado a mano y no es JSON, empezamos de cero.
+    return [];
+  }
+}
+
+// Lo apuntamos al entrar. Si ya estaba, sube al principio con su nombre nuevo.
+function apuntarEnHistorial(viaje) {
+  const resto = historial().filter((v) => v.codigo !== viaje.codigo);
+  const lista = [{ codigo: viaje.codigo, nombre: viaje.nombre }, ...resto];
+
+  localStorage.setItem(CLAVE_HISTORICO, JSON.stringify(lista.slice(0, CUANTOS_GUARDAMOS)));
+}
+
+export function olvidarDelHistorial(codigo) {
+  const lista = historial().filter((v) => v.codigo !== codigo);
+  localStorage.setItem(CLAVE_HISTORICO, JSON.stringify(lista));
+}
+
+export async function crearViaje(nombre, moneda = "EUR") {
+  const { data, error } = await supabase.rpc("crear_viaje", {
+    nombre_viaje: nombre,
+    moneda_viaje: moneda,
+  });
   if (error) throw fallo(error, "No hemos podido crear el viaje.");
 
   const viaje = data[0];
   usarCodigo(viaje.codigo);
   recordarCodigo(viaje.codigo);
+  apuntarEnHistorial(viaje);
 
   return { ...viaje, viajeros: [], gastos: [] };
 }
@@ -50,6 +81,7 @@ export async function abrirViaje(codigo) {
   // A partir de aquí, todas las peticiones van con este código.
   usarCodigo(viaje.codigo);
   recordarCodigo(viaje.codigo);
+  apuntarEnHistorial(viaje);
 
   return { ...viaje, ...(await cargarContenido(viaje.id)) };
 }
@@ -60,7 +92,7 @@ async function cargarContenido(viajeId) {
     supabase.from("viajeros").select("id, nombre").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
-      .select("id, pagador_id, importe, concepto")
+      .select("id, pagador_id, importe, moneda, importe_convertido, concepto")
       .eq("viaje_id", viajeId)
       .order("creado_en"),
     supabase
@@ -79,6 +111,9 @@ async function cargarContenido(viajeId) {
       pagadorId: gasto.pagador_id,
       // En la base de datos es numeric, y llega como texto.
       importe: Number(gasto.importe),
+      moneda: gasto.moneda ?? "EUR",
+      // Con este echamos las cuentas: ya está en la moneda del viaje.
+      importeConvertido: Number(gasto.importe_convertido ?? gasto.importe),
       concepto: gasto.concepto,
       participantes: participantes.data
         .filter((p) => p.gasto_id === gasto.id)
@@ -117,6 +152,8 @@ export async function anadirGasto(viajeId, gasto) {
       viaje_id: viajeId,
       pagador_id: gasto.pagadorId,
       importe: gasto.importe,
+      moneda: gasto.moneda,
+      importe_convertido: gasto.importeConvertido,
       concepto: gasto.concepto,
     })
     .select("id")
@@ -147,6 +184,8 @@ export async function editarGasto(id, gasto) {
     .update({
       pagador_id: gasto.pagadorId,
       importe: gasto.importe,
+      moneda: gasto.moneda,
+      importe_convertido: gasto.importeConvertido,
       concepto: gasto.concepto,
     })
     .eq("id", id);

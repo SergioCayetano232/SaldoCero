@@ -291,6 +291,62 @@ button:active {
   box-shadow: none !important;
 }
 
+/* ===== Monedas ===== */
+.fila-importe {
+  display: flex;
+  gap: 8px;
+}
+
+.fila-importe input {
+  flex: 1;
+  min-width: 0;
+}
+
+.selector-moneda {
+  width: auto;
+  flex-shrink: 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 14px;
+  padding-right: 32px;
+  background-position: right 10px center;
+  color: var(--tinta-suave);
+}
+
+/* El "son 70,00 €" de debajo del importe. */
+.conversion {
+  font-size: 13px;
+  color: var(--tinta-suave);
+  margin-top: -4px;
+  padding-left: 2px;
+}
+
+.conversion strong {
+  color: var(--teal-600);
+}
+
+/* Lo que costó en la moneda del viaje, bajo el importe original. */
+.gasto-convertido {
+  display: block;
+  font-family: var(--fuente);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--tinta-tenue);
+  margin-top: 1px;
+}
+
+/* La moneda del viaje, al lado de su nombre. */
+.viaje-moneda {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  color: var(--teal-700);
+  background-color: var(--teal-50);
+  border: 1px solid var(--teal-100);
+  padding: 3px 8px;
+  border-radius: var(--radio-pastilla);
+  flex-shrink: 0;
+}
+
 /* ===== Participantes de un gasto ===== */
 .participantes {
   border: 1px dashed var(--linea);
@@ -374,6 +430,39 @@ button:active {
 .reparto {
   color: var(--tinta-tenue);
   font-size: 13px;
+}
+
+/* ===== Los viajes por los que ya has pasado ===== */
+.viaje-pasado {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  padding: 4px 0;
+  border-radius: 8px;
+}
+
+.viaje-pasado:hover .viaje-pasado-nombre {
+  color: var(--teal-600);
+}
+
+.viaje-pasado-nombre {
+  display: block;
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--tinta);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.viaje-pasado .reparto {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  letter-spacing: 0.09em;
+}
+
+.viaje-pasado:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 /* ===== Los tres pasos de la pantalla de entrada ===== */
@@ -651,9 +740,13 @@ button:active {
   }
 
   .fila-formulario input,
-  .fila-formulario select,
   .fila-formulario .codigo {
     flex: 1 1 100%;
+  }
+
+  /* La moneda es corta: se queda al lado del botón, no ocupa una línea. */
+  .fila-formulario .selector-moneda {
+    flex: 0 0 auto;
   }
 
   .fila-formulario button {

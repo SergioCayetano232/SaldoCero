@@ -1,9 +1,19 @@
 import { useState } from "react";
+import * as datos from "../datos";
+import { MONEDAS } from "../monedas";
 
 // Primera pantalla: o creas un viaje o entras en el de alguien con su código.
 function Entrada({ onCrear, onEntrar, cargando, error }) {
   const [nombre, setNombre] = useState("");
+  const [moneda, setMoneda] = useState("EUR");
   const [codigo, setCodigo] = useState("");
+  // Los viajes por los que ya has pasado, guardados en este navegador.
+  const [pasados, setPasados] = useState(() => datos.historial());
+
+  function olvidar(codigoViaje) {
+    datos.olvidarDelHistorial(codigoViaje);
+    setPasados(datos.historial());
+  }
 
   return (
     <>
@@ -17,16 +27,32 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") onCrear(nombre);
+              if (e.key === "Enter") onCrear(nombre, moneda);
             }}
             disabled={cargando}
           />
-          <button onClick={() => onCrear(nombre)} disabled={cargando}>
+          <select
+            className="selector-moneda"
+            value={moneda}
+            onChange={(e) => setMoneda(e.target.value)}
+            disabled={cargando}
+            title="Moneda del viaje"
+          >
+            {MONEDAS.map((m) => (
+              <option key={m.codigo} value={m.codigo}>
+                {m.codigo}
+              </option>
+            ))}
+          </select>
+          <button onClick={() => onCrear(nombre, moneda)} disabled={cargando}>
             Crear
           </button>
         </div>
 
-        <p className="vacio">Te daremos un código para pasárselo a los demás.</p>
+        <p className="vacio">
+          Te daremos un código para pasárselo a los demás. Las cuentas se harán en{" "}
+          {moneda}.
+        </p>
       </section>
 
       <section className="tarjeta">
@@ -53,6 +79,38 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
       </section>
 
       {error && <p className="error">{error}</p>}
+
+      {pasados.length > 0 && (
+        <section className="tarjeta">
+          <h2>
+            <span className="icono">🕘</span> Tus viajes
+          </h2>
+
+          <ul className="lista">
+            {pasados.map((viaje) => (
+              <li key={viaje.codigo}>
+                <button
+                  className="viaje-pasado"
+                  onClick={() => onEntrar(viaje.codigo)}
+                  disabled={cargando}
+                >
+                  <span className="viaje-pasado-nombre">{viaje.nombre}</span>
+                  <small className="reparto">{viaje.codigo}</small>
+                </button>
+                <button
+                  className="boton-quitar"
+                  onClick={() => olvidar(viaje.codigo)}
+                  title="Quitar de la lista"
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <p className="vacio">Solo se guardan en este móvil, no los ve nadie más.</p>
+        </section>
+      )}
 
       <ul className="como-va">
         <li>

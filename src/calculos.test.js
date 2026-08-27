@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   participantesDeGasto,
+  importeDeGasto,
   calcularTotal,
   calcularBalances,
   calcularLeTocaPagar,
@@ -188,5 +189,49 @@ describe("gastos que se quedan sin gente", () => {
     // Ana lo pagó, pero no hay entre quién repartirlo.
     expect(bal.find((v) => v.id === "a").puesto).toBe(50);
     expect(bal.every((v) => v.tocaPagar === 0)).toBe(true);
+  });
+});
+
+describe("gastos en otra moneda", () => {
+  // 60 libras que son 70 euros: las cuentas van con los 70.
+  const enLibras = {
+    id: "g1",
+    pagadorId: "a",
+    importe: 60,
+    moneda: "GBP",
+    importeConvertido: 70,
+    concepto: "Cena",
+    participantes: ["a", "b"],
+  };
+
+  it("cuenta el importe convertido, no el original", () => {
+    expect(importeDeGasto(enLibras)).toBe(70);
+  });
+
+  it("un gasto viejo sin convertir usa su importe tal cual", () => {
+    expect(importeDeGasto({ importe: 40 })).toBe(40);
+  });
+
+  it("el total va en la moneda del viaje", () => {
+    expect(calcularTotal([enLibras])).toBe(70);
+  });
+
+  it("los balances se reparten sobre lo convertido", () => {
+    const bal = calcularBalances(viajeros, [enLibras]);
+
+    expect(bal.find((v) => v.id === "a").puesto).toBe(70);
+    expect(bal.find((v) => v.id === "b").balance).toBe(-35);
+  });
+
+  it("se pueden mezclar monedas en un mismo viaje", () => {
+    const bal = calcularBalances(viajeros, [
+      enLibras,
+      gasto("b", 30, ["a", "b"]), // este en euros
+    ]);
+
+    // 70 + 30 = 100 en total, 50 a cada uno de los dos.
+    expect(calcularTotal([enLibras, gasto("b", 30, ["a", "b"])])).toBe(100);
+    expect(bal.find((v) => v.id === "a").balance).toBe(20);
+    expect(bal.find((v) => v.id === "b").balance).toBe(-20);
   });
 });

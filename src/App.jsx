@@ -64,11 +64,11 @@ function App() {
     [viaje]
   );
 
-  async function crearViaje(nombre) {
+  async function crearViaje(nombre, moneda) {
     setCargando(true);
     setError("");
     try {
-      setViaje(await datos.crearViaje(nombre));
+      setViaje(await datos.crearViaje(nombre, moneda));
     } catch (fallo) {
       setError(fallo.message);
     } finally {
@@ -163,12 +163,15 @@ function App() {
       <Gastos
         viajeros={viajeros}
         gastos={gastos}
+        monedaViaje={viaje.moneda ?? "EUR"}
         onAnadir={(gasto) => hacer(() => datos.anadirGasto(viaje.id, gasto))}
         onEditar={(id, gasto) => hacer(() => datos.editarGasto(id, gasto))}
         onQuitar={(id) => hacer(() => datos.quitarGasto(id))}
       />
 
-      {gastos.length > 0 && <Resumen balances={balances} gastos={gastos} />}
+      {gastos.length > 0 && (
+        <Resumen balances={balances} gastos={gastos} monedaViaje={viaje.moneda ?? "EUR"} />
+      )}
 
       {(viajeros.length > 0 || gastos.length > 0) && (
         <button className="boton-reiniciar" onClick={vaciarViaje}>

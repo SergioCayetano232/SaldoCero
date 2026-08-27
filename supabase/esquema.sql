@@ -8,6 +8,8 @@ create table viajes (
   id uuid primary key default gen_random_uuid(),
   codigo text unique not null,
   nombre text not null,
+  -- En esta moneda se hacen las cuentas del viaje.
+  moneda text not null default 'EUR',
   creado_en timestamptz not null default now()
 );
 
@@ -22,7 +24,12 @@ create table gastos (
   id uuid primary key default gen_random_uuid(),
   viaje_id uuid not null references viajes(id) on delete cascade,
   pagador_id uuid not null references viajeros(id) on delete cascade,
+  -- Lo que se pagó de verdad, en la moneda en que se pagó.
   importe numeric(10, 2) not null check (importe > 0),
+  moneda text not null default 'EUR',
+  -- Y eso mismo pasado a la moneda del viaje, que es con lo que echamos cuentas.
+  -- Lo guardamos hecho: si mañana cambia el cambio, el viaje no se descuadra.
+  importe_convertido numeric(10, 2) not null check (importe_convertido > 0),
   concepto text not null,
   creado_en timestamptz not null default now()
 );
@@ -107,8 +114,8 @@ create policy "quitar participantes" on gastos_participantes for delete using (
 
 -- Al crear un viaje hay que devolverle su código a quien lo crea, y en ese
 -- momento todavía no lo tiene, así que no pasa por las reglas de arriba.
-create function crear_viaje(nombre_viaje text)
-returns table (id uuid, codigo text, nombre text)
+create function crear_viaje(nombre_viaje text, moneda_viaje text default 'EUR')
+returns table (id uuid, codigo text, nombre text, moneda text)
 language plpgsql
 security definer
 set search_path = public
@@ -128,30 +135,50 @@ begin
   end loop;
 
   return query
-    insert into viajes (codigo, nombre)
-    values (codigo_nuevo, coalesce(nullif(trim(nombre_viaje), ''), 'Mi viaje'))
-    returning viajes.id, viajes.codigo, viajes.nombre;
+    insert into viajes (codigo, nombre, moneda)
+    values (
+      codigo_nuevo,
+      coalesce(nullif(trim(nombre_viaje), ''), 'Mi viaje'),
+      coalesce(nullif(trim(moneda_viaje), ''), 'EUR')
+    )
+    returning viajes.id, viajes.codigo, viajes.nombre, viajes.moneda;
 end;
 $$;
 
 -- Entrar a un viaje con su código. Es la única puerta: sin código no hay id, y
 -- sin id no llegas a nada.
 create function abrir_viaje(codigo_buscado text)
-returns table (id uuid, codigo text, nombre text)
+returns table (id uuid, codigo text, nombre text, moneda text)
 language sql
 security definer
 set search_path = public
 as $$
-  select v.id, v.codigo, v.nombre
+  select v.id, v.codigo, v.nombre, v.moneda
   from viajes v
   where v.codigo = upper(trim(codigo_buscado));
 $$;
 
 -- ---------- Si ya tenías la base de datos creada ----------
 --
--- Editar gastos llegó después. Si montaste las tablas antes de eso, no hace
--- falta rehacerlo todo: con correr esto en el SQL Editor te vale.
---
+-- Lo de abajo llegó después. Si montaste las tablas antes, no hace falta
+-- rehacerlo todo: corre esto en el SQL Editor y listo.
+
+-- Editar un gasto ya apuntado.
 --   create policy "editar gastos" on gastos for update
 --     using (viaje_id = viaje_actual())
 --     with check (viaje_id = viaje_actual());
+
+-- Gastos en otra moneda. Los que ya había son todos en euros, así que el
+-- convertido es el mismo importe.
+--   alter table viajes add column moneda text not null default 'EUR';
+--   alter table gastos add column moneda text not null default 'EUR';
+--   alter table gastos add column importe_convertido numeric(10, 2);
+--   update gastos set importe_convertido = importe where importe_convertido is null;
+--   alter table gastos alter column importe_convertido set not null;
+--   alter table gastos add check (importe_convertido > 0);
+--
+-- Y las dos funciones, que ahora devuelven también la moneda. Ojo: hay que
+-- borrarlas antes, porque Postgres no deja cambiar lo que devuelve una función
+-- que ya existe. Después vuelve a pegar los "create function" de más arriba.
+--   drop function if exists crear_viaje(text);
+--   drop function if exists abrir_viaje(text);
