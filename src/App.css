@@ -191,6 +191,20 @@ button:active {
   background-color: #dfe6ea;
 }
 
+/* Cuando no hay nadie marcado no se puede añadir el gasto. */
+.aviso {
+  color: #b3541e;
+}
+
+.formulario-gasto button:disabled {
+  background-color: #c3cdd3;
+  cursor: not-allowed;
+}
+
+.formulario-gasto button:disabled:hover {
+  background-color: #c3cdd3;
+}
+
 /* ===== Participantes de un gasto ===== */
 .participantes {
   border: 1px dashed #d4dde2;

@@ -5,14 +5,14 @@ function Gastos({ viajeros, gastos, onAnadir, onEditar, onQuitar }) {
   const [pagadorId, setPagadorId] = useState("");
   const [importe, setImporte] = useState("");
   const [concepto, setConcepto] = useState("");
-  // Entre quiénes se reparte. Por defecto entre todos, que es lo normal.
-  const [participantes, setParticipantes] = useState([]);
+  // Entre quiénes se reparte. null = no lo has tocado, así que van todos.
+  const [participantes, setParticipantes] = useState(null);
   // El gasto que estás tocando ahora mismo. Vacío si estás apuntando uno nuevo.
   const [editando, setEditando] = useState(null);
 
   const todosLosIds = viajeros.map((v) => v.id);
-  // Si no hay nadie marcado a mano, van todos.
-  const marcados = participantes.length > 0 ? participantes : todosLosIds;
+  // Mientras no toques las casillas, el gasto va entre todos.
+  const marcados = participantes ?? todosLosIds;
   const entreTodos = marcados.length === viajeros.length;
 
   function alternar(id) {
@@ -26,7 +26,7 @@ function Gastos({ viajeros, gastos, onAnadir, onEditar, onQuitar }) {
   function limpiar() {
     setImporte("");
     setConcepto("");
-    setParticipantes([]);
+    setParticipantes(null);
     setEditando(null);
   }
 
@@ -44,6 +44,7 @@ function Gastos({ viajeros, gastos, onAnadir, onEditar, onQuitar }) {
 
     if (pagadorId === "") return;
     if (isNaN(importeNumero) || importeNumero <= 0) return;
+    if (marcados.length === 0) return;
 
     const gasto = {
       pagadorId,
@@ -121,8 +122,14 @@ function Gastos({ viajeros, gastos, onAnadir, onEditar, onQuitar }) {
 
             <div className="participantes">
               <p className="participantes-titulo">
-                Se reparte entre{" "}
-                {entreTodos ? <strong>todos</strong> : <strong>{marcados.length}</strong>}
+                {marcados.length === 0 ? (
+                  <span className="aviso">Marca al menos a uno para repartir el gasto</span>
+                ) : (
+                  <>
+                    Se reparte entre{" "}
+                    {entreTodos ? <strong>todos</strong> : <strong>{marcados.length}</strong>}
+                  </>
+                )}
                 {!entreTodos && (
                   <button className="enlace" onClick={() => setParticipantes(todosLosIds)}>
                     marcar todos
@@ -146,13 +153,17 @@ function Gastos({ viajeros, gastos, onAnadir, onEditar, onQuitar }) {
 
             {editando ? (
               <div className="fila-botones">
-                <button onClick={guardar}>Guardar cambios</button>
+                <button onClick={guardar} disabled={marcados.length === 0}>
+                  Guardar cambios
+                </button>
                 <button className="boton-cancelar" onClick={cancelar}>
                   Cancelar
                 </button>
               </div>
             ) : (
-              <button onClick={guardar}>Añadir gasto</button>
+              <button onClick={guardar} disabled={marcados.length === 0}>
+                Añadir gasto
+              </button>
             )}
           </div>
 
