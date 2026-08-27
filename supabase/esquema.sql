@@ -88,6 +88,9 @@ create policy "quitar viajeros" on viajeros for delete using (viaje_id = viaje_a
 create policy "ver gastos" on gastos for select using (viaje_id = viaje_actual());
 create policy "anadir gastos" on gastos for insert with check (viaje_id = viaje_actual());
 create policy "quitar gastos" on gastos for delete using (viaje_id = viaje_actual());
+create policy "editar gastos" on gastos for update
+  using (viaje_id = viaje_actual())
+  with check (viaje_id = viaje_actual());
 
 -- Los participantes cuelgan de un gasto, así que heredan el permiso del gasto.
 create policy "ver participantes" on gastos_participantes for select using (
@@ -143,3 +146,12 @@ as $$
   from viajes v
   where v.codigo = upper(trim(codigo_buscado));
 $$;
+
+-- ---------- Si ya tenías la base de datos creada ----------
+--
+-- Editar gastos llegó después. Si montaste las tablas antes de eso, no hace
+-- falta rehacerlo todo: con correr esto en el SQL Editor te vale.
+--
+--   create policy "editar gastos" on gastos for update
+--     using (viaje_id = viaje_actual())
+--     with check (viaje_id = viaje_actual());

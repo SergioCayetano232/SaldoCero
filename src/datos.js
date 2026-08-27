@@ -63,7 +63,10 @@ async function cargarContenido(viajeId) {
       .select("id, pagador_id, importe, concepto")
       .eq("viaje_id", viajeId)
       .order("creado_en"),
-    supabase.from("gastos_participantes").select("gasto_id, viajero_id"),
+    supabase
+      .from("gastos_participantes")
+      .select("gasto_id, viajero_id, gastos!inner(viaje_id)")
+      .eq("gastos.viaje_id", viajeId),
   ]);
 
   const error = viajeros.error || gastos.error || participantes.error;
@@ -134,6 +137,36 @@ export async function anadirGasto(viajeId, gasto) {
   }
 
   return { ...gasto, id: data.id };
+}
+
+// Cambiar un gasto ya apuntado.
+// El reparto lo rehacemos entero, que es más fácil que ir mirando quién sale y quién entra.
+export async function editarGasto(id, gasto) {
+  const { error } = await supabase
+    .from("gastos")
+    .update({
+      pagador_id: gasto.pagadorId,
+      importe: gasto.importe,
+      concepto: gasto.concepto,
+    })
+    .eq("id", id);
+
+  if (error) throw fallo(error, "No hemos podido guardar el gasto.");
+
+  const { error: errorBorrado } = await supabase
+    .from("gastos_participantes")
+    .delete()
+    .eq("gasto_id", id);
+
+  if (errorBorrado) throw fallo(errorBorrado, "No hemos podido guardar el gasto.");
+
+  const { error: errorParticipantes } = await supabase.from("gastos_participantes").insert(
+    gasto.participantes.map((viajeroId) => ({ gasto_id: id, viajero_id: viajeroId }))
+  );
+
+  if (errorParticipantes) throw fallo(errorParticipantes, "No hemos podido guardar el gasto.");
+
+  return { ...gasto, id };
 }
 
 export async function quitarGasto(id) {

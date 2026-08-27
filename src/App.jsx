@@ -164,6 +164,7 @@ function App() {
         viajeros={viajeros}
         gastos={gastos}
         onAnadir={(gasto) => hacer(() => datos.anadirGasto(viaje.id, gasto))}
+        onEditar={(id, gasto) => hacer(() => datos.editarGasto(id, gasto))}
         onQuitar={(id) => hacer(() => datos.quitarGasto(id))}
       />
 
