@@ -426,7 +426,7 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
                         </button>
                         <button
                           className="boton-quitar"
-                          onClick={() => onQuitar(gasto.id)}
+                          onClick={() => onQuitar(gasto.id, gasto.concepto)}
                         >
                           ✕
                         </button>

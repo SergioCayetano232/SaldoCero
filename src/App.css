@@ -1382,6 +1382,98 @@ button:active {
   background-color: var(--rojo-fondo);
 }
 
+/* ===== Deshacer un borrado ===== */
+/* Se queda pegado abajo, encima de todo, hasta que pasan los segundos. */
+.deshacer {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: calc(100vw - 32px);
+  padding: 12px 14px 12px 18px;
+  border-radius: var(--radio-pastilla);
+  background-color: var(--tinta);
+  color: var(--papel);
+  font-size: 14px;
+  box-shadow: var(--sombra-lg);
+  animation: subir-aviso var(--medio) var(--curva-muelle);
+}
+
+@keyframes subir-aviso {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.deshacer span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.deshacer button {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: var(--radio-pastilla);
+  background-color: rgba(255, 255, 255, 0.14);
+  color: var(--papel);
+  font-size: 13px;
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+}
+
+.deshacer button:hover {
+  background-color: rgba(255, 255, 255, 0.26);
+}
+
+/* Una barrita que se vacía: el tiempo que te queda para arrepentirte. */
+.deshacer button::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 2px;
+  background-color: var(--naranja-400);
+  transform-origin: left;
+  animation: se-acaba-el-tiempo 5s linear forwards;
+}
+
+@keyframes se-acaba-el-tiempo {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* En oscuro el fondo negro no destaca: se le da la vuelta. */
+@media (prefers-color-scheme: dark) {
+  .deshacer {
+    background-color: var(--papel);
+    color: var(--tinta);
+    border: 1px solid var(--linea);
+  }
+
+  .deshacer button {
+    background-color: var(--teal-50);
+    color: var(--teal-700);
+  }
+
+  .deshacer button:hover {
+    background-color: var(--teal-100);
+  }
+}
+
 /* ===== Instalar la app ===== */
 .boton-instalar {
   display: flex;

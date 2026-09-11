@@ -35,7 +35,7 @@ function Viajeros({ viajeros, onAnadir, onQuitar }) {
           {viajeros.map((viajero) => (
             <li key={viajero.id}>
               <span>{viajero.nombre}</span>
-              <button className="boton-quitar" onClick={() => onQuitar(viajero.id)}>
+              <button className="boton-quitar" onClick={() => onQuitar(viajero.id, viajero.nombre)}>
                 ✕
               </button>
             </li>

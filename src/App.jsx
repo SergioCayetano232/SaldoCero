@@ -3,6 +3,7 @@ import "./App.css";
 import * as datos from "./datos";
 import { hayConexion, usarCodigo } from "./supabase";
 import { calcularBalances } from "./calculos";
+import { borradoConEspera } from "./deshacer";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
 import Viajeros from "./componentes/Viajeros";
@@ -21,6 +22,8 @@ function App() {
   // Solo salimos cargando si de verdad hay un viaje que recuperar.
   const [cargando, setCargando] = useState(() => codigoDeArranque() !== "");
   const [error, setError] = useState("");
+  // Lo que acabas de borrar, mientras estás a tiempo de recuperarlo.
+  const [borrado, setBorrado] = useState(null);
 
   useEffect(() => {
     const codigo = codigoDeArranque();
@@ -63,6 +66,33 @@ function App() {
     },
     [viaje]
   );
+
+  // Borrar algo, dando unos segundos para arrepentirse.
+  // Lo quitamos de la pantalla ya, pero de la base de datos solo si no deshaces.
+  const borrarConAviso = useCallback((id, que, quitarDeVerdad) => {
+    setError("");
+
+    const espera = borradoConEspera(quitarDeVerdad, async (fallo) => {
+      setBorrado(null);
+      if (fallo) setError(fallo.message);
+
+      // Tanto si se ha borrado como si ha fallado, volvemos a leer el viaje:
+      // así la lista deja de esconderlo y enseña lo que hay de verdad.
+      try {
+        setViaje(await datos.refrescarViaje(viajeActual.current));
+      } catch {
+        // Si no se puede releer, lo cogerá la escucha de cada pocos segundos.
+      }
+    });
+
+    setBorrado({ id, que, espera });
+  }, []);
+
+  function deshacerBorrado() {
+    // Como todavía no se había tocado nada, basta con dejar de ocultarlo.
+    borrado?.espera.cancelar();
+    setBorrado(null);
+  }
 
   async function crearViaje(nombre, moneda) {
     setCargando(true);
@@ -152,7 +182,11 @@ function App() {
     );
   }
 
-  const { viajeros, gastos } = viaje;
+  // Lo que está a medio borrar no sale en la lista ni cuenta para las cuentas,
+  // aunque en la base de datos siga estando unos segundos más.
+  const seVa = borrado?.id;
+  const viajeros = viaje.viajeros.filter((v) => v.id !== seVa);
+  const gastos = viaje.gastos.filter((g) => g.id !== seVa && g.pagadorId !== seVa);
   const balances = calcularBalances(viajeros, gastos);
 
   return (
@@ -166,7 +200,9 @@ function App() {
       <Viajeros
         viajeros={viajeros}
         onAnadir={(nombre) => hacer(() => datos.anadirViajero(viaje.id, nombre))}
-        onQuitar={(id) => hacer(() => datos.quitarViajero(id))}
+        onQuitar={(id, nombre) =>
+          borrarConAviso(id, `a ${nombre}`, () => datos.quitarViajero(id))
+        }
       />
 
       <Gastos
@@ -175,7 +211,9 @@ function App() {
         monedaViaje={viaje.moneda ?? "EUR"}
         onAnadir={(gasto) => hacer(() => datos.anadirGasto(viaje.id, gasto))}
         onEditar={(id, gasto) => hacer(() => datos.editarGasto(id, gasto))}
-        onQuitar={(id) => hacer(() => datos.quitarGasto(id))}
+        onQuitar={(id, concepto) =>
+          borrarConAviso(id, `"${concepto}"`, () => datos.quitarGasto(id))
+        }
       />
 
       {gastos.length > 0 && (
@@ -194,6 +232,13 @@ function App() {
         <button className="boton-reiniciar" onClick={vaciarViaje}>
           Vaciar este viaje
         </button>
+      )}
+
+      {borrado && (
+        <div className="deshacer">
+          <span>Has quitado {borrado.que}</span>
+          <button onClick={deshacerBorrado}>Deshacer</button>
+        </div>
       )}
 
       <BotonInstalar />
