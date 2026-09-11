@@ -88,7 +88,7 @@ export async function abrirViaje(codigo) {
 
 // Los viajeros y los gastos de un viaje ya abierto.
 async function cargarContenido(viajeId) {
-  const [viajeros, gastos, participantes] = await Promise.all([
+  const [viajeros, gastos, participantes, saldados] = await Promise.all([
     supabase.from("viajeros").select("id, nombre").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
@@ -99,13 +99,18 @@ async function cargarContenido(viajeId) {
       .from("gastos_participantes")
       .select("gasto_id, viajero_id, gastos!inner(viaje_id)")
       .eq("gastos.viaje_id", viajeId),
+    supabase
+      .from("pagos_saldados")
+      .select("de_nombre, a_nombre")
+      .eq("viaje_id", viajeId),
   ]);
 
-  const error = viajeros.error || gastos.error || participantes.error;
+  const error = viajeros.error || gastos.error || participantes.error || saldados.error;
   if (error) throw fallo(error, "No hemos podido cargar el viaje.");
 
   return {
     viajeros: viajeros.data,
+    saldados: saldados.data.map((p) => ({ de: p.de_nombre, a: p.a_nombre })),
     gastos: gastos.data.map((gasto) => ({
       id: gasto.id,
       pagadorId: gasto.pagador_id,
@@ -208,6 +213,27 @@ export async function editarGasto(id, gasto) {
   return { ...gasto, id };
 }
 
+// Dar una deuda por pagada.
+export async function marcarSaldado(viajeId, pago) {
+  const { error } = await supabase
+    .from("pagos_saldados")
+    .insert({ viaje_id: viajeId, de_nombre: pago.de, a_nombre: pago.a });
+
+  if (error) throw fallo(error, "No hemos podido marcar el pago.");
+}
+
+// Y volver atrás si te has equivocado.
+export async function desmarcarSaldado(viajeId, pago) {
+  const { error } = await supabase
+    .from("pagos_saldados")
+    .delete()
+    .eq("viaje_id", viajeId)
+    .eq("de_nombre", pago.de)
+    .eq("a_nombre", pago.a);
+
+  if (error) throw fallo(error, "No hemos podido desmarcar el pago.");
+}
+
 export async function quitarGasto(id) {
   const { error } = await supabase.from("gastos").delete().eq("id", id);
   if (error) throw fallo(error, "No hemos podido quitar el gasto.");
@@ -215,6 +241,13 @@ export async function quitarGasto(id) {
 
 // Vaciar el viaje: fuera viajeros (y con ellos, sus gastos) y fuera gastos.
 export async function vaciarViaje(viajeId) {
+  const { error: errorSaldados } = await supabase
+    .from("pagos_saldados")
+    .delete()
+    .eq("viaje_id", viajeId);
+
+  if (errorSaldados) throw fallo(errorSaldados, "No hemos podido vaciar el viaje.");
+
   const { error } = await supabase.from("gastos").delete().eq("viaje_id", viajeId);
   if (error) throw fallo(error, "No hemos podido vaciar el viaje.");
 

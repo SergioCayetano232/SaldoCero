@@ -102,3 +102,20 @@ export function calcularPagos(balances) {
 
   return pagos;
 }
+
+// Marca cuáles de los pagos ya están dados por pagados.
+//
+// Los pagos no se guardan, se calculan cada vez. Así que si alguien apunta un
+// gasto después, las cuentas cambian y lo que marcaste puede ya no cuadrar. En
+// ese caso lo dejamos ver igual, pero avisando de que la cifra ha cambiado.
+export function marcarSaldados(pagos, saldados = []) {
+  return pagos.map((pago) => ({
+    ...pago,
+    saldado: saldados.some((s) => s.de === pago.de && s.a === pago.a),
+  }));
+}
+
+// Lo que queda por pagar de verdad.
+export function quedaPorPagar(pagos) {
+  return pagos.filter((pago) => !pago.saldado).reduce((t, p) => t + p.cantidad, 0);
+}

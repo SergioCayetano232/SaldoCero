@@ -1,10 +1,25 @@
-import { calcularLeTocaPagar, calcularPagos, calcularTotal } from "../calculos";
+import {
+  calcularLeTocaPagar,
+  calcularPagos,
+  calcularTotal,
+  marcarSaldados,
+  quedaPorPagar,
+} from "../calculos";
 import { conMoneda } from "../monedas";
 
-function Resumen({ balances, gastos, monedaViaje = "EUR" }) {
+function Resumen({
+  balances,
+  gastos,
+  monedaViaje = "EUR",
+  saldados = [],
+  onSaldar,
+  onDesaldar,
+}) {
   const total = calcularTotal(gastos);
   const leTocaPagar = calcularLeTocaPagar(balances);
-  const pagos = calcularPagos(balances);
+  const pagos = marcarSaldados(calcularPagos(balances), saldados);
+  const pendiente = quedaPorPagar(pagos);
+  const todoPagado = pagos.length > 0 && pendiente === 0;
 
   // Las barras se miden contra el que más ha puesto.
   const maxPuesto = Math.max(...balances.map((v) => v.puesto), 0);
@@ -68,18 +83,45 @@ function Resumen({ balances, gastos, monedaViaje = "EUR" }) {
       </ul>
 
       <div className="saldar">
-        <h3>Cómo saldar cuentas</h3>
+        <h3>
+          Cómo saldar cuentas
+          {pendiente > 0 && (
+            <span className="pendiente">
+              quedan {conMoneda(pendiente, monedaViaje)}
+            </span>
+          )}
+        </h3>
+
         {pagos.length === 0 ? (
           <p className="saldadas">🎉 Cuentas saldadas. Nadie debe nada.</p>
         ) : (
-          pagos.map((pago, indice) => (
-            <div className="pago" key={indice}>
-              <strong>{pago.de}</strong>
-              <span className="pago-flecha">→</span>
-              <strong>{pago.a}</strong>
-              <span className="pago-cantidad">{conMoneda(pago.cantidad, monedaViaje)}</span>
-            </div>
-          ))
+          <>
+            {todoPagado && (
+              <p className="saldadas">🎉 Todo pagado. Ya estáis a cero.</p>
+            )}
+
+            {pagos.map((pago) => (
+              <div
+                className={`pago ${pago.saldado ? "pagado" : ""}`}
+                key={`${pago.de}-${pago.a}`}
+              >
+                <strong>{pago.de}</strong>
+                <span className="pago-flecha">→</span>
+                <strong>{pago.a}</strong>
+                <span className="pago-cantidad">
+                  {conMoneda(pago.cantidad, monedaViaje)}
+                </span>
+
+                <button
+                  className="boton-saldar"
+                  onClick={() => (pago.saldado ? onDesaldar(pago) : onSaldar(pago))}
+                  title={pago.saldado ? "Marcar como pendiente" : "Marcar como pagado"}
+                >
+                  {pago.saldado ? "↩︎" : "✓"}
+                </button>
+              </div>
+            ))}
+          </>
         )}
       </div>
     </section>

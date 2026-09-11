@@ -6,6 +6,8 @@ import {
   calcularBalances,
   calcularLeTocaPagar,
   calcularPagos,
+  marcarSaldados,
+  quedaPorPagar,
 } from "./calculos";
 
 const ana = { id: "a", nombre: "Ana" };
@@ -233,5 +235,51 @@ describe("gastos en otra moneda", () => {
     expect(calcularTotal([enLibras, gasto("b", 30, ["a", "b"])])).toBe(100);
     expect(bal.find((v) => v.id === "a").balance).toBe(20);
     expect(bal.find((v) => v.id === "b").balance).toBe(-20);
+  });
+});
+
+describe("deudas ya pagadas", () => {
+  const pagos = [
+    { de: "Luis", a: "Ana", cantidad: 37.33 },
+    { de: "Marta", a: "Ana", cantidad: 78.83 },
+  ];
+
+  it("marca el que está saldado y deja el otro", () => {
+    const marcados = marcarSaldados(pagos, [{ de: "Luis", a: "Ana" }]);
+
+    expect(marcados[0].saldado).toBe(true);
+    expect(marcados[1].saldado).toBe(false);
+  });
+
+  it("sin nada saldado, ninguno lo está", () => {
+    expect(marcarSaldados(pagos).every((p) => !p.saldado)).toBe(true);
+  });
+
+  it("no confunde la ida con la vuelta", () => {
+    // Que Luis le pagara a Ana no significa que Ana le haya pagado a Luis.
+    const marcados = marcarSaldados([{ de: "Ana", a: "Luis", cantidad: 10 }], [
+      { de: "Luis", a: "Ana" },
+    ]);
+
+    expect(marcados[0].saldado).toBe(false);
+  });
+
+  it("no toca las cantidades", () => {
+    const marcados = marcarSaldados(pagos, [{ de: "Luis", a: "Ana" }]);
+    expect(marcados[0].cantidad).toBe(37.33);
+  });
+
+  it("suma solo lo que queda por pagar", () => {
+    const marcados = marcarSaldados(pagos, [{ de: "Luis", a: "Ana" }]);
+    expect(quedaPorPagar(marcados)).toBeCloseTo(78.83);
+  });
+
+  it("si está todo pagado, no queda nada", () => {
+    const marcados = marcarSaldados(pagos, [
+      { de: "Luis", a: "Ana" },
+      { de: "Marta", a: "Ana" },
+    ]);
+
+    expect(quedaPorPagar(marcados)).toBe(0);
   });
 });

@@ -178,7 +178,14 @@ function App() {
       />
 
       {gastos.length > 0 && (
-        <Resumen balances={balances} gastos={gastos} monedaViaje={viaje.moneda ?? "EUR"} />
+        <Resumen
+          balances={balances}
+          gastos={gastos}
+          monedaViaje={viaje.moneda ?? "EUR"}
+          saldados={viaje.saldados ?? []}
+          onSaldar={(pago) => hacer(() => datos.marcarSaldado(viaje.id, pago))}
+          onDesaldar={(pago) => hacer(() => datos.desmarcarSaldado(viaje.id, pago))}
+        />
       )}
 
       {(viajeros.length > 0 || gastos.length > 0) && (

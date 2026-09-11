@@ -1000,6 +1000,78 @@ button:active {
   font-size: 15px;
   font-weight: 600;
   margin-bottom: 14px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* Lo que falta por pagar, al lado del título. */
+.pendiente {
+  font-family: var(--fuente);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--naranja-500);
+  background-color: var(--naranja-100);
+  padding: 3px 10px;
+  border-radius: var(--radio-pastilla);
+  white-space: nowrap;
+}
+
+/* El botón de dar por pagada una deuda. */
+.boton-saldar {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--teal-300);
+  color: var(--teal-600);
+  background-color: var(--papel);
+  font-size: 13px;
+  line-height: 1;
+  margin-left: 4px;
+}
+
+.boton-saldar:hover {
+  background-color: var(--verde);
+  border-color: var(--verde);
+  color: white;
+  transform: scale(1.12);
+}
+
+/* Una deuda ya pagada se queda tachada y apagada, pero sin desaparecer:
+   así ves de un vistazo lo que ya está hecho. */
+.pago.pagado {
+  background-color: var(--verde-fondo);
+  opacity: 0.72;
+}
+
+.pago.pagado strong,
+.pago.pagado .pago-cantidad {
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  color: var(--tinta-tenue);
+}
+
+.pago.pagado .pago-flecha {
+  color: var(--verde);
+}
+
+.pago.pagado:hover {
+  opacity: 1;
+}
+
+.pago.pagado .boton-saldar {
+  border-color: var(--verde);
+  color: var(--verde);
+}
+
+.pago.pagado .boton-saldar:hover {
+  background-color: var(--tinta-tenue);
+  border-color: var(--tinta-tenue);
+  color: white;
 }
 
 .pago {

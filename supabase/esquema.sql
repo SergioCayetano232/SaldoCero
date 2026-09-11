@@ -41,10 +41,24 @@ create table gastos_participantes (
   primary key (gasto_id, viajero_id)
 );
 
+-- Las deudas que ya se han pagado.
+-- Los pagos no están guardados: salen de echar cuentas con los gastos. Así que
+-- aquí apuntamos solo el quién a quién, que es lo que identifica a cada uno.
+create table pagos_saldados (
+  id uuid primary key default gen_random_uuid(),
+  viaje_id uuid not null references viajes(id) on delete cascade,
+  de_nombre text not null,
+  a_nombre text not null,
+  saldado_en timestamptz not null default now(),
+  -- El mismo par no se puede marcar dos veces.
+  unique (viaje_id, de_nombre, a_nombre)
+);
+
 create index on viajes (codigo);
 create index on viajeros (viaje_id);
 create index on gastos (viaje_id);
 create index on gastos_participantes (viajero_id);
+create index on pagos_saldados (viaje_id);
 
 -- ---------- Quién puede ver qué ----------
 --
@@ -82,6 +96,7 @@ alter table viajes enable row level security;
 alter table viajeros enable row level security;
 alter table gastos enable row level security;
 alter table gastos_participantes enable row level security;
+alter table pagos_saldados enable row level security;
 
 -- Un viaje solo se ve si traes su código. Nunca se listan todos.
 create policy "ver mi viaje" on viajes for select using (id = viaje_actual());
@@ -109,6 +124,11 @@ create policy "anadir participantes" on gastos_participantes for insert with che
 create policy "quitar participantes" on gastos_participantes for delete using (
   exists (select 1 from gastos g where g.id = gasto_id and g.viaje_id = viaje_actual())
 );
+
+-- Las deudas saldadas, como todo lo demás: las del viaje cuyo código traes.
+create policy "ver saldados" on pagos_saldados for select using (viaje_id = viaje_actual());
+create policy "marcar saldado" on pagos_saldados for insert with check (viaje_id = viaje_actual());
+create policy "desmarcar saldado" on pagos_saldados for delete using (viaje_id = viaje_actual());
 
 -- ---------- Crear y abrir viajes ----------
 
@@ -182,3 +202,18 @@ $$;
 -- que ya existe. Después vuelve a pegar los "create function" de más arriba.
 --   drop function if exists crear_viaje(text);
 --   drop function if exists abrir_viaje(text);
+
+-- Marcar deudas como pagadas.
+--   create table pagos_saldados (
+--     id uuid primary key default gen_random_uuid(),
+--     viaje_id uuid not null references viajes(id) on delete cascade,
+--     de_nombre text not null,
+--     a_nombre text not null,
+--     saldado_en timestamptz not null default now(),
+--     unique (viaje_id, de_nombre, a_nombre)
+--   );
+--   create index on pagos_saldados (viaje_id);
+--   alter table pagos_saldados enable row level security;
+--   create policy "ver saldados" on pagos_saldados for select using (viaje_id = viaje_actual());
+--   create policy "marcar saldado" on pagos_saldados for insert with check (viaje_id = viaje_actual());
+--   create policy "desmarcar saldado" on pagos_saldados for delete using (viaje_id = viaje_actual());
