@@ -8,6 +8,7 @@ import {
   calcularPagos,
   marcarSaldados,
   quedaPorPagar,
+  repartoDeGasto,
 } from "./calculos";
 
 const ana = { id: "a", nombre: "Ana" };
@@ -281,5 +282,101 @@ describe("deudas ya pagadas", () => {
     ]);
 
     expect(quedaPorPagar(marcados)).toBe(0);
+  });
+});
+
+describe("reparto desigual", () => {
+  // Ana se pidió el doble que Luis: 2 partes contra 1.
+  const chuleton = {
+    id: "g1",
+    pagadorId: "a",
+    importe: 90,
+    concepto: "Cena",
+    participantes: ["a", "b"],
+    partes: { a: 2, b: 1 },
+  };
+
+  it("reparte según las partes de cada uno", () => {
+    const reparto = repartoDeGasto(chuleton, [ana, luis]);
+
+    expect(reparto.get("a")).toBeCloseTo(60);
+    expect(reparto.get("b")).toBeCloseTo(30);
+  });
+
+  it("sin partes, a partes iguales como siempre", () => {
+    const reparto = repartoDeGasto(gasto("a", 90, ["a", "b"]), [ana, luis]);
+
+    expect(reparto.get("a")).toBe(45);
+    expect(reparto.get("b")).toBe(45);
+  });
+
+  it("lo repartido suma el importe entero", () => {
+    const reparto = repartoDeGasto(chuleton, [ana, luis]);
+    const suma = [...reparto.values()].reduce((t, v) => t + v, 0);
+
+    expect(suma).toBeCloseTo(90);
+  });
+
+  it("si las partes no suman nada, a partes iguales", () => {
+    // Puede pasar si pones todo a cero.
+    const raro = { ...chuleton, partes: { a: 0, b: 0 } };
+    const reparto = repartoDeGasto(raro, [ana, luis]);
+
+    expect(reparto.get("a")).toBe(45);
+    expect(reparto.get("b")).toBe(45);
+  });
+
+  it("no cuenta las partes de quien ya no está en el gasto", () => {
+    // Marta tenía partes pero la han quitado: su parte no se pierde,
+    // se reparte entre los que quedan.
+    const conMarta = { ...chuleton, partes: { a: 2, b: 1, c: 3 } };
+    const reparto = repartoDeGasto(conMarta, [ana, luis]);
+    const suma = [...reparto.values()].reduce((t, v) => t + v, 0);
+
+    expect(suma).toBeCloseTo(90);
+    expect(reparto.get("a")).toBeCloseTo(60);
+  });
+
+  it("quien está en el gasto pero sin parte, no paga nada", () => {
+    const reparto = repartoDeGasto(
+      { ...chuleton, participantes: ["a", "b", "c"], partes: { a: 1, b: 1 } },
+      viajeros
+    );
+
+    expect(reparto.get("c")).toBe(0);
+    expect(reparto.get("a")).toBeCloseTo(45);
+  });
+
+  it("las partes decimales también valen", () => {
+    const reparto = repartoDeGasto(
+      { ...chuleton, importe: 100, partes: { a: 1.5, b: 0.5 } },
+      [ana, luis]
+    );
+
+    expect(reparto.get("a")).toBeCloseTo(75);
+    expect(reparto.get("b")).toBeCloseTo(25);
+  });
+
+  it("los balances usan el reparto desigual", () => {
+    const bal = calcularBalances([ana, luis], [chuleton]);
+
+    // Ana pagó 90 y le tocaban 60, así que le deben 30.
+    expect(bal.find((v) => v.id === "a").balance).toBeCloseTo(30);
+    expect(bal.find((v) => v.id === "b").balance).toBeCloseTo(-30);
+  });
+
+  it("mezclando gastos con y sin partes, todo cuadra", () => {
+    const bal = calcularBalances([ana, luis], [
+      chuleton,
+      gasto("b", 40, ["a", "b"]),
+    ]);
+
+    const suma = bal.reduce((t, v) => t + v.balance, 0);
+    expect(suma).toBeCloseTo(0);
+  });
+
+  it("un gasto sin gente no rompe nada aunque traiga partes", () => {
+    const reparto = repartoDeGasto(chuleton, []);
+    expect(reparto.size).toBe(0);
   });
 });

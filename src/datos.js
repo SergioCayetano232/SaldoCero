@@ -97,7 +97,7 @@ async function cargarContenido(viajeId) {
       .order("creado_en"),
     supabase
       .from("gastos_participantes")
-      .select("gasto_id, viajero_id, gastos!inner(viaje_id)")
+      .select("gasto_id, viajero_id, partes, gastos!inner(viaje_id)")
       .eq("gastos.viaje_id", viajeId),
     supabase
       .from("pagos_saldados")
@@ -124,6 +124,12 @@ async function cargarContenido(viajeId) {
       participantes: participantes.data
         .filter((p) => p.gasto_id === gasto.id)
         .map((p) => p.viajero_id),
+      // Las partes de cada uno, para el reparto desigual.
+      partes: Object.fromEntries(
+        participantes.data
+          .filter((p) => p.gasto_id === gasto.id)
+          .map((p) => [p.viajero_id, Number(p.partes ?? 1)])
+      ),
     })),
   };
 }
@@ -170,7 +176,11 @@ export async function anadirGasto(viajeId, gasto) {
 
   // Y con quién se reparte.
   const { error: errorParticipantes } = await supabase.from("gastos_participantes").insert(
-    gasto.participantes.map((viajeroId) => ({ gasto_id: data.id, viajero_id: viajeroId }))
+    gasto.participantes.map((viajeroId) => ({
+      gasto_id: data.id,
+      viajero_id: viajeroId,
+      partes: gasto.partes?.[viajeroId] ?? 1,
+    }))
   );
 
   if (errorParticipantes) {
@@ -208,7 +218,11 @@ export async function editarGasto(id, gasto) {
   if (errorBorrado) throw fallo(errorBorrado, "No hemos podido guardar el gasto.");
 
   const { error: errorParticipantes } = await supabase.from("gastos_participantes").insert(
-    gasto.participantes.map((viajeroId) => ({ gasto_id: id, viajero_id: viajeroId }))
+    gasto.participantes.map((viajeroId) => ({
+      gasto_id: id,
+      viajero_id: viajeroId,
+      partes: gasto.partes?.[viajeroId] ?? 1,
+    }))
   );
 
   if (errorParticipantes) throw fallo(errorParticipantes, "No hemos podido guardar el gasto.");

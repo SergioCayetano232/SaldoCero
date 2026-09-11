@@ -9,6 +9,9 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
   const [moneda, setMoneda] = useState(monedaViaje);
   const [concepto, setConcepto] = useState("");
   const [categoria, setCategoria] = useState(POR_DEFECTO);
+  // Las partes de cada uno. Vacío = a partes iguales, que es lo normal.
+  const [partes, setPartes] = useState({});
+  const [repartoAbierto, setRepartoAbierto] = useState(false);
   // El cambio que nos ha dado la API, con la moneda a la que corresponde.
   // Así sabemos si lo que tenemos guardado sirve para la moneda de ahora.
   const [cambioTraido, setCambioTraido] = useState(null);
@@ -59,6 +62,8 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
     setMoneda(monedaViaje);
     setConcepto("");
     setCategoria(POR_DEFECTO);
+    setPartes({});
+    setRepartoAbierto(false);
     setParticipantes(null);
     setEditando(null);
   }
@@ -72,6 +77,34 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
     setConcepto(gasto.concepto);
     setCategoria(gasto.categoria ?? POR_DEFECTO);
     setParticipantes(participantesDeGasto(gasto, viajeros).map((v) => v.id));
+
+    // Si el gasto iba repartido a trozos distintos, abrimos ya esa parte.
+    const suyas = gasto.partes ?? {};
+    const desigual = Object.values(suyas).some((p) => p !== 1);
+    setPartes(desigual ? suyas : {});
+    setRepartoAbierto(desigual);
+  }
+
+  // Lo que le toca a cada uno de los marcados. Por defecto, una parte.
+  function partesDeLosMarcados() {
+    return Object.fromEntries(marcados.map((id) => [id, partes[id] ?? 1]));
+  }
+
+  function cambiarParte(id, valor) {
+    const numero = parseFloat(valor);
+    setPartes({ ...partes, [id]: isNaN(numero) || numero < 0 ? 0 : numero });
+  }
+
+  // Cuánto sale para cada uno con las partes de ahora, para irlo viendo.
+  function loQueLeToca(id) {
+    const total = parseFloat(importe);
+    if (isNaN(total) || total <= 0 || typeof tasa !== "number") return null;
+
+    const suyas = partesDeLosMarcados();
+    const suma = Object.values(suyas).reduce((t, p) => t + p, 0);
+    if (suma <= 0) return null;
+
+    return ((total * tasa) * (suyas[id] ?? 0)) / suma;
   }
 
   function guardar() {
@@ -93,6 +126,8 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
       concepto: concepto.trim() === "" ? "Gasto" : concepto.trim(),
       categoria,
       participantes: marcados,
+      // Solo mandamos las partes si de verdad hay reparto desigual.
+      partes: repartoAbierto ? partesDeLosMarcados() : null,
     };
 
     if (editando) {
@@ -122,9 +157,13 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
     const suyos = participantesDeGasto(gasto, viajeros);
     // Puede quedarse sin nadie si borras a los que iban en él.
     if (suyos.length === 0) return "sin nadie a quien repartirlo";
-    if (suyos.length === viajeros.length) return "entre todos";
+    // Si va repartido desigual, se dice: si no, engaña ver "entre todos".
+    const desigual = Object.values(gasto.partes ?? {}).some((p) => p !== 1);
+    const comoSeParte = desigual ? ", a partes distintas" : "";
 
-    return `entre ${suyos.map((v) => v.nombre).join(", ")}`;
+    if (suyos.length === viajeros.length) return `entre todos${comoSeParte}`;
+
+    return `entre ${suyos.map((v) => v.nombre).join(", ")}${comoSeParte}`;
   }
 
   return (
@@ -245,6 +284,52 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
                   </label>
                 ))}
               </div>
+
+              {/* El reparto desigual va escondido: la mayoría de gastos se
+                  parten por igual y no hace falta marear con esto. */}
+              {marcados.length > 1 && (
+                <button
+                  className="enlace enlace-reparto"
+                  onClick={() => setRepartoAbierto(!repartoAbierto)}
+                >
+                  {repartoAbierto ? "← volver a partes iguales" : "¿unos más que otros?"}
+                </button>
+              )}
+
+              {repartoAbierto && marcados.length > 1 && (
+                <div className="partes">
+                  <p className="partes-ayuda">
+                    Cuántas partes paga cada uno. Con 2 y 1, el primero paga el doble.
+                  </p>
+
+                  {viajeros
+                    .filter((v) => marcados.includes(v.id))
+                    .map((viajero) => {
+                      const suyo = loQueLeToca(viajero.id);
+
+                      return (
+                        <div className="fila-parte" key={viajero.id}>
+                          <span className="parte-nombre">{viajero.nombre}</span>
+
+                          <input
+                            type="number"
+                            className="parte-campo"
+                            min="0"
+                            step="0.5"
+                            value={partes[viajero.id] ?? 1}
+                            onChange={(e) => cambiarParte(viajero.id, e.target.value)}
+                          />
+
+                          {suyo !== null && (
+                            <span className="parte-importe">
+                              {conMoneda(suyo, monedaViaje)}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
             </div>
 
             {editando ? (

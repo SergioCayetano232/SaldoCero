@@ -327,7 +327,8 @@ button:active {
 }
 
 .fila-formulario button,
-.formulario-gasto button {
+.formulario-gasto > button,
+.formulario-gasto .fila-botones button {
   padding: 11px 20px;
   background: linear-gradient(180deg, var(--teal-500), var(--teal-600));
   color: white;
@@ -341,7 +342,8 @@ button:active {
 }
 
 .fila-formulario button:hover,
-.formulario-gasto button:hover {
+.formulario-gasto > button:hover,
+.formulario-gasto .fila-botones button:hover {
   background: linear-gradient(180deg, var(--teal-600), var(--teal-700));
   transform: translateY(-1px);
   box-shadow: var(--sombra-md);
@@ -349,7 +351,8 @@ button:active {
 
 /* Un brillo que cruza el botón al pasar por encima. */
 .fila-formulario button::after,
-.formulario-gasto button::after {
+.formulario-gasto > button::after,
+.formulario-gasto .fila-botones button::after {
   content: "";
   position: absolute;
   inset: 0 auto 0 0;
@@ -365,7 +368,8 @@ button:active {
 }
 
 .fila-formulario button:hover::after,
-.formulario-gasto button:hover:not(:disabled)::after {
+.formulario-gasto > button:hover:not(:disabled)::after,
+.formulario-gasto .fila-botones button:hover:not(:disabled)::after {
   animation: barrido 0.7s var(--curva-suave);
 }
 
@@ -479,7 +483,8 @@ button:active {
   font-weight: 500;
 }
 
-.formulario-gasto button:disabled {
+.formulario-gasto > button:disabled,
+.formulario-gasto .fila-botones button:disabled {
   background: var(--linea) !important;
   color: var(--tinta-tenue) !important;
   cursor: not-allowed;
@@ -542,6 +547,60 @@ button:active {
   padding: 3px 8px;
   border-radius: var(--radio-pastilla);
   flex-shrink: 0;
+}
+
+/* ===== Reparto desigual ===== */
+.enlace-reparto {
+  display: block;
+  margin-top: 10px;
+}
+
+.partes {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--linea);
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
+}
+
+.partes-ayuda {
+  font-size: 12px;
+  color: var(--tinta-tenue);
+  margin-bottom: 10px;
+}
+
+.fila-parte {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+}
+
+.parte-nombre {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.parte-campo {
+  width: 72px;
+  flex-shrink: 0;
+  padding: 6px 10px;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Lo que le sale a pagar con las partes de ahora. */
+.parte-importe {
+  flex-shrink: 0;
+  min-width: 74px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--teal-600);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ===== Categorías ===== */

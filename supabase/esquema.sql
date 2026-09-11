@@ -40,6 +40,9 @@ create table gastos (
 create table gastos_participantes (
   gasto_id uuid not null references gastos(id) on delete cascade,
   viajero_id uuid not null references viajeros(id) on delete cascade,
+  -- Cuánto le toca a este del gasto. Es un peso, no un importe: con 2 y 1 uno
+  -- paga el doble que el otro. A 1 todos, que es repartir a partes iguales.
+  partes numeric(6, 2) not null default 1 check (partes >= 0),
   primary key (gasto_id, viajero_id)
 );
 
@@ -222,3 +225,7 @@ $$;
 
 -- Categorías de gasto. Los que ya había se quedan en "otros".
 --   alter table gastos add column categoria text not null default 'otros';
+
+-- Reparto desigual. Lo que había se queda a partes iguales.
+--   alter table gastos_participantes
+--     add column partes numeric(6, 2) not null default 1 check (partes >= 0);

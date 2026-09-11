@@ -21,6 +21,38 @@ export function calcularTotal(gastos) {
   return gastos.reduce((suma, gasto) => suma + importeDeGasto(gasto), 0);
 }
 
+// Cuánto le toca de un gasto a cada uno de los suyos.
+//
+// Normalmente a partes iguales, pero un gasto puede traer partes: si uno se
+// pidió el chuletón y otro una ensalada, no es justo partirlo por la mitad.
+// Las partes son un peso, no un importe: {ana: 2, luis: 1} es dos tercios y un
+// tercio. Así la cuenta cuadra siempre aunque luego cambies el importe.
+export function repartoDeGasto(gasto, participantes) {
+  const importe = importeDeGasto(gasto);
+  const reparto = new Map();
+
+  if (participantes.length === 0) return reparto;
+
+  const partes = gasto.partes ?? null;
+  // Solo valen las partes de los que siguen en el gasto.
+  const suma = partes
+    ? participantes.reduce((t, p) => t + (partes[p.id] ?? 0), 0)
+    : 0;
+
+  // Sin partes, o con partes que no suman nada, a partes iguales.
+  if (!partes || suma <= 0) {
+    const parte = importe / participantes.length;
+    for (const p of participantes) reparto.set(p.id, parte);
+    return reparto;
+  }
+
+  for (const p of participantes) {
+    reparto.set(p.id, (importe * (partes[p.id] ?? 0)) / suma);
+  }
+
+  return reparto;
+}
+
 // Cuánto ha puesto cada uno, cuánto le tocaba y su balance.
 // Ya no vale dividir el total entre todos: cada gasto va con su gente, así que
 // hay que ir gasto por gasto repartiendo entre los suyos.
@@ -38,9 +70,8 @@ export function calcularBalances(viajeros, gastos) {
     const participantes = participantesDeGasto(gasto, viajeros);
     if (participantes.length === 0) continue;
 
-    const parte = importe / participantes.length;
-    for (const participante of participantes) {
-      tocaPagar.set(participante.id, tocaPagar.get(participante.id) + parte);
+    for (const [id, parte] of repartoDeGasto(gasto, participantes)) {
+      tocaPagar.set(id, tocaPagar.get(id) + parte);
     }
   }
 
