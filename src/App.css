@@ -544,6 +544,106 @@ button:active {
   flex-shrink: 0;
 }
 
+/* ===== Categorías ===== */
+.categorias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pastilla-categoria {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-pastilla);
+  background-color: var(--papel);
+  color: var(--tinta-suave);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.pastilla-categoria:hover {
+  border-color: var(--color-categoria);
+  color: var(--color-categoria);
+  transform: translateY(-1px);
+}
+
+/* La elegida se pinta con su propio color. */
+.pastilla-categoria.elegida {
+  border-color: var(--color-categoria);
+  color: var(--color-categoria);
+  background-color: color-mix(in srgb, var(--color-categoria) 12%, transparent);
+  font-weight: 600;
+}
+
+.pastilla-emoji {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* El emoji delante de cada gasto en la lista. */
+.gasto-icono {
+  font-size: 17px;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 1.4em;
+  text-align: center;
+}
+
+/* ===== En qué se ha ido el dinero ===== */
+.desglose {
+  margin-bottom: 18px;
+}
+
+/* Una sola barra con un trozo por categoría. */
+.desglose-barra {
+  display: flex;
+  height: 10px;
+  border-radius: var(--radio-pastilla);
+  overflow: hidden;
+  background-color: var(--fondo);
+}
+
+.desglose-trozo {
+  height: 100%;
+  transition: width 0.7s var(--curva-suave);
+}
+
+/* Una rayita blanca entre trozo y trozo, para que se distingan. */
+.desglose-trozo + .desglose-trozo {
+  box-shadow: inset 1.5px 0 0 var(--papel);
+}
+
+.desglose-lista {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 12px;
+}
+
+.desglose-lista li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--tinta-suave);
+}
+
+.desglose-punto {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.desglose-lista strong {
+  color: var(--tinta);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ===== Participantes de un gasto ===== */
 .participantes {
   border: 1px dashed var(--linea);

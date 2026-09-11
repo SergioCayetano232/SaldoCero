@@ -8,6 +8,8 @@ import {
 } from "../calculos";
 import { conMoneda } from "../monedas";
 import { resumenEnTexto, copiarAlPortapapeles } from "../compartir";
+import { gastoPorCategoria } from "../categorias";
+import { importeDeGasto } from "../calculos";
 
 function Resumen({
   balances,
@@ -24,6 +26,7 @@ function Resumen({
   const leTocaPagar = calcularLeTocaPagar(balances);
   const pagos = marcarSaldados(calcularPagos(balances), saldados);
   const pendiente = quedaPorPagar(pagos);
+  const porCategoria = gastoPorCategoria(gastos, importeDeGasto);
   const todoPagado = pagos.length > 0 && pendiente === 0;
 
   // Las barras se miden contra el que más ha puesto.
@@ -61,6 +64,36 @@ function Resumen({
           {balances.length === 1 ? "viajero" : "viajeros"}
         </div>
       </div>
+
+      {/* En qué se ha ido el dinero. Solo si hay más de una cosa, que si no
+          es una barra al 100% y no cuenta nada. */}
+      {porCategoria.length > 1 && (
+        <div className="desglose">
+          <div className="desglose-barra">
+            {porCategoria.map((c) => (
+              <div
+                key={c.id}
+                className="desglose-trozo"
+                style={{
+                  width: `${(c.total / total) * 100}%`,
+                  backgroundColor: c.color,
+                }}
+                title={`${c.nombre}: ${conMoneda(c.total, monedaViaje)}`}
+              />
+            ))}
+          </div>
+
+          <ul className="desglose-lista">
+            {porCategoria.map((c) => (
+              <li key={c.id}>
+                <span className="desglose-punto" style={{ backgroundColor: c.color }} />
+                {c.emoji} {c.nombre}
+                <strong>{conMoneda(c.total, monedaViaje)}</strong>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {leTocaPagar && (
         <div className="le-toca">

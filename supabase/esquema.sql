@@ -31,6 +31,8 @@ create table gastos (
   -- Lo guardamos hecho: si mañana cambia el cambio, el viaje no se descuadra.
   importe_convertido numeric(10, 2) not null check (importe_convertido > 0),
   concepto text not null,
+  -- En qué se fue: comida, transporte, alojamiento...
+  categoria text not null default 'otros',
   creado_en timestamptz not null default now()
 );
 
@@ -217,3 +219,6 @@ $$;
 --   create policy "ver saldados" on pagos_saldados for select using (viaje_id = viaje_actual());
 --   create policy "marcar saldado" on pagos_saldados for insert with check (viaje_id = viaje_actual());
 --   create policy "desmarcar saldado" on pagos_saldados for delete using (viaje_id = viaje_actual());
+
+-- Categorías de gasto. Los que ya había se quedan en "otros".
+--   alter table gastos add column categoria text not null default 'otros';

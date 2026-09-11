@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { participantesDeGasto } from "../calculos";
 import { MONEDAS, cambio, conMoneda } from "../monedas";
+import { CATEGORIAS, POR_DEFECTO, categoriaDe } from "../categorias";
 
 function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar }) {
   const [pagadorId, setPagadorId] = useState("");
   const [importe, setImporte] = useState("");
   const [moneda, setMoneda] = useState(monedaViaje);
   const [concepto, setConcepto] = useState("");
+  const [categoria, setCategoria] = useState(POR_DEFECTO);
   // El cambio que nos ha dado la API, con la moneda a la que corresponde.
   // Así sabemos si lo que tenemos guardado sirve para la moneda de ahora.
   const [cambioTraido, setCambioTraido] = useState(null);
@@ -56,6 +58,7 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
     setImporte("");
     setMoneda(monedaViaje);
     setConcepto("");
+    setCategoria(POR_DEFECTO);
     setParticipantes(null);
     setEditando(null);
   }
@@ -67,6 +70,7 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
     setImporte(String(gasto.importe));
     setMoneda(gasto.moneda ?? monedaViaje);
     setConcepto(gasto.concepto);
+    setCategoria(gasto.categoria ?? POR_DEFECTO);
     setParticipantes(participantesDeGasto(gasto, viajeros).map((v) => v.id));
   }
 
@@ -87,6 +91,7 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
       // Lo guardamos ya convertido: si mañana cambia el cambio, este viaje no.
       importeConvertido: Number((importeNumero * tasa).toFixed(2)),
       concepto: concepto.trim() === "" ? "Gasto" : concepto.trim(),
+      categoria,
       participantes: marcados,
     };
 
@@ -194,6 +199,23 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
               }}
             />
 
+            {/* En qué se fue. Van como pastillas y no en un desplegable:
+                se ven todas a la vez y se elige de un toque. */}
+            <div className="categorias">
+              {CATEGORIAS.map((c) => (
+                <button
+                  key={c.id}
+                  className={`pastilla-categoria ${categoria === c.id ? "elegida" : ""}`}
+                  onClick={() => setCategoria(c.id)}
+                  title={c.nombre}
+                  style={{ "--color-categoria": c.color }}
+                >
+                  <span className="pastilla-emoji">{c.emoji}</span>
+                  {c.nombre}
+                </button>
+              ))}
+            </div>
+
             <div className="participantes">
               <p className="participantes-titulo">
                 {marcados.length === 0 ? (
@@ -247,6 +269,9 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
             <ul className="lista">
               {gastos.map((gasto) => (
                 <li key={gasto.id} className={gasto.id === editando ? "editandose" : ""}>
+                  <span className="gasto-icono" title={categoriaDe(gasto.categoria).nombre}>
+                    {categoriaDe(gasto.categoria).emoji}
+                  </span>
                   <span>
                     <span className="gasto-concepto">{gasto.concepto}</span>
                     <br />
