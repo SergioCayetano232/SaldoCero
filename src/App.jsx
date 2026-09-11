@@ -146,6 +146,7 @@ function App() {
           cargando={cargando}
           error={error}
         />
+        <BotonInstalar />
         <Pie />
       </div>
     );
@@ -195,8 +196,48 @@ function App() {
         </button>
       )}
 
+      <BotonInstalar />
       <Pie />
     </div>
+  );
+}
+
+// El botón de instalar, cuando el navegador dice que se puede.
+//
+// Chrome avisa con un evento y deja guardarlo para enseñarlo cuando quieras.
+// Safari no lo tiene: allí se instala desde Compartir > Añadir a inicio, y el
+// botón no sale. Tampoco sale si ya la tienes instalada.
+function BotonInstalar() {
+  const [aviso, setAviso] = useState(null);
+
+  useEffect(() => {
+    function alPoderInstalar(evento) {
+      // Si no lo paramos, Chrome saca su propio cartel cuando le apetece.
+      evento.preventDefault();
+      setAviso(evento);
+    }
+
+    window.addEventListener("beforeinstallprompt", alPoderInstalar);
+    // Instalada: fuera el botón.
+    window.addEventListener("appinstalled", () => setAviso(null));
+
+    return () => window.removeEventListener("beforeinstallprompt", alPoderInstalar);
+  }, []);
+
+  if (!aviso) return null;
+
+  async function instalar() {
+    aviso.prompt();
+    await aviso.userChoice;
+    // El aviso solo sirve una vez, se haya instalado o no.
+    setAviso(null);
+  }
+
+  return (
+    <button className="boton-instalar" onClick={instalar}>
+      <span className="instalar-icono">⬇</span>
+      Instalar en el móvil
+    </button>
   );
 }
 

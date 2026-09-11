@@ -1332,6 +1332,44 @@ button:active {
   background-color: var(--rojo-fondo);
 }
 
+/* ===== Instalar la app ===== */
+.boton-instalar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 24px auto 0;
+  padding: 11px 22px;
+  border-radius: var(--radio-pastilla);
+  border: 1px solid var(--teal-300);
+  background-color: var(--cristal);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--teal-700);
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: var(--sombra-sm);
+  animation: aparecer-creciendo var(--lento) var(--curva-muelle);
+}
+
+.boton-instalar:hover {
+  background-color: var(--teal-500);
+  border-color: var(--teal-500);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-md);
+}
+
+/* La flechita da un saltito, como invitando. */
+.instalar-icono {
+  font-size: 13px;
+  animation: rebotar 2.2s infinite var(--curva-suave);
+}
+
+.boton-instalar:hover .instalar-icono {
+  animation: none;
+}
+
 /* ===== Pie ===== */
 .pie {
   display: flex;

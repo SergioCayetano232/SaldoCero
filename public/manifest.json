@@ -1,0 +1,33 @@
+{
+  "name": "SaldoCero · Reparte los gastos del viaje",
+  "short_name": "SaldoCero",
+  "description": "Apunta quién paga qué en el viaje y te decimos quién le debe a quién.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#e8f0ef",
+  "theme_color": "#0e7c7b",
+  "lang": "es",
+  "categories": ["finance", "travel", "utilities"],
+  "icons": [
+    {
+      "src": "/icono-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icono-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icono-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

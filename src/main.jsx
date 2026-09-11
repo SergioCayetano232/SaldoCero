@@ -8,3 +8,13 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>,
 )
+
+// Que la app se pueda instalar y abra sin conexión.
+// Solo en producción: en desarrollo estorba, porque te sirve versiones viejas.
+if ("serviceWorker" in navigator && import.meta.env.PROD) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {
+      // Si no se puede registrar, la app funciona igual. No hay nada que decir.
+    });
+  });
+}
