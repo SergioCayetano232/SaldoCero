@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { participantesDeGasto } from "../calculos";
 import { MONEDAS, cambio, conMoneda } from "../monedas";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe } from "../categorias";
+import { hoy, comoTitulo, porDias } from "../fechas";
 
 function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar }) {
   const [pagadorId, setPagadorId] = useState("");
@@ -12,6 +13,8 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
   // Las partes de cada uno. Vacío = a partes iguales, que es lo normal.
   const [partes, setPartes] = useState({});
   const [repartoAbierto, setRepartoAbierto] = useState(false);
+  // Por defecto hoy, que es cuando se apunta casi todo.
+  const [fecha, setFecha] = useState(hoy);
   // El cambio que nos ha dado la API, con la moneda a la que corresponde.
   // Así sabemos si lo que tenemos guardado sirve para la moneda de ahora.
   const [cambioTraido, setCambioTraido] = useState(null);
@@ -44,6 +47,9 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
     };
   }, [moneda, monedaViaje]);
 
+  // Los gastos agrupados por día, que es como se leen mejor.
+  const dias = porDias(gastos);
+
   const todosLosIds = viajeros.map((v) => v.id);
   // Mientras no toques las casillas, el gasto va entre todos.
   const marcados = participantes ?? todosLosIds;
@@ -64,6 +70,7 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
     setCategoria(POR_DEFECTO);
     setPartes({});
     setRepartoAbierto(false);
+    setFecha(hoy());
     setParticipantes(null);
     setEditando(null);
   }
@@ -76,6 +83,7 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
     setMoneda(gasto.moneda ?? monedaViaje);
     setConcepto(gasto.concepto);
     setCategoria(gasto.categoria ?? POR_DEFECTO);
+    setFecha(gasto.fecha ?? hoy());
     setParticipantes(participantesDeGasto(gasto, viajeros).map((v) => v.id));
 
     // Si el gasto iba repartido a trozos distintos, abrimos ya esa parte.
@@ -125,6 +133,7 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
       importeConvertido: Number((importeNumero * tasa).toFixed(2)),
       concepto: concepto.trim() === "" ? "Gasto" : concepto.trim(),
       categoria,
+      fecha,
       participantes: marcados,
       // Solo mandamos las partes si de verdad hay reparto desigual.
       partes: repartoAbierto ? partesDeLosMarcados() : null,
@@ -145,6 +154,11 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
   function cancelar() {
     setPagadorId("");
     limpiar();
+  }
+
+  // Lo que se gastó ese día, en la moneda del viaje.
+  function totalDelDia(dia) {
+    return dia.gastos.reduce((t, g) => t + (g.importeConvertido ?? g.importe), 0);
   }
 
   function nombrePagador(id) {
@@ -205,6 +219,15 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
                   </option>
                 ))}
               </select>
+
+              <input
+                type="date"
+                className="campo-fecha"
+                value={fecha}
+                max={hoy()}
+                onChange={(e) => setFecha(e.target.value || hoy())}
+                title="¿Qué día fue?"
+              />
             </div>
 
             {moneda !== monedaViaje && (
@@ -351,42 +374,68 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
           {gastos.length === 0 ? (
             <p className="vacio">Todavía no hay gastos.</p>
           ) : (
-            <ul className="lista">
-              {gastos.map((gasto) => (
-                <li key={gasto.id} className={gasto.id === editando ? "editandose" : ""}>
-                  <span className="gasto-icono" title={categoriaDe(gasto.categoria).nombre}>
-                    {categoriaDe(gasto.categoria).emoji}
-                  </span>
-                  <span>
-                    <span className="gasto-concepto">{gasto.concepto}</span>
-                    <br />
-                    <small className="reparto">
-                      {nombrePagador(gasto.pagadorId)} · {textoReparto(gasto)}
-                    </small>
-                  </span>
-                  <span className="gasto-importe">
-                    {conMoneda(gasto.importe, gasto.moneda ?? monedaViaje)}
-                    {gasto.moneda && gasto.moneda !== monedaViaje && (
-                      <small className="gasto-convertido">
-                        {conMoneda(gasto.importeConvertido, monedaViaje)}
-                      </small>
-                    )}
-                  </span>
-                  <span className="acciones">
-                    <button
-                      className="boton-editar"
-                      onClick={() => editar(gasto)}
-                      title="Editar gasto"
+            dias.map((dia) => (
+              <div className="dia" key={dia.fecha || "sin-fecha"}>
+                {/* El día solo se pone si el viaje dura más de uno. */}
+                {dias.length > 1 && (
+                  <p className="dia-titulo">
+                    {dia.fecha ? comoTitulo(dia.fecha) : "Sin fecha"}
+                    <span className="dia-total">
+                      {conMoneda(totalDelDia(dia), monedaViaje)}
+                    </span>
+                  </p>
+                )}
+
+                <ul className="lista">
+                  {dia.gastos.map((gasto) => (
+                    <li
+                      key={gasto.id}
+                      className={gasto.id === editando ? "editandose" : ""}
                     >
-                      ✏️
-                    </button>
-                    <button className="boton-quitar" onClick={() => onQuitar(gasto.id)}>
-                      ✕
-                    </button>
-                  </span>
-                </li>
-              ))}
-            </ul>
+                      <span
+                        className="gasto-icono"
+                        title={categoriaDe(gasto.categoria).nombre}
+                      >
+                        {categoriaDe(gasto.categoria).emoji}
+                      </span>
+
+                      <span>
+                        <span className="gasto-concepto">{gasto.concepto}</span>
+                        <br />
+                        <small className="reparto">
+                          {nombrePagador(gasto.pagadorId)} · {textoReparto(gasto)}
+                        </small>
+                      </span>
+
+                      <span className="gasto-importe">
+                        {conMoneda(gasto.importe, gasto.moneda ?? monedaViaje)}
+                        {gasto.moneda && gasto.moneda !== monedaViaje && (
+                          <small className="gasto-convertido">
+                            {conMoneda(gasto.importeConvertido, monedaViaje)}
+                          </small>
+                        )}
+                      </span>
+
+                      <span className="acciones">
+                        <button
+                          className="boton-editar"
+                          onClick={() => editar(gasto)}
+                          title="Editar gasto"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          className="boton-quitar"
+                          onClick={() => onQuitar(gasto.id)}
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
           )}
         </>
       )}

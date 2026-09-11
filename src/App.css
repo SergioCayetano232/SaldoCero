@@ -495,6 +495,7 @@ button:active {
 /* ===== Monedas ===== */
 .fila-importe {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -547,6 +548,55 @@ button:active {
   padding: 3px 8px;
   border-radius: var(--radio-pastilla);
   flex-shrink: 0;
+}
+
+/* ===== Fechas ===== */
+.campo-fecha {
+  width: auto;
+  flex-shrink: 0;
+  padding: 11px 12px;
+  font-size: 14px;
+  font-family: var(--fuente);
+  color: var(--tinta-suave);
+  cursor: pointer;
+}
+
+/* Cada día de gastos, con su título y su total. */
+.dia + .dia {
+  margin-top: 18px;
+}
+
+.dia-titulo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--linea);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tinta-tenue);
+}
+
+.dia-total {
+  font-family: var(--fuente-titulo);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--tinta-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 560px) {
+  /* En el móvil la fecha se pone debajo, que si no no cabe nada. */
+  .campo-fecha {
+    width: 100%;
+    flex: 1 1 100%;
+  }
 }
 
 /* ===== Reparto desigual ===== */

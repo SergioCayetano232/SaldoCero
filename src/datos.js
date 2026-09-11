@@ -92,8 +92,9 @@ async function cargarContenido(viajeId) {
     supabase.from("viajeros").select("id, nombre").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
-      .select("id, pagador_id, importe, moneda, importe_convertido, concepto, categoria")
+      .select("id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha")
       .eq("viaje_id", viajeId)
+      .order("fecha")
       .order("creado_en"),
     supabase
       .from("gastos_participantes")
@@ -121,6 +122,7 @@ async function cargarContenido(viajeId) {
       importeConvertido: Number(gasto.importe_convertido ?? gasto.importe),
       concepto: gasto.concepto,
       categoria: gasto.categoria ?? "otros",
+      fecha: gasto.fecha,
       participantes: participantes.data
         .filter((p) => p.gasto_id === gasto.id)
         .map((p) => p.viajero_id),
@@ -168,6 +170,7 @@ export async function anadirGasto(viajeId, gasto) {
       importe_convertido: gasto.importeConvertido,
       concepto: gasto.concepto,
       categoria: gasto.categoria,
+      fecha: gasto.fecha,
     })
     .select("id")
     .single();
@@ -205,6 +208,7 @@ export async function editarGasto(id, gasto) {
       importe_convertido: gasto.importeConvertido,
       concepto: gasto.concepto,
       categoria: gasto.categoria,
+      fecha: gasto.fecha,
     })
     .eq("id", id);
 

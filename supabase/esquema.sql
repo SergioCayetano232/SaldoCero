@@ -33,6 +33,9 @@ create table gastos (
   concepto text not null,
   -- En qué se fue: comida, transporte, alojamiento...
   categoria text not null default 'otros',
+  -- El día del gasto. Va aparte de creado_en porque no siempre apuntas las
+  -- cosas el mismo día: la cena del viernes la metes el domingo.
+  fecha date not null default current_date,
   creado_en timestamptz not null default now()
 );
 
@@ -229,3 +232,7 @@ $$;
 -- Reparto desigual. Lo que había se queda a partes iguales.
 --   alter table gastos_participantes
 --     add column partes numeric(6, 2) not null default 1 check (partes >= 0);
+
+-- Fecha del gasto. Los que ya había se quedan con el día que se apuntaron.
+--   alter table gastos add column fecha date not null default current_date;
+--   update gastos set fecha = creado_en::date;
