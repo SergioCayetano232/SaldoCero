@@ -53,6 +53,32 @@ export function olvidarDelHistorial(codigo) {
   localStorage.setItem(CLAVE_HISTORICO, JSON.stringify(lista));
 }
 
+// Quién eres tú en cada viaje, para resaltarte en las listas.
+// Va por viaje y en este navegador: cada uno entra desde su móvil.
+const CLAVE_SOY = "saldocero-soy";
+
+function quienesSoy() {
+  try {
+    const guardado = JSON.parse(localStorage.getItem(CLAVE_SOY) ?? "{}");
+    return typeof guardado === "object" && guardado !== null ? guardado : {};
+  } catch {
+    return {};
+  }
+}
+
+export function soyEn(codigo) {
+  return quienesSoy()[codigo] ?? null;
+}
+
+export function soyYo(codigo, viajeroId) {
+  const todos = quienesSoy();
+
+  if (viajeroId) todos[codigo] = viajeroId;
+  else delete todos[codigo];
+
+  localStorage.setItem(CLAVE_SOY, JSON.stringify(todos));
+}
+
 export async function crearViaje(nombre, moneda = "EUR") {
   const { data, error } = await supabase.rpc("crear_viaje", {
     nombre_viaje: nombre,

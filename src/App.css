@@ -1382,6 +1382,96 @@ button:active {
   background-color: var(--rojo-fondo);
 }
 
+/* ===== Quién eres tú ===== */
+/* Tu fila lleva un filito de color a la izquierda, para encontrarte rápido. */
+.soy-yo {
+  position: relative;
+}
+
+.lista li.soy-yo::before,
+.fila-balance.soy-yo::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: var(--radio-pastilla);
+  background: linear-gradient(180deg, var(--teal-500), var(--teal-300));
+}
+
+.etiqueta-tu {
+  display: inline-block;
+  margin-left: 7px;
+  padding: 1px 7px;
+  border-radius: var(--radio-pastilla);
+  background-color: var(--teal-50);
+  border: 1px solid var(--teal-100);
+  color: var(--teal-700);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  vertical-align: middle;
+}
+
+/* El botón de "este soy yo", discreto hasta que lo buscas. */
+.boton-soy {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: var(--radio-pastilla);
+  border: 1px solid var(--linea);
+  color: var(--tinta-tenue);
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.5;
+}
+
+.lista li:hover .boton-soy,
+.lista li:focus-within .boton-soy {
+  opacity: 1;
+}
+
+.boton-soy:hover {
+  border-color: var(--teal-300);
+  color: var(--teal-600);
+  background-color: var(--teal-50);
+  opacity: 1;
+}
+
+/* Cuando ya eres tú, se queda marcado. */
+.soy-yo .boton-soy {
+  opacity: 1;
+  border-color: var(--teal-300);
+  background-color: var(--teal-50);
+  color: var(--teal-600);
+}
+
+.aviso-quien-soy {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--linea);
+}
+
+/* Los pagos que te tocan a ti, con un pelín más de peso. */
+.pago-mio:not(.pagado) {
+  border: 1px solid var(--teal-300);
+  background-color: var(--teal-100);
+}
+
+@media (max-width: 560px) {
+  /* Sin ratón no hay "pasar por encima". */
+  .lista li .boton-soy {
+    opacity: 0.75;
+  }
+
+  /* Pegado al borde de la tarjeta, que en el móvil hay menos sitio. */
+  .lista li.soy-yo::before,
+  .fila-balance.soy-yo::before {
+    left: -8px;
+  }
+}
+
 /* ===== Deshacer un borrado ===== */
 /* Se queda pegado abajo, encima de todo, hasta que pasan los segundos. */
 .deshacer {

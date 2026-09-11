@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function Viajeros({ viajeros, onAnadir, onQuitar }) {
+function Viajeros({ viajeros, onAnadir, onQuitar, soy, onSoyYo }) {
   const [nombre, setNombre] = useState("");
 
   function anadir() {
@@ -33,14 +33,35 @@ function Viajeros({ viajeros, onAnadir, onQuitar }) {
       ) : (
         <ul className="lista">
           {viajeros.map((viajero) => (
-            <li key={viajero.id}>
-              <span>{viajero.nombre}</span>
-              <button className="boton-quitar" onClick={() => onQuitar(viajero.id, viajero.nombre)}>
+            <li key={viajero.id} className={viajero.id === soy ? "soy-yo" : ""}>
+              <span>
+                {viajero.nombre}
+                {viajero.id === soy && <span className="etiqueta-tu">tú</span>}
+              </span>
+
+              <button
+                className="boton-soy"
+                onClick={() => onSoyYo(viajero.id)}
+                title={viajero.id === soy ? "Ya no soy yo" : "Este soy yo"}
+              >
+                {viajero.id === soy ? "✓" : "¿yo?"}
+              </button>
+
+              <button
+                className="boton-quitar"
+                onClick={() => onQuitar(viajero.id, viajero.nombre)}
+              >
                 ✕
               </button>
             </li>
           ))}
         </ul>
+      )}
+
+      {viajeros.length > 0 && !soy && (
+        <p className="vacio aviso-quien-soy">
+          Marca quién eres tú y te lo resaltamos en las cuentas.
+        </p>
       )}
     </section>
   );

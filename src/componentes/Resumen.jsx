@@ -19,6 +19,7 @@ function Resumen({
   onSaldar,
   onDesaldar,
   viaje,
+  soy,
 }) {
   // "" mientras no has copiado, y si no, lo que ha pasado.
   const [copiado, setCopiado] = useState("");
@@ -26,6 +27,8 @@ function Resumen({
   const leTocaPagar = calcularLeTocaPagar(balances);
   const pagos = marcarSaldados(calcularPagos(balances), saldados);
   const pendiente = quedaPorPagar(pagos);
+  // Tu nombre, para saber cuáles de los pagos te tocan a ti.
+  const miNombre = balances.find((v) => v.id === soy)?.nombre ?? null;
   const porCategoria = gastoPorCategoria(gastos, importeDeGasto);
   const todoPagado = pagos.length > 0 && pendiente === 0;
 
@@ -111,10 +114,15 @@ function Resumen({
         {balances.map((viajero) => (
           <li
             key={viajero.id}
-            className={`fila-balance ${viajero.balance >= 0 ? "positivo" : "negativo"}`}
+            className={`fila-balance ${viajero.balance >= 0 ? "positivo" : "negativo"} ${
+              viajero.id === soy ? "soy-yo" : ""
+            }`}
           >
             <div className="balance-quien">
-              <div className="balance-nombre">{viajero.nombre}</div>
+              <div className="balance-nombre">
+                {viajero.nombre}
+                {viajero.id === soy && <span className="etiqueta-tu">tú</span>}
+              </div>
               <div className="barra">
                 <div
                   className="barra-relleno"
@@ -160,7 +168,9 @@ function Resumen({
 
             {pagos.map((pago) => (
               <div
-                className={`pago ${pago.saldado ? "pagado" : ""}`}
+                className={`pago ${pago.saldado ? "pagado" : ""} ${
+                  pago.de === miNombre || pago.a === miNombre ? "pago-mio" : ""
+                }`}
                 key={`${pago.de}-${pago.a}`}
               >
                 <strong>{pago.de}</strong>

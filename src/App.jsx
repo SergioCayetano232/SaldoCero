@@ -24,6 +24,8 @@ function App() {
   const [error, setError] = useState("");
   // Lo que acabas de borrar, mientras estás a tiempo de recuperarlo.
   const [borrado, setBorrado] = useState(null);
+  // Cuál de los viajeros eres tú. Guardado en este navegador.
+  const [soy, setSoy] = useState(null);
 
   useEffect(() => {
     const codigo = codigoDeArranque();
@@ -31,7 +33,10 @@ function App() {
 
     datos
       .abrirViaje(codigo)
-      .then(setViaje)
+      .then((abierto) => {
+        setViaje(abierto);
+        setSoy(datos.soyEn(abierto.codigo));
+      })
       .catch(() => datos.olvidarCodigo()) // el código ya no vale, a la pantalla de entrada
       .finally(() => setCargando(false));
   }, []);
@@ -110,7 +115,9 @@ function App() {
     setCargando(true);
     setError("");
     try {
-      setViaje(await datos.abrirViaje(codigo));
+      const abierto = await datos.abrirViaje(codigo);
+      setViaje(abierto);
+      setSoy(datos.soyEn(abierto.codigo));
     } catch (fallo) {
       setError(fallo.message);
     } finally {
@@ -123,7 +130,15 @@ function App() {
     usarCodigo("");
     window.location.hash = "";
     setViaje(null);
+    setSoy(null);
     setError("");
+  }
+
+  function elegirQuienSoy(viajeroId) {
+    // Si vuelves a pulsar el mismo, dejas de ser nadie.
+    const nuevo = viajeroId === soy ? null : viajeroId;
+    datos.soyYo(viaje.codigo, nuevo);
+    setSoy(nuevo);
   }
 
   function vaciarViaje() {
@@ -199,6 +214,8 @@ function App() {
 
       <Viajeros
         viajeros={viajeros}
+        soy={soy}
+        onSoyYo={elegirQuienSoy}
         onAnadir={(nombre) => hacer(() => datos.anadirViajero(viaje.id, nombre))}
         onQuitar={(id, nombre) =>
           borrarConAviso(id, `a ${nombre}`, () => datos.quitarViajero(id))
@@ -220,6 +237,7 @@ function App() {
         <Resumen
           balances={balances}
           gastos={gastos}
+          soy={soy}
           monedaViaje={viaje.moneda ?? "EUR"}
           saldados={viaje.saldados ?? []}
           onSaldar={(pago) => hacer(() => datos.marcarSaldado(viaje.id, pago))}
