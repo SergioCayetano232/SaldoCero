@@ -14,14 +14,29 @@ Pruébala aquí: https://saldo-cero-eight.vercel.app/
 
 - Creas un viaje y te da un código; con ese código entran los demás.
 - Todos apuntáis gastos a la vez, cada uno desde su móvil.
-- Cada gasto lleva quién pagó, cuánto y en concepto de qué.
+- Cada gasto lleva quién pagó, cuánto, en qué día y en concepto de qué.
+- Marcas cuál de los viajeros eres tú y te resalta tus cuentas.
+- Cada gasto va en una categoría, y el resumen te dice en qué se va el dinero.
 - Si un gasto no es de todos, marcas solo a los que van.
+- Y si uno come el doble que los demás, lo repartes en partes desiguales.
 - Si te equivocas, editas el gasto y ya está.
+- Si borras algo sin querer, lo deshaces.
 - Puedes pagar en otra moneda y te lo convertimos a la del viaje.
 - Te dice a quién le toca pagar la próxima: al que menos ha puesto.
 - Y al final, la lista de quién paga a quién para quedar todos a cero.
+- Vas marcando las deudas que ya se han pagado.
+- El resumen lo compartes por donde quieras o te lo descargas en un txt.
 - Guarda los viajes en los que has estado, para volver sin buscar el código.
 
+
+## Se instala en el móvil
+
+Es una PWA, así que puedes añadirla a la pantalla de inicio y se abre como una
+app más, sin barra del navegador.
+
+Sin internet abre igual, pero solo la app: los gastos no los guardamos en el
+móvil a propósito. Un viaje lo van tocando varios a la vez, y enseñarte unas
+cuentas viejas sin avisar sería peor que decirte que no hay conexión.
 
 ## Lo de las monedas
 
@@ -41,7 +56,8 @@ internet, te avisa y lo apuntas en la moneda del viaje.
 ## Con qué está hecho
 
 React, Vite, y JavaScript y CSS , sin librerías de estilos. Los viajes se
-guardan en Supabase.
+guardan en Supabase, y un service worker de treinta líneas es todo lo que hace
+falta para lo de instalarla.
 
 No hay usuarios ni contraseñas. La llave es el código del viaje: el navegador lo
 manda en cada petición y la base de datos solo te deja tocar el viaje al que
