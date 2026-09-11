@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   calcularLeTocaPagar,
   calcularPagos,
@@ -6,6 +7,7 @@ import {
   quedaPorPagar,
 } from "../calculos";
 import { conMoneda } from "../monedas";
+import { resumenEnTexto, copiarAlPortapapeles } from "../compartir";
 
 function Resumen({
   balances,
@@ -14,7 +16,10 @@ function Resumen({
   saldados = [],
   onSaldar,
   onDesaldar,
+  viaje,
 }) {
+  // "" mientras no has copiado, y si no, lo que ha pasado.
+  const [copiado, setCopiado] = useState("");
   const total = calcularTotal(gastos);
   const leTocaPagar = calcularLeTocaPagar(balances);
   const pagos = marcarSaldados(calcularPagos(balances), saldados);
@@ -24,9 +29,29 @@ function Resumen({
   // Las barras se miden contra el que más ha puesto.
   const maxPuesto = Math.max(...balances.map((v) => v.puesto), 0);
 
+  async function compartir() {
+    const texto = resumenEnTexto({
+      nombre: viaje?.nombre ?? "El viaje",
+      codigo: viaje?.codigo ?? "",
+      total,
+      balances,
+      pagos,
+      moneda: monedaViaje,
+    });
+
+    const hecho = await copiarAlPortapapeles(texto);
+    setCopiado(hecho ? "bien" : "mal");
+    setTimeout(() => setCopiado(""), 2500);
+  }
+
   return (
     <section className="tarjeta">
-      <h2><span className="icono">📊</span> Resumen</h2>
+      <h2>
+        <span className="icono">📊</span> Resumen
+        <button className="boton-compartir" onClick={compartir} title="Copiar el resumen">
+          {copiado === "bien" ? "¡Copiado!" : copiado === "mal" ? "No se pudo" : "Compartir"}
+        </button>
+      </h2>
 
       <div className="total-destacado">
         <div className="total-etiqueta">Total del viaje</div>

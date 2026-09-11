@@ -989,6 +989,28 @@ button:active {
   color: var(--rojo);
 }
 
+/* El botón de copiar el resumen, a la derecha del título. */
+.boton-compartir {
+  margin-left: auto;
+  padding: 5px 12px;
+  border-radius: var(--radio-pastilla);
+  border: 1px solid var(--teal-300);
+  background-color: var(--teal-50);
+  color: var(--teal-700);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.boton-compartir:hover {
+  background-color: var(--teal-500);
+  border-color: var(--teal-500);
+  color: white;
+  transform: translateY(-1px);
+}
+
 /* ===== Saldar cuentas ===== */
 .saldar {
   margin-top: 22px;

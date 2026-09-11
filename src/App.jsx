@@ -185,6 +185,7 @@ function App() {
           saldados={viaje.saldados ?? []}
           onSaldar={(pago) => hacer(() => datos.marcarSaldado(viaje.id, pago))}
           onDesaldar={(pago) => hacer(() => datos.desmarcarSaldado(viaje.id, pago))}
+          viaje={viaje}
         />
       )}
 
