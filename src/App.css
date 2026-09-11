@@ -4,42 +4,154 @@
   margin: 0 auto;
 }
 
+/* Las tarjetas van entrando una detras de otra, no todas de golpe. Cada una
+   espera un poco mas que la anterior. */
+.app > * {
+  animation: aparecer var(--lento) var(--curva-suave) backwards;
+}
+
+.app > *:nth-child(1) {
+  animation-delay: 0s;
+}
+.app > *:nth-child(2) {
+  animation-delay: 0.08s;
+}
+.app > *:nth-child(3) {
+  animation-delay: 0.16s;
+}
+.app > *:nth-child(4) {
+  animation-delay: 0.24s;
+}
+.app > *:nth-child(5) {
+  animation-delay: 0.32s;
+}
+.app > *:nth-child(n + 6) {
+  animation-delay: 0.4s;
+}
+
 /* ===== Cabecera ===== */
 .cabecera {
   text-align: center;
-  margin-bottom: 26px;
+  margin-bottom: 30px;
+  padding-top: 8px;
 }
 
 .cabecera h1 {
-  font-size: 44px;
+  font-size: 56px;
   font-weight: 700;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.045em;
   color: var(--teal-600);
-  line-height: 1.05;
+  line-height: 1;
+  display: inline-flex;
+  align-items: baseline;
 }
 
-.cabecera h1 span {
-  /* El "Cero" en degradado naranja, que es el guiño de la marca. */
-  background: linear-gradient(135deg, var(--naranja-400), var(--naranja-500));
+/* Las dos mitades del nombre entran por separado, con un pelin de retraso
+   la segunda. Es el primer gesto que ve el usuario. */
+.cabecera h1 .saldo,
+.cabecera h1 .cero {
+  display: inline-block;
+  animation: entrar-letra 0.7s var(--curva-muelle) backwards;
+}
+
+.cabecera h1 .cero {
+  /* El "Cero" en degradado, que es el guiño de la marca. Y el degradado se
+     mueve despacio, para que no sea un color plano. */
+  background: linear-gradient(
+    100deg,
+    var(--naranja-400),
+    var(--naranja-500),
+    #e86a4e,
+    var(--naranja-400)
+  );
+  background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  animation: entrar-letra 0.7s 0.1s var(--curva-muelle) backwards,
+    mover-degradado 7s 0.8s ease-in-out infinite;
 }
 
 .cabecera p {
-  color: var(--tinta-tenue);
-  margin-top: 6px;
+  color: var(--tinta-suave);
+  margin-top: 10px;
   font-size: 15px;
+  animation: aparecer var(--lento) 0.25s var(--curva-suave) backwards;
+}
+
+/* Una rayita debajo del titulo, que se abre sola al cargar. */
+.cabecera::after {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 3px;
+  margin: 16px auto 0;
+  border-radius: var(--radio-pastilla);
+  background: linear-gradient(90deg, var(--teal-500), var(--naranja-400));
+  transform-origin: center;
+  animation: abrir-raya 0.8s 0.4s var(--curva-suave) backwards;
+}
+
+@keyframes abrir-raya {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
 }
 
 /* ===== Tarjetas ===== */
+/* Las tarjetas son de cristal: dejan ver el fondo de colores por detras,
+   difuminado. Es lo que hace que no parezcan cajas blancas pegadas. */
 .tarjeta {
-  background-color: var(--papel);
-  border: 1px solid var(--linea);
+  background-color: var(--cristal);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--cristal-borde);
   border-radius: var(--radio);
   padding: 24px;
   margin-top: 16px;
   box-shadow: var(--sombra-md);
+  position: relative;
+  transition: box-shadow var(--medio) var(--curva-suave),
+    transform var(--medio) var(--curva-suave), border-color var(--medio);
+}
+
+/* Una luz fina en el borde de arriba, como si le diera el sol. */
+.tarjeta::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  border-radius: var(--radio) var(--radio) 0 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.9),
+    transparent
+  );
+  pointer-events: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .tarjeta::before {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.18),
+      transparent
+    );
+  }
+}
+
+/* Al pasar por encima se levanta un poquito. Lo justo para que se note. */
+.tarjeta:hover {
+  box-shadow: var(--sombra-flotante);
+  transform: translateY(-3px);
+  border-color: var(--teal-300);
 }
 
 .tarjeta h2 {
@@ -54,16 +166,48 @@
   color: var(--tinta-suave);
 }
 
-/* El emoji del título, un poco más discreto. */
+/* El emoji del título, un poco más discreto. El line-height y el ancho fijo
+   evitan que se vea recortado dentro del flex. */
 .tarjeta h2 .icono {
-  font-size: 15px;
-  opacity: 0.85;
+  font-size: 16px;
+  line-height: 1;
+  width: 1.2em;
+  text-align: center;
+  opacity: 0.9;
+  display: inline-block;
+  flex-shrink: 0;
+  transition: transform var(--medio) var(--curva-muelle);
+}
+
+/* Y que salude al pasar por la tarjeta. */
+.tarjeta:hover h2 .icono {
+  transform: scale(1.15) rotate(-8deg);
 }
 
 /* ===== La tarjeta del viaje abierto ===== */
+/* La del viaje abierto manda sobre las demas, asi que lleva un borde con una
+   luz que da vueltas muy despacio. */
 .tarjeta-viaje {
-  /* Un filito de color arriba, para que destaque sobre las demás. */
-  border-top: 3px solid var(--teal-500);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Una franja de color arriba, que es la que la distingue del resto. */
+.tarjeta-viaje::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--teal-500),
+    var(--teal-300),
+    var(--naranja-400),
+    var(--teal-500)
+  );
+  background-size: 300% 100%;
+  animation: mover-degradado 6s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .viaje-titulo {
@@ -103,6 +247,7 @@
 .boton-salir:hover {
   background-color: var(--rojo-fondo);
   color: var(--rojo);
+  transform: rotate(90deg);
 }
 
 /* ===== Formularios ===== */
@@ -137,11 +282,17 @@ select {
   font-family: inherit;
   color: var(--tinta);
   background-color: var(--papel);
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color var(--rapido), box-shadow var(--rapido),
+    background-color var(--rapido);
 }
 
 input::placeholder {
   color: var(--tinta-tenue);
+}
+
+input:hover:not(:focus),
+select:hover:not(:focus) {
+  border-color: var(--teal-300);
 }
 
 input:focus,
@@ -166,11 +317,13 @@ button {
   font-family: inherit;
   border: none;
   background: none;
-  transition: background-color 0.15s, transform 0.1s, box-shadow 0.15s;
+  color: inherit;
+  transition: background-color var(--rapido), transform var(--rapido) var(--curva-suave),
+    box-shadow var(--rapido), color var(--rapido), opacity var(--rapido);
 }
 
 button:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.98);
 }
 
 .fila-formulario button,
@@ -183,11 +336,37 @@ button:active {
   font-weight: 500;
   white-space: nowrap;
   box-shadow: var(--sombra-sm);
+  position: relative;
+  overflow: hidden;
 }
 
 .fila-formulario button:hover,
 .formulario-gasto button:hover {
   background: linear-gradient(180deg, var(--teal-600), var(--teal-700));
+  transform: translateY(-1px);
+  box-shadow: var(--sombra-md);
+}
+
+/* Un brillo que cruza el botón al pasar por encima. */
+.fila-formulario button::after,
+.formulario-gasto button::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.28),
+    transparent
+  );
+  transform: translateX(-100%);
+  pointer-events: none;
+}
+
+.fila-formulario button:hover::after,
+.formulario-gasto button:hover:not(:disabled)::after {
+  animation: barrido 0.7s var(--curva-suave);
 }
 
 /* ===== Listas ===== */
@@ -205,6 +384,9 @@ button:active {
   padding: 13px 0;
   border-bottom: 1px solid var(--linea);
   font-size: 15px;
+  /* Cada fila nueva entra sola, sin que parpadee la lista entera. */
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
+  transition: background-color var(--rapido);
 }
 
 .lista li:last-child {
@@ -216,18 +398,31 @@ button:active {
   padding-top: 0;
 }
 
+/* Los botones de quitar y editar solo salen cuando vas a por ellos. */
+.lista li .boton-quitar,
+.lista li .boton-editar {
+  opacity: 0.25;
+}
+
+.lista li:hover .boton-quitar,
+.lista li:hover .boton-editar,
+.lista li:focus-within .boton-quitar,
+.lista li:focus-within .boton-editar {
+  opacity: 0.6;
+}
+
 .boton-quitar {
   color: var(--rojo);
   font-size: 15px;
   padding: 6px 9px;
   border-radius: 8px;
   flex-shrink: 0;
-  opacity: 0.55;
 }
 
 .boton-quitar:hover {
   background-color: var(--rojo-fondo);
-  opacity: 1;
+  opacity: 1 !important;
+  transform: scale(1.1);
 }
 
 /* Los dos botones que lleva cada gasto a la derecha. */
@@ -242,12 +437,12 @@ button:active {
   padding: 6px 9px;
   border-radius: 8px;
   flex-shrink: 0;
-  opacity: 0.55;
 }
 
 .boton-editar:hover {
   background-color: var(--teal-50);
-  opacity: 1;
+  opacity: 1 !important;
+  transform: scale(1.1) rotate(-6deg);
 }
 
 /* El gasto que estás tocando, resaltado para no perderlo de vista. */
@@ -289,6 +484,7 @@ button:active {
   color: var(--tinta-tenue) !important;
   cursor: not-allowed;
   box-shadow: none !important;
+  transform: none !important;
 }
 
 /* ===== Monedas ===== */
@@ -305,7 +501,7 @@ button:active {
 .selector-moneda {
   width: auto;
   flex-shrink: 0;
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-family: var(--fuente-mono);
   font-size: 14px;
   padding-right: 32px;
   background-position: right 10px center;
@@ -318,6 +514,7 @@ button:active {
   color: var(--tinta-suave);
   margin-top: -4px;
   padding-left: 2px;
+  animation: entrar-desde-abajo var(--medio) var(--curva-suave);
 }
 
 .conversion strong {
@@ -338,7 +535,7 @@ button:active {
 .viaje-moneda {
   font-size: 12px;
   font-weight: 600;
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-family: var(--fuente-mono);
   color: var(--teal-700);
   background-color: var(--teal-50);
   border: 1px solid var(--teal-100);
@@ -352,7 +549,12 @@ button:active {
   border: 1px dashed var(--linea);
   border-radius: var(--radio-sm);
   padding: 13px;
-  background-color: #fafcfc;
+  background-color: var(--papel-hundido);
+  transition: border-color var(--medio);
+}
+
+.participantes:hover {
+  border-color: var(--teal-300);
 }
 
 .participantes-titulo {
@@ -381,11 +583,17 @@ button:active {
   cursor: pointer;
   user-select: none;
   background-color: var(--papel);
-  transition: all 0.15s;
+  transition: background-color var(--rapido), border-color var(--rapido),
+    color var(--rapido), transform var(--rapido) var(--curva-muelle);
 }
 
 .casilla:hover {
   border-color: var(--teal-300);
+  transform: translateY(-1px);
+}
+
+.casilla:active {
+  transform: scale(0.96);
 }
 
 .casilla input {
@@ -411,6 +619,10 @@ button:active {
   text-underline-offset: 2px;
 }
 
+.enlace:hover {
+  color: var(--teal-700);
+}
+
 /* El gasto en la lista: concepto arriba, quién y cuánto abajo. */
 .gasto-concepto {
   font-weight: 500;
@@ -424,6 +636,8 @@ button:active {
   white-space: nowrap;
   margin-left: auto;
   padding-right: 4px;
+  /* Los números no bailan al cambiar de ancho. */
+  font-variant-numeric: tabular-nums;
 }
 
 /* Letra pequeña bajo un gasto o un balance. */
@@ -445,6 +659,10 @@ button:active {
   color: var(--teal-600);
 }
 
+.viaje-pasado:hover {
+  transform: translateX(3px);
+}
+
 .viaje-pasado-nombre {
   display: block;
   font-weight: 500;
@@ -453,16 +671,18 @@ button:active {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color var(--rapido);
 }
 
 .viaje-pasado .reparto {
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-family: var(--fuente-mono);
   letter-spacing: 0.09em;
 }
 
 .viaje-pasado:disabled {
   opacity: 0.5;
   cursor: default;
+  transform: none;
 }
 
 /* ===== Los tres pasos de la pantalla de entrada ===== */
@@ -480,6 +700,18 @@ button:active {
   gap: 12px;
   font-size: 14px;
   color: var(--tinta-suave);
+  animation: aparecer var(--lento) var(--curva-suave) backwards;
+}
+
+/* Los tres pasos entran en orden, como si se fueran contando. */
+.como-va li:nth-child(1) {
+  animation-delay: 0.25s;
+}
+.como-va li:nth-child(2) {
+  animation-delay: 0.35s;
+}
+.como-va li:nth-child(3) {
+  animation-delay: 0.45s;
 }
 
 .paso-num {
@@ -493,6 +725,11 @@ button:active {
   color: var(--teal-700);
   font-size: 12px;
   font-weight: 600;
+  transition: transform var(--medio) var(--curva-muelle);
+}
+
+.como-va li:hover .paso-num {
+  transform: scale(1.15);
 }
 
 /* ===== Estados vacíos ===== */
@@ -506,6 +743,44 @@ button:active {
   padding: 60px 0;
 }
 
+/* Los tres puntitos que rebotan mientras carga. */
+.puntos {
+  display: inline-flex;
+  gap: 5px;
+  margin-left: 3px;
+  vertical-align: middle;
+}
+
+.puntos span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--teal-500);
+  animation: rebotar 1.3s infinite var(--curva-suave);
+}
+
+.puntos span:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.puntos span:nth-child(3) {
+  animation-delay: 0.32s;
+}
+
+/* Las cajas grises que se ven mientras llegan los datos. Es mejor esto que un
+   hueco en blanco: ya ves la forma de lo que va a venir. */
+.esqueleto {
+  border-radius: var(--radio-sm);
+  background: linear-gradient(
+    90deg,
+    var(--linea) 25%,
+    var(--papel-hundido) 50%,
+    var(--linea) 75%
+  );
+  background-size: 200% 100%;
+  animation: brillo-esqueleto 1.4s infinite linear;
+}
+
 /* ===== Errores ===== */
 .error {
   background-color: var(--rojo-fondo);
@@ -515,31 +790,59 @@ button:active {
   border-radius: var(--radio-sm);
   font-size: 14px;
   margin-top: 16px;
+  /* Tiembla al salir, que se vea que algo ha fallado. */
+  animation: temblor 0.4s var(--curva-suave);
 }
 
 /* ===== El código del viaje ===== */
 .codigo {
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 19px;
+  font-family: var(--fuente-mono);
+  font-size: 21px;
   font-weight: 600;
-  letter-spacing: 0.14em;
-  color: var(--teal-600);
+  letter-spacing: 0.18em;
+  color: var(--teal-700);
   background-color: var(--teal-50);
   border: 1px dashed var(--teal-300);
-  padding: 10px 16px;
+  padding: 12px 16px;
   border-radius: var(--radio-sm);
   cursor: pointer;
   flex: 1;
   text-align: center;
-  transition: background-color 0.15s;
+  position: relative;
+  overflow: hidden;
+  transition: background-color var(--rapido), transform var(--rapido) var(--curva-suave),
+    border-color var(--rapido);
+}
+
+/* Un brillo que cruza el codigo, para que se vea que se puede tocar. */
+.codigo::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 45%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.65),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: barrido 3.5s 1.5s infinite var(--curva-suave);
+  pointer-events: none;
 }
 
 .codigo:hover {
   background-color: var(--teal-100);
+  border-color: var(--teal-500);
+  transform: scale(1.015);
+}
+
+.codigo:active {
+  transform: scale(0.99);
 }
 
 .campo-codigo {
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-family: var(--fuente-mono);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -553,6 +856,21 @@ button:active {
   margin-bottom: 20px;
   color: white;
   box-shadow: var(--sombra-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Un brillo en diagonal, para que el degradado no se vea plano. */
+.total-destacado::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 60% 80% at 85% -20%,
+    rgba(255, 255, 255, 0.22),
+    transparent
+  );
+  pointer-events: none;
 }
 
 .total-etiqueta {
@@ -565,11 +883,15 @@ button:active {
 
 .total-cifra {
   font-family: var(--fuente-titulo);
-  font-size: 38px;
+  font-size: 46px;
   font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-  margin-top: 2px;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.18);
+  /* Da un golpecito cada vez que cambia el total. */
+  animation: latido var(--lento) var(--curva-muelle);
 }
 
 .total-detalle {
@@ -585,6 +907,7 @@ button:active {
   border-radius: var(--radio-sm);
   font-size: 15px;
   margin-bottom: 18px;
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
 }
 
 /* Cada persona con su barra, para comparar de un vistazo. */
@@ -617,7 +940,25 @@ button:active {
   height: 100%;
   background: linear-gradient(90deg, var(--teal-300), var(--teal-500));
   border-radius: var(--radio-pastilla);
-  transition: width 0.35s ease;
+  /* Más lento que el resto: lo bonito es ver la barra crecer. */
+  transition: width 0.7s var(--curva-suave);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Un brillo que recorre la barra de vez en cuando. */
+.barra-relleno::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 50%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.45),
+    transparent
+  );
+  animation: barrido 2.4s 1s infinite var(--curva-suave);
 }
 
 .balance-cifra {
@@ -630,6 +971,7 @@ button:active {
   font-weight: 600;
   font-size: 17px;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .balance-texto {
@@ -669,6 +1011,24 @@ button:active {
   border-radius: var(--radio-sm);
   margin-bottom: 8px;
   font-size: 15px;
+  transition: transform var(--rapido) var(--curva-suave),
+    background-color var(--rapido);
+  animation: aparecer-creciendo var(--medio) var(--curva-suave) backwards;
+}
+
+.pago:nth-child(2) {
+  animation-delay: 0.06s;
+}
+.pago:nth-child(3) {
+  animation-delay: 0.12s;
+}
+.pago:nth-child(n + 4) {
+  animation-delay: 0.18s;
+}
+
+.pago:hover {
+  background-color: var(--teal-100);
+  transform: translateX(3px);
 }
 
 .pago:last-child {
@@ -680,12 +1040,18 @@ button:active {
   flex-shrink: 0;
 }
 
+/* La flecha se mueve cuando pasas por encima, como señalando. */
+.pago:hover .pago-flecha {
+  animation: flecha-va-y-viene 0.8s infinite var(--curva-suave);
+}
+
 .pago-cantidad {
   margin-left: auto;
   font-family: var(--fuente-titulo);
   font-weight: 600;
   color: var(--teal-700);
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .saldadas {
@@ -695,6 +1061,7 @@ button:active {
   border-radius: var(--radio-sm);
   color: var(--verde);
   font-weight: 500;
+  animation: aparecer-creciendo var(--lento) var(--curva-muelle);
 }
 
 /* ===== Vaciar viaje ===== */
@@ -710,6 +1077,42 @@ button:active {
 .boton-reiniciar:hover {
   color: var(--rojo);
   background-color: var(--rojo-fondo);
+}
+
+/* ===== Pie ===== */
+.pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 52px;
+  padding-top: 22px;
+  border-top: 1px solid var(--linea);
+  font-size: 12px;
+  color: var(--tinta-tenue);
+}
+
+.pie-marca {
+  font-family: var(--fuente-titulo);
+  font-weight: 600;
+  color: var(--tinta-suave);
+}
+
+.pie-punto {
+  opacity: 0.4;
+}
+
+@media (max-width: 560px) {
+  /* En el movil los separadores sobran, cada cosa en su linea. */
+  .pie {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .pie-punto {
+    display: none;
+  }
 }
 
 /* ===== Móvil ===== */
@@ -728,6 +1131,12 @@ button:active {
 
   .tarjeta {
     padding: 18px 16px;
+  }
+
+  /* En el móvil no hay ratón, así que la tarjeta no se levanta. */
+  .tarjeta:hover {
+    transform: none;
+    box-shadow: var(--sombra-md);
   }
 
   .total-cifra {
@@ -760,5 +1169,11 @@ button:active {
 
   .lista li {
     gap: 8px;
+  }
+
+  /* Sin ratón no hay "pasar por encima": los botones siempre a la vista. */
+  .lista li .boton-quitar,
+  .lista li .boton-editar {
+    opacity: 0.6;
   }
 }

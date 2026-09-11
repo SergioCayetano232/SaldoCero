@@ -124,7 +124,14 @@ function App() {
     return (
       <div className="app">
         <Cabecera />
-        <p className="vacio cargando">Cargando…</p>
+          <p className="vacio cargando">
+          Cargando
+          <span className="puntos">
+            <span />
+            <span />
+            <span />
+          </span>
+        </p>
       </div>
     );
   }
@@ -139,6 +146,7 @@ function App() {
           cargando={cargando}
           error={error}
         />
+        <Pie />
       </div>
     );
   }
@@ -178,7 +186,22 @@ function App() {
           Vaciar este viaje
         </button>
       )}
+
+      <Pie />
     </div>
+  );
+}
+
+// Un pie discreto, que la pantalla no acabe en un vacío enorme.
+function Pie() {
+  return (
+    <footer className="pie">
+      <span className="pie-marca">SaldoCero</span>
+      <span className="pie-punto">·</span>
+      <span>Sin cuentas ni contraseñas</span>
+      <span className="pie-punto">·</span>
+      <span>Tus viajes solo en tu móvil</span>
+    </footer>
   );
 }
 
@@ -186,7 +209,8 @@ function Cabecera() {
   return (
     <header className="cabecera">
       <h1>
-        Saldo<span>Cero</span>
+        <span className="saldo">Saldo</span>
+        <span className="cero">Cero</span>
       </h1>
       <p>Repartimos los gastos del viaje entre todos.</p>
     </header>

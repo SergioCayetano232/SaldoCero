@@ -19,7 +19,9 @@
   --tinta-tenue: #7b929b;
   --linea: #e3ecee;
   --papel: #ffffff;
-  --fondo: #f2f6f5;
+  /* Un blanco con un pelín de gris, para lo que va dentro de una tarjeta. */
+  --papel-hundido: #fafcfc;
+  --fondo: #e8f0ef;
 
   --verde: #1d8a5f;
   --verde-fondo: #e6f4ec;
@@ -30,6 +32,8 @@
   --sombra-sm: 0 1px 2px rgba(20, 38, 44, 0.05);
   --sombra-md: 0 1px 2px rgba(20, 38, 44, 0.04), 0 8px 24px rgba(20, 38, 44, 0.06);
   --sombra-lg: 0 2px 4px rgba(20, 38, 44, 0.05), 0 18px 44px rgba(20, 38, 44, 0.1);
+  /* La que sale al pasar el ratón por encima de algo que se levanta. */
+  --sombra-flotante: 0 4px 8px rgba(20, 38, 44, 0.06), 0 24px 56px rgba(20, 38, 44, 0.13);
 
   --radio: 16px;
   --radio-sm: 10px;
@@ -37,6 +41,72 @@
 
   --fuente-titulo: "Outfit", system-ui, sans-serif;
   --fuente: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --fuente-mono: ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Las curvas del movimiento. La suave frena al final; la muelle se pasa
+     un poco y vuelve, que es lo que da sensación de peso. */
+  --curva-suave: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --curva-muelle: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --rapido: 0.15s;
+  --medio: 0.28s;
+  --lento: 0.5s;
+
+  /* Las manchas de color del fondo y el grano de encima. */
+  --luz-teal: rgba(14, 124, 123, 0.4);
+  --luz-teal-2: rgba(52, 168, 166, 0.32);
+  --luz-naranja: rgba(244, 162, 89, 0.38);
+  --luz-rosa: rgba(214, 122, 158, 0.28);
+  --fuerza-grano: 0.055;
+
+  /* El cristal de las tarjetas: un blanco translucido sobre el fondo. */
+  --cristal: rgba(255, 255, 255, 0.62);
+  --cristal-borde: rgba(255, 255, 255, 0.85);
+}
+
+/* Modo oscuro. Solo cambian los colores. Va con lo que tenga el sistema, sin
+   botón: esto se abre un momento para apuntar un gasto y poco más. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --teal-50: #12312f;
+    --teal-100: #17403e;
+    --teal-300: #4a9a97;
+    --teal-500: #2ba3a1;
+    --teal-600: #45b8b5;
+    --teal-700: #8fd6d3;
+
+    --naranja-100: #3a2a18;
+    --naranja-400: #f4a259;
+    --naranja-500: #f0a765;
+
+    --tinta: #e8f0f1;
+    --tinta-suave: #9db3ba;
+    --tinta-tenue: #6f878f;
+    --linea: #22383e;
+    --papel: #142429;
+    --papel-hundido: #101e22;
+    --fondo: #0b1518;
+
+    --verde: #4cc38a;
+    --verde-fondo: #102e22;
+    --rojo: #e5706b;
+    --rojo-fondo: #331816;
+
+    /* En oscuro las sombras negras no se ven; se suben las opacidades. */
+    --sombra-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --sombra-md: 0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 24px rgba(0, 0, 0, 0.35);
+    --sombra-lg: 0 2px 4px rgba(0, 0, 0, 0.3), 0 18px 44px rgba(0, 0, 0, 0.45);
+    --sombra-flotante: 0 4px 8px rgba(0, 0, 0, 0.3), 0 24px 56px rgba(0, 0, 0, 0.5);
+
+    /* De noche las luces son mas intensas y el grano se nota menos. */
+    --luz-teal: rgba(20, 160, 158, 0.22);
+    --luz-teal-2: rgba(40, 120, 170, 0.17);
+    --luz-naranja: rgba(200, 120, 60, 0.15);
+    --luz-rosa: rgba(150, 70, 120, 0.14);
+    --fuerza-grano: 0.05;
+
+    --cristal: rgba(20, 36, 41, 0.72);
+    --cristal-borde: rgba(255, 255, 255, 0.08);
+  }
 }
 
 * {
@@ -48,17 +118,37 @@
 body {
   font-family: var(--fuente);
   background-color: var(--fondo);
-  /* Un par de luces de color muy suaves, para que el fondo no sea plano. */
-  background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(14, 124, 123, 0.1), transparent),
-    radial-gradient(ellipse 60% 40% at 90% 5%, rgba(244, 162, 89, 0.09), transparent);
-  background-repeat: no-repeat;
-  background-attachment: fixed;
   color: var(--tinta);
   padding: 28px 18px 72px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Que el navegador pinte bien los formularios en oscuro. */
+  color-scheme: light dark;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  /* Cuatro manchas de color, quietas respecto a la ventana. Van aquí y no en
+     un pseudoelemento porque así no hay juntas en páginas largas. */
+  background-image:
+    radial-gradient(circle 46em at 12% 8%, var(--luz-teal), transparent 65%),
+    radial-gradient(circle 38em at 88% 12%, var(--luz-naranja), transparent 62%),
+    radial-gradient(circle 42em at 78% 82%, var(--luz-teal-2), transparent 65%),
+    radial-gradient(circle 34em at 18% 92%, var(--luz-rosa), transparent 60%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+/* Encima, un grano finito. Es lo que le quita el aire de degradado de
+   plantilla y hace que parezca papel. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: var(--fuerza-grano);
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23r)'/%3E%3C/svg%3E");
 }
 
 h1,
@@ -74,15 +164,180 @@ h3 {
   outline-offset: 2px;
 }
 
+/* ===== Las animaciones, todas juntas ===== */
+
+/* Lo de siempre: entrar subiendo un poco. */
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Lo que aparece de golpe en una lista: entra creciendo un pelín. */
+@keyframes aparecer-creciendo {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* El "¡Copiado!" y demás avisos que entran y se van. */
+@keyframes entrar-desde-abajo {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* La cifra del total cuando cambia: un golpecito de escala. */
+@keyframes latido {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.045);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* El brillo que cruza las barras y el botón de crear. */
+@keyframes barrido {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(200%);
+  }
+}
+
+/* Los tres puntos del "Cargando…". */
+@keyframes rebotar {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
+
+/* El anillo del avatar cuando le toca pagar a alguien. */
+@keyframes pulso-anillo {
+  0% {
+    box-shadow: 0 0 0 0 rgba(232, 134, 46, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(232, 134, 46, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(232, 134, 46, 0);
+  }
+}
+
+/* Para el error: que se note que algo ha ido mal. */
+@keyframes temblor {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+/* El esqueleto de carga. */
+@keyframes brillo-esqueleto {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* El degradado del titulo, deslizandose. */
+@keyframes mover-degradado {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* El brillo que recorre el borde de la tarjeta del viaje. */
+@keyframes girar-borde {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+/* Las letras del titulo, entrando de una en una. */
+@keyframes entrar-letra {
+  from {
+    opacity: 0;
+    transform: translateY(16px) rotate(-6deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* La flecha del "quién paga a quién", que va y viene. */
+@keyframes flecha-va-y-viene {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
 @media (max-width: 560px) {
   body {
     padding: 20px 14px 56px;
   }
 }
 
+/* Si has pedido menos movimiento, todo quieto. Las animaciones son un
+   adorno, la app funciona igual sin ellas. */
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
