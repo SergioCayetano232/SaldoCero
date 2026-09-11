@@ -1003,6 +1003,14 @@ button:active {
   animation: temblor 0.4s var(--curva-suave);
 }
 
+/* El recordatorio de guardar el código. Va en naranja porque perderlo es la
+   única forma de quedarte sin el viaje. */
+.aviso-codigo {
+  border-left: 2px solid var(--naranja-400);
+  padding-left: 10px;
+  margin-top: 2px;
+}
+
 /* ===== El código del viaje ===== */
 .codigo {
   font-family: var(--fuente-mono);
@@ -1198,9 +1206,14 @@ button:active {
   color: var(--rojo);
 }
 
-/* El botón de copiar el resumen, a la derecha del título. */
-.boton-compartir {
+/* Los dos botones del resumen, a la derecha del título. */
+.acciones-resumen {
   margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+
+.boton-compartir {
   padding: 5px 12px;
   border-radius: var(--radio-pastilla);
   border: 1px solid var(--teal-300);

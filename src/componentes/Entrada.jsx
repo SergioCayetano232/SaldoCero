@@ -108,7 +108,10 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
             ))}
           </ul>
 
-          <p className="vacio">Solo se guardan en este móvil, no los ve nadie más.</p>
+          <p className="vacio">
+            Solo se guardan en este móvil. Si borras los datos del navegador o
+            entras desde otro sitio, vuelves con el código.
+          </p>
         </section>
       )}
 

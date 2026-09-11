@@ -6,10 +6,7 @@
 
 export const ESPERA = 5000;
 
-// Prepara un borrado. Devuelve cómo cancelarlo y cómo hacerlo ya.
-//
-//   borrar: lo que hay que ejecutar pasado el tiempo
-//   alTerminar: se llama cuando ya está hecho (bien o mal)
+// Devuelve con qué cancelarlo y con qué adelantarlo.
 export function borradoConEspera(borrar, alTerminar) {
   let hecho = false;
 

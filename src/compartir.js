@@ -74,3 +74,17 @@ function copiarALoAntiguo(texto) {
     document.body.removeChild(campo);
   }
 }
+
+// Bajarse el resumen en un archivo de texto, por si quieres guardarlo.
+export function descargarResumen(texto, nombreViaje) {
+  const archivo = new Blob([texto], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(archivo);
+
+  const enlace = document.createElement("a");
+  enlace.href = url;
+  // Sin barras ni dos puntos, que hay sistemas que no los admiten.
+  enlace.download = `${nombreViaje.replace(/[\\/:*?"<>|]/g, "-")}.txt`;
+  enlace.click();
+
+  URL.revokeObjectURL(url);
+}

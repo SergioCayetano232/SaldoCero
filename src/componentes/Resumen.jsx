@@ -7,7 +7,7 @@ import {
   quedaPorPagar,
 } from "../calculos";
 import { conMoneda } from "../monedas";
-import { resumenEnTexto, copiarAlPortapapeles } from "../compartir";
+import { resumenEnTexto, copiarAlPortapapeles, descargarResumen } from "../compartir";
 import { gastoPorCategoria } from "../categorias";
 import { importeDeGasto } from "../calculos";
 
@@ -35,8 +35,8 @@ function Resumen({
   // Las barras se miden contra el que más ha puesto.
   const maxPuesto = Math.max(...balances.map((v) => v.puesto), 0);
 
-  async function compartir() {
-    const texto = resumenEnTexto({
+  function elResumen() {
+    return resumenEnTexto({
       nombre: viaje?.nombre ?? "El viaje",
       codigo: viaje?.codigo ?? "",
       total,
@@ -44,8 +44,10 @@ function Resumen({
       pagos,
       moneda: monedaViaje,
     });
+  }
 
-    const hecho = await copiarAlPortapapeles(texto);
+  async function compartir() {
+    const hecho = await copiarAlPortapapeles(elResumen());
     setCopiado(hecho ? "bien" : "mal");
     setTimeout(() => setCopiado(""), 2500);
   }
@@ -54,9 +56,23 @@ function Resumen({
     <section className="tarjeta">
       <h2>
         <span className="icono">📊</span> Resumen
-        <button className="boton-compartir" onClick={compartir} title="Copiar el resumen">
-          {copiado === "bien" ? "¡Copiado!" : copiado === "mal" ? "No se pudo" : "Compartir"}
-        </button>
+        <span className="acciones-resumen">
+          <button
+            className="boton-compartir"
+            onClick={compartir}
+            title="Copiar el resumen"
+          >
+            {copiado === "bien" ? "¡Copiado!" : copiado === "mal" ? "No se pudo" : "Compartir"}
+          </button>
+
+          <button
+            className="boton-compartir"
+            onClick={() => descargarResumen(elResumen(), viaje?.nombre ?? "viaje")}
+            title="Bajarlo en un archivo"
+          >
+            Guardar
+          </button>
+        </span>
       </h2>
 
       <div className="total-destacado">

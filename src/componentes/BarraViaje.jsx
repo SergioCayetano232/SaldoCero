@@ -28,7 +28,10 @@ function BarraViaje({ viaje, onSalir }) {
         <button onClick={copiar}>{copiado ? "¡Copiado!" : "Copiar código"}</button>
       </div>
 
-      <p className="vacio">Pásales el código y entran a este mismo viaje.</p>
+      <p className="vacio aviso-codigo">
+        Pásales el código y entran a este mismo viaje. Guárdalo tú también: es la
+        única forma de volver desde otro móvil.
+      </p>
     </section>
   );
 }
