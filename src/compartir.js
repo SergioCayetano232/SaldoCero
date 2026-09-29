@@ -48,9 +48,9 @@ export function resumenEnTexto({ nombre, codigo, total, balances, pagos, moneda 
 //
 // El navegador solo deja usar el portapapeles en páginas seguras, así que si
 // falla probamos con el truco de toda la vida: un textarea y un execCommand.
-export async function copiarAlPortapapeles(texto) {
+export async function copiarAlPortapapeles(texto, nav = navigator) {
   try {
-    await navigator.clipboard.writeText(texto);
+    await nav.clipboard.writeText(texto);
     return true;
   } catch {
     return copiarALoAntiguo(texto);
@@ -58,6 +58,8 @@ export async function copiarAlPortapapeles(texto) {
 }
 
 function copiarALoAntiguo(texto) {
+  if (typeof document === "undefined") return false;
+
   const campo = document.createElement("textarea");
   campo.value = texto;
   // Fuera de la vista, pero donde el navegador lo deje seleccionar.
@@ -87,4 +89,35 @@ export function descargarResumen(texto, nombreViaje) {
   enlace.click();
 
   URL.revokeObjectURL(url);
+}
+
+// El enlace que abre el viaje directamente: la app lee el código de detrás de la #.
+export function enlaceDelViaje(codigo, base = window.location.origin + window.location.pathname) {
+  return `${base}#${codigo}`;
+}
+
+// Lo que se manda al invitar. El código va también en el texto por si alguien
+// abre el enlace en otro navegador y le toca escribirlo a mano.
+export function invitacion({ nombre, codigo }, base) {
+  return {
+    title: `${nombre} en SaldoCero`,
+    text: `Apunta aquí lo que pagues en "${nombre}". Si te pide código: ${codigo}`,
+    url: enlaceDelViaje(codigo, base),
+  };
+}
+
+// Con el menú de compartir del móvil si lo hay, y si no, copiando el enlace.
+// Devuelve "compartido", "cancelado", "copiado" o "fallo".
+export async function invitar(datos, nav = navigator) {
+  if (nav.share) {
+    try {
+      await nav.share(datos);
+      return "compartido";
+    } catch (e) {
+      // Si cierras el menú sin elegir nada, no hay que hacer nada más.
+      if (e?.name === "AbortError") return "cancelado";
+    }
+  }
+
+  return (await copiarAlPortapapeles(datos.url, nav)) ? "copiado" : "fallo";
 }

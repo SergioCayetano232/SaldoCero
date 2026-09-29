@@ -326,7 +326,8 @@ button:active {
   transform: translateY(1px) scale(0.98);
 }
 
-.fila-formulario button,
+/* El código también es un botón, pero va con su propio estilo. */
+.fila-formulario button:not(.codigo),
 .formulario-gasto > button,
 .formulario-gasto .fila-botones button {
   padding: 11px 20px;
@@ -341,7 +342,7 @@ button:active {
   overflow: hidden;
 }
 
-.fila-formulario button:hover,
+.fila-formulario button:not(.codigo):hover,
 .formulario-gasto > button:hover,
 .formulario-gasto .fila-botones button:hover {
   background: linear-gradient(180deg, var(--teal-600), var(--teal-700));
@@ -350,7 +351,7 @@ button:active {
 }
 
 /* Un brillo que cruza el botón al pasar por encima. */
-.fila-formulario button::after,
+.fila-formulario button:not(.codigo)::after,
 .formulario-gasto > button::after,
 .formulario-gasto .fila-botones button::after {
   content: "";
@@ -367,7 +368,7 @@ button:active {
   pointer-events: none;
 }
 
-.fila-formulario button:hover::after,
+.fila-formulario button:not(.codigo):hover::after,
 .formulario-gasto > button:hover:not(:disabled)::after,
 .formulario-gasto .fila-botones button:hover:not(:disabled)::after {
   animation: barrido 0.7s var(--curva-suave);
@@ -1224,6 +1225,28 @@ button:active {
 
 .codigo:active {
   transform: scale(0.99);
+}
+
+.codigo.copiado {
+  font-family: var(--fuente);
+  font-size: 17px;
+  letter-spacing: 0;
+}
+
+.boton-invitar {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.invitar-icono {
+  font-size: 16px;
+  line-height: 1;
+  transition: transform var(--medio) var(--curva-muelle);
+}
+
+.boton-invitar:hover .invitar-icono {
+  transform: translate(2px, -2px);
 }
 
 .campo-codigo {

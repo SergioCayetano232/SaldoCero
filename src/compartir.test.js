@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { resumenEnTexto } from "./compartir";
+import { describe, it, expect, vi } from "vitest";
+import { resumenEnTexto, enlaceDelViaje, invitacion, invitar } from "./compartir";
 
 // Un viaje de ejemplo, para no repetirlo en cada prueba.
 const viaje = {
@@ -80,5 +80,68 @@ describe("resumenEnTexto", () => {
 
     expect(texto).toContain("Todo pagado");
     expect(texto).not.toContain("Quién le paga a quién");
+  });
+});
+
+describe("enlaceDelViaje", () => {
+  it("el código va detrás de la almohadilla", () => {
+    expect(enlaceDelViaje("ABC12345", "https://saldocero.app/")).toBe(
+      "https://saldocero.app/#ABC12345"
+    );
+  });
+});
+
+describe("invitacion", () => {
+  const datos = invitacion({ nombre: "Lisboa", codigo: "ABC12345" }, "https://saldocero.app/");
+
+  it("lleva el enlace del viaje", () => {
+    expect(datos.url).toBe("https://saldocero.app/#ABC12345");
+  });
+
+  it("y el código en el texto, por si hay que escribirlo", () => {
+    expect(datos.text).toContain("Lisboa");
+    expect(datos.text).toContain("ABC12345");
+  });
+});
+
+describe("invitar", () => {
+  const datos = { title: "t", text: "x", url: "https://saldocero.app/#ABC" };
+  const portapapeles = () => ({ writeText: vi.fn().mockResolvedValue() });
+
+  it("con menú de compartir, lo usa", async () => {
+    const nav = { share: vi.fn().mockResolvedValue(), clipboard: portapapeles() };
+
+    expect(await invitar(datos, nav)).toBe("compartido");
+    expect(nav.share).toHaveBeenCalledWith(datos);
+    expect(nav.clipboard.writeText).not.toHaveBeenCalled();
+  });
+
+  it("si cierras el menú, ni copia ni nada", async () => {
+    const cancelado = Object.assign(new Error("x"), { name: "AbortError" });
+    const nav = { share: vi.fn().mockRejectedValue(cancelado), clipboard: portapapeles() };
+
+    expect(await invitar(datos, nav)).toBe("cancelado");
+    expect(nav.clipboard.writeText).not.toHaveBeenCalled();
+  });
+
+  // Por ejemplo, si el navegador no deja compartir desde esa página.
+  it("si el menú falla por otra cosa, copia el enlace", async () => {
+    const nav = { share: vi.fn().mockRejectedValue(new Error("x")), clipboard: portapapeles() };
+
+    expect(await invitar(datos, nav)).toBe("copiado");
+    expect(nav.clipboard.writeText).toHaveBeenCalledWith(datos.url);
+  });
+
+  it("sin menú de compartir, copia el enlace", async () => {
+    const nav = { clipboard: portapapeles() };
+
+    expect(await invitar(datos, nav)).toBe("copiado");
+    expect(nav.clipboard.writeText).toHaveBeenCalledWith(datos.url);
+  });
+
+  it("si tampoco se puede copiar, avisa del fallo", async () => {
+    const nav = { clipboard: { writeText: vi.fn().mockRejectedValue(new Error("x")) } };
+
+    expect(await invitar(datos, nav)).toBe("fallo");
   });
 });
