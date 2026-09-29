@@ -13,13 +13,16 @@ Pruébala aquí: https://saldo-cero-eight.vercel.app/
 ## Qué hace
 
 - Creas un viaje y te da un código; con ese código entran los demás.
-- Todos apuntáis gastos a la vez, cada uno desde su móvil.
+- O los invitas con un enlace o un QR, y entran directos.
+- Todos apuntáis gastos a la vez, cada uno desde su móvil, y te avisa de lo
+  que apuntan los demás.
 - Cada gasto lleva quién pagó, cuánto, en qué día y en concepto de qué.
 - Marcas cuál de los viajeros eres tú y te resalta tus cuentas.
 - Cada gasto va en una categoría, y el resumen te dice en qué se va el dinero.
 - Si un gasto no es de todos, marcas solo a los que van.
 - Y si uno come el doble que los demás, lo repartes en partes desiguales.
-- Si te equivocas, editas el gasto y ya está.
+- Si te equivocas, editas el gasto y ya está. En el móvil, deslizándolo.
+- Buscas y filtras los gastos por concepto, persona o categoría.
 - Si borras algo sin querer, lo deshaces.
 - Puedes pagar en otra moneda y te lo convertimos a la del viaje.
 - Te dice a quién le toca pagar la próxima: al que menos ha puesto.
@@ -55,7 +58,8 @@ internet, te avisa y lo apuntas en la moneda del viaje.
 
 ## Con qué está hecho
 
-React, Vite, y JavaScript y CSS , sin librerías de estilos. Los viajes se
+React, Vite, y JavaScript y CSS, sin librerías de estilos. La única librería
+aparte es `qrcode`, para el QR. Los viajes se
 guardan en Supabase, y un service worker de treinta líneas es todo lo que hace
 falta para lo de instalarla.
 
@@ -93,6 +97,11 @@ http://localhost:5173.
 Si ya tenías la base de datos montada de antes, al final de `esquema.sql` están
 apuntados los cambios que han ido llegando después, para que los apliques sueltos
 sin rehacerlo todo.
+
+El plan gratis de Supabase pausa el proyecto si pasa una semana sin uso. Para
+evitarlo hay un workflow que lo toca cada día: en GitHub, en Settings > Secrets >
+Actions, añade `SUPABASE_URL` y `SUPABASE_ANON_KEY` con los mismos valores del
+`.env`.
 
 ## Las pruebas
 
