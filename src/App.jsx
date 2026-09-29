@@ -11,6 +11,7 @@ import BarraViaje from "./componentes/BarraViaje";
 import Viajeros from "./componentes/Viajeros";
 import Gastos from "./componentes/Gastos";
 import Resumen from "./componentes/Resumen";
+import CargandoViaje from "./componentes/CargandoViaje";
 
 // El viaje que hay que abrir al arrancar: el del enlace compartido (#ABC123),
 // o el último en el que estuviste. Vacío si no hay ninguno.
@@ -204,14 +205,7 @@ function App() {
     return (
       <div className="app">
         <Cabecera />
-          <p className="vacio cargando">
-          Cargando
-          <span className="puntos">
-            <span />
-            <span />
-            <span />
-          </span>
-        </p>
+        <CargandoViaje />
       </div>
     );
   }
