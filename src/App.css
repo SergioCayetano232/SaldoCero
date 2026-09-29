@@ -451,6 +451,45 @@ button:active {
 }
 
 /* El gasto que estás tocando, resaltado para no perderlo de vista. */
+/* ===== Buscar y filtrar ===== */
+.filtros {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filtro-buscar {
+  padding-left: 38px;
+  /* La lupa, dibujada aquí como la flecha de los desplegables. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%237b929b' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='m11 11 3.5 3.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 14px center;
+}
+
+.filtro-selectores {
+  display: flex;
+  gap: 8px;
+}
+
+.filtro-resumen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radio-sm);
+  background-color: var(--teal-50);
+  font-size: 13px;
+  color: var(--tinta-suave);
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
+}
+
+.filtro-resumen strong {
+  color: var(--tinta);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ===== Deslizar los gastos ===== */
 /* Lo que se sale por el lado al arrastrar no tiene que verse fuera de la tarjeta. */
 .lista-deslizable {

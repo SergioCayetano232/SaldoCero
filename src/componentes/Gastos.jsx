@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { participantesDeGasto } from "../calculos";
+import { calcularTotal, participantesDeGasto } from "../calculos";
 import { MONEDAS, cambio, conMoneda } from "../monedas";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe } from "../categorias";
+import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS } from "../filtros";
 import { hoy, comoTitulo, porDias } from "../fechas";
 import Deslizable from "./Deslizable";
 
@@ -49,8 +50,22 @@ function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, onAnadir, onEdi
     };
   }, [moneda, monedaViaje]);
 
+  const [filtros, setFiltros] = useState(SIN_FILTROS);
+  // Si quedan pocos gastos la barra se esconde, y con ella lo que hubiera filtrado.
+  const puedeFiltrar = gastos.length >= MINIMO_PARA_FILTRAR;
+  const filtrando = puedeFiltrar && hayFiltros(filtros);
+  const visibles = filtrando ? filtrarGastos(gastos, filtros, viajeros) : gastos;
+  // Solo las categorías que hay, que elegir una vacía no sirve de nada.
+  const categoriasUsadas = CATEGORIAS.filter((c) =>
+    gastos.some((g) => (g.categoria ?? POR_DEFECTO) === c.id)
+  );
+
+  function filtrar(cambio) {
+    setFiltros({ ...filtros, ...cambio });
+  }
+
   // Los gastos agrupados por día, que es como se leen mejor.
-  const dias = porDias(gastos);
+  const dias = porDias(visibles);
 
   const todosLosIds = viajeros.map((v) => v.id);
   // Mientras no toques las casillas, el gasto va entre todos.
@@ -377,8 +392,63 @@ function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, onAnadir, onEdi
             )}
           </div>
 
+          {puedeFiltrar && (
+            <div className="filtros">
+              <input
+                type="search"
+                className="filtro-buscar"
+                placeholder="Buscar un gasto"
+                aria-label="Buscar un gasto"
+                value={filtros.texto}
+                onChange={(e) => filtrar({ texto: e.target.value })}
+              />
+
+              <div className="filtro-selectores">
+                <select
+                  value={filtros.viajeroId}
+                  onChange={(e) => filtrar({ viajeroId: e.target.value })}
+                  aria-label="Filtrar por persona"
+                >
+                  <option value="">Todos</option>
+                  {viajeros.map((v) => (
+                    <option key={v.id} value={v.id}>
+                      {v.nombre}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={filtros.categoria}
+                  onChange={(e) => filtrar({ categoria: e.target.value })}
+                  aria-label="Filtrar por categoría"
+                >
+                  <option value="">Todo</option>
+                  {categoriasUsadas.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.emoji} {c.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {filtrando && (
+                <p className="filtro-resumen" role="status">
+                  <span>
+                    {visibles.length} de {gastos.length} gastos · suman{" "}
+                    <strong>{conMoneda(calcularTotal(visibles), monedaViaje)}</strong>
+                  </span>
+                  <button className="enlace" onClick={() => setFiltros(SIN_FILTROS)}>
+                    quitar filtros
+                  </button>
+                </p>
+              )}
+            </div>
+          )}
+
           {gastos.length === 0 ? (
             <p className="vacio">Todavía no hay gastos.</p>
+          ) : visibles.length === 0 ? (
+            <p className="vacio">Ningún gasto encaja con eso.</p>
           ) : (
             dias.map((dia) => (
               <div className="dia" key={dia.fecha || "sin-fecha"}>
