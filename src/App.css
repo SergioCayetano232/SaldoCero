@@ -1918,6 +1918,11 @@ button:active {
   animation-delay: 0s, 4.1s;
 }
 
+/* Igual aquí: tiene que salir en cuanto quitas algo, no a los 0,4 s. */
+.app > .deshacer {
+  animation-delay: 0s;
+}
+
 .novedad-icono {
   display: inline-block;
   animation: campanita 0.8s 0.2s var(--curva-suave);
