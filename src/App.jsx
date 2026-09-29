@@ -59,14 +59,17 @@ function App() {
   }, [viajeId]);
 
   // Todas las operaciones fallan igual: avisamos y dejamos el viaje como estaba.
+  // Devuelve si ha ido bien, por si alguien quiere hacer algo después.
   const hacer = useCallback(
     async (operacion) => {
       setError("");
       try {
         await operacion();
         setViaje(await datos.refrescarViaje(viaje));
+        return true;
       } catch (fallo) {
         setError(fallo.message);
+        return false;
       }
     },
     [viaje]

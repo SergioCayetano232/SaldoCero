@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   calcularLeTocaPagar,
   calcularPagos,
@@ -11,6 +11,8 @@ import { resumenEnTexto, copiarAlPortapapeles, descargarResumen } from "../compa
 import { gastoPorCategoria } from "../categorias";
 import { importeDeGasto } from "../calculos";
 import Cifra from "./Cifra";
+import Confeti from "./Confeti";
+import { esElUltimo } from "../confeti";
 
 function Resumen({
   balances,
@@ -24,6 +26,9 @@ function Resumen({
 }) {
   // "" mientras no has copiado, y si no, lo que ha pasado.
   const [copiado, setCopiado] = useState("");
+  // Qué fiesta va. Hace de key para que el confeti vuelva a caer si se repite.
+  const [fiesta, setFiesta] = useState(null);
+  const fiestas = useRef(0);
   const total = calcularTotal(gastos);
   const leTocaPagar = calcularLeTocaPagar(balances);
   const pagos = marcarSaldados(calcularPagos(balances), saldados);
@@ -45,6 +50,18 @@ function Resumen({
       pagos,
       moneda: monedaViaje,
     });
+  }
+
+  async function saldar(pago) {
+    const ultimo = esElUltimo(pagos, pago);
+    const bien = await onSaldar(pago);
+
+    // Solo si se ha guardado: celebrarlo y que luego falle queda fatal.
+    if (ultimo && bien) {
+      const esta = ++fiestas.current;
+      setFiesta(esta);
+      setTimeout(() => setFiesta((f) => (f === esta ? null : f)), 3500);
+    }
   }
 
   async function compartir() {
@@ -201,7 +218,7 @@ function Resumen({
 
                 <button
                   className="boton-saldar"
-                  onClick={() => (pago.saldado ? onDesaldar(pago) : onSaldar(pago))}
+                  onClick={() => (pago.saldado ? onDesaldar(pago) : saldar(pago))}
                   title={pago.saldado ? "Marcar como pendiente" : "Marcar como pagado"}
                 >
                   {pago.saldado ? "↩︎" : "✓"}
@@ -211,6 +228,8 @@ function Resumen({
           </>
         )}
       </div>
+
+      {fiesta && <Confeti key={fiesta} />}
     </section>
   );
 }
