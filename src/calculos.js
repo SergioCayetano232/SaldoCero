@@ -112,12 +112,12 @@ export function calcularPagos(balances) {
   // Copias, que no queremos tocar los balances.
   const deudores = balances
     .filter((v) => v.balance < -MARGEN)
-    .map((v) => ({ nombre: v.nombre, cantidad: -v.balance }))
+    .map((v) => ({ id: v.id, nombre: v.nombre, cantidad: -v.balance }))
     .sort((a, b) => b.cantidad - a.cantidad);
 
   const acreedores = balances
     .filter((v) => v.balance > MARGEN)
-    .map((v) => ({ nombre: v.nombre, cantidad: v.balance }))
+    .map((v) => ({ id: v.id, nombre: v.nombre, cantidad: v.balance }))
     .sort((a, b) => b.cantidad - a.cantidad);
 
   const pagos = [];
@@ -128,7 +128,13 @@ export function calcularPagos(balances) {
     // Se paga lo menor de las dos cantidades.
     const cantidad = Math.min(deudores[i].cantidad, acreedores[j].cantidad);
 
-    pagos.push({ de: deudores[i].nombre, a: acreedores[j].nombre, cantidad });
+    pagos.push({
+      de: deudores[i].nombre,
+      a: acreedores[j].nombre,
+      deId: deudores[i].id,
+      aId: acreedores[j].id,
+      cantidad,
+    });
 
     deudores[i].cantidad -= cantidad;
     acreedores[j].cantidad -= cantidad;
@@ -141,6 +147,13 @@ export function calcularPagos(balances) {
   return pagos;
 }
 
+// Si dos pagos son el mismo quién a quién. Por id, que dos pueden llamarse
+// igual; por nombre solo si a alguno le falta, que son los marcados antes.
+export function mismoPago(x, y) {
+  if (x.deId && x.aId && y.deId && y.aId) return x.deId === y.deId && x.aId === y.aId;
+  return x.de === y.de && x.a === y.a;
+}
+
 // Marca cuáles de los pagos ya están dados por pagados.
 //
 // Los pagos no se guardan, se calculan cada vez. Así que si alguien apunta un
@@ -149,7 +162,7 @@ export function calcularPagos(balances) {
 export function marcarSaldados(pagos, saldados = []) {
   return pagos.map((pago) => ({
     ...pago,
-    saldado: saldados.some((s) => s.de === pago.de && s.a === pago.a),
+    saldado: saldados.some((s) => mismoPago(s, pago)),
   }));
 }
 
@@ -159,11 +172,16 @@ export function balancesTrasPagos(balances, pagos) {
   const ajuste = new Map();
 
   for (const pago of pagos.filter((p) => p.saldado)) {
-    ajuste.set(pago.de, (ajuste.get(pago.de) ?? 0) + pago.cantidad);
-    ajuste.set(pago.a, (ajuste.get(pago.a) ?? 0) - pago.cantidad);
+    const de = pago.deId ?? pago.de;
+    const a = pago.aId ?? pago.a;
+    ajuste.set(de, (ajuste.get(de) ?? 0) + pago.cantidad);
+    ajuste.set(a, (ajuste.get(a) ?? 0) - pago.cantidad);
   }
 
-  return balances.map((v) => ({ ...v, balance: v.balance + (ajuste.get(v.nombre) ?? 0) }));
+  return balances.map((v) => ({
+    ...v,
+    balance: v.balance + (ajuste.get(v.id) ?? ajuste.get(v.nombre) ?? 0),
+  }));
 }
 
 // Lo que queda por pagar de verdad.

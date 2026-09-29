@@ -1,6 +1,7 @@
 // El confeti de cuando quedáis todos a cero.
 
 import { CATEGORIAS } from "./categorias";
+import { mismoPago } from "./calculos";
 
 // Los colores de las categorías, que ya pegan con la app.
 export const COLORES = CATEGORIAS.map((c) => c.color);
@@ -10,7 +11,7 @@ export const CUANTOS = 90;
 // Si al marcar este pago ya no queda ninguno pendiente, toca fiesta.
 export function esElUltimo(pagos, pago) {
   const pendientes = pagos.filter((p) => !p.saldado);
-  return pendientes.length === 1 && pendientes[0].de === pago.de && pendientes[0].a === pago.a;
+  return pendientes.length === 1 && mismoPago(pendientes[0], pago);
 }
 
 function entre(min, max, azar) {

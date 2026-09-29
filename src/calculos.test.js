@@ -8,6 +8,7 @@ import {
   estadoDeBalance,
   calcularPagos,
   marcarSaldados,
+  mismoPago,
   quedaPorPagar,
   balancesTrasPagos,
   repartoDeGasto,
@@ -140,7 +141,9 @@ describe("calcularLeTocaPagar", () => {
 describe("calcularPagos", () => {
   it("un deudor y un acreedor, un solo pago", () => {
     const bal = calcularBalances([ana, luis], [gasto("a", 50, ["a", "b"])]);
-    expect(calcularPagos(bal)).toEqual([{ de: "Luis", a: "Ana", cantidad: 25 }]);
+    expect(calcularPagos(bal)).toEqual([
+      { de: "Luis", a: "Ana", deId: "b", aId: "a", cantidad: 25 },
+    ]);
   });
 
   it("cuentas saldadas, ningún pago", () => {
@@ -192,8 +195,8 @@ describe("calcularPagos", () => {
     ];
 
     expect(calcularPagos(bal)).toEqual([
-      { de: "Marta", a: "Ana", cantidad: 100 },
-      { de: "Pepe", a: "Luis", cantidad: 50 },
+      { de: "Marta", a: "Ana", deId: "3", aId: "1", cantidad: 100 },
+      { de: "Pepe", a: "Luis", deId: "4", aId: "2", cantidad: 50 },
     ]);
   });
 
@@ -438,5 +441,52 @@ describe("balancesTrasPagos", () => {
   it("no toca los balances de fuera", () => {
     balancesTrasPagos(bal, marcarSaldados(pagos, [{ de: "Luis", a: "Ana" }]));
     expect(bal.find((v) => v.nombre === "Luis").balance).toBeCloseTo(-30);
+  });
+});
+
+// Dos que se llaman igual: antes, marcar la deuda de uno marcaba la del otro.
+describe("pagos con nombres repetidos", () => {
+  const anaA = { id: "a1", nombre: "Ana" };
+  const anaB = { id: "a2", nombre: "Ana" };
+  const pepe = { id: "p", nombre: "Pepe" };
+  const pepa = { id: "q", nombre: "Pepa" };
+  // Pepe le debe a una Ana y Pepa a la otra.
+  const bal = [
+    { ...anaA, balance: 30 },
+    { ...anaB, balance: 20 },
+    { ...pepe, balance: -30 },
+    { ...pepa, balance: -20 },
+  ];
+  const pagos = calcularPagos(bal);
+
+  it("cada pago sabe a qué Ana va", () => {
+    expect(pagos.map((p) => p.aId).sort()).toEqual(["a1", "a2"]);
+  });
+
+  it("marcar uno por id no marca el otro", () => {
+    const marcados = marcarSaldados(pagos, [{ deId: "p", aId: "a1", de: "Pepe", a: "Ana" }]);
+    expect(marcados.filter((p) => p.saldado).map((p) => p.aId)).toEqual(["a1"]);
+  });
+
+  it("lo pagado se descuenta a la Ana que es", () => {
+    const tras = balancesTrasPagos(bal, marcarSaldados(pagos, [{ deId: "p", aId: "a1", de: "Pepe", a: "Ana" }]));
+    const de = (id) => tras.find((v) => v.id === id).balance;
+
+    expect(de("a1")).toBeCloseTo(0);
+    expect(de("a2")).toBeCloseTo(20);
+  });
+});
+
+describe("mismoPago", () => {
+  it("con ids en los dos, manda el id aunque el nombre coincida", () => {
+    expect(mismoPago({ deId: "p", aId: "a1", de: "Pepe", a: "Ana" }, { deId: "p", aId: "a2", de: "Pepe", a: "Ana" })).toBe(false);
+    expect(mismoPago({ deId: "p", aId: "a1", de: "X", a: "Y" }, { deId: "p", aId: "a1", de: "Pepe", a: "Ana" })).toBe(true);
+  });
+
+  // Los marcados antes del cambio solo tienen nombre, o les falta uno de los ids.
+  it("si a alguno le falta un id, por nombre", () => {
+    expect(mismoPago({ de: "Pepe", a: "Ana" }, { deId: "p", aId: "a1", de: "Pepe", a: "Ana" })).toBe(true);
+    expect(mismoPago({ deId: "p", aId: null, de: "Pepe", a: "Ana" }, { deId: "p", aId: "a1", de: "Pepe", a: "Ana" })).toBe(true);
+    expect(mismoPago({ de: "Pepe", a: "Eva" }, { deId: "p", aId: "a1", de: "Pepe", a: "Ana" })).toBe(false);
   });
 });

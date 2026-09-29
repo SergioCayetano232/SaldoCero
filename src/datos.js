@@ -128,7 +128,7 @@ async function cargarContenido(viajeId) {
       .eq("gastos.viaje_id", viajeId),
     supabase
       .from("pagos_saldados")
-      .select("de_nombre, a_nombre")
+      .select("de_id, a_id, de_nombre, a_nombre")
       .eq("viaje_id", viajeId),
   ]);
 
@@ -137,7 +137,13 @@ async function cargarContenido(viajeId) {
 
   return {
     viajeros: viajeros.data,
-    saldados: saldados.data.map((p) => ({ de: p.de_nombre, a: p.a_nombre })),
+    // Los marcados antes de guardar ids no los traen: esos van por nombre.
+    saldados: saldados.data.map((p) => ({
+      deId: p.de_id,
+      aId: p.a_id,
+      de: p.de_nombre,
+      a: p.a_nombre,
+    })),
     gastos: gastos.data.map((gasto) => ({
       id: gasto.id,
       pagadorId: gasto.pagador_id,
@@ -264,7 +270,13 @@ export async function editarGasto(id, gasto) {
 export async function marcarSaldado(viajeId, pago) {
   const { error } = await supabase
     .from("pagos_saldados")
-    .insert({ viaje_id: viajeId, de_nombre: pago.de, a_nombre: pago.a });
+    .insert({
+      viaje_id: viajeId,
+      de_id: pago.deId,
+      a_id: pago.aId,
+      de_nombre: pago.de,
+      a_nombre: pago.a,
+    });
 
   if (error) throw fallo(error, "No hemos podido marcar el pago.");
 }
@@ -275,10 +287,22 @@ export async function desmarcarSaldado(viajeId, pago) {
     .from("pagos_saldados")
     .delete()
     .eq("viaje_id", viajeId)
-    .eq("de_nombre", pago.de)
-    .eq("a_nombre", pago.a);
+    .eq("de_id", pago.deId)
+    .eq("a_id", pago.aId);
 
   if (error) throw fallo(error, "No hemos podido desmarcar el pago.");
+
+  // Y el que se marcó antes de guardar ids, si es ese. Solo por nombre no hay
+  // otra forma de encontrarlo.
+  const { error: errorAntiguo } = await supabase
+    .from("pagos_saldados")
+    .delete()
+    .eq("viaje_id", viajeId)
+    .eq("de_nombre", pago.de)
+    .eq("a_nombre", pago.a)
+    .or("de_id.is.null,a_id.is.null");
+
+  if (errorAntiguo) throw fallo(errorAntiguo, "No hemos podido desmarcar el pago.");
 }
 
 export async function quitarGasto(id) {

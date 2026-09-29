@@ -54,3 +54,13 @@ describe("trozosDeConfeti", () => {
     expect(COLORES).toContain(trozo.color);
   });
 });
+
+describe("esElUltimo con nombres repetidos", () => {
+  const aAnaA = { de: "Pepe", a: "Ana", deId: "p", aId: "a1", cantidad: 30, saldado: false };
+  const aAnaB = { de: "Pepe", a: "Ana", deId: "p", aId: "a2", cantidad: 20, saldado: true };
+
+  it("distingue a cuál de las dos Anas va", () => {
+    expect(esElUltimo([aAnaA, aAnaB], aAnaA)).toBe(true);
+    expect(esElUltimo([aAnaA, { ...aAnaB, saldado: false }], aAnaA)).toBe(false);
+  });
+});

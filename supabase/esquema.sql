@@ -55,11 +55,15 @@ create table gastos_participantes (
 create table pagos_saldados (
   id uuid primary key default gen_random_uuid(),
   viaje_id uuid not null references viajes(id) on delete cascade,
+  -- Por id y no por nombre: con dos que se llamen igual se pisaban. El nombre
+  -- se queda para los que se marcaron antes de esto.
+  de_id uuid references viajeros(id) on delete cascade,
+  a_id uuid references viajeros(id) on delete cascade,
   de_nombre text not null,
   a_nombre text not null,
   saldado_en timestamptz not null default now(),
   -- El mismo par no se puede marcar dos veces.
-  unique (viaje_id, de_nombre, a_nombre)
+  unique (viaje_id, de_id, a_id)
 );
 
 create index on viajes (codigo);
@@ -135,7 +139,12 @@ create policy "quitar participantes" on gastos_participantes for delete using (
 
 -- Las deudas saldadas, como todo lo demás: las del viaje cuyo código traes.
 create policy "ver saldados" on pagos_saldados for select using (viaje_id = viaje_actual());
-create policy "marcar saldado" on pagos_saldados for insert with check (viaje_id = viaje_actual());
+-- Y los dos viajeros, de este mismo viaje.
+create policy "marcar saldado" on pagos_saldados for insert with check (
+  viaje_id = viaje_actual()
+  and (de_id is null or exists (select 1 from viajeros v where v.id = de_id and v.viaje_id = viaje_actual()))
+  and (a_id is null or exists (select 1 from viajeros v where v.id = a_id and v.viaje_id = viaje_actual()))
+);
 create policy "desmarcar saldado" on pagos_saldados for delete using (viaje_id = viaje_actual());
 
 -- ---------- Crear y abrir viajes ----------
@@ -236,3 +245,36 @@ $$;
 -- Fecha del gasto. Los que ya había se quedan con el día que se apuntaron.
 --   alter table gastos add column fecha date not null default current_date;
 --   update gastos set fecha = creado_en::date;
+
+--   -- Pagos saldados por viajero y no por nombre: con dos que se llamen igual,
+--   -- marcar la deuda de uno marcaba también la del otro.
+--   alter table pagos_saldados
+--     add column de_id uuid references viajeros(id) on delete cascade,
+--     add column a_id uuid references viajeros(id) on delete cascade;
+--
+--   -- Los que ya había: se busca cada nombre en su viaje. Si en ese viaje hay dos
+--   -- con el mismo nombre no se sabe cuál era, y se quedan solo con el nombre.
+--   update pagos_saldados p set
+--     de_id = (
+--       select v.id from viajeros v
+--       where v.viaje_id = p.viaje_id and v.nombre = p.de_nombre
+--         and (select count(*) from viajeros w where w.viaje_id = p.viaje_id and w.nombre = p.de_nombre) = 1
+--     ),
+--     a_id = (
+--       select v.id from viajeros v
+--       where v.viaje_id = p.viaje_id and v.nombre = p.a_nombre
+--         and (select count(*) from viajeros w where w.viaje_id = p.viaje_id and w.nombre = p.a_nombre) = 1
+--     );
+--
+--   -- Lo que no se puede marcar dos veces ya no es el par de nombres, es el par de viajeros.
+--   alter table pagos_saldados drop constraint if exists pagos_saldados_viaje_id_de_nombre_a_nombre_key;
+--   alter table pagos_saldados add constraint pagos_saldados_viaje_id_de_id_a_id_key unique (viaje_id, de_id, a_id);
+--
+--   -- Y los dos viajeros tienen que ser de este mismo viaje. Sin id se deja pasar,
+--   -- que es lo que manda la versión de la web que haya abierta mientras se despliega.
+--   drop policy if exists "marcar saldado" on pagos_saldados;
+--   create policy "marcar saldado" on pagos_saldados for insert with check (
+--     viaje_id = viaje_actual()
+--     and (de_id is null or exists (select 1 from viajeros v where v.id = de_id and v.viaje_id = viaje_actual()))
+--     and (a_id is null or exists (select 1 from viajeros v where v.id = a_id and v.viaje_id = viaje_actual()))
+--   );

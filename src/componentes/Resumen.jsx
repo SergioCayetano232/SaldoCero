@@ -40,8 +40,6 @@ function Resumen({
   // Con lo ya pagado descontado: si todo está saldado, no le toca a nadie.
   const leTocaPagar = calcularLeTocaPagar(balancesTrasPagos(balances, pagos));
   const pendiente = quedaPorPagar(pagos);
-  // Tu nombre, para saber cuáles de los pagos te tocan a ti.
-  const miNombre = balances.find((v) => v.id === soy)?.nombre ?? null;
   const porCategoria = gastoPorCategoria(gastos, importeDeGasto);
   const todoPagado = pagos.length > 0 && pendiente === 0;
 
@@ -199,9 +197,9 @@ function Resumen({
             {pagos.map((pago) => (
               <div
                 className={`pago ${pago.saldado ? "pagado" : ""} ${
-                  pago.de === miNombre || pago.a === miNombre ? "pago-mio" : ""
+                  soy && (pago.deId === soy || pago.aId === soy) ? "pago-mio" : ""
                 }`}
-                key={`${pago.de}-${pago.a}`}
+                key={`${pago.deId}-${pago.aId}`}
               >
                 <Avatar nombre={pago.de} color={colores?.get(pago.de)} pequeno />
                 <strong>{pago.de}</strong>
