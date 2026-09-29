@@ -1,5 +1,8 @@
-import { useState } from "react";
-import { copiarAlPortapapeles, invitacion, invitar } from "../compartir";
+import { lazy, Suspense, useCallback, useState } from "react";
+import { copiarAlPortapapeles, enlaceDelViaje, invitacion, invitar } from "../compartir";
+
+// La librería del QR pesa, y casi nadie lo abre: se baja solo al pulsar.
+const QRViaje = lazy(() => import("./QRViaje"));
 
 // Lo que dice cada botón según lo que haya pasado al pulsarlo.
 const TEXTO_INVITAR = {
@@ -11,6 +14,9 @@ const TEXTO_INVITAR = {
 function BarraViaje({ viaje, onSalir }) {
   const [codigoCopiado, setCodigoCopiado] = useState(false);
   const [invitado, setInvitado] = useState("");
+  const [conQR, setConQR] = useState(false);
+  // Siempre la misma: si cambiara, la ventana robaría el foco en cada refresco.
+  const cerrarQR = useCallback(() => setConQR(false), []);
 
   async function copiarCodigo() {
     const hecho = await copiarAlPortapapeles(viaje.codigo);
@@ -54,12 +60,26 @@ function BarraViaje({ viaje, onSalir }) {
           </span>
           {TEXTO_INVITAR[invitado] ?? "Invitar"}
         </button>
+        <button className="boton-qr" onClick={() => setConQR(true)} title="Enseñar el QR">
+          <span aria-hidden="true">▦</span> QR
+        </button>
       </div>
 
       <p className="vacio aviso-codigo">
         Invítalos con el enlace, o pásales el código y entran a este mismo viaje.
         Guárdalo tú también: es la única forma de volver desde otro móvil.
       </p>
+
+      {conQR && (
+        <Suspense fallback={null}>
+          <QRViaje
+            enlace={enlaceDelViaje(viaje.codigo)}
+            codigo={viaje.codigo}
+            nombre={viaje.nombre}
+            onCerrar={cerrarQR}
+          />
+        </Suspense>
+      )}
     </section>
   );
 }

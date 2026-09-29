@@ -326,8 +326,8 @@ button:active {
   transform: translateY(1px) scale(0.98);
 }
 
-/* El código también es un botón, pero va con su propio estilo. */
-.fila-formulario button:not(.codigo),
+/* El código y el QR también son botones, pero van con su propio estilo. */
+.fila-formulario button:not(.codigo):not(.boton-qr),
 .formulario-gasto > button,
 .formulario-gasto .fila-botones button {
   padding: 11px 20px;
@@ -342,7 +342,7 @@ button:active {
   overflow: hidden;
 }
 
-.fila-formulario button:not(.codigo):hover,
+.fila-formulario button:not(.codigo):not(.boton-qr):hover,
 .formulario-gasto > button:hover,
 .formulario-gasto .fila-botones button:hover {
   background: linear-gradient(180deg, var(--teal-600), var(--teal-700));
@@ -351,7 +351,7 @@ button:active {
 }
 
 /* Un brillo que cruza el botón al pasar por encima. */
-.fila-formulario button:not(.codigo)::after,
+.fila-formulario button:not(.codigo):not(.boton-qr)::after,
 .formulario-gasto > button::after,
 .formulario-gasto .fila-botones button::after {
   content: "";
@@ -368,7 +368,7 @@ button:active {
   pointer-events: none;
 }
 
-.fila-formulario button:not(.codigo):hover::after,
+.fila-formulario button:not(.codigo):not(.boton-qr):hover::after,
 .formulario-gasto > button:hover:not(:disabled)::after,
 .formulario-gasto .fila-botones button:hover:not(:disabled)::after {
   animation: barrido 0.7s var(--curva-suave);
@@ -1237,6 +1237,93 @@ button:active {
   display: inline-flex;
   align-items: center;
   gap: 7px;
+}
+
+/* Secundario: el que manda en la fila es Invitar. */
+.boton-qr {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 16px;
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--teal-300);
+  color: var(--teal-700);
+  background-color: transparent;
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background-color var(--rapido), border-color var(--rapido);
+}
+
+.boton-qr:hover {
+  background-color: var(--teal-50);
+  border-color: var(--teal-500);
+}
+
+/* ===== Ventana del QR ===== */
+.velo {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background-color: rgba(10, 20, 24, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: aparecer var(--medio) var(--curva-suave);
+}
+
+.ventana-qr {
+  position: relative;
+  width: min(340px, 100%);
+  padding: 26px 24px 22px;
+  border-radius: var(--radio);
+  background-color: var(--papel);
+  box-shadow: var(--sombra-lg);
+  text-align: center;
+  animation: aparecer-creciendo var(--lento) var(--curva-muelle);
+}
+
+.ventana-cerrar {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.ventana-titulo {
+  font-family: var(--fuente-titulo);
+  font-size: 19px;
+  margin-bottom: 16px;
+  padding-right: 24px;
+}
+
+/* Oscuro sobre blanco siempre, también en modo oscuro: hay cámaras que un QR
+   al revés no lo leen. */
+.qr {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  margin: 0 auto;
+  border-radius: var(--radio-sm);
+  box-shadow: var(--sombra-sm);
+}
+
+.qr-fondo {
+  fill: #fff;
+}
+
+.qr-puntos {
+  fill: #14262c;
+}
+
+.qr-codigo {
+  margin-top: 14px;
+  font-family: var(--fuente-mono);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--teal-700);
 }
 
 .invitar-icono {
