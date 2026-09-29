@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { argumentosDeEdicion } from "./datos";
+import { datosDelGasto } from "./datos";
 
 const gasto = {
   pagadorId: "b",
@@ -13,10 +13,9 @@ const gasto = {
   partes: { a: 2, b: 1, c: 1 },
 };
 
-describe("argumentosDeEdicion", () => {
+describe("datosDelGasto", () => {
   it("lleva todo lo del gasto con los nombres que espera la función", () => {
-    expect(argumentosDeEdicion("g1", gasto)).toEqual({
-      g_id: "g1",
+    expect(datosDelGasto(gasto)).toEqual({
       g_pagador: "b",
       g_importe: 100,
       g_moneda: "USD",
@@ -33,13 +32,13 @@ describe("argumentosDeEdicion", () => {
   });
 
   it("a partes iguales si no hay partes", () => {
-    const args = argumentosDeEdicion("g1", { ...gasto, partes: null });
+    const args = datosDelGasto({ ...gasto, partes: null });
     expect(args.g_participantes.map((p) => p.partes)).toEqual([1, 1, 1]);
   });
 
   // Solo van los que están en el gasto, aunque queden partes de alguien que ya no.
   it("las partes de alguien que ya no está en el gasto no se mandan", () => {
-    const args = argumentosDeEdicion("g1", { ...gasto, participantes: ["a", "b"] });
+    const args = datosDelGasto({ ...gasto, participantes: ["a", "b"] });
     expect(args.g_participantes.map((p) => p.viajero_id)).toEqual(["a", "b"]);
   });
 });

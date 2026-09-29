@@ -244,6 +244,48 @@ begin
 end;
 $$;
 
+-- Apuntar un gasto de una vez, con su reparto. Como editar_gasto: o todo o nada.
+-- Antes eran dos peticiones y, si fallaba la segunda, había que borrar el gasto
+-- a mano; si también fallaba eso, se quedaba suelto descuadrando las cuentas.
+create function crear_gasto(
+  g_viaje uuid,
+  g_pagador uuid,
+  g_importe numeric,
+  g_moneda text,
+  g_convertido numeric,
+  g_concepto text,
+  g_categoria text,
+  g_fecha date,
+  g_participantes jsonb
+)
+returns uuid
+language plpgsql
+security invoker
+set search_path = public
+as $$
+declare
+  nuevo uuid;
+begin
+  if jsonb_array_length(coalesce(g_participantes, '[]'::jsonb)) = 0 then
+    raise exception 'Un gasto tiene que repartirse entre alguien';
+  end if;
+
+  insert into gastos (viaje_id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha)
+  values (
+    g_viaje, g_pagador, g_importe,
+    coalesce(g_moneda, 'EUR'), g_convertido, g_concepto,
+    coalesce(g_categoria, 'otros'), coalesce(g_fecha, current_date)
+  )
+  returning id into nuevo;
+
+  insert into gastos_participantes (gasto_id, viajero_id, partes)
+  select nuevo, (p ->> 'viajero_id')::uuid, coalesce((p ->> 'partes')::numeric, 1)
+  from jsonb_array_elements(g_participantes) as p;
+
+  return nuevo;
+end;
+$$;
+
 -- ---------- Si ya tenías la base de datos creada ----------
 --
 -- Lo de abajo llegó después. Si montaste las tablas antes, no hace falta
@@ -329,3 +371,5 @@ $$;
 --   );
 
 -- Editar un gasto de una vez. Pega el "create function editar_gasto" de más arriba.
+
+-- Apuntar un gasto de una vez. Pega el "create function crear_gasto" de más arriba.
