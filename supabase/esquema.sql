@@ -195,6 +195,55 @@ as $$
   where v.codigo = upper(trim(codigo_buscado));
 $$;
 
+-- Editar un gasto de una vez: los datos y el reparto, o todo o nada.
+-- Antes eran tres peticiones, y si fallaba la última el gasto se quedaba sin
+-- nadie con quien repartirse. Va con los permisos de quien llama, así que las
+-- reglas de siempre (traer el código del viaje) siguen mandando.
+create function editar_gasto(
+  g_id uuid,
+  g_pagador uuid,
+  g_importe numeric,
+  g_moneda text,
+  g_convertido numeric,
+  g_concepto text,
+  g_categoria text,
+  g_fecha date,
+  -- [{"viajero_id": "...", "partes": 1}, ...]
+  g_participantes jsonb
+)
+returns void
+language plpgsql
+security invoker
+set search_path = public
+as $$
+begin
+  if jsonb_array_length(coalesce(g_participantes, '[]'::jsonb)) = 0 then
+    raise exception 'Un gasto tiene que repartirse entre alguien';
+  end if;
+
+  update gastos set
+    pagador_id = g_pagador,
+    importe = g_importe,
+    moneda = g_moneda,
+    importe_convertido = g_convertido,
+    concepto = g_concepto,
+    categoria = g_categoria,
+    fecha = g_fecha
+  where id = g_id;
+
+  -- Si no lo ve (no existe, o es de otro viaje), no ha tocado nada.
+  if not found then
+    raise exception 'Ese gasto no está en este viaje';
+  end if;
+
+  delete from gastos_participantes where gasto_id = g_id;
+
+  insert into gastos_participantes (gasto_id, viajero_id, partes)
+  select g_id, (p ->> 'viajero_id')::uuid, coalesce((p ->> 'partes')::numeric, 1)
+  from jsonb_array_elements(g_participantes) as p;
+end;
+$$;
+
 -- ---------- Si ya tenías la base de datos creada ----------
 --
 -- Lo de abajo llegó después. Si montaste las tablas antes, no hace falta
@@ -278,3 +327,5 @@ $$;
 --     and (de_id is null or exists (select 1 from viajeros v where v.id = de_id and v.viaje_id = viaje_actual()))
 --     and (a_id is null or exists (select 1 from viajeros v where v.id = a_id and v.viaje_id = viaje_actual()))
 --   );
+
+-- Editar un gasto de una vez. Pega el "create function editar_gasto" de más arriba.

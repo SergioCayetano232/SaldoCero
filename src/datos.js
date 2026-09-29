@@ -228,40 +228,30 @@ export async function anadirGasto(viajeId, gasto) {
   return { ...gasto, id: data.id };
 }
 
-// Cambiar un gasto ya apuntado.
-// El reparto lo rehacemos entero, que es más fácil que ir mirando quién sale y quién entra.
-export async function editarGasto(id, gasto) {
-  const { error } = await supabase
-    .from("gastos")
-    .update({
-      pagador_id: gasto.pagadorId,
-      importe: gasto.importe,
-      moneda: gasto.moneda,
-      importe_convertido: gasto.importeConvertido,
-      concepto: gasto.concepto,
-      categoria: gasto.categoria,
-      fecha: gasto.fecha,
-    })
-    .eq("id", id);
-
-  if (error) throw fallo(error, "No hemos podido guardar el gasto.");
-
-  const { error: errorBorrado } = await supabase
-    .from("gastos_participantes")
-    .delete()
-    .eq("gasto_id", id);
-
-  if (errorBorrado) throw fallo(errorBorrado, "No hemos podido guardar el gasto.");
-
-  const { error: errorParticipantes } = await supabase.from("gastos_participantes").insert(
-    gasto.participantes.map((viajeroId) => ({
-      gasto_id: id,
+// Lo que se le manda a editar_gasto. El reparto va en una lista con las partes
+// de cada uno, que la base de datos lo rehace entero.
+export function argumentosDeEdicion(id, gasto) {
+  return {
+    g_id: id,
+    g_pagador: gasto.pagadorId,
+    g_importe: gasto.importe,
+    g_moneda: gasto.moneda,
+    g_convertido: gasto.importeConvertido,
+    g_concepto: gasto.concepto,
+    g_categoria: gasto.categoria,
+    g_fecha: gasto.fecha,
+    g_participantes: gasto.participantes.map((viajeroId) => ({
       viajero_id: viajeroId,
       partes: gasto.partes?.[viajeroId] ?? 1,
-    }))
-  );
+    })),
+  };
+}
 
-  if (errorParticipantes) throw fallo(errorParticipantes, "No hemos podido guardar el gasto.");
+// Cambiar un gasto ya apuntado. Va todo en una sola llamada: si algo falla, la
+// base de datos no guarda nada y el gasto se queda como estaba.
+export async function editarGasto(id, gasto) {
+  const { error } = await supabase.rpc("editar_gasto", argumentosDeEdicion(id, gasto));
+  if (error) throw fallo(error, "No hemos podido guardar el gasto.");
 
   return { ...gasto, id };
 }
