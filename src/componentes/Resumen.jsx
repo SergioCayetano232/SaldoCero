@@ -10,6 +10,7 @@ import { conMoneda } from "../monedas";
 import { resumenEnTexto, copiarAlPortapapeles, descargarResumen } from "../compartir";
 import { gastoPorCategoria } from "../categorias";
 import { importeDeGasto } from "../calculos";
+import Cifra from "./Cifra";
 
 function Resumen({
   balances,
@@ -77,7 +78,9 @@ function Resumen({
 
       <div className="total-destacado">
         <div className="total-etiqueta">Total del viaje</div>
-        <div className="total-cifra">{conMoneda(total, monedaViaje)}</div>
+        <div className="total-cifra">
+          <Cifra valor={total} moneda={monedaViaje} />
+        </div>
         <div className="total-detalle">
           {gastos.length} {gastos.length === 1 ? "gasto" : "gastos"} · {balances.length}{" "}
           {balances.length === 1 ? "viajero" : "viajeros"}
@@ -154,7 +157,7 @@ function Resumen({
             <div className="balance-cifra">
               <div className="balance-importe">
                 {viajero.balance >= 0 ? "+" : "−"}
-                {conMoneda(Math.abs(viajero.balance), monedaViaje)}
+                <Cifra valor={Math.abs(viajero.balance)} moneda={monedaViaje} />
               </div>
               <div className="balance-texto">
                 {viajero.balance >= 0 ? "le deben" : "debe"}
@@ -169,7 +172,7 @@ function Resumen({
           Cómo saldar cuentas
           {pendiente > 0 && (
             <span className="pendiente">
-              quedan {conMoneda(pendiente, monedaViaje)}
+              quedan <Cifra valor={pendiente} moneda={monedaViaje} />
             </span>
           )}
         </h3>

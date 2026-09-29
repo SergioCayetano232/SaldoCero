@@ -1260,6 +1260,7 @@ button:active {
   padding: 3px 10px;
   border-radius: var(--radio-pastilla);
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 /* El botón de dar por pagada una deuda. */
