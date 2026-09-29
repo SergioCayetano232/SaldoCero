@@ -6,6 +6,7 @@ import { calcularBalances } from "./calculos";
 import { coloresDelViaje } from "./avatares";
 import { borradoConEspera } from "./deshacer";
 import { novedades, textoDeNovedades } from "./novedades";
+import { vibrar } from "./vibrar";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
 import Viajeros from "./componentes/Viajeros";
@@ -97,9 +98,11 @@ function App() {
       try {
         await operacion();
         setViaje(await datos.refrescarViaje(viaje));
+        vibrar("toque");
         return true;
       } catch (fallo) {
         setError(fallo.message);
+        vibrar("error");
         return false;
       } finally {
         enMarcha.current--;
@@ -112,6 +115,7 @@ function App() {
   // Lo quitamos de la pantalla ya, pero de la base de datos solo si no deshaces.
   const borrarConAviso = useCallback((id, que, quitarDeVerdad) => {
     setError("");
+    vibrar("quitar");
 
     const espera = borradoConEspera(quitarDeVerdad, async (fallo) => {
       setBorrado(null);

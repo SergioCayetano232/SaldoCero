@@ -17,6 +17,7 @@ import Confeti from "./Confeti";
 import Avatar from "./Avatar";
 import Desglose from "./Desglose";
 import { esElUltimo } from "../confeti";
+import { vibrar } from "../vibrar";
 
 function Resumen({
   balances,
@@ -66,6 +67,7 @@ function Resumen({
     if (ultimo && bien) {
       const esta = ++fiestas.current;
       setFiesta(esta);
+      vibrar("exito");
       setTimeout(() => setFiesta((f) => (f === esta ? null : f)), 3500);
     }
   }

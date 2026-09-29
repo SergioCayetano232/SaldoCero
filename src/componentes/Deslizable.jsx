@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { esHorizontal, conResistencia, queHacer, HOLGURA } from "../deslizar";
+import { vibrar } from "../vibrar";
 
 // Una fila de la lista que se puede arrastrar de lado con el dedo.
 function Deslizable({ className = "", onEditar, onQuitar, children }) {
@@ -31,7 +32,14 @@ function Deslizable({ className = "", onEditar, onQuitar, children }) {
       if (t.modo === "lado") e.currentTarget.setPointerCapture(e.pointerId);
     }
 
-    if (t.modo === "lado") setDx(conResistencia(mx, ancho));
+    if (t.modo !== "lado") return;
+    const nuevo = conResistencia(mx, ancho);
+
+    // Un toque justo al pasar el umbral: así sabes que ya vale sin mirar.
+    const ahora = queHacer(nuevo, ancho);
+    if (ahora && ahora !== queHacer(dx, ancho)) vibrar("toque");
+
+    setDx(nuevo);
   }
 
   function alSoltar() {
