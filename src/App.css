@@ -450,6 +450,67 @@ button:active {
 }
 
 /* El gasto que estás tocando, resaltado para no perderlo de vista. */
+/* ===== Deslizar los gastos ===== */
+/* Lo que se sale por el lado al arrastrar no tiene que verse fuera de la tarjeta. */
+.lista-deslizable {
+  overflow-x: clip;
+}
+
+/* pan-y: el scroll de arriba abajo sigue siendo del navegador, lo de lado es nuestro. */
+.lista li.deslizable {
+  position: relative;
+  touch-action: pan-y;
+}
+
+.lista li.deslizable.soltada {
+  transition: transform var(--medio) var(--curva-suave), background-color var(--rapido);
+}
+
+/* Lo que asoma por el hueco que deja la fila: editar a un lado, quitar al otro. */
+.deslizable::before,
+.deslizable::after {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  white-space: nowrap;
+  border-radius: var(--radio-sm);
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: none;
+  transition: background-color var(--rapido), color var(--rapido);
+}
+
+.deslizable::before {
+  content: "✏️ Editar";
+  right: calc(100% + 6px);
+  width: max(calc(var(--dx) - 6px), 0px);
+  background-color: var(--teal-50);
+  color: var(--teal-600);
+}
+
+.deslizable::after {
+  content: "Quitar ✕";
+  left: calc(100% + 6px);
+  width: max(calc(-1 * var(--dx) - 6px), 0px);
+  background-color: var(--rojo-fondo);
+  color: var(--rojo);
+}
+
+/* Pasado el umbral, se enciende: si sueltas, pasa. */
+.listo-editar::before {
+  background-color: var(--teal-500);
+  color: #fff;
+}
+
+.listo-quitar::after {
+  background-color: var(--rojo);
+  color: #fff;
+}
+
 .editandose {
   background-color: var(--naranja-100);
   border-radius: var(--radio-sm);

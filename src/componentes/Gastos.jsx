@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { participantesDeGasto } from "../calculos";
 import { MONEDAS, cambio, conMoneda } from "../monedas";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe } from "../categorias";
 import { hoy, comoTitulo, porDias } from "../fechas";
+import Deslizable from "./Deslizable";
 
 function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar }) {
   const [pagadorId, setPagadorId] = useState("");
@@ -31,6 +32,7 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
   const [participantes, setParticipantes] = useState(null);
   // El gasto que estás tocando ahora mismo. Vacío si estás apuntando uno nuevo.
   const [editando, setEditando] = useState(null);
+  const formulario = useRef(null);
 
   // Cada vez que cambias de moneda, preguntamos a cuánto está.
   useEffect(() => {
@@ -91,6 +93,10 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
     const desigual = Object.values(suyas).some((p) => p !== 1);
     setPartes(desigual ? suyas : {});
     setRepartoAbierto(desigual);
+
+    // En el móvil el formulario suele quedar arriba, fuera de la vista.
+    const quieto = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    formulario.current?.scrollIntoView({ behavior: quieto ? "auto" : "smooth", block: "start" });
   }
 
   // Lo que le toca a cada uno de los marcados. Por defecto, una parte.
@@ -188,7 +194,7 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
         <p className="vacio">Primero añade viajeros para poder registrar gastos.</p>
       ) : (
         <>
-          <div className="formulario-gasto">
+          <div className="formulario-gasto" ref={formulario}>
             <select value={pagadorId} onChange={(e) => setPagadorId(e.target.value)}>
               <option value="">¿Quién pagó?</option>
               {viajeros.map((viajero) => (
@@ -386,11 +392,13 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
                   </p>
                 )}
 
-                <ul className="lista">
+                <ul className="lista lista-deslizable">
                   {dia.gastos.map((gasto) => (
-                    <li
+                    <Deslizable
                       key={gasto.id}
                       className={gasto.id === editando ? "editandose" : ""}
+                      onEditar={() => editar(gasto)}
+                      onQuitar={() => onQuitar(gasto.id, gasto.concepto)}
                     >
                       <span
                         className="gasto-icono"
@@ -431,7 +439,7 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
                           ✕
                         </button>
                       </span>
-                    </li>
+                    </Deslizable>
                   ))}
                 </ul>
               </div>
