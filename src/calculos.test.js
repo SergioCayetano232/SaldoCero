@@ -9,6 +9,7 @@ import {
   calcularPagos,
   marcarSaldados,
   quedaPorPagar,
+  balancesTrasPagos,
   repartoDeGasto,
 } from "./calculos";
 
@@ -399,5 +400,43 @@ describe("reparto desigual", () => {
   it("un gasto sin gente no rompe nada aunque traiga partes", () => {
     const reparto = repartoDeGasto(chuleton, []);
     expect(reparto.size).toBe(0);
+  });
+});
+
+describe("balancesTrasPagos", () => {
+  // Ana pone 90 entre los tres: Luis y Marta le deben 30 cada uno.
+  const bal = calcularBalances(viajeros, [gasto("a", 90, ["a", "b", "c"])]);
+  const pagos = calcularPagos(bal);
+
+  it("sin nada pagado, los balances no cambian", () => {
+    const tras = balancesTrasPagos(bal, marcarSaldados(pagos, []));
+    expect(tras.map((v) => v.balance)).toEqual(bal.map((v) => v.balance));
+  });
+
+  it("lo pagado se descuenta a los dos", () => {
+    const tras = balancesTrasPagos(bal, marcarSaldados(pagos, [{ de: "Luis", a: "Ana" }]));
+    const de = (nombre) => tras.find((v) => v.nombre === nombre).balance;
+
+    expect(de("Ana")).toBeCloseTo(30);
+    expect(de("Luis")).toBeCloseTo(0);
+    expect(de("Marta")).toBeCloseTo(-30);
+  });
+
+  it("con todo pagado, todos a cero y ya no le toca a nadie", () => {
+    const todos = [{ de: "Luis", a: "Ana" }, { de: "Marta", a: "Ana" }];
+    const tras = balancesTrasPagos(bal, marcarSaldados(pagos, todos));
+
+    for (const v of tras) expect(v.balance).toBeCloseTo(0);
+    expect(calcularLeTocaPagar(tras)).toEqual({ igualados: true });
+  });
+
+  it("si Luis ya pagó, le toca a Marta", () => {
+    const tras = balancesTrasPagos(bal, marcarSaldados(pagos, [{ de: "Luis", a: "Ana" }]));
+    expect(calcularLeTocaPagar(tras).nombre).toBe("Marta");
+  });
+
+  it("no toca los balances de fuera", () => {
+    balancesTrasPagos(bal, marcarSaldados(pagos, [{ de: "Luis", a: "Ana" }]));
+    expect(bal.find((v) => v.nombre === "Luis").balance).toBeCloseTo(-30);
   });
 });

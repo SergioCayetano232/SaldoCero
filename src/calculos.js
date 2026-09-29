@@ -153,6 +153,19 @@ export function marcarSaldados(pagos, saldados = []) {
   }));
 }
 
+// Los balances contando lo que ya se ha pagado.
+// Si Luis ya le dio sus 30 € a Ana, en la práctica ha puesto 30 € más y Ana 30 € menos.
+export function balancesTrasPagos(balances, pagos) {
+  const ajuste = new Map();
+
+  for (const pago of pagos.filter((p) => p.saldado)) {
+    ajuste.set(pago.de, (ajuste.get(pago.de) ?? 0) + pago.cantidad);
+    ajuste.set(pago.a, (ajuste.get(pago.a) ?? 0) - pago.cantidad);
+  }
+
+  return balances.map((v) => ({ ...v, balance: v.balance + (ajuste.get(v.nombre) ?? 0) }));
+}
+
 // Lo que queda por pagar de verdad.
 export function quedaPorPagar(pagos) {
   return pagos.filter((pago) => !pago.saldado).reduce((t, p) => t + p.cantidad, 0);

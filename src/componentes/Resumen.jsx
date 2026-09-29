@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import {
+  balancesTrasPagos,
   calcularLeTocaPagar,
   estadoDeBalance,
   calcularPagos,
@@ -33,8 +34,9 @@ function Resumen({
   const [fiesta, setFiesta] = useState(null);
   const fiestas = useRef(0);
   const total = calcularTotal(gastos);
-  const leTocaPagar = calcularLeTocaPagar(balances);
   const pagos = marcarSaldados(calcularPagos(balances), saldados);
+  // Con lo ya pagado descontado: si todo está saldado, no le toca a nadie.
+  const leTocaPagar = calcularLeTocaPagar(balancesTrasPagos(balances, pagos));
   const pendiente = quedaPorPagar(pagos);
   // Tu nombre, para saber cuáles de los pagos te tocan a ti.
   const miNombre = balances.find((v) => v.id === soy)?.nombre ?? null;
