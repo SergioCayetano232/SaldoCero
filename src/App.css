@@ -1742,6 +1742,90 @@ button:active {
 
 /* ===== Deshacer un borrado ===== */
 /* Se queda pegado abajo, encima de todo, hasta que pasan los segundos. */
+/* Lo que apuntan los demás. Arriba, para no pisar el deshacer de abajo.
+   Centrado con márgenes y no con left 50%: así solo tendría media pantalla de ancho. */
+.novedad {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  top: 16px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 11px 18px 11px 14px;
+  border-radius: var(--radio-pastilla);
+  /* Casi opaco: va encima de lo que sea y tiene que leerse de un vistazo. */
+  background-color: color-mix(in srgb, var(--papel) 92%, transparent);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--linea);
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: var(--sombra-lg);
+  animation: bajar-aviso var(--medio) var(--curva-muelle), irse-aviso 0.4s 4.1s var(--curva-suave) forwards;
+}
+
+/* Las esperas de entrada de .app > * le pisarían los tiempos. */
+.app > .novedad {
+  animation-delay: 0s, 4.1s;
+}
+
+.novedad-icono {
+  display: inline-block;
+  animation: campanita 0.8s 0.2s var(--curva-suave);
+}
+
+@keyframes bajar-aviso {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes irse-aviso {
+  to {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes campanita {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  20%,
+  60% {
+    transform: rotate(-18deg);
+  }
+  40%,
+  80% {
+    transform: rotate(14deg);
+  }
+}
+
+/* La fila que acaba de llegar se ilumina un momento y se apaga. */
+.lista li.recien-llegado {
+  animation: aparecer-creciendo var(--medio) var(--curva-suave), resaltar-nuevo 2.6s var(--curva-suave);
+}
+
+@keyframes resaltar-nuevo {
+  0%,
+  30% {
+    background-color: var(--naranja-100);
+    box-shadow: inset 3px 0 0 var(--naranja-400);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: inset 3px 0 0 transparent;
+  }
+}
+
 .deshacer {
   position: fixed;
   left: 50%;

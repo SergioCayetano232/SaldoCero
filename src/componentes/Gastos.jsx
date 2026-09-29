@@ -5,7 +5,7 @@ import { CATEGORIAS, POR_DEFECTO, categoriaDe } from "../categorias";
 import { hoy, comoTitulo, porDias } from "../fechas";
 import Deslizable from "./Deslizable";
 
-function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar }) {
+function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, onAnadir, onEditar, onQuitar }) {
   const [pagadorId, setPagadorId] = useState("");
   const [importe, setImporte] = useState("");
   const [moneda, setMoneda] = useState(monedaViaje);
@@ -396,7 +396,9 @@ function Gastos({ viajeros, gastos, monedaViaje, onAnadir, onEditar, onQuitar })
                   {dia.gastos.map((gasto) => (
                     <Deslizable
                       key={gasto.id}
-                      className={gasto.id === editando ? "editandose" : ""}
+                      className={`${gasto.id === editando ? "editandose" : ""} ${
+                        recienLlegados?.has(gasto.id) ? "recien-llegado" : ""
+                      }`}
                       onEditar={() => editar(gasto)}
                       onQuitar={() => onQuitar(gasto.id, gasto.concepto)}
                     >

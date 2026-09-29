@@ -5,6 +5,7 @@ import { hayConexion, usarCodigo } from "./supabase";
 import { calcularBalances } from "./calculos";
 import { coloresDelViaje } from "./avatares";
 import { borradoConEspera } from "./deshacer";
+import { novedades, textoDeNovedades } from "./novedades";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
 import Viajeros from "./componentes/Viajeros";
@@ -50,13 +51,40 @@ function App() {
     viajeActual.current = viaje;
   }, [viaje]);
 
+  // Lo que han apuntado los demás, mientras dura el aviso.
+  const [novedad, setNovedad] = useState(null);
+  // Lo que has creado tú desde aquí, para no avisarte de ello como si fuera de otro.
+  const propios = useRef(new Set());
+  // Mientras guardas algo, lo que llegue puede ser lo tuyo a medio guardar.
+  const enMarcha = useRef(0);
+
   // Nos vamos enterando de lo que apunten los demás.
   const viajeId = viaje?.id;
 
   useEffect(() => {
     if (!viajeId) return;
+    let reloj;
 
-    return datos.escucharCambios(() => viajeActual.current, setViaje);
+    const dejarDeEscuchar = datos.escucharCambios(
+      () => viajeActual.current,
+      (nuevo) => {
+        const hay = novedades(viajeActual.current, nuevo, propios.current);
+        setViaje(nuevo);
+
+        if (enMarcha.current > 0) return;
+        const texto = textoDeNovedades(hay, nuevo.viajeros, nuevo.moneda ?? "EUR");
+        if (!texto) return;
+
+        clearTimeout(reloj);
+        setNovedad({ texto, ids: new Set([...hay.gastos, ...hay.viajeros].map((x) => x.id)) });
+        reloj = setTimeout(() => setNovedad(null), 4500);
+      }
+    );
+
+    return () => {
+      dejarDeEscuchar();
+      clearTimeout(reloj);
+    };
   }, [viajeId]);
 
   // Todas las operaciones fallan igual: avisamos y dejamos el viaje como estaba.
@@ -64,6 +92,7 @@ function App() {
   const hacer = useCallback(
     async (operacion) => {
       setError("");
+      enMarcha.current++;
       try {
         await operacion();
         setViaje(await datos.refrescarViaje(viaje));
@@ -71,6 +100,8 @@ function App() {
       } catch (fallo) {
         setError(fallo.message);
         return false;
+      } finally {
+        enMarcha.current--;
       }
     },
     [viaje]
@@ -222,7 +253,10 @@ function App() {
         colores={colores}
         soy={soy}
         onSoyYo={elegirQuienSoy}
-        onAnadir={(nombre) => hacer(() => datos.anadirViajero(viaje.id, nombre))}
+        recienLlegados={novedad?.ids}
+        onAnadir={(nombre) =>
+          hacer(async () => propios.current.add((await datos.anadirViajero(viaje.id, nombre)).id))
+        }
         onQuitar={(id, nombre) =>
           borrarConAviso(id, `a ${nombre}`, () => datos.quitarViajero(id))
         }
@@ -232,7 +266,10 @@ function App() {
         viajeros={viajeros}
         gastos={gastos}
         monedaViaje={viaje.moneda ?? "EUR"}
-        onAnadir={(gasto) => hacer(() => datos.anadirGasto(viaje.id, gasto))}
+        recienLlegados={novedad?.ids}
+        onAnadir={(gasto) =>
+          hacer(async () => propios.current.add((await datos.anadirGasto(viaje.id, gasto)).id))
+        }
         onEditar={(id, gasto) => hacer(() => datos.editarGasto(id, gasto))}
         onQuitar={(id, concepto) =>
           borrarConAviso(id, `"${concepto}"`, () => datos.quitarGasto(id))
@@ -257,6 +294,13 @@ function App() {
         <button className="boton-reiniciar" onClick={vaciarViaje}>
           Vaciar este viaje
         </button>
+      )}
+
+      {novedad && (
+        <div className="novedad" role="status" key={novedad.texto}>
+          <span className="novedad-icono">🔔</span>
+          {novedad.texto}
+        </div>
       )}
 
       {borrado && (
