@@ -15,6 +15,7 @@ import { importeDeGasto } from "../calculos";
 import Cifra from "./Cifra";
 import Confeti from "./Confeti";
 import Avatar from "./Avatar";
+import Desglose from "./Desglose";
 import { esElUltimo } from "../confeti";
 
 function Resumen({
@@ -110,33 +111,9 @@ function Resumen({
       </div>
 
       {/* En qué se ha ido el dinero. Solo si hay más de una cosa, que si no
-          es una barra al 100% y no cuenta nada. */}
+          es un anillo entero y no cuenta nada. */}
       {porCategoria.length > 1 && (
-        <div className="desglose">
-          <div className="desglose-barra">
-            {porCategoria.map((c) => (
-              <div
-                key={c.id}
-                className="desglose-trozo"
-                style={{
-                  width: `${(c.total / total) * 100}%`,
-                  backgroundColor: c.color,
-                }}
-                title={`${c.nombre}: ${conMoneda(c.total, monedaViaje)}`}
-              />
-            ))}
-          </div>
-
-          <ul className="desglose-lista">
-            {porCategoria.map((c) => (
-              <li key={c.id}>
-                <span className="desglose-punto" style={{ backgroundColor: c.color }} />
-                {c.emoji} {c.nombre}
-                <strong>{conMoneda(c.total, monedaViaje)}</strong>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <Desglose porCategoria={porCategoria} moneda={monedaViaje} />
       )}
 
       {leTocaPagar && (

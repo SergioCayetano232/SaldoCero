@@ -252,6 +252,13 @@ h3 {
   }
 }
 
+/* Los trozos del donut: salen de la nada y se estiran hasta su tamaño. */
+@keyframes dibujar-trozo {
+  from {
+    stroke-dasharray: 0 var(--vuelta);
+  }
+}
+
 /* El confeti: cae desde arriba, se va de lado y da vueltas. */
 @keyframes caer-confeti {
   0% {

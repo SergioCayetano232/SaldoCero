@@ -764,54 +764,167 @@ button:active {
 
 /* ===== En qué se ha ido el dinero ===== */
 .desglose {
+  display: flex;
+  align-items: center;
+  gap: 22px;
   margin-bottom: 18px;
 }
 
-/* Una sola barra con un trozo por categoría. */
-.desglose-barra {
-  display: flex;
-  height: 10px;
-  border-radius: var(--radio-pastilla);
-  overflow: hidden;
-  background-color: var(--fondo);
+.donut {
+  position: relative;
+  flex-shrink: 0;
+  width: 140px;
+  height: 140px;
 }
 
-.desglose-trozo {
+.donut svg {
+  display: block;
+  width: 100%;
   height: 100%;
-  transition: width 0.7s var(--curva-suave);
+  overflow: visible;
 }
 
-/* Una rayita blanca entre trozo y trozo, para que se distingan. */
-.desglose-trozo + .desglose-trozo {
-  box-shadow: inset 1.5px 0 0 var(--papel);
+.donut circle {
+  fill: none;
+}
+
+.donut-pista {
+  stroke: var(--fondo);
+}
+
+/* Cada trozo es el mismo círculo con un trazo discontinuo: un trozo de color y
+   el resto vacío. Girándolo, se coloca en su sitio. */
+.donut-trozo {
+  stroke-dasharray: var(--largo) var(--vuelta);
+  transform-origin: 70px 70px;
+  cursor: pointer;
+  transition: stroke-dasharray 0.7s var(--curva-suave), transform 0.7s var(--curva-suave),
+    opacity var(--medio), stroke-width var(--medio) var(--curva-muelle);
+  animation: dibujar-trozo 0.9s var(--curva-suave) backwards;
+  animation-delay: calc(var(--orden) * 0.09s + 0.15s);
+}
+
+.con-elegida .donut-trozo:not(.elegido) {
+  opacity: 0.28;
+}
+
+.donut-trozo.elegido {
+  stroke-width: 22px;
+}
+
+.donut-emoji {
+  font-size: 13px;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+  animation: aparecer-creciendo var(--medio) var(--curva-muelle) backwards;
+  animation-delay: calc(var(--orden) * 0.09s + 0.7s);
+  transition: opacity var(--medio);
+}
+
+.con-elegida .donut-emoji {
+  opacity: 0.5;
+}
+
+/* El hueco del medio: el porcentaje de la que estás mirando. */
+.donut-centro {
+  position: absolute;
+  inset: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+  animation: aparecer-creciendo var(--medio) var(--curva-muelle);
+}
+
+.donut-porcentaje {
+  font-family: var(--fuente-titulo);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--tinta);
+  font-variant-numeric: tabular-nums;
+}
+
+.donut-nombre {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--tinta-suave);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .desglose-lista {
   list-style: none;
+  flex: 1;
+  min-width: 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px 16px;
-  margin-top: 12px;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .desglose-lista li {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
   font-size: 13px;
   color: var(--tinta-suave);
+  cursor: pointer;
+  transition: background-color var(--rapido), opacity var(--medio);
+}
+
+.desglose-lista li.elegida {
+  background-color: var(--teal-50);
+}
+
+.con-elegida .desglose-lista li:not(.elegida) {
+  opacity: 0.5;
 }
 
 .desglose-punto {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   flex-shrink: 0;
+}
+
+.desglose-nombre {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .desglose-lista strong {
   color: var(--tinta);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.desglose-tanto {
+  width: 3.2em;
+  text-align: right;
+  color: var(--tinta-tenue);
+  font-variant-numeric: tabular-nums;
+}
+
+/* En pantallas estrechas el donut arriba y la lista debajo, a lo ancho. */
+@media (max-width: 400px) {
+  .desglose {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .desglose-lista {
+    width: 100%;
+  }
 }
 
 /* ===== Participantes de un gasto ===== */
