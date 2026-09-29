@@ -84,6 +84,13 @@ export function calcularBalances(viajeros, gastos) {
   }));
 }
 
+// Cómo está cada uno. Con restos de decimales, un -0.004 es estar en paz.
+export function estadoDeBalance(balance) {
+  if (balance > MARGEN) return "le-deben";
+  if (balance < -MARGEN) return "debe";
+  return "en-paz";
+}
+
 // Le toca al que peor balance tiene, o sea al que menos ha puesto.
 export function calcularLeTocaPagar(balances) {
   if (balances.length === 0) return null;

@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import {
   calcularLeTocaPagar,
+  estadoDeBalance,
   calcularPagos,
   calcularTotal,
   marcarSaldados,
@@ -149,47 +150,51 @@ function Resumen({
       )}
 
       <ul className="lista">
-        {balances.map((viajero) => (
-          <li
-            key={viajero.id}
-            className={`fila-balance ${viajero.balance >= 0 ? "positivo" : "negativo"} ${
-              viajero.id === soy ? "soy-yo" : ""
-            }`}
-          >
-            <Avatar
-              nombre={viajero.nombre}
-              color={colores?.get(viajero.nombre)}
-              latiendo={leTocaPagar && !leTocaPagar.igualados && leTocaPagar.nombre === viajero.nombre}
-            />
+        {balances.map((viajero) => {
+          const estado = estadoDeBalance(viajero.balance);
 
-            <div className="balance-quien">
-              <div className="balance-nombre">
-                {viajero.nombre}
-                {viajero.id === soy && <span className="etiqueta-tu">tú</span>}
-              </div>
-              <div className="barra">
-                <div
-                  className="barra-relleno"
-                  style={{ width: maxPuesto > 0 ? `${(viajero.puesto / maxPuesto) * 100}%` : "0%" }}
-                />
-              </div>
-              <small className="reparto">
-                <span className="sin-partir">puso {conMoneda(viajero.puesto, monedaViaje)}</span> ·{" "}
-                <span className="sin-partir">le tocan {conMoneda(viajero.tocaPagar, monedaViaje)}</span>
-              </small>
-            </div>
+          return (
+            <li
+              key={viajero.id}
+              className={`fila-balance ${estado} ${
+                viajero.id === soy ? "soy-yo" : ""
+              }`}
+            >
+              <Avatar
+                nombre={viajero.nombre}
+                color={colores?.get(viajero.nombre)}
+                latiendo={leTocaPagar && !leTocaPagar.igualados && leTocaPagar.nombre === viajero.nombre}
+              />
 
-            <div className="balance-cifra">
-              <div className="balance-importe">
-                {viajero.balance >= 0 ? "+" : "−"}
-                <Cifra valor={Math.abs(viajero.balance)} moneda={monedaViaje} />
+              <div className="balance-quien">
+                <div className="balance-nombre">
+                  {viajero.nombre}
+                  {viajero.id === soy && <span className="etiqueta-tu">tú</span>}
+                </div>
+                <div className="barra">
+                  <div
+                    className="barra-relleno"
+                    style={{ width: maxPuesto > 0 ? `${(viajero.puesto / maxPuesto) * 100}%` : "0%" }}
+                  />
+                </div>
+                <small className="reparto">
+                  <span className="sin-partir">puso {conMoneda(viajero.puesto, monedaViaje)}</span> ·{" "}
+                  <span className="sin-partir">le tocan {conMoneda(viajero.tocaPagar, monedaViaje)}</span>
+                </small>
               </div>
-              <div className="balance-texto">
-                {viajero.balance >= 0 ? "le deben" : "debe"}
+
+              <div className="balance-cifra">
+                <div className="balance-importe">
+                  {estado === "le-deben" ? "+" : estado === "debe" ? "−" : ""}
+                  <Cifra valor={Math.abs(viajero.balance)} moneda={monedaViaje} />
+                </div>
+                <div className="balance-texto">
+                  {estado === "le-deben" ? "le deben" : estado === "debe" ? "debe" : "en paz"}
+                </div>
               </div>
-            </div>
-          </li>
-        ))}
+            </li>
+          );
+        })}
       </ul>
 
       <div className="saldar">

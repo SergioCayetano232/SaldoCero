@@ -1198,12 +1198,17 @@ button:active {
   letter-spacing: 0.05em;
 }
 
-.positivo .balance-importe {
+.le-deben .balance-importe {
   color: var(--verde);
 }
 
-.negativo .balance-importe {
+.debe .balance-importe {
   color: var(--rojo);
+}
+
+/* A cero no hay nada que destacar. */
+.en-paz .balance-importe {
+  color: var(--tinta-tenue);
 }
 
 /* Los dos botones del resumen, a la derecha del título. */

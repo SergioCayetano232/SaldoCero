@@ -5,6 +5,7 @@ import {
   calcularTotal,
   calcularBalances,
   calcularLeTocaPagar,
+  estadoDeBalance,
   calcularPagos,
   marcarSaldados,
   quedaPorPagar,
@@ -95,6 +96,26 @@ describe("calcularBalances", () => {
   it("sin gastos, todos a cero", () => {
     const bal = calcularBalances(viajeros, []);
     expect(bal.every((v) => v.balance === 0)).toBe(true);
+  });
+});
+
+describe("estadoDeBalance", () => {
+  it("en positivo, le deben", () => {
+    expect(estadoDeBalance(20)).toBe("le-deben");
+  });
+
+  it("en negativo, debe", () => {
+    expect(estadoDeBalance(-20)).toBe("debe");
+  });
+
+  it("a cero, en paz", () => {
+    expect(estadoDeBalance(0)).toBe("en-paz");
+  });
+
+  // 10 entre 3 deja restos, y nadie debe 0.004 €.
+  it("los restos de decimales también son estar en paz", () => {
+    expect(estadoDeBalance(0.004)).toBe("en-paz");
+    expect(estadoDeBalance(-0.004)).toBe("en-paz");
   });
 });
 
