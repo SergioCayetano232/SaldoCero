@@ -12,10 +12,12 @@ import { gastoPorCategoria } from "../categorias";
 import { importeDeGasto } from "../calculos";
 import Cifra from "./Cifra";
 import Confeti from "./Confeti";
+import Avatar from "./Avatar";
 import { esElUltimo } from "../confeti";
 
 function Resumen({
   balances,
+  colores,
   gastos,
   monedaViaje = "EUR",
   saldados = [],
@@ -154,6 +156,12 @@ function Resumen({
               viajero.id === soy ? "soy-yo" : ""
             }`}
           >
+            <Avatar
+              nombre={viajero.nombre}
+              color={colores?.get(viajero.nombre)}
+              latiendo={leTocaPagar && !leTocaPagar.igualados && leTocaPagar.nombre === viajero.nombre}
+            />
+
             <div className="balance-quien">
               <div className="balance-nombre">
                 {viajero.nombre}
@@ -166,8 +174,8 @@ function Resumen({
                 />
               </div>
               <small className="reparto">
-                puso {conMoneda(viajero.puesto, monedaViaje)} · le tocan{" "}
-                {conMoneda(viajero.tocaPagar, monedaViaje)}
+                <span className="sin-partir">puso {conMoneda(viajero.puesto, monedaViaje)}</span> ·{" "}
+                <span className="sin-partir">le tocan {conMoneda(viajero.tocaPagar, monedaViaje)}</span>
               </small>
             </div>
 
@@ -209,8 +217,10 @@ function Resumen({
                 }`}
                 key={`${pago.de}-${pago.a}`}
               >
+                <Avatar nombre={pago.de} color={colores?.get(pago.de)} pequeno />
                 <strong>{pago.de}</strong>
                 <span className="pago-flecha">→</span>
+                <Avatar nombre={pago.a} color={colores?.get(pago.a)} pequeno />
                 <strong>{pago.a}</strong>
                 <span className="pago-cantidad">
                   {conMoneda(pago.cantidad, monedaViaje)}

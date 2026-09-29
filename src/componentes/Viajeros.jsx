@@ -1,6 +1,7 @@
 import { useState } from "react";
+import Avatar from "./Avatar";
 
-function Viajeros({ viajeros, onAnadir, onQuitar, soy, onSoyYo }) {
+function Viajeros({ viajeros, colores, onAnadir, onQuitar, soy, onSoyYo }) {
   const [nombre, setNombre] = useState("");
 
   function anadir() {
@@ -34,7 +35,8 @@ function Viajeros({ viajeros, onAnadir, onQuitar, soy, onSoyYo }) {
         <ul className="lista">
           {viajeros.map((viajero) => (
             <li key={viajero.id} className={viajero.id === soy ? "soy-yo" : ""}>
-              <span>
+              <span className="viajero-quien">
+                <Avatar nombre={viajero.nombre} color={colores?.get(viajero.nombre)} />
                 {viajero.nombre}
                 {viajero.id === soy && <span className="etiqueta-tu">tú</span>}
               </span>

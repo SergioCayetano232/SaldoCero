@@ -3,6 +3,7 @@ import "./App.css";
 import * as datos from "./datos";
 import { hayConexion, usarCodigo } from "./supabase";
 import { calcularBalances } from "./calculos";
+import { coloresDelViaje } from "./avatares";
 import { borradoConEspera } from "./deshacer";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
@@ -206,6 +207,7 @@ function App() {
   const viajeros = viaje.viajeros.filter((v) => v.id !== seVa);
   const gastos = viaje.gastos.filter((g) => g.id !== seVa && g.pagadorId !== seVa);
   const balances = calcularBalances(viajeros, gastos);
+  const colores = coloresDelViaje(viajeros.map((v) => v.nombre));
 
   return (
     <div className="app">
@@ -217,6 +219,7 @@ function App() {
 
       <Viajeros
         viajeros={viajeros}
+        colores={colores}
         soy={soy}
         onSoyYo={elegirQuienSoy}
         onAnadir={(nombre) => hacer(() => datos.anadirViajero(viaje.id, nombre))}
@@ -239,6 +242,7 @@ function App() {
       {gastos.length > 0 && (
         <Resumen
           balances={balances}
+          colores={colores}
           gastos={gastos}
           soy={soy}
           monedaViaje={viaje.moneda ?? "EUR"}
