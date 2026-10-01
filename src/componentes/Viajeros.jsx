@@ -3,7 +3,7 @@ import Avatar from "./Avatar";
 import NombreEditable from "./NombreEditable";
 import { limpiarNombre, LARGO_MAXIMO } from "../nombres";
 
-function Viajeros({ viajeros, colores, recienLlegados, onAnadir, onRenombrar, onQuitar, soy, onSoyYo }) {
+function Viajeros({ viajeros, colores, recienLlegados, cerrado, onAnadir, onRenombrar, onQuitar, soy, onSoyYo }) {
   const [nombre, setNombre] = useState("");
 
   function anadir() {
@@ -18,19 +18,21 @@ function Viajeros({ viajeros, colores, recienLlegados, onAnadir, onRenombrar, on
     <section className="tarjeta">
       <h2><span className="icono">🧳</span> Viajeros</h2>
 
-      <div className="fila-formulario">
-        <input
-          type="text"
-          placeholder="Nombre del viajero"
-          maxLength={LARGO_MAXIMO}
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") anadir();
-          }}
-        />
-        <button onClick={anadir}>Añadir</button>
-      </div>
+      {!cerrado && (
+        <div className="fila-formulario">
+          <input
+            type="text"
+            placeholder="Nombre del viajero"
+            maxLength={LARGO_MAXIMO}
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") anadir();
+            }}
+          />
+          <button onClick={anadir}>Añadir</button>
+        </div>
+      )}
 
       {viajeros.length === 0 ? (
         <p className="vacio">Aún no hay viajeros. Añade al menos dos para empezar.</p>
@@ -45,11 +47,15 @@ function Viajeros({ viajeros, colores, recienLlegados, onAnadir, onRenombrar, on
             >
               <span className="viajero-quien">
                 <Avatar nombre={viajero.nombre} color={colores?.get(viajero.nombre)} />
-                <NombreEditable
-                  nombre={viajero.nombre}
-                  onGuardar={(nuevo) => onRenombrar(viajero.id, nuevo)}
-                  titulo={`Cambiar el nombre de ${viajero.nombre}`}
-                />
+                {cerrado ? (
+                  <span className="nombre-fijo">{viajero.nombre}</span>
+                ) : (
+                  <NombreEditable
+                    nombre={viajero.nombre}
+                    onGuardar={(nuevo) => onRenombrar(viajero.id, nuevo)}
+                    titulo={`Cambiar el nombre de ${viajero.nombre}`}
+                  />
+                )}
                 {viajero.id === soy && <span className="etiqueta-tu">tú</span>}
               </span>
 
@@ -61,12 +67,14 @@ function Viajeros({ viajeros, colores, recienLlegados, onAnadir, onRenombrar, on
                 {viajero.id === soy ? "✓" : "¿yo?"}
               </button>
 
-              <button
-                className="boton-quitar"
-                onClick={() => onQuitar(viajero.id, viajero.nombre)}
-              >
-                ✕
-              </button>
+              {!cerrado && (
+                <button
+                  className="boton-quitar"
+                  onClick={() => onQuitar(viajero.id, viajero.nombre)}
+                >
+                  ✕
+                </button>
+              )}
             </li>
           ))}
         </ul>

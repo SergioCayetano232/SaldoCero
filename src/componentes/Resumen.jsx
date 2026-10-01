@@ -33,6 +33,7 @@ function Resumen({
   onParcial,
   onQuitarParcial,
   onPresupuesto,
+  cerrado,
   viaje,
   soy,
 }) {
@@ -126,6 +127,7 @@ function Resumen({
           total={total}
           presupuesto={viaje?.presupuesto ?? null}
           moneda={monedaViaje}
+          fijo={cerrado}
           onGuardar={onPresupuesto}
         />
       </div>
@@ -175,7 +177,8 @@ function Resumen({
         </>
       )}
 
-      {leTocaPagar && (
+      {/* Cerrado ya no hay "próxima" que pagar. */}
+      {leTocaPagar && !cerrado && (
         <div className="le-toca">
           {leTocaPagar.igualados ? (
             <>✅ Está todo igualado, puede pagar cualquiera.</>

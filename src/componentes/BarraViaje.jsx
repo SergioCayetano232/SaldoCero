@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useState } from "react";
 import { copiarAlPortapapeles, enlaceDelViaje, invitacion, invitar } from "../compartir";
 import NombreEditable from "./NombreEditable";
+import { textoCerrado } from "../cerrar";
 
 // La librería del QR pesa, y casi nadie lo abre: se baja solo al pulsar.
 const QRViaje = lazy(() => import("./QRViaje"));
@@ -12,7 +13,7 @@ const TEXTO_INVITAR = {
 };
 
 // El viaje abierto, con su código para compartir.
-function BarraViaje({ viaje, onSalir, onRenombrar }) {
+function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir }) {
   const [codigoCopiado, setCodigoCopiado] = useState(false);
   const [invitado, setInvitado] = useState("");
   const [conQR, setConQR] = useState(false);
@@ -40,18 +41,37 @@ function BarraViaje({ viaje, onSalir, onRenombrar }) {
     <section className="tarjeta tarjeta-viaje">
       <div className="viaje-titulo">
         <span className="viaje-emoji">🗺️</span>
-        <NombreEditable
-          como="h2"
-          className="viaje-nombre"
-          nombre={viaje.nombre}
-          onGuardar={onRenombrar}
-          titulo="Cambiar el nombre del viaje"
-        />
+        {cerrado ? (
+          <h2 className="viaje-nombre">{viaje.nombre}</h2>
+        ) : (
+          <NombreEditable
+            como="h2"
+            className="viaje-nombre"
+            nombre={viaje.nombre}
+            onGuardar={onRenombrar}
+            titulo="Cambiar el nombre del viaje"
+          />
+        )}
         <span className="viaje-moneda">{viaje.moneda ?? "EUR"}</span>
         <button className="boton-salir" onClick={onSalir} title="Salir del viaje">
           ✕
         </button>
       </div>
+
+      {cerrado && (
+        <div className="viaje-cerrado">
+          <span className="viaje-cerrado-icono" aria-hidden="true">
+            🔒
+          </span>
+          <p>
+            <strong>{textoCerrado(viaje.cerradoEn)}.</strong> Los gastos ya no cambian; las
+            deudas se pueden seguir marcando como pagadas.
+          </p>
+          <button className="enlace" onClick={onReabrir}>
+            Reabrir
+          </button>
+        </div>
+      )}
 
       <div className="fila-formulario">
         <button

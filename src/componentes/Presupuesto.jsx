@@ -3,7 +3,8 @@ import { leerImporte, simboloDe } from "../monedas";
 import { estadoPresupuesto, textoPresupuesto } from "../presupuesto";
 
 // La barra del presupuesto, dentro del recuadro del total.
-function Presupuesto({ total, presupuesto, moneda, onGuardar }) {
+// Fijo, se ve pero no se cambia: es lo que queda de un viaje cerrado.
+function Presupuesto({ total, presupuesto, moneda, fijo = false, onGuardar }) {
   const [editando, setEditando] = useState(false);
   const [texto, setTexto] = useState("");
 
@@ -50,6 +51,7 @@ function Presupuesto({ total, presupuesto, moneda, onGuardar }) {
   }
 
   if (!estado) {
+    if (fijo) return null;
     return (
       <button className="presupuesto-poner" onClick={abrir}>
         + Poner un presupuesto
@@ -72,9 +74,11 @@ function Presupuesto({ total, presupuesto, moneda, onGuardar }) {
       <div className="presupuesto-pie">
         <span>{textoPresupuesto(estado, presupuesto, moneda)}</span>
         <span className="presupuesto-tanto">{estado.porcentaje}%</span>
-        <button className="presupuesto-cambiar" onClick={abrir} title="Cambiar el presupuesto">
-          ✎
-        </button>
+        {!fijo && (
+          <button className="presupuesto-cambiar" onClick={abrir} title="Cambiar el presupuesto">
+            ✎
+          </button>
+        )}
       </div>
     </div>
   );

@@ -122,7 +122,7 @@ export async function abrirViaje(codigo) {
 async function cargarContenido(viajeId) {
   const [delViaje, viajeros, gastos, participantes, saldados, parciales] = await Promise.all([
     // Lo del viaje otra vez, por si lo ha cambiado alguien desde otro móvil.
-    supabase.from("viajes").select("nombre, presupuesto").eq("id", viajeId).single(),
+    supabase.from("viajes").select("nombre, presupuesto, cerrado_en").eq("id", viajeId).single(),
     supabase.from("viajeros").select("id, nombre").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
@@ -153,6 +153,7 @@ async function cargarContenido(viajeId) {
   return {
     nombre: delViaje.data.nombre,
     presupuesto: delViaje.data.presupuesto === null ? null : Number(delViaje.data.presupuesto),
+    cerradoEn: delViaje.data.cerrado_en,
     viajeros: viajeros.data,
     // Los marcados antes de guardar ids no los traen: esos van por nombre.
     saldados: saldados.data.map((p) => ({
@@ -229,6 +230,19 @@ export async function ponerPresupuesto(viajeId, presupuesto) {
     .select("id");
 
   if (error || !data.length) throw fallo(error, "No hemos podido guardar el presupuesto.");
+}
+
+// Cerrado, la base de datos ya no deja tocar gastos ni viajeros. Null lo reabre.
+export async function cerrarViaje(viajeId, cerrar = true) {
+  const { data, error } = await supabase
+    .from("viajes")
+    .update({ cerrado_en: cerrar ? new Date().toISOString() : null })
+    .eq("id", viajeId)
+    .select("id");
+
+  if (error || !data.length) {
+    throw fallo(error, cerrar ? "No hemos podido cerrar el viaje." : "No hemos podido reabrir el viaje.");
+  }
 }
 
 export async function quitarViajero(id) {

@@ -3,7 +3,8 @@ import { esHorizontal, conResistencia, queHacer, HOLGURA } from "../deslizar";
 import { vibrar } from "../vibrar";
 
 // Una fila de la lista que se puede arrastrar de lado con el dedo.
-function Deslizable({ className = "", onEditar, onQuitar, children }) {
+// Quieta, no se mueve: es para cuando no hay nada que editar ni quitar.
+function Deslizable({ className = "", onEditar, onQuitar, quieto = false, children }) {
   const [dx, setDx] = useState(0);
   const [ancho, setAncho] = useState(0);
   const [soltada, setSoltada] = useState(true);
@@ -12,7 +13,7 @@ function Deslizable({ className = "", onEditar, onQuitar, children }) {
 
   function alBajar(e) {
     // Con ratón están los botones, esto es para el móvil.
-    if (e.pointerType === "mouse") return;
+    if (e.pointerType === "mouse" || quieto) return;
 
     toque.current = { x: e.clientX, y: e.clientY, modo: null };
     setAncho(e.currentTarget.offsetWidth);

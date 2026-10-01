@@ -8,7 +8,7 @@ import { sugerirConceptos } from "../sugerencias";
 import { gastoAlFormulario, repetirGasto } from "../repetir";
 import Deslizable from "./Deslizable";
 
-function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, onAnadir, onEditar, onQuitar }) {
+function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, cerrado, onAnadir, onEditar, onQuitar }) {
   const [pagadorId, setPagadorId] = useState("");
   const [importe, setImporte] = useState("");
   const [moneda, setMoneda] = useState(monedaViaje);
@@ -234,234 +234,237 @@ function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, onAnadir, onEdi
         <p className="vacio">Primero añade viajeros para poder registrar gastos.</p>
       ) : (
         <>
-          <div className="formulario-gasto" ref={formulario}>
-            <select value={pagadorId} onChange={(e) => setPagadorId(e.target.value)}>
-              <option value="">¿Quién pagó?</option>
-              {viajeros.map((viajero) => (
-                <option key={viajero.id} value={viajero.id}>
-                  {viajero.nombre}
-                </option>
-              ))}
-            </select>
-
-            <div className="fila-importe">
-              <input
-                type="number"
-                placeholder="Importe"
-                min="0"
-                step="0.01"
-                value={importe}
-                onChange={(e) => setImporte(e.target.value)}
-              />
-              <select
-                className="selector-moneda"
-                value={moneda}
-                onChange={(e) => {
-                  setMoneda(e.target.value);
-                  setTasaAMano(null);
-                }}
-                title="¿En qué moneda se pagó?"
-              >
-                {MONEDAS.map((m) => (
-                  <option key={m.codigo} value={m.codigo}>
-                    {m.codigo}
+          {/* Cerrado, ya no se apuntan gastos. */}
+          {!cerrado && (
+            <div className="formulario-gasto" ref={formulario}>
+              <select value={pagadorId} onChange={(e) => setPagadorId(e.target.value)}>
+                <option value="">¿Quién pagó?</option>
+                {viajeros.map((viajero) => (
+                  <option key={viajero.id} value={viajero.id}>
+                    {viajero.nombre}
                   </option>
                 ))}
               </select>
 
-              <input
-                type="date"
-                className="campo-fecha"
-                value={fecha}
-                max={hoy()}
-                onChange={(e) => setFecha(e.target.value || hoy())}
-                title="¿Qué día fue?"
-              />
-            </div>
-
-            {moneda !== monedaViaje && (
-              <div className="conversion">
-                {aMano ? (
-                  <>
-                    {sinCambio && tasaAMano === null && (
-                      <span className="aviso">No sabemos el cambio de {moneda}, ponlo tú. </span>
-                    )}
-                    <label className="cambio-a-mano">
-                      1 {moneda} =
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        placeholder="0,00"
-                        value={tasaAMano ?? ""}
-                        onChange={(e) => setTasaAMano(e.target.value)}
-                        aria-label={`Cuántos ${monedaViaje} es 1 ${moneda}`}
-                      />
-                      {monedaViaje}
-                    </label>
-                    {tasa && importe > 0 && (
-                      <> · Son <strong>{conMoneda(importe * tasa, monedaViaje)}</strong></>
-                    )}
-                    {typeof cambioTraido?.tasa === "number" && cambioTraido.moneda === moneda && (
-                      <button className="enlace" onClick={() => setTasaAMano(null)}>
-                        Usar el del día
-                      </button>
-                    )}
-                  </>
-                ) : tasa === undefined ? (
-                  <>Mirando a cuánto está el cambio…</>
-                ) : (
-                  <>
-                    {importe > 0 && (
-                      <>Son <strong>{conMoneda(importe * tasa, monedaViaje)}</strong> · </>
-                    )}
-                    1 {moneda} = {tasa.toFixed(4)} {monedaViaje}
-                    {/* El banco no siempre te cobra el del día. */}
-                    <button className="enlace" onClick={() => setTasaAMano(tasaComoTexto(tasa))}>
-                      Cambiar
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
-
-            <input
-              type="text"
-              placeholder="Concepto (cena, hotel...)"
-              value={concepto}
-              onChange={(e) => setConcepto(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") guardar();
-              }}
-            />
-
-            {sugerencias.length > 0 && (
-              <div className="sugerencias">
-                {sugerencias.map((s) => {
-                  const c = categoriaDe(s.categoria);
-                  return (
-                    <button
-                      key={s.concepto}
-                      className="pastilla-categoria sugerencia"
-                      onClick={() => usarSugerencia(s)}
-                      style={{ "--color-categoria": c.color }}
-                    >
-                      <span className="pastilla-emoji">{c.emoji}</span>
-                      {s.concepto}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* En qué se fue. Van como pastillas y no en un desplegable:
-                se ven todas a la vez y se elige de un toque. */}
-            <div className="categorias">
-              {CATEGORIAS.map((c) => (
-                <button
-                  key={c.id}
-                  className={`pastilla-categoria ${categoria === c.id ? "elegida" : ""}`}
-                  onClick={() => setCategoria(c.id)}
-                  title={c.nombre}
-                  style={{ "--color-categoria": c.color }}
+              <div className="fila-importe">
+                <input
+                  type="number"
+                  placeholder="Importe"
+                  min="0"
+                  step="0.01"
+                  value={importe}
+                  onChange={(e) => setImporte(e.target.value)}
+                />
+                <select
+                  className="selector-moneda"
+                  value={moneda}
+                  onChange={(e) => {
+                    setMoneda(e.target.value);
+                    setTasaAMano(null);
+                  }}
+                  title="¿En qué moneda se pagó?"
                 >
-                  <span className="pastilla-emoji">{c.emoji}</span>
-                  {c.nombre}
-                </button>
-              ))}
-            </div>
+                  {MONEDAS.map((m) => (
+                    <option key={m.codigo} value={m.codigo}>
+                      {m.codigo}
+                    </option>
+                  ))}
+                </select>
 
-            <div className="participantes">
-              <p className="participantes-titulo">
-                {marcados.length === 0 ? (
-                  <span className="aviso">Marca al menos a uno para repartir el gasto</span>
-                ) : (
-                  <>
-                    Se reparte entre{" "}
-                    {entreTodos ? <strong>todos</strong> : <strong>{marcados.length}</strong>}
-                  </>
-                )}
-                {!entreTodos && (
-                  <button className="enlace" onClick={() => setParticipantes(todosLosIds)}>
-                    marcar todos
+                <input
+                  type="date"
+                  className="campo-fecha"
+                  value={fecha}
+                  max={hoy()}
+                  onChange={(e) => setFecha(e.target.value || hoy())}
+                  title="¿Qué día fue?"
+                />
+              </div>
+
+              {moneda !== monedaViaje && (
+                <div className="conversion">
+                  {aMano ? (
+                    <>
+                      {sinCambio && tasaAMano === null && (
+                        <span className="aviso">No sabemos el cambio de {moneda}, ponlo tú. </span>
+                      )}
+                      <label className="cambio-a-mano">
+                        1 {moneda} =
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          placeholder="0,00"
+                          value={tasaAMano ?? ""}
+                          onChange={(e) => setTasaAMano(e.target.value)}
+                          aria-label={`Cuántos ${monedaViaje} es 1 ${moneda}`}
+                        />
+                        {monedaViaje}
+                      </label>
+                      {tasa && importe > 0 && (
+                        <> · Son <strong>{conMoneda(importe * tasa, monedaViaje)}</strong></>
+                      )}
+                      {typeof cambioTraido?.tasa === "number" && cambioTraido.moneda === moneda && (
+                        <button className="enlace" onClick={() => setTasaAMano(null)}>
+                          Usar el del día
+                        </button>
+                      )}
+                    </>
+                  ) : tasa === undefined ? (
+                    <>Mirando a cuánto está el cambio…</>
+                  ) : (
+                    <>
+                      {importe > 0 && (
+                        <>Son <strong>{conMoneda(importe * tasa, monedaViaje)}</strong> · </>
+                      )}
+                      1 {moneda} = {tasa.toFixed(4)} {monedaViaje}
+                      {/* El banco no siempre te cobra el del día. */}
+                      <button className="enlace" onClick={() => setTasaAMano(tasaComoTexto(tasa))}>
+                        Cambiar
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+
+              <input
+                type="text"
+                placeholder="Concepto (cena, hotel...)"
+                value={concepto}
+                onChange={(e) => setConcepto(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") guardar();
+                }}
+              />
+
+              {sugerencias.length > 0 && (
+                <div className="sugerencias">
+                  {sugerencias.map((s) => {
+                    const c = categoriaDe(s.categoria);
+                    return (
+                      <button
+                        key={s.concepto}
+                        className="pastilla-categoria sugerencia"
+                        onClick={() => usarSugerencia(s)}
+                        style={{ "--color-categoria": c.color }}
+                      >
+                        <span className="pastilla-emoji">{c.emoji}</span>
+                        {s.concepto}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* En qué se fue. Van como pastillas y no en un desplegable:
+                  se ven todas a la vez y se elige de un toque. */}
+              <div className="categorias">
+                {CATEGORIAS.map((c) => (
+                  <button
+                    key={c.id}
+                    className={`pastilla-categoria ${categoria === c.id ? "elegida" : ""}`}
+                    onClick={() => setCategoria(c.id)}
+                    title={c.nombre}
+                    style={{ "--color-categoria": c.color }}
+                  >
+                    <span className="pastilla-emoji">{c.emoji}</span>
+                    {c.nombre}
                   </button>
-                )}
-              </p>
-
-              <div className="casillas">
-                {viajeros.map((viajero) => (
-                  <label key={viajero.id} className="casilla">
-                    <input
-                      type="checkbox"
-                      checked={marcados.includes(viajero.id)}
-                      onChange={() => alternar(viajero.id)}
-                    />
-                    {viajero.nombre}
-                  </label>
                 ))}
               </div>
 
-              {/* El reparto desigual va escondido: la mayoría de gastos se
-                  parten por igual y no hace falta marear con esto. */}
-              {marcados.length > 1 && (
-                <button
-                  className="enlace enlace-reparto"
-                  onClick={() => setRepartoAbierto(!repartoAbierto)}
-                >
-                  {repartoAbierto ? "← volver a partes iguales" : "¿unos más que otros?"}
-                </button>
-              )}
+              <div className="participantes">
+                <p className="participantes-titulo">
+                  {marcados.length === 0 ? (
+                    <span className="aviso">Marca al menos a uno para repartir el gasto</span>
+                  ) : (
+                    <>
+                      Se reparte entre{" "}
+                      {entreTodos ? <strong>todos</strong> : <strong>{marcados.length}</strong>}
+                    </>
+                  )}
+                  {!entreTodos && (
+                    <button className="enlace" onClick={() => setParticipantes(todosLosIds)}>
+                      marcar todos
+                    </button>
+                  )}
+                </p>
 
-              {repartoAbierto && marcados.length > 1 && (
-                <div className="partes">
-                  <p className="partes-ayuda">
-                    Cuántas partes paga cada uno. Con 2 y 1, el primero paga el doble.
-                  </p>
-
-                  {viajeros
-                    .filter((v) => marcados.includes(v.id))
-                    .map((viajero) => {
-                      const suyo = loQueLeToca(viajero.id);
-
-                      return (
-                        <div className="fila-parte" key={viajero.id}>
-                          <span className="parte-nombre">{viajero.nombre}</span>
-
-                          <input
-                            type="number"
-                            className="parte-campo"
-                            min="0"
-                            step="0.5"
-                            value={partes[viajero.id] ?? 1}
-                            onChange={(e) => cambiarParte(viajero.id, e.target.value)}
-                          />
-
-                          {suyo !== null && (
-                            <span className="parte-importe">
-                              {conMoneda(suyo, monedaViaje)}
-                            </span>
-                          )}
-                        </div>
-                      );
-                    })}
+                <div className="casillas">
+                  {viajeros.map((viajero) => (
+                    <label key={viajero.id} className="casilla">
+                      <input
+                        type="checkbox"
+                        checked={marcados.includes(viajero.id)}
+                        onChange={() => alternar(viajero.id)}
+                      />
+                      {viajero.nombre}
+                    </label>
+                  ))}
                 </div>
+
+                {/* El reparto desigual va escondido: la mayoría de gastos se
+                    parten por igual y no hace falta marear con esto. */}
+                {marcados.length > 1 && (
+                  <button
+                    className="enlace enlace-reparto"
+                    onClick={() => setRepartoAbierto(!repartoAbierto)}
+                  >
+                    {repartoAbierto ? "← volver a partes iguales" : "¿unos más que otros?"}
+                  </button>
+                )}
+
+                {repartoAbierto && marcados.length > 1 && (
+                  <div className="partes">
+                    <p className="partes-ayuda">
+                      Cuántas partes paga cada uno. Con 2 y 1, el primero paga el doble.
+                    </p>
+
+                    {viajeros
+                      .filter((v) => marcados.includes(v.id))
+                      .map((viajero) => {
+                        const suyo = loQueLeToca(viajero.id);
+
+                        return (
+                          <div className="fila-parte" key={viajero.id}>
+                            <span className="parte-nombre">{viajero.nombre}</span>
+
+                            <input
+                              type="number"
+                              className="parte-campo"
+                              min="0"
+                              step="0.5"
+                              value={partes[viajero.id] ?? 1}
+                              onChange={(e) => cambiarParte(viajero.id, e.target.value)}
+                            />
+
+                            {suyo !== null && (
+                              <span className="parte-importe">
+                                {conMoneda(suyo, monedaViaje)}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
+
+              {editando ? (
+                <div className="fila-botones">
+                  <button onClick={guardar} disabled={marcados.length === 0 || typeof tasa !== "number"}>
+                    Guardar cambios
+                  </button>
+                  <button className="boton-cancelar" onClick={cancelar}>
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <button onClick={guardar} disabled={marcados.length === 0 || typeof tasa !== "number"}>
+                  Añadir gasto
+                </button>
               )}
             </div>
-
-            {editando ? (
-              <div className="fila-botones">
-                <button onClick={guardar} disabled={marcados.length === 0 || typeof tasa !== "number"}>
-                  Guardar cambios
-                </button>
-                <button className="boton-cancelar" onClick={cancelar}>
-                  Cancelar
-                </button>
-              </div>
-            ) : (
-              <button onClick={guardar} disabled={marcados.length === 0 || typeof tasa !== "number"}>
-                Añadir gasto
-              </button>
-            )}
-          </div>
+          )}
 
           {puedeFiltrar && (
             <div className="filtros">
@@ -542,6 +545,7 @@ function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, onAnadir, onEdi
                       }`}
                       onEditar={() => editar(gasto)}
                       onQuitar={() => onQuitar(gasto.id, gasto.concepto)}
+                      quieto={cerrado}
                     >
                       <span
                         className="gasto-icono"
@@ -567,29 +571,31 @@ function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, onAnadir, onEdi
                         )}
                       </span>
 
-                      <span className="acciones">
-                        <button
-                          className="boton-repetir"
-                          onClick={() => repetir(gasto)}
-                          title="Apuntar otro igual"
-                          aria-label="Apuntar otro igual"
-                        >
-                          ⧉
-                        </button>
-                        <button
-                          className="boton-editar"
-                          onClick={() => editar(gasto)}
-                          title="Editar gasto"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          className="boton-quitar"
-                          onClick={() => onQuitar(gasto.id, gasto.concepto)}
-                        >
-                          ✕
-                        </button>
-                      </span>
+                      {!cerrado && (
+                        <span className="acciones">
+                          <button
+                            className="boton-repetir"
+                            onClick={() => repetir(gasto)}
+                            title="Apuntar otro igual"
+                            aria-label="Apuntar otro igual"
+                          >
+                            ⧉
+                          </button>
+                          <button
+                            className="boton-editar"
+                            onClick={() => editar(gasto)}
+                            title="Editar gasto"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            className="boton-quitar"
+                            onClick={() => onQuitar(gasto.id, gasto.concepto)}
+                          >
+                            ✕
+                          </button>
+                        </span>
+                      )}
                     </Deslizable>
                   ))}
                 </ul>

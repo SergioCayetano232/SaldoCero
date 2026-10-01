@@ -7,6 +7,7 @@ import { coloresDelViaje } from "./avatares";
 import { borradoConEspera } from "./deshacer";
 import { novedades, textoDeNovedades } from "./novedades";
 import { vibrar } from "./vibrar";
+import { estaCerrado } from "./cerrar";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
 import Viajeros from "./componentes/Viajeros";
@@ -190,6 +191,20 @@ function App() {
     hacer(() => datos.vaciarViaje(viaje.id));
   }
 
+  function cerrarViaje() {
+    const confirmado = window.confirm(
+      `¿Cerrar "${viaje.nombre}"? Nadie podrá apuntar, cambiar ni quitar gastos. Se puede reabrir.`
+    );
+    if (!confirmado) return;
+
+    hacer(() => datos.cerrarViaje(viaje.id));
+  }
+
+  function reabrirViaje() {
+    if (!window.confirm(`¿Reabrir "${viaje.nombre}"? Se podrán volver a tocar los gastos.`)) return;
+    hacer(() => datos.cerrarViaje(viaje.id, false));
+  }
+
   // Sin las claves de Supabase no hay nada que hacer.
   if (!hayConexion) {
     return (
@@ -238,6 +253,7 @@ function App() {
   const parciales = (viaje.parciales ?? []).filter((p) => p.id !== seVa);
   const balances = calcularBalances(viajeros, gastos, parciales);
   const colores = coloresDelViaje(viajeros.map((v) => v.nombre));
+  const cerrado = estaCerrado(viaje);
 
   return (
     <div className="app">
@@ -246,6 +262,8 @@ function App() {
       <BarraViaje
         viaje={viaje}
         onSalir={salirDelViaje}
+        cerrado={cerrado}
+        onReabrir={reabrirViaje}
         onRenombrar={(nombre) => hacer(() => datos.renombrarViaje(viaje, nombre))}
       />
 
@@ -257,6 +275,7 @@ function App() {
         soy={soy}
         onSoyYo={elegirQuienSoy}
         recienLlegados={novedad?.ids}
+        cerrado={cerrado}
         onAnadir={(nombre) =>
           hacer(async () => propios.current.add((await datos.anadirViajero(viaje.id, nombre)).id))
         }
@@ -271,6 +290,7 @@ function App() {
         gastos={gastos}
         monedaViaje={viaje.moneda ?? "EUR"}
         recienLlegados={novedad?.ids}
+        cerrado={cerrado}
         onAnadir={(gasto) =>
           hacer(async () => propios.current.add((await datos.anadirGasto(viaje.id, gasto)).id))
         }
@@ -290,6 +310,7 @@ function App() {
           saldados={viaje.saldados ?? []}
           onSaldar={(pago) => hacer(() => datos.marcarSaldado(viaje.id, pago))}
           onDesaldar={(pago) => hacer(() => datos.desmarcarSaldado(viaje.id, pago))}
+          cerrado={cerrado}
           onPresupuesto={(cantidad) => hacer(() => datos.ponerPresupuesto(viaje.id, cantidad))}
           parciales={parciales}
           onParcial={(parcial) => hacer(() => datos.anadirParcial(viaje.id, parcial))}
@@ -300,10 +321,17 @@ function App() {
         />
       )}
 
-      {(viajeros.length > 0 || gastos.length > 0) && (
-        <button className="boton-reiniciar" onClick={vaciarViaje}>
-          Vaciar este viaje
-        </button>
+      {!cerrado && (viajeros.length > 0 || gastos.length > 0) && (
+        <div className="botones-final">
+          {gastos.length > 0 && (
+            <button className="boton-cerrar-viaje" onClick={cerrarViaje}>
+              🔒 Cerrar el viaje
+            </button>
+          )}
+          <button className="boton-reiniciar" onClick={vaciarViaje}>
+            Vaciar este viaje
+          </button>
+        </div>
       )}
 
       {novedad && (

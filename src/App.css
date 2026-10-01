@@ -2184,6 +2184,73 @@ button:active {
   background-color: var(--rojo-fondo);
 }
 
+/* ===== Viaje cerrado ===== */
+.botones-final {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 22px;
+}
+
+.botones-final .boton-reiniciar {
+  margin: 0;
+}
+
+.boton-cerrar-viaje {
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--teal-700);
+  border: 1px solid var(--teal-100);
+  border-radius: var(--radio-sm);
+}
+
+.boton-cerrar-viaje:hover {
+  background-color: var(--teal-50);
+  border-color: var(--teal-300);
+}
+
+.viaje-cerrado {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border-radius: var(--radio-sm);
+  background-color: var(--papel-hundido);
+  border: 1px solid var(--linea);
+  font-size: 13px;
+  color: var(--tinta-suave);
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
+}
+
+.viaje-cerrado p {
+  flex: 1;
+  min-width: 0;
+}
+
+.viaje-cerrado strong {
+  color: var(--tinta);
+}
+
+.viaje-cerrado-icono {
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.viaje-cerrado .enlace {
+  flex-shrink: 0;
+  line-height: 1.5;
+}
+
+.nombre-fijo {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ===== Quién eres tú ===== */
 /* Tu fila lleva un filito de color a la izquierda, para encontrarte rápido. */
 .soy-yo {
