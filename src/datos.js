@@ -48,6 +48,12 @@ function apuntarEnHistorial(viaje) {
   localStorage.setItem(CLAVE_HISTORICO, JSON.stringify(lista.slice(0, CUANTOS_GUARDAMOS)));
 }
 
+// Si le cambian el nombre, que en la lista salga con el nuevo. Sin subirlo arriba.
+export function renombrarEnHistorial(codigo, nombre) {
+  const lista = historial().map((v) => (v.codigo === codigo ? { ...v, nombre } : v));
+  localStorage.setItem(CLAVE_HISTORICO, JSON.stringify(lista));
+}
+
 export function olvidarDelHistorial(codigo) {
   const lista = historial().filter((v) => v.codigo !== codigo);
   localStorage.setItem(CLAVE_HISTORICO, JSON.stringify(lista));
@@ -114,7 +120,9 @@ export async function abrirViaje(codigo) {
 
 // Los viajeros y los gastos de un viaje ya abierto.
 async function cargarContenido(viajeId) {
-  const [viajeros, gastos, participantes, saldados, parciales] = await Promise.all([
+  const [delViaje, viajeros, gastos, participantes, saldados, parciales] = await Promise.all([
+    // El nombre otra vez, por si lo ha cambiado alguien desde otro móvil.
+    supabase.from("viajes").select("nombre").eq("id", viajeId).single(),
     supabase.from("viajeros").select("id, nombre").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
@@ -138,10 +146,12 @@ async function cargarContenido(viajeId) {
   ]);
 
   const error =
+    delViaje.error ||
     viajeros.error || gastos.error || participantes.error || saldados.error || parciales.error;
   if (error) throw fallo(error, "No hemos podido cargar el viaje.");
 
   return {
+    nombre: delViaje.data.nombre,
     viajeros: viajeros.data,
     // Los marcados antes de guardar ids no los traen: esos van por nombre.
     saldados: saldados.data.map((p) => ({
@@ -194,6 +204,19 @@ export async function anadirViajero(viajeId, nombre) {
 
   if (error) throw fallo(error, "No hemos podido añadir al viajero.");
   return data;
+}
+
+export async function renombrarViajero(id, nombre) {
+  // Si las reglas no le dejan, no da error: simplemente no cambia nada.
+  const { data, error } = await supabase.from("viajeros").update({ nombre }).eq("id", id).select("id");
+  if (error || !data.length) throw fallo(error, "No hemos podido cambiarle el nombre.");
+}
+
+export async function renombrarViaje(viaje, nombre) {
+  const { data, error } = await supabase.from("viajes").update({ nombre }).eq("id", viaje.id).select("id");
+  if (error || !data.length) throw fallo(error, "No hemos podido cambiar el nombre del viaje.");
+
+  renombrarEnHistorial(viaje.codigo, nombre);
 }
 
 export async function quitarViajero(id) {

@@ -1953,6 +1953,57 @@ button:active {
   min-width: 0;
 }
 
+/* ===== Nombres que se cambian tocándolos ===== */
+.nombre-editable {
+  min-width: 0;
+  display: flex;
+}
+
+.boton-nombre {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: text;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.boton-nombre:active {
+  transform: none;
+}
+
+.lapiz {
+  flex-shrink: 0;
+  font-size: 0.7em;
+  color: var(--tinta-tenue);
+  opacity: 0;
+  transition: opacity var(--rapido);
+}
+
+.boton-nombre:hover .lapiz,
+.boton-nombre:focus-visible .lapiz {
+  opacity: 1;
+}
+
+.campo-nombre {
+  width: auto;
+  flex: 1;
+  min-width: 0;
+  padding: 2px 8px;
+  margin: -3px 0;
+  font: inherit;
+  animation: aparecer-creciendo var(--rapido) var(--curva-suave);
+}
+
 /* Si no cabe, que salte entera: "40.00" arriba y el "€" solo abajo queda feo. */
 .sin-partir {
   white-space: nowrap;
@@ -2380,6 +2431,10 @@ button:active {
 
   .lista li {
     gap: 8px;
+  }
+
+  .lapiz {
+    opacity: 0.6;
   }
 
   /* Sin ratón no hay "pasar por encima": los botones siempre a la vista. */

@@ -1,5 +1,6 @@
 import { lazy, Suspense, useCallback, useState } from "react";
 import { copiarAlPortapapeles, enlaceDelViaje, invitacion, invitar } from "../compartir";
+import NombreEditable from "./NombreEditable";
 
 // La librería del QR pesa, y casi nadie lo abre: se baja solo al pulsar.
 const QRViaje = lazy(() => import("./QRViaje"));
@@ -11,7 +12,7 @@ const TEXTO_INVITAR = {
 };
 
 // El viaje abierto, con su código para compartir.
-function BarraViaje({ viaje, onSalir }) {
+function BarraViaje({ viaje, onSalir, onRenombrar }) {
   const [codigoCopiado, setCodigoCopiado] = useState(false);
   const [invitado, setInvitado] = useState("");
   const [conQR, setConQR] = useState(false);
@@ -39,7 +40,13 @@ function BarraViaje({ viaje, onSalir }) {
     <section className="tarjeta tarjeta-viaje">
       <div className="viaje-titulo">
         <span className="viaje-emoji">🗺️</span>
-        <h2 className="viaje-nombre">{viaje.nombre}</h2>
+        <NombreEditable
+          como="h2"
+          className="viaje-nombre"
+          nombre={viaje.nombre}
+          onGuardar={onRenombrar}
+          titulo="Cambiar el nombre del viaje"
+        />
         <span className="viaje-moneda">{viaje.moneda ?? "EUR"}</span>
         <button className="boton-salir" onClick={onSalir} title="Salir del viaje">
           ✕

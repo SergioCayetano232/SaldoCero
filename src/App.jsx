@@ -243,7 +243,11 @@ function App() {
     <div className="app">
       <Cabecera />
 
-      <BarraViaje viaje={viaje} onSalir={salirDelViaje} />
+      <BarraViaje
+        viaje={viaje}
+        onSalir={salirDelViaje}
+        onRenombrar={(nombre) => hacer(() => datos.renombrarViaje(viaje, nombre))}
+      />
 
       {error && <p className="error">{error}</p>}
 
@@ -256,6 +260,7 @@ function App() {
         onAnadir={(nombre) =>
           hacer(async () => propios.current.add((await datos.anadirViajero(viaje.id, nombre)).id))
         }
+        onRenombrar={(id, nombre) => hacer(() => datos.renombrarViajero(id, nombre))}
         onQuitar={(id, nombre) =>
           borrarConAviso(id, `a ${nombre}`, () => datos.quitarViajero(id))
         }

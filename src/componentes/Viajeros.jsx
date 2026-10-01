@@ -1,12 +1,14 @@
 import { useState } from "react";
 import Avatar from "./Avatar";
+import NombreEditable from "./NombreEditable";
+import { limpiarNombre, LARGO_MAXIMO } from "../nombres";
 
-function Viajeros({ viajeros, colores, recienLlegados, onAnadir, onQuitar, soy, onSoyYo }) {
+function Viajeros({ viajeros, colores, recienLlegados, onAnadir, onRenombrar, onQuitar, soy, onSoyYo }) {
   const [nombre, setNombre] = useState("");
 
   function anadir() {
-    const nombreLimpio = nombre.trim();
-    if (nombreLimpio === "") return;
+    const nombreLimpio = limpiarNombre(nombre);
+    if (!nombreLimpio) return;
 
     onAnadir(nombreLimpio);
     setNombre("");
@@ -20,6 +22,7 @@ function Viajeros({ viajeros, colores, recienLlegados, onAnadir, onQuitar, soy, 
         <input
           type="text"
           placeholder="Nombre del viajero"
+          maxLength={LARGO_MAXIMO}
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
           onKeyDown={(e) => {
@@ -42,7 +45,11 @@ function Viajeros({ viajeros, colores, recienLlegados, onAnadir, onQuitar, soy, 
             >
               <span className="viajero-quien">
                 <Avatar nombre={viajero.nombre} color={colores?.get(viajero.nombre)} />
-                {viajero.nombre}
+                <NombreEditable
+                  nombre={viajero.nombre}
+                  onGuardar={(nuevo) => onRenombrar(viajero.id, nuevo)}
+                  titulo={`Cambiar el nombre de ${viajero.nombre}`}
+                />
                 {viajero.id === soy && <span className="etiqueta-tu">tú</span>}
               </span>
 
