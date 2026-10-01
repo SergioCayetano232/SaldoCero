@@ -121,8 +121,8 @@ export async function abrirViaje(codigo) {
 // Los viajeros y los gastos de un viaje ya abierto.
 async function cargarContenido(viajeId) {
   const [delViaje, viajeros, gastos, participantes, saldados, parciales] = await Promise.all([
-    // El nombre otra vez, por si lo ha cambiado alguien desde otro móvil.
-    supabase.from("viajes").select("nombre").eq("id", viajeId).single(),
+    // Lo del viaje otra vez, por si lo ha cambiado alguien desde otro móvil.
+    supabase.from("viajes").select("nombre, presupuesto").eq("id", viajeId).single(),
     supabase.from("viajeros").select("id, nombre").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
@@ -152,6 +152,7 @@ async function cargarContenido(viajeId) {
 
   return {
     nombre: delViaje.data.nombre,
+    presupuesto: delViaje.data.presupuesto === null ? null : Number(delViaje.data.presupuesto),
     viajeros: viajeros.data,
     // Los marcados antes de guardar ids no los traen: esos van por nombre.
     saldados: saldados.data.map((p) => ({
@@ -217,6 +218,17 @@ export async function renombrarViaje(viaje, nombre) {
   if (error || !data.length) throw fallo(error, "No hemos podido cambiar el nombre del viaje.");
 
   renombrarEnHistorial(viaje.codigo, nombre);
+}
+
+// null lo quita.
+export async function ponerPresupuesto(viajeId, presupuesto) {
+  const { data, error } = await supabase
+    .from("viajes")
+    .update({ presupuesto })
+    .eq("id", viajeId)
+    .select("id");
+
+  if (error || !data.length) throw fallo(error, "No hemos podido guardar el presupuesto.");
 }
 
 export async function quitarViajero(id) {

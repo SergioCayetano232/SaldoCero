@@ -17,6 +17,7 @@ import Confeti from "./Confeti";
 import Avatar from "./Avatar";
 import Desglose from "./Desglose";
 import PagosACuenta from "./PagosACuenta";
+import Presupuesto from "./Presupuesto";
 import { esElUltimo } from "../confeti";
 import { vibrar } from "../vibrar";
 
@@ -31,6 +32,7 @@ function Resumen({
   onDesaldar,
   onParcial,
   onQuitarParcial,
+  onPresupuesto,
   viaje,
   soy,
 }) {
@@ -120,6 +122,12 @@ function Resumen({
           {gastos.length} {gastos.length === 1 ? "gasto" : "gastos"} · {balances.length}{" "}
           {balances.length === 1 ? "viajero" : "viajeros"}
         </div>
+        <Presupuesto
+          total={total}
+          presupuesto={viaje?.presupuesto ?? null}
+          moneda={monedaViaje}
+          onGuardar={onPresupuesto}
+        />
       </div>
 
       {/* En qué se ha ido el dinero. Solo si hay más de una cosa, que si no

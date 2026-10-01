@@ -290,6 +290,7 @@ function App() {
           saldados={viaje.saldados ?? []}
           onSaldar={(pago) => hacer(() => datos.marcarSaldado(viaje.id, pago))}
           onDesaldar={(pago) => hacer(() => datos.desmarcarSaldado(viaje.id, pago))}
+          onPresupuesto={(cantidad) => hacer(() => datos.ponerPresupuesto(viaje.id, cantidad))}
           parciales={parciales}
           onParcial={(parcial) => hacer(() => datos.anadirParcial(viaje.id, parcial))}
           onQuitarParcial={(parcial, de, a) =>

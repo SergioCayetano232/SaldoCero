@@ -1526,6 +1526,158 @@ button:active {
   margin-top: 4px;
 }
 
+/* ===== Presupuesto ===== */
+.presupuesto,
+.presupuesto-poner {
+  position: relative;
+  margin-top: 14px;
+}
+
+.presupuesto-poner {
+  font-size: 13px;
+  color: white;
+  opacity: 0.75;
+  padding: 4px 10px;
+  margin-left: -10px;
+  border-radius: var(--radio-pastilla);
+}
+
+.presupuesto-poner:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+.presupuesto-barra {
+  height: 8px;
+  border-radius: var(--radio-pastilla);
+  background-color: rgba(255, 255, 255, 0.22);
+  overflow: hidden;
+}
+
+.presupuesto-relleno {
+  height: 100%;
+  border-radius: inherit;
+  background-color: white;
+  transition: width var(--lento) var(--curva-suave), background-color var(--medio);
+  animation: llenar-barra var(--lento) var(--curva-suave);
+}
+
+@keyframes llenar-barra {
+  from {
+    width: 0;
+  }
+}
+
+.presupuesto.cerca .presupuesto-relleno {
+  background-color: var(--presupuesto-cerca);
+}
+
+.presupuesto.pasado .presupuesto-relleno {
+  background-color: var(--presupuesto-pasado);
+}
+
+.presupuesto-pie {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 7px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.presupuesto-pie > span:first-child {
+  flex: 1;
+  min-width: 0;
+  opacity: 0.9;
+}
+
+/* Un texto de color sobre el verde no se lee en los dos temas: mejor una pastilla. */
+.presupuesto.pasado .presupuesto-pie > span:first-child {
+  flex: 0 1 auto;
+  margin-right: auto;
+  padding: 2px 10px;
+  border-radius: var(--radio-pastilla);
+  background-color: var(--presupuesto-aviso);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 1;
+  animation: temblor 0.4s var(--curva-suave);
+}
+
+.presupuesto-tanto {
+  font-weight: 600;
+}
+
+.presupuesto-cambiar {
+  color: white;
+  opacity: 0.6;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.presupuesto-cambiar:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+.presupuesto-editando {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
+}
+
+.presupuesto-campo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.presupuesto-campo input {
+  width: 110px;
+  padding: 6px 10px;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.presupuesto-botones {
+  display: flex;
+  gap: 6px;
+}
+
+.presupuesto-botones button {
+  font-size: 13px;
+  font-weight: 500;
+  color: white;
+  padding: 6px 12px;
+  border-radius: var(--radio-pastilla);
+  background-color: rgba(255, 255, 255, 0.16);
+}
+
+.presupuesto-botones button:first-child {
+  background-color: white;
+  color: var(--presupuesto-tinta);
+}
+
+.presupuesto-botones button:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.28);
+}
+
+.presupuesto-botones button:first-child:hover:not(:disabled) {
+  background-color: white;
+  transform: translateY(-1px);
+}
+
+.presupuesto-botones button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .le-toca {
   background-color: var(--naranja-100);
   border: 1px solid rgba(244, 162, 89, 0.35);

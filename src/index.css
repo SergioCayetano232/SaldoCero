@@ -51,6 +51,12 @@
   --medio: 0.28s;
   --lento: 0.5s;
 
+  /* La barra del presupuesto va sobre el verde del total, en claro y en oscuro. */
+  --presupuesto-cerca: #ffd08a;
+  --presupuesto-pasado: #ffb3ad;
+  --presupuesto-aviso: #b3302b;
+  --presupuesto-tinta: #0b5c5b;
+
   /* Las manchas de color del fondo y el grano de encima. */
   --luz-teal: rgba(14, 124, 123, 0.4);
   --luz-teal-2: rgba(52, 168, 166, 0.32);
