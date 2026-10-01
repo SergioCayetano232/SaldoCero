@@ -1018,6 +1018,35 @@ button:active {
   font-variant-numeric: tabular-nums;
 }
 
+/* Para elegir de quién es el desglose: el viaje entero o uno solo. */
+.desglose-quien {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.desglose-quien .etiqueta-tu {
+  margin-left: 2px;
+}
+
+.desglose-de {
+  font-size: 13px;
+  color: var(--tinta-suave);
+  margin-bottom: 12px;
+  animation: entrar-desde-abajo var(--medio) var(--curva-suave);
+}
+
+.desglose-de strong {
+  color: var(--tinta);
+  font-variant-numeric: tabular-nums;
+}
+
+.desglose-quien + .vacio,
+.desglose-de + .vacio {
+  margin-bottom: 18px;
+}
+
 /* En pantallas estrechas el donut arriba y la lista debajo, a lo ancho. */
 @media (max-width: 400px) {
   .desglose {

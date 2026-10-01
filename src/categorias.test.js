@@ -78,3 +78,13 @@ describe("gastoPorCategoria", () => {
     expect(suma).toBeCloseTo(371.5);
   });
 });
+
+describe("gastoPorCategoria con el reparto de uno", () => {
+  it("las categorías en las que no tiene nada no salen", () => {
+    const gastos = [
+      { importe: 60, categoria: "comida", mia: 20 },
+      { importe: 40, categoria: "ocio", mia: 0 },
+    ];
+    expect(gastoPorCategoria(gastos, (g) => g.mia).map((c) => c.id)).toEqual(["comida"]);
+  });
+});

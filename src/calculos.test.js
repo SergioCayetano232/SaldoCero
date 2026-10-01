@@ -12,6 +12,7 @@ import {
   quedaPorPagar,
   balancesTrasPagos,
   repartoDeGasto,
+  parteDe,
 } from "./calculos";
 
 const ana = { id: "a", nombre: "Ana" };
@@ -488,5 +489,38 @@ describe("mismoPago", () => {
     expect(mismoPago({ de: "Pepe", a: "Ana" }, { deId: "p", aId: "a1", de: "Pepe", a: "Ana" })).toBe(true);
     expect(mismoPago({ deId: "p", aId: null, de: "Pepe", a: "Ana" }, { deId: "p", aId: "a1", de: "Pepe", a: "Ana" })).toBe(true);
     expect(mismoPago({ de: "Pepe", a: "Eva" }, { deId: "p", aId: "a1", de: "Pepe", a: "Ana" })).toBe(false);
+  });
+});
+
+describe("parteDe", () => {
+  it("a partes iguales entre los que van", () => {
+    const cena = { importe: 90, pagadorId: "a", participantes: ["a", "b", "c"] };
+    expect(parteDe(cena, "b", viajeros)).toBe(30);
+  });
+
+  it("con partes desiguales, lo suyo", () => {
+    const pizza = { importe: 90, pagadorId: "a", participantes: ["a", "b"], partes: { a: 2, b: 1 } };
+    expect(parteDe(pizza, "a", viajeros)).toBe(60);
+    expect(parteDe(pizza, "b", viajeros)).toBe(30);
+  });
+
+  it("si no va en el gasto, cero aunque lo pagara", () => {
+    const taxi = { importe: 20, pagadorId: "c", participantes: ["a", "b"] };
+    expect(parteDe(taxi, "c", viajeros)).toBe(0);
+  });
+
+  it("los de antes, sin participantes, van entre todos", () => {
+    expect(parteDe({ importe: 30, pagadorId: "a" }, "c", viajeros)).toBe(10);
+  });
+
+  it("en otra moneda cuenta lo convertido", () => {
+    const g = { importe: 150, importeConvertido: 15, pagadorId: "a", participantes: ["a", "b", "c"] };
+    expect(parteDe(g, "a", viajeros)).toBe(5);
+  });
+
+  it("sumando lo de todos sale el gasto entero", () => {
+    const g = { importe: 100, pagadorId: "a", participantes: ["a", "b", "c"], partes: { a: 1, b: 1, c: 1 } };
+    const suma = viajeros.reduce((t, v) => t + parteDe(g, v.id, viajeros), 0);
+    expect(suma).toBeCloseTo(100);
   });
 });

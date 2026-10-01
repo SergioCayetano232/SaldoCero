@@ -27,7 +27,9 @@ export function gastoPorCategoria(gastos, importeDeGasto) {
     suma.set(id, (suma.get(id) ?? 0) + importeDeGasto(gasto));
   }
 
+  // Con el reparto de uno solo salen ceros: los gastos en los que no iba.
   return [...suma]
+    .filter(([, total]) => total > 0)
     .map(([id, total]) => ({ ...categoriaDe(id), total }))
     .sort((a, b) => b.total - a.total);
 }

@@ -53,6 +53,11 @@ export function repartoDeGasto(gasto, participantes) {
   return reparto;
 }
 
+// Lo que le toca a uno de un gasto. Cero si no va en él.
+export function parteDe(gasto, viajeroId, viajeros) {
+  return repartoDeGasto(gasto, participantesDeGasto(gasto, viajeros)).get(viajeroId) ?? 0;
+}
+
 // Cuánto ha puesto cada uno, cuánto le tocaba y su balance.
 // Ya no vale dividir el total entre todos: cada gasto va con su gente, así que
 // hay que ir gasto por gasto repartiendo entre los suyos.

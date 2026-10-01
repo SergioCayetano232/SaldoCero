@@ -11,7 +11,7 @@ import {
 import { conMoneda } from "../monedas";
 import { resumenEnTexto, copiarAlPortapapeles, descargarResumen } from "../compartir";
 import { gastoPorCategoria } from "../categorias";
-import { importeDeGasto } from "../calculos";
+import { importeDeGasto, parteDe } from "../calculos";
 import Cifra from "./Cifra";
 import Confeti from "./Confeti";
 import Avatar from "./Avatar";
@@ -35,12 +35,20 @@ function Resumen({
   // Qué fiesta va. Hace de key para que el confeti vuelva a caer si se repite.
   const [fiesta, setFiesta] = useState(null);
   const fiestas = useRef(0);
+  // De quién es el desglose. null = del viaje entero.
+  const [persona, setPersona] = useState(null);
   const total = calcularTotal(gastos);
   const pagos = marcarSaldados(calcularPagos(balances), saldados);
   // Con lo ya pagado descontado: si todo está saldado, no le toca a nadie.
   const leTocaPagar = calcularLeTocaPagar(balancesTrasPagos(balances, pagos));
   const pendiente = quedaPorPagar(pagos);
-  const porCategoria = gastoPorCategoria(gastos, importeDeGasto);
+  const delViaje = gastoPorCategoria(gastos, importeDeGasto);
+  // Si lo han quitado del viaje mientras lo mirabas, vuelve a todos.
+  const deQuien = balances.find((v) => v.id === persona);
+  // Lo que le tocaba a él de cada gasto, no lo que pagó: eso es en qué se le fue.
+  const porCategoria = deQuien
+    ? gastoPorCategoria(gastos, (g) => parteDe(g, deQuien.id, balances))
+    : delViaje;
   const todoPagado = pagos.length > 0 && pendiente === 0;
 
   // Las barras se miden contra el que más ha puesto.
@@ -112,8 +120,47 @@ function Resumen({
 
       {/* En qué se ha ido el dinero. Solo si hay más de una cosa, que si no
           es un anillo entero y no cuenta nada. */}
-      {porCategoria.length > 1 && (
-        <Desglose porCategoria={porCategoria} moneda={monedaViaje} />
+      {delViaje.length > 1 && (
+        <>
+          {balances.length > 1 && (
+            <div className="desglose-quien" role="group" aria-label="De quién">
+              <button
+                className={`pastilla-categoria ${deQuien ? "" : "elegida"}`}
+                style={{ "--color-categoria": "var(--teal-500)" }}
+                onClick={() => setPersona(null)}
+              >
+                Todos
+              </button>
+              {balances.map((v) => (
+                <button
+                  key={v.id}
+                  className={`pastilla-categoria ${v.id === deQuien?.id ? "elegida" : ""}`}
+                  style={{ "--color-categoria": colores?.get(v.nombre) ?? "var(--tinta-tenue)" }}
+                  onClick={() => setPersona(v.id)}
+                >
+                  <span className="desglose-punto" style={{ backgroundColor: "var(--color-categoria)" }} />
+                  {v.nombre}
+                  {v.id === soy && <span className="etiqueta-tu">tú</span>}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {deQuien && porCategoria.length > 0 && (
+            <p className="desglose-de">
+              A {deQuien.nombre} le tocan{" "}
+              <strong>{conMoneda(deQuien.tocaPagar, monedaViaje)}</strong> de los{" "}
+              {conMoneda(total, monedaViaje)}
+            </p>
+          )}
+
+          {porCategoria.length > 0 ? (
+            // Con key, el donut vuelve a dibujarse al cambiar de persona.
+            <Desglose key={persona ?? "todos"} porCategoria={porCategoria} moneda={monedaViaje} />
+          ) : (
+            <p className="vacio">{deQuien.nombre} no va en ningún gasto.</p>
+          )}
+        </>
       )}
 
       {leTocaPagar && (
