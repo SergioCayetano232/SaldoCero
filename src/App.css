@@ -1785,6 +1785,102 @@ button:active {
   font-variant-numeric: tabular-nums;
 }
 
+/* ===== Pagos a cuenta ===== */
+.a-cuenta {
+  margin-top: 14px;
+}
+
+.a-cuenta h4 {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tinta-tenue);
+  margin-bottom: 6px;
+}
+
+.lista-parciales {
+  list-style: none;
+  margin-bottom: 10px;
+}
+
+/* Más discretos que las deudas: ya están pagados, solo se apuntan. */
+.parcial {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 4px 6px 10px;
+  border-left: 2px solid var(--teal-300);
+  font-size: 14px;
+  color: var(--tinta-suave);
+  animation: aparecer-creciendo var(--medio) var(--curva-suave) backwards;
+}
+
+.parcial + .parcial {
+  margin-top: 4px;
+}
+
+.parcial-quien {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.parcial-cantidad {
+  margin-left: auto;
+  font-weight: 600;
+  color: var(--tinta);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.parcial .boton-quitar {
+  opacity: 0.6;
+}
+
+.formulario-parcial {
+  margin-top: 4px;
+  padding: 12px;
+  border: 1px dashed var(--linea);
+  border-radius: var(--radio-sm);
+  background-color: var(--papel-hundido);
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
+}
+
+.fila-parcial {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.fila-parcial select {
+  flex: 1;
+  min-width: 0;
+}
+
+.formulario-parcial .fila-formulario {
+  margin-bottom: 0;
+}
+
+.formulario-parcial .fila-formulario input {
+  font-variant-numeric: tabular-nums;
+}
+
+.formulario-parcial .fila-formulario button:disabled {
+  background: var(--linea);
+  color: var(--tinta-tenue);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.formulario-parcial .aviso {
+  font-size: 12px;
+  margin-top: 8px;
+}
+
 .saldadas {
   text-align: center;
   padding: 22px;

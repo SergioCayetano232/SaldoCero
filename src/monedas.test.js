@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { cambio, esAMano, leerTasa, tasaDeGasto, tasaComoTexto, conMoneda } from "./monedas";
+import { cambio, esAMano, leerTasa, leerImporte, tasaDeGasto, tasaComoTexto, conMoneda } from "./monedas";
 
 describe("leerTasa", () => {
   it("vale con coma o con punto", () => {
@@ -67,5 +67,19 @@ describe("monedas a mano", () => {
 
   it("se escriben con su símbolo", () => {
     expect(conMoneda(150, "MAD")).toBe("150.00 DH");
+  });
+});
+
+describe("leerImporte", () => {
+  it("con coma o punto, redondeado al céntimo", () => {
+    expect(leerImporte("20")).toBe(20);
+    expect(leerImporte("12,5")).toBe(12.5);
+    expect(leerImporte("10.456")).toBe(10.46);
+  });
+
+  it("menos de medio céntimo no es un pago", () => {
+    expect(leerImporte("0,004")).toBeNull();
+    expect(leerImporte("")).toBeNull();
+    expect(leerImporte("-5")).toBeNull();
   });
 });

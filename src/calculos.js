@@ -61,9 +61,21 @@ export function parteDe(gasto, viajeroId, viajeros) {
 // Cuánto ha puesto cada uno, cuánto le tocaba y su balance.
 // Ya no vale dividir el total entre todos: cada gasto va con su gente, así que
 // hay que ir gasto por gasto repartiendo entre los suyos.
-export function calcularBalances(viajeros, gastos) {
+//
+// Los pagos a cuenta van aparte de "puesto": si Luis le da 20 € a Ana, debe 20 €
+// menos, pero no se ha gastado 20 € más en el viaje.
+export function calcularBalances(viajeros, gastos, parciales = []) {
   const puesto = new Map(viajeros.map((viajero) => [viajero.id, 0]));
   const tocaPagar = new Map(viajeros.map((viajero) => [viajero.id, 0]));
+  const dado = new Map(viajeros.map((viajero) => [viajero.id, 0]));
+  const recibido = new Map(viajeros.map((viajero) => [viajero.id, 0]));
+
+  for (const p of parciales) {
+    // Si falta alguno de los dos, no se cuenta: descuadraría al otro.
+    if (!dado.has(p.deId) || !recibido.has(p.aId)) continue;
+    dado.set(p.deId, dado.get(p.deId) + p.importe);
+    recibido.set(p.aId, recibido.get(p.aId) + p.importe);
+  }
 
   for (const gasto of gastos) {
     const importe = importeDeGasto(gasto);
@@ -84,8 +96,14 @@ export function calcularBalances(viajeros, gastos) {
     ...viajero,
     puesto: puesto.get(viajero.id),
     tocaPagar: tocaPagar.get(viajero.id),
+    dado: dado.get(viajero.id),
+    recibido: recibido.get(viajero.id),
     // Positivo, le deben. Negativo, debe.
-    balance: puesto.get(viajero.id) - tocaPagar.get(viajero.id),
+    balance:
+      puesto.get(viajero.id) -
+      tocaPagar.get(viajero.id) +
+      dado.get(viajero.id) -
+      recibido.get(viajero.id),
   }));
 }
 

@@ -16,6 +16,7 @@ import Cifra from "./Cifra";
 import Confeti from "./Confeti";
 import Avatar from "./Avatar";
 import Desglose from "./Desglose";
+import PagosACuenta from "./PagosACuenta";
 import { esElUltimo } from "../confeti";
 import { vibrar } from "../vibrar";
 
@@ -25,8 +26,11 @@ function Resumen({
   gastos,
   monedaViaje = "EUR",
   saldados = [],
+  parciales = [],
   onSaldar,
   onDesaldar,
+  onParcial,
+  onQuitarParcial,
   viaje,
   soy,
 }) {
@@ -206,6 +210,13 @@ function Resumen({
                 <small className="reparto">
                   <span className="sin-partir">puso {conMoneda(viajero.puesto, monedaViaje)}</span> ·{" "}
                   <span className="sin-partir">le tocan {conMoneda(viajero.tocaPagar, monedaViaje)}</span>
+                  {/* Si no, puso y le tocan no cuadran con lo que debe. */}
+                  {viajero.dado > 0 && (
+                    <> · <span className="sin-partir">dio {conMoneda(viajero.dado, monedaViaje)}</span></>
+                  )}
+                  {viajero.recibido > 0 && (
+                    <> · <span className="sin-partir">recibió {conMoneda(viajero.recibido, monedaViaje)}</span></>
+                  )}
                 </small>
               </div>
 
@@ -268,6 +279,16 @@ function Resumen({
             ))}
           </>
         )}
+
+        <PagosACuenta
+          viajeros={balances}
+          pagos={pagos}
+          parciales={parciales}
+          colores={colores}
+          moneda={monedaViaje}
+          onAnadir={onParcial}
+          onQuitar={onQuitarParcial}
+        />
       </div>
 
       {fiesta && <Confeti key={fiesta} />}

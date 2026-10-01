@@ -114,7 +114,7 @@ export async function abrirViaje(codigo) {
 
 // Los viajeros y los gastos de un viaje ya abierto.
 async function cargarContenido(viajeId) {
-  const [viajeros, gastos, participantes, saldados] = await Promise.all([
+  const [viajeros, gastos, participantes, saldados, parciales] = await Promise.all([
     supabase.from("viajeros").select("id, nombre").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
@@ -130,9 +130,15 @@ async function cargarContenido(viajeId) {
       .from("pagos_saldados")
       .select("de_id, a_id, de_nombre, a_nombre")
       .eq("viaje_id", viajeId),
+    supabase
+      .from("pagos_parciales")
+      .select("id, de_id, a_id, importe")
+      .eq("viaje_id", viajeId)
+      .order("creado_en"),
   ]);
 
-  const error = viajeros.error || gastos.error || participantes.error || saldados.error;
+  const error =
+    viajeros.error || gastos.error || participantes.error || saldados.error || parciales.error;
   if (error) throw fallo(error, "No hemos podido cargar el viaje.");
 
   return {
@@ -143,6 +149,12 @@ async function cargarContenido(viajeId) {
       aId: p.a_id,
       de: p.de_nombre,
       a: p.a_nombre,
+    })),
+    parciales: parciales.data.map((p) => ({
+      id: p.id,
+      deId: p.de_id,
+      aId: p.a_id,
+      importe: Number(p.importe),
     })),
     gastos: gastos.data.map((gasto) => ({
       id: gasto.id,
@@ -266,6 +278,23 @@ export async function desmarcarSaldado(viajeId, pago) {
     .or("de_id.is.null,a_id.is.null");
 
   if (errorAntiguo) throw fallo(errorAntiguo, "No hemos podido desmarcar el pago.");
+}
+
+// Lo que se paga a cuenta de una deuda, aunque no sea entera.
+export async function anadirParcial(viajeId, parcial) {
+  const { data, error } = await supabase
+    .from("pagos_parciales")
+    .insert({ viaje_id: viajeId, de_id: parcial.deId, a_id: parcial.aId, importe: parcial.importe })
+    .select("id")
+    .single();
+
+  if (error) throw fallo(error, "No hemos podido apuntar el pago.");
+  return { ...parcial, id: data.id };
+}
+
+export async function quitarParcial(id) {
+  const { error } = await supabase.from("pagos_parciales").delete().eq("id", id);
+  if (error) throw fallo(error, "No hemos podido quitar el pago.");
 }
 
 export async function quitarGasto(id) {

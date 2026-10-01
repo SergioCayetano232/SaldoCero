@@ -77,13 +77,24 @@ export function esAMano(codigo) {
   return MONEDAS.some((m) => m.codigo === codigo && m.aMano);
 }
 
-// El cambio que escribe la gente: "10,85", "10.85" o " 0,092 ". Null si no vale.
-export function leerTasa(texto) {
+// Lo que escribe la gente: "10,85", "10.85" o " 0,092 ". Null si no vale.
+export function leerCantidad(texto) {
   const limpio = String(texto ?? "").trim().replace(",", ".");
   if (!/^\d*\.?\d+$/.test(limpio)) return null;
 
-  const tasa = Number(limpio);
-  return tasa > 0 ? tasa : null;
+  const cantidad = Number(limpio);
+  return cantidad > 0 ? cantidad : null;
+}
+
+export const leerTasa = leerCantidad;
+
+// Un importe de dinero: como mucho dos decimales, que no hay medios céntimos.
+export function leerImporte(texto) {
+  const cantidad = leerCantidad(texto);
+  if (cantidad === null) return null;
+
+  const redondo = Math.round(cantidad * 100) / 100;
+  return redondo > 0 ? redondo : null;
 }
 
 // El cambio con el que se guardó un gasto. Al editarlo hay que seguir con ese,

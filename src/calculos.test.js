@@ -524,3 +524,63 @@ describe("parteDe", () => {
     expect(suma).toBeCloseTo(100);
   });
 });
+
+describe("pagos a cuenta", () => {
+  // Ana paga 90 entre los tres: Luis y Marta le deben 30 cada uno.
+  const cena = { importe: 90, pagadorId: "a", participantes: ["a", "b", "c"] };
+
+  it("el que da debe menos y al que recibe le deben menos", () => {
+    const balances = calcularBalances(viajeros, [cena], [{ deId: "b", aId: "a", importe: 20 }]);
+    const [a, b, c] = balances.map((v) => v.balance);
+    expect(a).toBeCloseTo(40);
+    expect(b).toBeCloseTo(-10);
+    expect(c).toBeCloseTo(-30);
+  });
+
+  it("no cuenta como lo puesto en el viaje", () => {
+    const [, luis] = calcularBalances(viajeros, [cena], [{ deId: "b", aId: "a", importe: 20 }]);
+    expect(luis.puesto).toBe(0);
+    expect(luis.dado).toBe(20);
+  });
+
+  it("los balances siguen sumando cero", () => {
+    const parciales = [
+      { deId: "b", aId: "a", importe: 20 },
+      { deId: "c", aId: "a", importe: 5.5 },
+    ];
+    const suma = calcularBalances(viajeros, [cena], parciales).reduce((t, v) => t + v.balance, 0);
+    expect(suma).toBeCloseTo(0);
+  });
+
+  it("los pagos de saldar cuentas ya salen con lo que queda", () => {
+    const balances = calcularBalances(viajeros, [cena], [{ deId: "b", aId: "a", importe: 20 }]);
+    const pagos = calcularPagos(balances);
+    expect(pagos.map((p) => [p.de, p.a, Math.round(p.cantidad * 100) / 100])).toEqual([
+      ["Marta", "Ana", 30],
+      ["Luis", "Ana", 10],
+    ]);
+  });
+
+  it("si lo paga entero, deja de deber", () => {
+    const balances = calcularBalances(viajeros, [cena], [{ deId: "b", aId: "a", importe: 30 }]);
+    expect(estadoDeBalance(balances[1].balance)).toBe("en-paz");
+    expect(calcularPagos(balances)).toHaveLength(1);
+  });
+
+  it("si se pasa, ahora le deben a él", () => {
+    const balances = calcularBalances(viajeros, [cena], [{ deId: "b", aId: "a", importe: 50 }]);
+    expect(balances[1].balance).toBeCloseTo(20);
+  });
+
+  it("si uno de los dos ya no está, no se cuenta", () => {
+    const balances = calcularBalances([ana, luis], [cena], [{ deId: "c", aId: "a", importe: 30 }]);
+    expect(balances[0].recibido).toBe(0);
+  });
+
+  it("sin pagos a cuenta, como siempre", () => {
+    const [a] = calcularBalances(viajeros, [cena]);
+    expect(a.balance).toBeCloseTo(60);
+    expect(a.dado).toBe(0);
+    expect(a.recibido).toBe(0);
+  });
+});

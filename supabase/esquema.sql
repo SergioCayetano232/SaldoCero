@@ -10,6 +10,10 @@ create table viajes (
   nombre text not null,
   -- En esta moneda se hacen las cuentas del viaje.
   moneda text not null default 'EUR',
+  -- Lo que queréis gastaros como mucho, en la moneda del viaje. Null = sin tope.
+  presupuesto numeric(10, 2) check (presupuesto > 0),
+  -- Cerrado ya no se tocan gastos ni viajeros, solo se pagan las deudas.
+  cerrado_en timestamptz,
   creado_en timestamptz not null default now()
 );
 
@@ -66,11 +70,24 @@ create table pagos_saldados (
   unique (viaje_id, de_id, a_id)
 );
 
+-- Lo que se va pagando a cuenta: "Luis le dio 20 € a Ana", aunque no sea toda
+-- la deuda. Cuenta como un gasto al revés: mueve los balances.
+create table pagos_parciales (
+  id uuid primary key default gen_random_uuid(),
+  viaje_id uuid not null references viajes(id) on delete cascade,
+  de_id uuid not null references viajeros(id) on delete cascade,
+  a_id uuid not null references viajeros(id) on delete cascade,
+  importe numeric(10, 2) not null check (importe > 0),
+  creado_en timestamptz not null default now(),
+  check (de_id <> a_id)
+);
+
 create index on viajes (codigo);
 create index on viajeros (viaje_id);
 create index on gastos (viaje_id);
 create index on gastos_participantes (viajero_id);
 create index on pagos_saldados (viaje_id);
+create index on pagos_parciales (viaje_id);
 
 -- ---------- Quién puede ver qué ----------
 --
@@ -104,37 +121,63 @@ as $$
   where v.codigo = codigo_actual() and codigo_actual() <> '';
 $$;
 
+-- Lo mismo, pero solo si el viaje no está cerrado. Es lo que piden los gastos y
+-- los viajeros para tocarlos.
+create function viaje_abierto()
+returns uuid
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select v.id from viajes v
+  where v.codigo = codigo_actual() and codigo_actual() <> '' and v.cerrado_en is null;
+$$;
+
 alter table viajes enable row level security;
 alter table viajeros enable row level security;
 alter table gastos enable row level security;
 alter table gastos_participantes enable row level security;
 alter table pagos_saldados enable row level security;
+alter table pagos_parciales enable row level security;
+
+-- Del viaje y de los viajeros solo se cambian estas columnas. El código, o de
+-- qué viaje es cada uno, no se tocan nunca.
+revoke update on viajes from anon, authenticated;
+grant update (nombre, presupuesto, cerrado_en) on viajes to anon, authenticated;
+revoke update on viajeros from anon, authenticated;
+grant update (nombre) on viajeros to anon, authenticated;
 
 -- Un viaje solo se ve si traes su código. Nunca se listan todos.
 create policy "ver mi viaje" on viajes for select using (id = viaje_actual());
 create policy "crear un viaje" on viajes for insert with check (true);
+create policy "editar mi viaje" on viajes for update
+  using (id = viaje_actual()) with check (id = viaje_actual());
 
--- Viajeros y gastos: solo los del viaje cuyo código traes.
+-- Viajeros y gastos: solo los del viaje cuyo código traes. Y para tocarlos,
+-- que no esté cerrado.
 create policy "ver viajeros" on viajeros for select using (viaje_id = viaje_actual());
-create policy "anadir viajeros" on viajeros for insert with check (viaje_id = viaje_actual());
-create policy "quitar viajeros" on viajeros for delete using (viaje_id = viaje_actual());
+create policy "anadir viajeros" on viajeros for insert with check (viaje_id = viaje_abierto());
+create policy "quitar viajeros" on viajeros for delete using (viaje_id = viaje_abierto());
+create policy "renombrar viajeros" on viajeros for update
+  using (viaje_id = viaje_abierto()) with check (viaje_id = viaje_abierto());
 
 create policy "ver gastos" on gastos for select using (viaje_id = viaje_actual());
-create policy "anadir gastos" on gastos for insert with check (viaje_id = viaje_actual());
-create policy "quitar gastos" on gastos for delete using (viaje_id = viaje_actual());
+create policy "anadir gastos" on gastos for insert with check (viaje_id = viaje_abierto());
+create policy "quitar gastos" on gastos for delete using (viaje_id = viaje_abierto());
 create policy "editar gastos" on gastos for update
-  using (viaje_id = viaje_actual())
-  with check (viaje_id = viaje_actual());
+  using (viaje_id = viaje_abierto())
+  with check (viaje_id = viaje_abierto());
 
 -- Los participantes cuelgan de un gasto, así que heredan el permiso del gasto.
 create policy "ver participantes" on gastos_participantes for select using (
   exists (select 1 from gastos g where g.id = gasto_id and g.viaje_id = viaje_actual())
 );
 create policy "anadir participantes" on gastos_participantes for insert with check (
-  exists (select 1 from gastos g where g.id = gasto_id and g.viaje_id = viaje_actual())
+  exists (select 1 from gastos g where g.id = gasto_id and g.viaje_id = viaje_abierto())
 );
 create policy "quitar participantes" on gastos_participantes for delete using (
-  exists (select 1 from gastos g where g.id = gasto_id and g.viaje_id = viaje_actual())
+  exists (select 1 from gastos g where g.id = gasto_id and g.viaje_id = viaje_abierto())
 );
 
 -- Las deudas saldadas, como todo lo demás: las del viaje cuyo código traes.
@@ -146,6 +189,16 @@ create policy "marcar saldado" on pagos_saldados for insert with check (
   and (a_id is null or exists (select 1 from viajeros v where v.id = a_id and v.viaje_id = viaje_actual()))
 );
 create policy "desmarcar saldado" on pagos_saldados for delete using (viaje_id = viaje_actual());
+
+-- Los pagos a cuenta, igual. Se pueden apuntar con el viaje cerrado: las deudas
+-- se pagan después de volver.
+create policy "ver parciales" on pagos_parciales for select using (viaje_id = viaje_actual());
+create policy "anadir parcial" on pagos_parciales for insert with check (
+  viaje_id = viaje_actual()
+  and exists (select 1 from viajeros v where v.id = de_id and v.viaje_id = viaje_actual())
+  and exists (select 1 from viajeros v where v.id = a_id and v.viaje_id = viaje_actual())
+);
+create policy "quitar parcial" on pagos_parciales for delete using (viaje_id = viaje_actual());
 
 -- ---------- Crear y abrir viajes ----------
 
@@ -373,3 +426,22 @@ $$;
 -- Editar un gasto de una vez. Pega el "create function editar_gasto" de más arriba.
 
 -- Apuntar un gasto de una vez. Pega el "create function crear_gasto" de más arriba.
+
+-- Pagos a cuenta, presupuesto, renombrar y cerrar el viaje.
+--   Pega el "create table pagos_parciales", su índice, su "enable row level
+--   security" y sus tres policies de más arriba. Y luego:
+--
+--   alter table viajes add column presupuesto numeric(10, 2) check (presupuesto > 0);
+--   alter table viajes add column cerrado_en timestamptz;
+--
+--   revoke update on viajes from anon, authenticated;
+--   grant update (nombre, presupuesto, cerrado_en) on viajes to anon, authenticated;
+--   revoke update on viajeros from anon, authenticated;
+--   grant update (nombre) on viajeros to anon, authenticated;
+--   create policy "editar mi viaje" on viajes for update
+--     using (id = viaje_actual()) with check (id = viaje_actual());
+--
+--   Pega el "create function viaje_abierto". Después borra las policies de
+--   añadir, quitar y editar de viajeros, gastos y gastos_participantes
+--   (drop policy "anadir viajeros" on viajeros; ...) y créalas otra vez como
+--   están arriba, con viaje_abierto(). Y la nueva "renombrar viajeros".

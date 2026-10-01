@@ -235,7 +235,8 @@ function App() {
   const seVa = borrado?.id;
   const viajeros = viaje.viajeros.filter((v) => v.id !== seVa);
   const gastos = viaje.gastos.filter((g) => g.id !== seVa && g.pagadorId !== seVa);
-  const balances = calcularBalances(viajeros, gastos);
+  const parciales = (viaje.parciales ?? []).filter((p) => p.id !== seVa);
+  const balances = calcularBalances(viajeros, gastos, parciales);
   const colores = coloresDelViaje(viajeros.map((v) => v.nombre));
 
   return (
@@ -284,6 +285,11 @@ function App() {
           saldados={viaje.saldados ?? []}
           onSaldar={(pago) => hacer(() => datos.marcarSaldado(viaje.id, pago))}
           onDesaldar={(pago) => hacer(() => datos.desmarcarSaldado(viaje.id, pago))}
+          parciales={parciales}
+          onParcial={(parcial) => hacer(() => datos.anadirParcial(viaje.id, parcial))}
+          onQuitarParcial={(parcial, de, a) =>
+            borrarConAviso(parcial.id, `el pago de ${de} a ${a}`, () => datos.quitarParcial(parcial.id))
+          }
           viaje={viaje}
         />
       )}
