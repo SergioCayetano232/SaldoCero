@@ -4,6 +4,7 @@ import { MONEDAS, cambio, conMoneda, leerTasa, tasaDeGasto, tasaComoTexto } from
 import { CATEGORIAS, POR_DEFECTO, categoriaDe } from "../categorias";
 import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS } from "../filtros";
 import { hoy, comoTitulo, porDias } from "../fechas";
+import { sugerirConceptos } from "../sugerencias";
 import Deslizable from "./Deslizable";
 
 function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, onAnadir, onEditar, onQuitar }) {
@@ -70,6 +71,13 @@ function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, onAnadir, onEdi
 
   function filtrar(cambio) {
     setFiltros({ ...filtros, ...cambio });
+  }
+
+  const sugerencias = sugerirConceptos(gastos, concepto);
+
+  function usarSugerencia(s) {
+    setConcepto(s.concepto);
+    setCategoria(s.categoria);
   }
 
   // Los gastos agrupados por día, que es como se leen mejor.
@@ -321,6 +329,25 @@ function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, onAnadir, onEdi
                 if (e.key === "Enter") guardar();
               }}
             />
+
+            {sugerencias.length > 0 && (
+              <div className="sugerencias">
+                {sugerencias.map((s) => {
+                  const c = categoriaDe(s.categoria);
+                  return (
+                    <button
+                      key={s.concepto}
+                      className="pastilla-categoria sugerencia"
+                      onClick={() => usarSugerencia(s)}
+                      style={{ "--color-categoria": c.color }}
+                    >
+                      <span className="pastilla-emoji">{c.emoji}</span>
+                      {s.concepto}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
             {/* En qué se fue. Van como pastillas y no en un desplegable:
                 se ven todas a la vez y se elige de un toque. */}
