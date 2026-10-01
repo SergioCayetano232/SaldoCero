@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { calcularTotal, participantesDeGasto } from "../calculos";
-import { MONEDAS, cambio, conMoneda, leerTasa, tasaDeGasto, tasaComoTexto } from "../monedas";
+import { MONEDAS, cambio, conMoneda, leerTasa, tasaComoTexto } from "../monedas";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe } from "../categorias";
 import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS } from "../filtros";
 import { hoy, comoTitulo, porDias } from "../fechas";
 import { sugerirConceptos } from "../sugerencias";
+import { gastoAlFormulario, repetirGasto } from "../repetir";
 import Deslizable from "./Deslizable";
 
 function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, onAnadir, onEditar, onQuitar }) {
@@ -109,30 +110,33 @@ function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, onAnadir, onEdi
     setEditando(null);
   }
 
-  // Subimos el gasto al formulario para poder cambiarlo.
-  function editar(gasto) {
-    setEditando(gasto.id);
-    setPagadorId(gasto.pagadorId);
-    setImporte(String(gasto.importe));
-    setMoneda(gasto.moneda ?? monedaViaje);
-    // Con el cambio que tenía, que si no se recalcula con el de hoy.
-    setTasaAMano(
-      (gasto.moneda ?? monedaViaje) === monedaViaje ? null : tasaComoTexto(tasaDeGasto(gasto))
-    );
-    setConcepto(gasto.concepto);
-    setCategoria(gasto.categoria ?? POR_DEFECTO);
-    setFecha(gasto.fecha ?? hoy());
-    setParticipantes(participantesDeGasto(gasto, viajeros).map((v) => v.id));
-
-    // Si el gasto iba repartido a trozos distintos, abrimos ya esa parte.
-    const suyas = gasto.partes ?? {};
-    const desigual = Object.values(suyas).some((p) => p !== 1);
-    setPartes(desigual ? suyas : {});
-    setRepartoAbierto(desigual);
+  function rellenar(f) {
+    setPagadorId(f.pagadorId);
+    setImporte(f.importe);
+    setMoneda(f.moneda);
+    setTasaAMano(f.tasaAMano);
+    setConcepto(f.concepto);
+    setCategoria(f.categoria);
+    setFecha(f.fecha ?? hoy());
+    setParticipantes(f.participantes);
+    setPartes(f.partes);
+    setRepartoAbierto(f.repartoAbierto);
 
     // En el móvil el formulario suele quedar arriba, fuera de la vista.
     const quieto = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     formulario.current?.scrollIntoView({ behavior: quieto ? "auto" : "smooth", block: "start" });
+  }
+
+  function editar(gasto) {
+    setEditando(gasto.id);
+    rellenar(gastoAlFormulario(gasto, viajeros, monedaViaje));
+  }
+
+  // Otro igual pero de hoy: el desayuno de cada día, la gasolina...
+  // No se guarda solo, que lo normal es que cambie algo del importe.
+  function repetir(gasto) {
+    setEditando(null);
+    rellenar(repetirGasto(gasto, viajeros, monedaViaje, hoy()));
   }
 
   // Lo que le toca a cada uno de los marcados. Por defecto, una parte.
@@ -564,6 +568,14 @@ function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, onAnadir, onEdi
                       </span>
 
                       <span className="acciones">
+                        <button
+                          className="boton-repetir"
+                          onClick={() => repetir(gasto)}
+                          title="Apuntar otro igual"
+                          aria-label="Apuntar otro igual"
+                        >
+                          ⧉
+                        </button>
                         <button
                           className="boton-editar"
                           onClick={() => editar(gasto)}

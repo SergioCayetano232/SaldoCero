@@ -1,0 +1,30 @@
+// Subir un gasto al formulario, para editarlo o para apuntar otro igual.
+
+import { participantesDeGasto } from "./calculos";
+import { POR_DEFECTO } from "./categorias";
+import { tasaDeGasto, tasaComoTexto } from "./monedas";
+
+export function gastoAlFormulario(gasto, viajeros, monedaViaje) {
+  const moneda = gasto.moneda ?? monedaViaje;
+  const suyas = gasto.partes ?? {};
+  const desigual = Object.values(suyas).some((p) => p !== 1);
+
+  return {
+    pagadorId: gasto.pagadorId,
+    importe: String(gasto.importe),
+    moneda,
+    // Con el cambio que tenía, que si no se recalcula con el de hoy.
+    tasaAMano: moneda === monedaViaje ? null : tasaComoTexto(tasaDeGasto(gasto)),
+    concepto: gasto.concepto,
+    categoria: gasto.categoria ?? POR_DEFECTO,
+    fecha: gasto.fecha,
+    participantes: participantesDeGasto(gasto, viajeros).map((v) => v.id),
+    partes: desigual ? suyas : {},
+    repartoAbierto: desigual,
+  };
+}
+
+// Lo mismo, pero es otro gasto: el de hoy, no el de aquel día.
+export function repetirGasto(gasto, viajeros, monedaViaje, dia) {
+  return { ...gastoAlFormulario(gasto, viajeros, monedaViaje), fecha: dia };
+}
