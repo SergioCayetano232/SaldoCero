@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { calcularTotal, participantesDeGasto } from "../calculos";
-import { MONEDAS, cambio, conMoneda } from "../monedas";
+import { MONEDAS, cambio, conMoneda, leerTasa, tasaDeGasto, tasaComoTexto } from "../monedas";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe } from "../categorias";
 import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS } from "../filtros";
 import { hoy, comoTitulo, porDias } from "../fechas";
@@ -20,15 +20,23 @@ function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, onAnadir, onEdi
   // El cambio que nos ha dado la API, con la moneda a la que corresponde.
   // Así sabemos si lo que tenemos guardado sirve para la moneda de ahora.
   const [cambioTraido, setCambioTraido] = useState(null);
+  // El cambio escrito a mano, tal cual. null = vale el de la API.
+  const [tasaAMano, setTasaAMano] = useState(null);
 
-  // Si pagas en la moneda del viaje, uno por uno. Si no, lo que diga la API,
+  // Si la API no lo sabe, no queda otra que escribirlo.
+  const sinCambio = cambioTraido?.moneda === moneda && cambioTraido.tasa === null;
+  const aMano = tasaAMano !== null || sinCambio;
+
+  // En la moneda del viaje, uno por uno. Si no, lo escrito o lo que diga la API,
   // y undefined mientras está de camino.
   const tasa =
     moneda === monedaViaje
       ? 1
-      : cambioTraido?.moneda === moneda
-        ? cambioTraido.tasa
-        : undefined;
+      : aMano
+        ? leerTasa(tasaAMano)
+        : cambioTraido?.moneda === moneda
+          ? cambioTraido.tasa
+          : undefined;
   // Entre quiénes se reparte. null = no lo has tocado, así que van todos.
   const [participantes, setParticipantes] = useState(null);
   // El gasto que estás tocando ahora mismo. Vacío si estás apuntando uno nuevo.
@@ -83,6 +91,7 @@ function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, onAnadir, onEdi
   function limpiar() {
     setImporte("");
     setMoneda(monedaViaje);
+    setTasaAMano(null);
     setConcepto("");
     setCategoria(POR_DEFECTO);
     setPartes({});
@@ -98,6 +107,10 @@ function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, onAnadir, onEdi
     setPagadorId(gasto.pagadorId);
     setImporte(String(gasto.importe));
     setMoneda(gasto.moneda ?? monedaViaje);
+    // Con el cambio que tenía, que si no se recalcula con el de hoy.
+    setTasaAMano(
+      (gasto.moneda ?? monedaViaje) === monedaViaje ? null : tasaComoTexto(tasaDeGasto(gasto))
+    );
     setConcepto(gasto.concepto);
     setCategoria(gasto.categoria ?? POR_DEFECTO);
     setFecha(gasto.fecha ?? hoy());
@@ -231,7 +244,10 @@ function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, onAnadir, onEdi
               <select
                 className="selector-moneda"
                 value={moneda}
-                onChange={(e) => setMoneda(e.target.value)}
+                onChange={(e) => {
+                  setMoneda(e.target.value);
+                  setTasaAMano(null);
+                }}
                 title="¿En qué moneda se pagó?"
               >
                 {MONEDAS.map((m) => (
@@ -252,24 +268,48 @@ function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, onAnadir, onEdi
             </div>
 
             {moneda !== monedaViaje && (
-              <p className="conversion">
-                {tasa === undefined ? (
-                  <>Mirando a cuánto está el cambio…</>
-                ) : tasa === null ? (
-                  <span className="aviso">
-                    No hemos podido saber el cambio. Apúntalo en {monedaViaje}.
-                  </span>
-                ) : importe > 0 ? (
+              <div className="conversion">
+                {aMano ? (
                   <>
-                    Son <strong>{conMoneda(importe * tasa, monedaViaje)}</strong> · 1{" "}
-                    {moneda} = {tasa.toFixed(4)} {monedaViaje}
+                    {sinCambio && tasaAMano === null && (
+                      <span className="aviso">No sabemos el cambio de {moneda}, ponlo tú. </span>
+                    )}
+                    <label className="cambio-a-mano">
+                      1 {moneda} =
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="0,00"
+                        value={tasaAMano ?? ""}
+                        onChange={(e) => setTasaAMano(e.target.value)}
+                        aria-label={`Cuántos ${monedaViaje} es 1 ${moneda}`}
+                      />
+                      {monedaViaje}
+                    </label>
+                    {tasa && importe > 0 && (
+                      <> · Son <strong>{conMoneda(importe * tasa, monedaViaje)}</strong></>
+                    )}
+                    {typeof cambioTraido?.tasa === "number" && cambioTraido.moneda === moneda && (
+                      <button className="enlace" onClick={() => setTasaAMano(null)}>
+                        Usar el del día
+                      </button>
+                    )}
                   </>
+                ) : tasa === undefined ? (
+                  <>Mirando a cuánto está el cambio…</>
                 ) : (
                   <>
+                    {importe > 0 && (
+                      <>Son <strong>{conMoneda(importe * tasa, monedaViaje)}</strong> · </>
+                    )}
                     1 {moneda} = {tasa.toFixed(4)} {monedaViaje}
+                    {/* El banco no siempre te cobra el del día. */}
+                    <button className="enlace" onClick={() => setTasaAMano(tasaComoTexto(tasa))}>
+                      Cambiar
+                    </button>
                   </>
                 )}
-              </p>
+              </div>
             )}
 
             <input

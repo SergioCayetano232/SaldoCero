@@ -628,6 +628,28 @@ button:active {
   color: var(--teal-600);
 }
 
+.conversion .enlace {
+  margin-left: 8px;
+  font-size: 12px;
+}
+
+/* "1 MAD = [0,0925] EUR", el campo tiene que caber en la frase. */
+.cambio-a-mano {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--fuente-mono);
+}
+
+.cambio-a-mano input {
+  width: 92px;
+  padding: 5px 8px;
+  font-size: 13px;
+  font-family: var(--fuente-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
 /* Lo que costó en la moneda del viaje, bajo el importe original. */
 .gasto-convertido {
   display: block;

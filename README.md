@@ -52,9 +52,9 @@ te movería las cuentas de un viaje de hace tres meses, y eso no tiene sentido:
 lo que pagaste, pagado está.
 
 El cambio lo da [Frankfurter](https://frankfurter.dev), que es gratis y no pide
-registrarse. Solo trae las monedas del Banco Central Europeo, así que están el
-euro, la libra o el yen, pero no el dirham ni el peso colombiano. Si no hay
-internet, te avisa y lo apuntas en la moneda del viaje.
+registrarse. Solo trae las monedas del Banco Central Europeo, así que el dírham
+o el peso colombiano no los sabe: para esas, o si no hay internet, escribes tú
+el cambio. También puedes cambiar el del día si el banco te cobró otro.
 
 ## Con qué está hecho
 

@@ -1,8 +1,8 @@
 // Las monedas y el cambio entre ellas.
 
 // Las que se suelen necesitar en un viaje.
-// Ojo: solo valen las que trae la API del cambio, que son las del Banco Central
-// Europeo. Otras como el dirham o el peso colombiano no están.
+// La API solo trae las del Banco Central Europeo. Las marcadas aMano no están
+// ahí: el cambio de esas lo escribe quien apunta el gasto.
 export const MONEDAS = [
   { codigo: "EUR", simbolo: "€", nombre: "Euro" },
   { codigo: "USD", simbolo: "$", nombre: "Dólar" },
@@ -19,6 +19,13 @@ export const MONEDAS = [
   { codigo: "MXN", simbolo: "MX$", nombre: "Peso mexicano" },
   { codigo: "BRL", simbolo: "R$", nombre: "Real" },
   { codigo: "THB", simbolo: "฿", nombre: "Baht" },
+  { codigo: "MAD", simbolo: "DH", nombre: "Dírham marroquí", aMano: true },
+  { codigo: "EGP", simbolo: "E£", nombre: "Libra egipcia", aMano: true },
+  { codigo: "COP", simbolo: "COL$", nombre: "Peso colombiano", aMano: true },
+  { codigo: "ARS", simbolo: "AR$", nombre: "Peso argentino", aMano: true },
+  { codigo: "CLP", simbolo: "CLP$", nombre: "Peso chileno", aMano: true },
+  { codigo: "PEN", simbolo: "S/", nombre: "Sol peruano", aMano: true },
+  { codigo: "VND", simbolo: "₫", nombre: "Dong", aMano: true },
 ];
 
 export function simboloDe(codigo) {
@@ -44,6 +51,8 @@ const cache = new Map();
 // Cuántos "a" hacen falta para un "de". Devuelve null si no se ha podido saber.
 export async function cambio(de, a) {
   if (de === a) return 1;
+  // Para estas la API da error seguro, ni se pregunta.
+  if (esAMano(de) || esAMano(a)) return null;
 
   const clave = `${de}-${a}`;
   if (cache.has(clave)) return cache.get(clave);
@@ -62,4 +71,29 @@ export async function cambio(de, a) {
     // Sin internet o la API caída: que lo apunte en la moneda del viaje.
     return null;
   }
+}
+
+export function esAMano(codigo) {
+  return MONEDAS.some((m) => m.codigo === codigo && m.aMano);
+}
+
+// El cambio que escribe la gente: "10,85", "10.85" o " 0,092 ". Null si no vale.
+export function leerTasa(texto) {
+  const limpio = String(texto ?? "").trim().replace(",", ".");
+  if (!/^\d*\.?\d+$/.test(limpio)) return null;
+
+  const tasa = Number(limpio);
+  return tasa > 0 ? tasa : null;
+}
+
+// El cambio con el que se guardó un gasto. Al editarlo hay que seguir con ese,
+// no con el de hoy, o se le mueven las cuentas solo por abrirlo.
+export function tasaDeGasto(gasto) {
+  if (!gasto.importeConvertido || !gasto.importe) return 1;
+  return gasto.importeConvertido / gasto.importe;
+}
+
+// Para ponerlo en el campo: sin colas de decimales, pero sin perder precisión.
+export function tasaComoTexto(tasa) {
+  return String(Number(tasa.toFixed(6))).replace(".", ",");
 }
