@@ -263,8 +263,8 @@ export async function cerrarViaje(viajeId, cerrar = true) {
 export async function quitarViajero(id) {
   // Los gastos que pagó y los repartos en los que estaba se van con él,
   // de eso se encarga la base de datos (on delete cascade).
-  const { error } = await supabase.from("viajeros").delete().eq("id", id);
-  if (error) throw fallo(error, "No hemos podido quitar al viajero.");
+  const { data, error } = await supabase.from("viajeros").delete().eq("id", id).select("id");
+  if (error || !data.length) throw fallo(error, "No hemos podido quitar al viajero.");
 }
 
 // Apuntar un gasto con su reparto, en una sola llamada: o se guarda todo o nada.
@@ -369,8 +369,8 @@ export async function anadirParcial(viajeId, parcial) {
 }
 
 export async function quitarParcial(id) {
-  const { error } = await supabase.from("pagos_parciales").delete().eq("id", id);
-  if (error) throw fallo(error, "No hemos podido quitar el pago.");
+  const { data, error } = await supabase.from("pagos_parciales").delete().eq("id", id).select("id");
+  if (error || !data.length) throw fallo(error, "No hemos podido quitar el pago.");
 }
 
 // Todas en una petición: si "cada uno pone 50" falla, que no se quede a medias.
@@ -389,9 +389,11 @@ export async function quitarDelBote(id) {
 
 // Con la foto, si tiene: primero el gasto y luego la foto. Al revés, si fallara
 // lo segundo quedaría un gasto apuntando a una foto que ya no está.
+// Si las reglas no dejan borrarlo (el viaje se ha cerrado desde otro móvil), no
+// da error: simplemente no borra nada. Por eso el select.
 export async function quitarGasto(id, ticket = null) {
-  const { error } = await supabase.from("gastos").delete().eq("id", id);
-  if (error) throw fallo(error, "No hemos podido quitar el gasto.");
+  const { data, error } = await supabase.from("gastos").delete().eq("id", id).select("id");
+  if (error || !data.length) throw fallo(error, "No hemos podido quitar el gasto.");
 
   if (ticket) await borrarFotos([ticket]);
 }
@@ -438,6 +440,17 @@ async function borrarFotos(rutas) {
 
 // Vaciar el viaje: fuera viajeros (y con ellos, sus gastos) y fuera gastos.
 export async function vaciarViaje(viajeId) {
+  // Cerrado, las reglas dejan borrar las deudas marcadas pero no los gastos: se
+  // quedaría a medias sin avisar. Mejor mirarlo antes.
+  const { data: viaje, error: errorViaje } = await supabase
+    .from("viajes")
+    .select("cerrado_en")
+    .eq("id", viajeId)
+    .single();
+
+  if (errorViaje) throw fallo(errorViaje, "No hemos podido vaciar el viaje.");
+  if (viaje.cerrado_en) throw new Error("El viaje está cerrado. Reábrelo para poder vaciarlo.");
+
   // Las fotos primero, que luego ya no sabríamos cuáles eran.
   const { data: fotos } = await supabase.storage.from(TICKETS).list(viajeId, { limit: 1000 });
 
