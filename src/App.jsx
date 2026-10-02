@@ -435,7 +435,7 @@ function Pie() {
       <span className="pie-punto">·</span>
       <span>Sin cuentas ni contraseñas</span>
       <span className="pie-punto">·</span>
-      <span>Tus viajes solo en tu móvil</span>
+      <span>Solo entra quien tiene el código</span>
     </footer>
   );
 }
