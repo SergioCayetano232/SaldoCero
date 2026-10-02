@@ -126,6 +126,7 @@ function Resumen({
         </div>
         <Presupuesto
           total={total}
+          gastos={gastos}
           presupuesto={viaje?.presupuesto ?? null}
           moneda={monedaViaje}
           fijo={cerrado}

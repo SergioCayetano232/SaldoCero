@@ -1606,6 +1606,13 @@ button:active {
   animation: temblor 0.4s var(--curva-suave);
 }
 
+.presupuesto-ritmo {
+  margin-top: 4px;
+  font-size: 12px;
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
+
 .presupuesto-tanto {
   font-weight: 600;
 }

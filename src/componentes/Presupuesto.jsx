@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { leerImporte, simboloDe } from "../monedas";
-import { estadoPresupuesto, textoPresupuesto } from "../presupuesto";
+import { estadoPresupuesto, textoPresupuesto, ritmoDeGasto, textoRitmo } from "../presupuesto";
 
 // La barra del presupuesto, dentro del recuadro del total.
 // Fijo, se ve pero no se cambia: es lo que queda de un viaje cerrado.
-function Presupuesto({ total, presupuesto, moneda, fijo = false, onGuardar }) {
+function Presupuesto({ total, gastos = [], presupuesto, moneda, fijo = false, onGuardar }) {
   const [editando, setEditando] = useState(false);
   const [texto, setTexto] = useState("");
 
   const cantidad = leerImporte(texto);
   const estado = estadoPresupuesto(total, presupuesto);
+  const ritmo = ritmoDeGasto(gastos);
 
   function abrir() {
     setTexto(presupuesto ? String(presupuesto).replace(".", ",") : "");
@@ -80,6 +81,7 @@ function Presupuesto({ total, presupuesto, moneda, fijo = false, onGuardar }) {
           </button>
         )}
       </div>
+      {ritmo && <div className="presupuesto-ritmo">{textoRitmo(ritmo, estado, moneda, fijo)}</div>}
     </div>
   );
 }
