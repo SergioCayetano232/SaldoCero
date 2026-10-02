@@ -2,6 +2,7 @@
 
 import { conMoneda } from "./monedas";
 import { importeDeGasto } from "./calculos";
+import { BOTE } from "./bote";
 
 // Solo lo que ha llegado nuevo, y que no hayas puesto tú desde este móvil.
 // Lo borrado y lo editado no se avisa: tus propios borrados llegan igual por
@@ -26,7 +27,7 @@ export function textoDeNovedades({ gastos, viajeros }, todos, moneda) {
   if (gastos.length === 1) {
     const [g] = gastos;
     const quien = todos.find((v) => v.id === g.pagadorId)?.nombre;
-    const pago = quien ? ` (pagó ${quien})` : "";
+    const pago = g.pagadorId === BOTE ? " (del bote)" : quien ? ` (pagó ${quien})` : "";
     partes.push(`Nuevo gasto: ${g.concepto} · ${conMoneda(importeDeGasto(g), moneda)}${pago}`);
   } else if (gastos.length > 1) {
     partes.push(`${gastos.length} gastos nuevos`);

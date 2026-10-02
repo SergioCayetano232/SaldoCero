@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { datosDelGasto } from "./datos";
+import { BOTE } from "./bote";
 
 const gasto = {
   pagadorId: "b",
@@ -40,5 +41,9 @@ describe("datosDelGasto", () => {
   it("las partes de alguien que ya no está en el gasto no se mandan", () => {
     const args = datosDelGasto({ ...gasto, participantes: ["a", "b"] });
     expect(args.g_participantes.map((p) => p.viajero_id)).toEqual(["a", "b"]);
+  });
+
+  it("si sale del bote, va sin pagador", () => {
+    expect(datosDelGasto({ ...gasto, pagadorId: BOTE }).g_pagador).toBeNull();
   });
 });

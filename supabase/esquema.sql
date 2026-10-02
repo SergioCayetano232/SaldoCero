@@ -27,7 +27,8 @@ create table viajeros (
 create table gastos (
   id uuid primary key default gen_random_uuid(),
   viaje_id uuid not null references viajes(id) on delete cascade,
-  pagador_id uuid not null references viajeros(id) on delete cascade,
+  -- Null, pagado desde el bote común.
+  pagador_id uuid references viajeros(id) on delete cascade,
   -- Lo que se pagó de verdad, en la moneda en que se pagó.
   importe numeric(10, 2) not null check (importe > 0),
   moneda text not null default 'EUR',
@@ -82,12 +83,22 @@ create table pagos_parciales (
   check (de_id <> a_id)
 );
 
+-- Lo que pone cada uno en el bote común. Los gastos del bote salen de aquí.
+create table aportaciones_bote (
+  id uuid primary key default gen_random_uuid(),
+  viaje_id uuid not null references viajes(id) on delete cascade,
+  viajero_id uuid not null references viajeros(id) on delete cascade,
+  importe numeric(10, 2) not null check (importe > 0),
+  creado_en timestamptz not null default now()
+);
+
 create index on viajes (codigo);
 create index on viajeros (viaje_id);
 create index on gastos (viaje_id);
 create index on gastos_participantes (viajero_id);
 create index on pagos_saldados (viaje_id);
 create index on pagos_parciales (viaje_id);
+create index on aportaciones_bote (viaje_id);
 
 -- ---------- Quién puede ver qué ----------
 --
@@ -140,6 +151,7 @@ alter table gastos enable row level security;
 alter table gastos_participantes enable row level security;
 alter table pagos_saldados enable row level security;
 alter table pagos_parciales enable row level security;
+alter table aportaciones_bote enable row level security;
 
 -- Del viaje y de los viajeros solo se cambian estas columnas. El código, o de
 -- qué viaje es cada uno, no se tocan nunca.
@@ -199,6 +211,14 @@ create policy "anadir parcial" on pagos_parciales for insert with check (
   and exists (select 1 from viajeros v where v.id = a_id and v.viaje_id = viaje_actual())
 );
 create policy "quitar parcial" on pagos_parciales for delete using (viaje_id = viaje_actual());
+
+-- El bote es parte del viaje: cerrado, ya no se mete ni se saca nada.
+create policy "ver bote" on aportaciones_bote for select using (viaje_id = viaje_actual());
+create policy "poner en el bote" on aportaciones_bote for insert with check (
+  viaje_id = viaje_abierto()
+  and exists (select 1 from viajeros v where v.id = viajero_id and v.viaje_id = viaje_actual())
+);
+create policy "quitar del bote" on aportaciones_bote for delete using (viaje_id = viaje_abierto());
 
 -- ---------- Crear y abrir viajes ----------
 
@@ -445,3 +465,9 @@ $$;
 --   añadir, quitar y editar de viajeros, gastos y gastos_participantes
 --   (drop policy "anadir viajeros" on viajeros; ...) y créalas otra vez como
 --   están arriba, con viaje_abierto(). Y la nueva "renombrar viajeros".
+
+-- Bote común.
+--   alter table gastos alter column pagador_id drop not null;
+--
+--   Pega el "create table aportaciones_bote", su índice, su "enable row level
+--   security" y sus tres policies de más arriba.

@@ -6,9 +6,10 @@ import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS } from "../
 import { hoy, comoTitulo, porDias } from "../fechas";
 import { sugerirConceptos } from "../sugerencias";
 import { gastoAlFormulario, repetirGasto } from "../repetir";
+import { BOTE } from "../bote";
 import Deslizable from "./Deslizable";
 
-function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, cerrado, onAnadir, onEditar, onQuitar }) {
+function Gastos({ viajeros, hayBote = false, gastos, monedaViaje, recienLlegados, cerrado, onAnadir, onEditar, onQuitar }) {
   const [pagadorId, setPagadorId] = useState("");
   const [importe, setImporte] = useState("");
   const [moneda, setMoneda] = useState(monedaViaje);
@@ -208,6 +209,7 @@ function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, cerrado, onAnad
   }
 
   function nombrePagador(id) {
+    if (id === BOTE) return "🫙 Del bote";
     const viajero = viajeros.find((v) => v.id === id);
     return viajero ? viajero.nombre : "¿?";
   }
@@ -244,6 +246,8 @@ function Gastos({ viajeros, gastos, monedaViaje, recienLlegados, cerrado, onAnad
                     {viajero.nombre}
                   </option>
                 ))}
+                {/* Si editas uno del bote, que siga saliendo aunque ya no haya bote. */}
+                {(hayBote || pagadorId === BOTE) && <option value={BOTE}>🫙 Del bote</option>}
               </select>
 
               <div className="fila-importe">

@@ -11,6 +11,7 @@ import {
 import { conMoneda } from "../monedas";
 import { resumenEnTexto, copiarAlPortapapeles, descargarResumen } from "../compartir";
 import { mensajeDeCobro, enlaceWhatsApp } from "../cobrar";
+import { BOTE, sinBote } from "../bote";
 import { gastoPorCategoria } from "../categorias";
 import { importeDeGasto, parteDe } from "../calculos";
 import Cifra from "./Cifra";
@@ -46,28 +47,32 @@ function Resumen({
   // De quién es el desglose. null = del viaje entero.
   const [persona, setPersona] = useState(null);
   const total = calcularTotal(gastos);
+  // El bote entra en los pagos (lo que sobra se devuelve), pero no es nadie:
+  // ni le toca pagar la próxima ni sale en las listas de personas.
+  const personas = sinBote(balances);
   const pagos = marcarSaldados(calcularPagos(balances), saldados);
   // Con lo ya pagado descontado: si todo está saldado, no le toca a nadie.
-  const leTocaPagar = calcularLeTocaPagar(balancesTrasPagos(balances, pagos));
+  const leTocaPagar = calcularLeTocaPagar(balancesTrasPagos(personas, pagos));
   const pendiente = quedaPorPagar(pagos);
   const delViaje = gastoPorCategoria(gastos, importeDeGasto);
   // Si lo han quitado del viaje mientras lo mirabas, vuelve a todos.
-  const deQuien = balances.find((v) => v.id === persona);
+  const deQuien = personas.find((v) => v.id === persona);
   // Lo que le tocaba a él de cada gasto, no lo que pagó: eso es en qué se le fue.
   const porCategoria = deQuien
-    ? gastoPorCategoria(gastos, (g) => parteDe(g, deQuien.id, balances))
+    ? gastoPorCategoria(gastos, (g) => parteDe(g, deQuien.id, personas))
     : delViaje;
   const todoPagado = pagos.length > 0 && pendiente === 0;
 
   // Las barras se miden contra el que más ha puesto.
-  const maxPuesto = Math.max(...balances.map((v) => v.puesto), 0);
+  const maxPuesto = Math.max(...personas.map((v) => v.puesto), 0);
 
   function elResumen() {
     return resumenEnTexto({
       nombre: viaje?.nombre ?? "El viaje",
       codigo: viaje?.codigo ?? "",
       total,
-      balances,
+      // En "lo que puso cada uno" cuenta también lo que metió en el bote.
+      balances: personas.map((v) => ({ ...v, puesto: v.puesto + (v.alBote ?? 0) })),
       pagos,
       moneda: monedaViaje,
     });
@@ -121,8 +126,8 @@ function Resumen({
           <Cifra valor={total} moneda={monedaViaje} />
         </div>
         <div className="total-detalle">
-          {gastos.length} {gastos.length === 1 ? "gasto" : "gastos"} · {balances.length}{" "}
-          {balances.length === 1 ? "viajero" : "viajeros"}
+          {gastos.length} {gastos.length === 1 ? "gasto" : "gastos"} · {personas.length}{" "}
+          {personas.length === 1 ? "viajero" : "viajeros"}
         </div>
         <Presupuesto
           total={total}
@@ -138,7 +143,7 @@ function Resumen({
           es un anillo entero y no cuenta nada. */}
       {delViaje.length > 1 && (
         <>
-          {balances.length > 1 && (
+          {personas.length > 1 && (
             <div className="desglose-quien" role="group" aria-label="De quién">
               <button
                 className={`pastilla-categoria ${deQuien ? "" : "elegida"}`}
@@ -147,7 +152,7 @@ function Resumen({
               >
                 Todos
               </button>
-              {balances.map((v) => (
+              {personas.map((v) => (
                 <button
                   key={v.id}
                   className={`pastilla-categoria ${v.id === deQuien?.id ? "elegida" : ""}`}
@@ -193,7 +198,7 @@ function Resumen({
       )}
 
       <ul className="lista">
-        {balances.map((viajero) => {
+        {personas.map((viajero) => {
           const estado = estadoDeBalance(viajero.balance);
 
           return (
@@ -226,6 +231,9 @@ function Resumen({
                   {/* Si no, puso y le tocan no cuadran con lo que debe. */}
                   {viajero.dado > 0 && (
                     <> · <span className="sin-partir">dio {conMoneda(viajero.dado, monedaViaje)}</span></>
+                  )}
+                  {viajero.alBote > 0 && (
+                    <> · <span className="sin-partir">al bote {conMoneda(viajero.alBote, monedaViaje)}</span></>
                   )}
                   {viajero.recibido > 0 && (
                     <> · <span className="sin-partir">recibió {conMoneda(viajero.recibido, monedaViaje)}</span></>
@@ -272,17 +280,18 @@ function Resumen({
                 }`}
                 key={`${pago.deId}-${pago.aId}`}
               >
-                <Avatar nombre={pago.de} color={colores?.get(pago.de)} pequeno />
+                <AvatarDe id={pago.deId} nombre={pago.de} colores={colores} />
                 <strong>{pago.de}</strong>
                 <span className="pago-flecha">→</span>
-                <Avatar nombre={pago.a} color={colores?.get(pago.a)} pequeno />
+                <AvatarDe id={pago.aId} nombre={pago.a} colores={colores} />
                 <strong>{pago.a}</strong>
                 <span className="pago-final">
                   <span className="pago-cantidad">
                     {conMoneda(pago.cantidad, monedaViaje)}
                   </span>
 
-                  {!pago.saldado && (
+                  {/* Al bote no se le manda un WhatsApp. */}
+                  {!pago.saldado && pago.deId !== BOTE && pago.aId !== BOTE && (
                     <a
                       className="boton-saldar boton-cobrar"
                       href={enlaceWhatsApp(
@@ -317,8 +326,8 @@ function Resumen({
         )}
 
         <PagosACuenta
-          viajeros={balances}
-          pagos={pagos}
+          viajeros={personas}
+          pagos={pagos.filter((p) => p.deId !== BOTE && p.aId !== BOTE)}
           parciales={parciales}
           colores={colores}
           moneda={monedaViaje}
@@ -330,6 +339,17 @@ function Resumen({
       {fiesta && <Confeti key={fiesta} />}
     </section>
   );
+}
+
+function AvatarDe({ id, nombre, colores }) {
+  if (id === BOTE) {
+    return (
+      <span className="avatar avatar-pequeno avatar-bote" aria-hidden="true">
+        🫙
+      </span>
+    );
+  }
+  return <Avatar nombre={nombre} color={colores?.get(nombre)} pequeno />;
 }
 
 export default Resumen;

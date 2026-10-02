@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import "./App.css";
 import * as datos from "./datos";
 import { hayConexion, usarCodigo } from "./supabase";
-import { calcularBalances } from "./calculos";
+import { balancesConBote, hayBote } from "./bote";
 import { coloresDelViaje } from "./avatares";
 import { borradoConEspera } from "./deshacer";
 import { novedades, textoDeNovedades } from "./novedades";
@@ -11,6 +11,7 @@ import { estaCerrado } from "./cerrar";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
 import Viajeros from "./componentes/Viajeros";
+import Bote from "./componentes/Bote";
 import Gastos from "./componentes/Gastos";
 import Resumen from "./componentes/Resumen";
 import CargandoViaje from "./componentes/CargandoViaje";
@@ -251,7 +252,8 @@ function App() {
   const viajeros = viaje.viajeros.filter((v) => v.id !== seVa);
   const gastos = viaje.gastos.filter((g) => g.id !== seVa && g.pagadorId !== seVa);
   const parciales = (viaje.parciales ?? []).filter((p) => p.id !== seVa);
-  const balances = calcularBalances(viajeros, gastos, parciales);
+  const aportaciones = (viaje.aportaciones ?? []).filter((a) => a.id !== seVa && a.viajeroId !== seVa);
+  const balances = balancesConBote(viajeros, gastos, parciales, aportaciones);
   const colores = coloresDelViaje(viajeros.map((v) => v.nombre));
   const cerrado = estaCerrado(viaje);
 
@@ -285,8 +287,24 @@ function App() {
         }
       />
 
+      {viajeros.length > 0 && (
+        <Bote
+          viajeros={viajeros}
+          aportaciones={aportaciones}
+          gastos={gastos}
+          colores={colores}
+          moneda={viaje.moneda ?? "EUR"}
+          cerrado={cerrado}
+          onPoner={(lista) => hacer(() => datos.ponerEnElBote(viaje.id, lista))}
+          onQuitar={(a, nombre) =>
+            borrarConAviso(a.id, `lo que puso ${nombre} en el bote`, () => datos.quitarDelBote(a.id))
+          }
+        />
+      )}
+
       <Gastos
         viajeros={viajeros}
+        hayBote={hayBote(aportaciones, gastos)}
         gastos={gastos}
         monedaViaje={viaje.moneda ?? "EUR"}
         recienLlegados={novedad?.ids}

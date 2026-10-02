@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { novedades, textoDeNovedades } from "./novedades";
+import { BOTE } from "./bote";
 
 const ana = { id: "a", nombre: "Ana" };
 const luis = { id: "b", nombre: "Luis" };
@@ -54,6 +55,11 @@ describe("textoDeNovedades", () => {
   it("un gasto, con su cifra y quién lo pagó", () => {
     const texto = textoDeNovedades({ gastos: [cena], viajeros: [] }, todos, "EUR");
     expect(texto).toBe("Nuevo gasto: Cena · 30.00 € (pagó Luis)");
+  });
+
+  it("si salió del bote, lo dice", () => {
+    const texto = textoDeNovedades({ gastos: [{ ...cena, pagadorId: BOTE }], viajeros: [] }, todos, "EUR");
+    expect(texto).toBe("Nuevo gasto: Cena · 30.00 € (del bote)");
   });
 
   it("varios, solo cuántos", () => {

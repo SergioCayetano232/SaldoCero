@@ -1963,6 +1963,50 @@ button:active {
   font-variant-numeric: tabular-nums;
 }
 
+/* ===== Bote común ===== */
+.bote-queda {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--teal-700);
+  background-color: var(--teal-100);
+  padding: 3px 10px;
+  border-radius: var(--radio-pastilla);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.bote-queda.en-rojo {
+  color: var(--rojo);
+  background-color: var(--rojo-fondo);
+  animation: temblor 0.4s var(--curva-suave);
+}
+
+.bote-explica {
+  margin-bottom: 8px;
+}
+
+.bote .lista-parciales {
+  margin-bottom: 12px;
+}
+
+.bote .aviso {
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.bote .formulario-parcial .fila-formulario + .fila-formulario {
+  margin-top: 8px;
+}
+
+/* El bote no tiene inicial ni color: un tarro y listo. */
+.avatar-bote {
+  --color-avatar: var(--teal-300);
+  font-size: 13px;
+}
+
 /* ===== Pagos a cuenta ===== */
 .a-cuenta {
   margin-top: 14px;

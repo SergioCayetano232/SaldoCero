@@ -3,6 +3,7 @@
 // { id, codigo, nombre, viajeros: [], gastos: [] }
 
 import { supabase, usarCodigo } from "./supabase";
+import { BOTE } from "./bote";
 
 // Al usuario le decimos algo que entienda, pero el fallo de verdad lo dejamos
 // en la consola, que si no no hay quien averigüe qué ha pasado.
@@ -120,7 +121,7 @@ export async function abrirViaje(codigo) {
 
 // Los viajeros y los gastos de un viaje ya abierto.
 async function cargarContenido(viajeId) {
-  const [delViaje, viajeros, gastos, participantes, saldados, parciales] = await Promise.all([
+  const [delViaje, viajeros, gastos, participantes, saldados, parciales, bote] = await Promise.all([
     // Lo del viaje otra vez, por si lo ha cambiado alguien desde otro móvil.
     supabase.from("viajes").select("nombre, presupuesto, cerrado_en").eq("id", viajeId).single(),
     supabase.from("viajeros").select("id, nombre").eq("viaje_id", viajeId).order("creado_en"),
@@ -143,11 +144,17 @@ async function cargarContenido(viajeId) {
       .select("id, de_id, a_id, importe")
       .eq("viaje_id", viajeId)
       .order("creado_en"),
+    supabase
+      .from("aportaciones_bote")
+      .select("id, viajero_id, importe")
+      .eq("viaje_id", viajeId)
+      .order("creado_en"),
   ]);
 
   const error =
     delViaje.error ||
-    viajeros.error || gastos.error || participantes.error || saldados.error || parciales.error;
+    viajeros.error || gastos.error || participantes.error || saldados.error || parciales.error ||
+    bote.error;
   if (error) throw fallo(error, "No hemos podido cargar el viaje.");
 
   return {
@@ -157,8 +164,8 @@ async function cargarContenido(viajeId) {
     viajeros: viajeros.data,
     // Los marcados antes de guardar ids no los traen: esos van por nombre.
     saldados: saldados.data.map((p) => ({
-      deId: p.de_id,
-      aId: p.a_id,
+      deId: idDeSaldado(p.de_id, p.de_nombre, p.a_id),
+      aId: idDeSaldado(p.a_id, p.a_nombre, p.de_id),
       de: p.de_nombre,
       a: p.a_nombre,
     })),
@@ -168,9 +175,15 @@ async function cargarContenido(viajeId) {
       aId: p.a_id,
       importe: Number(p.importe),
     })),
+    aportaciones: bote.data.map((a) => ({
+      id: a.id,
+      viajeroId: a.viajero_id,
+      importe: Number(a.importe),
+    })),
     gastos: gastos.data.map((gasto) => ({
       id: gasto.id,
-      pagadorId: gasto.pagador_id,
+      // Sin pagador es que salió del bote.
+      pagadorId: gasto.pagador_id ?? BOTE,
       // En la base de datos es numeric, y llega como texto.
       importe: Number(gasto.importe),
       moneda: gasto.moneda ?? "EUR",
@@ -267,7 +280,7 @@ export async function anadirGasto(viajeId, gasto) {
 // con las partes de cada uno, que la base de datos lo rehace entero.
 export function datosDelGasto(gasto) {
   return {
-    g_pagador: gasto.pagadorId,
+    g_pagador: gasto.pagadorId === BOTE ? null : gasto.pagadorId,
     g_importe: gasto.importe,
     g_moneda: gasto.moneda,
     g_convertido: gasto.importeConvertido,
@@ -296,8 +309,8 @@ export async function marcarSaldado(viajeId, pago) {
     .from("pagos_saldados")
     .insert({
       viaje_id: viajeId,
-      de_id: pago.deId,
-      a_id: pago.aId,
+      de_id: sinBote(pago.deId),
+      a_id: sinBote(pago.aId),
       de_nombre: pago.de,
       a_nombre: pago.a,
     });
@@ -305,14 +318,26 @@ export async function marcarSaldado(viajeId, pago) {
   if (error) throw fallo(error, "No hemos podido marcar el pago.");
 }
 
+// El bote no es un viajero: en la base de datos va sin id, solo con el nombre.
+function sinBote(id) {
+  return id === BOTE ? null : id;
+}
+
+// Y al leerlo, es el bote si le falta el id solo a ese lado. Sin ninguno de los
+// dos es de los marcados antes de guardar ids.
+function idDeSaldado(id, nombre, idDelOtro) {
+  if (!id && idDelOtro && nombre === "Bote") return BOTE;
+  return id;
+}
+
 // Y volver atrás si te has equivocado.
 export async function desmarcarSaldado(viajeId, pago) {
-  const { error } = await supabase
-    .from("pagos_saldados")
-    .delete()
-    .eq("viaje_id", viajeId)
-    .eq("de_id", pago.deId)
-    .eq("a_id", pago.aId);
+  // El lado del bote está vacío en la base de datos.
+  const lado = (consulta, columna, id) =>
+    id === BOTE ? consulta.is(columna, null) : consulta.eq(columna, id);
+
+  const consulta = supabase.from("pagos_saldados").delete().eq("viaje_id", viajeId);
+  const { error } = await lado(lado(consulta, "de_id", pago.deId), "a_id", pago.aId);
 
   if (error) throw fallo(error, "No hemos podido desmarcar el pago.");
 
@@ -344,6 +369,20 @@ export async function anadirParcial(viajeId, parcial) {
 export async function quitarParcial(id) {
   const { error } = await supabase.from("pagos_parciales").delete().eq("id", id);
   if (error) throw fallo(error, "No hemos podido quitar el pago.");
+}
+
+// Todas en una petición: si "cada uno pone 50" falla, que no se quede a medias.
+export async function ponerEnElBote(viajeId, aportaciones) {
+  const { error } = await supabase
+    .from("aportaciones_bote")
+    .insert(aportaciones.map((a) => ({ viaje_id: viajeId, viajero_id: a.viajeroId, importe: a.importe })));
+
+  if (error) throw fallo(error, "No hemos podido apuntarlo en el bote.");
+}
+
+export async function quitarDelBote(id) {
+  const { data, error } = await supabase.from("aportaciones_bote").delete().eq("id", id).select("id");
+  if (error || !data.length) throw fallo(error, "No hemos podido quitarlo del bote.");
 }
 
 export async function quitarGasto(id) {
