@@ -41,6 +41,8 @@ create table gastos (
   -- El día del gasto. Va aparte de creado_en porque no siempre apuntas las
   -- cosas el mismo día: la cena del viernes la metes el domingo.
   fecha date not null default current_date,
+  -- La foto del ticket, si hay: su ruta en el bucket "tickets".
+  ticket text,
   creado_en timestamptz not null default now()
 );
 
@@ -219,6 +221,25 @@ create policy "poner en el bote" on aportaciones_bote for insert with check (
   and exists (select 1 from viajeros v where v.id = viajero_id and v.viaje_id = viaje_actual())
 );
 create policy "quitar del bote" on aportaciones_bote for delete using (viaje_id = viaje_abierto());
+
+-- ---------- Fotos de los tickets ----------
+--
+-- Un bucket privado. Cada foto va en la carpeta de su viaje ("<viaje_id>/...")
+-- y las reglas miran esa carpeta con el mismo código de siempre en la cabecera.
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('tickets', 'tickets', false, 2097152, array['image/jpeg'])
+on conflict (id) do nothing;
+
+create policy "ver tickets" on storage.objects for select using (
+  bucket_id = 'tickets' and (storage.foldername(name))[1] = viaje_actual()::text
+);
+create policy "subir tickets" on storage.objects for insert with check (
+  bucket_id = 'tickets' and (storage.foldername(name))[1] = viaje_abierto()::text
+);
+create policy "quitar tickets" on storage.objects for delete using (
+  bucket_id = 'tickets' and (storage.foldername(name))[1] = viaje_abierto()::text
+);
 
 -- ---------- Crear y abrir viajes ----------
 
@@ -471,3 +492,9 @@ $$;
 --
 --   Pega el "create table aportaciones_bote", su índice, su "enable row level
 --   security" y sus tres policies de más arriba.
+
+-- Foto del ticket.
+--   alter table gastos add column ticket text;
+--
+--   Pega el "insert into storage.buckets" y las tres policies de los tickets de
+--   más arriba.

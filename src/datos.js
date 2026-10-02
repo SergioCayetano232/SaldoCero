@@ -4,6 +4,7 @@
 
 import { supabase, usarCodigo } from "./supabase";
 import { BOTE } from "./bote";
+import { rutaDelTicket } from "./tickets";
 
 // Al usuario le decimos algo que entienda, pero el fallo de verdad lo dejamos
 // en la consola, que si no no hay quien averigüe qué ha pasado.
@@ -127,7 +128,7 @@ async function cargarContenido(viajeId) {
     supabase.from("viajeros").select("id, nombre").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
-      .select("id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha")
+      .select("id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha, ticket")
       .eq("viaje_id", viajeId)
       .order("fecha")
       .order("creado_en"),
@@ -192,6 +193,7 @@ async function cargarContenido(viajeId) {
       concepto: gasto.concepto,
       categoria: gasto.categoria ?? "otros",
       fecha: gasto.fecha,
+      ticket: gasto.ticket ?? null,
       participantes: participantes.data
         .filter((p) => p.gasto_id === gasto.id)
         .map((p) => p.viajero_id),
@@ -385,13 +387,60 @@ export async function quitarDelBote(id) {
   if (error || !data.length) throw fallo(error, "No hemos podido quitarlo del bote.");
 }
 
-export async function quitarGasto(id) {
+// Con la foto, si tiene: primero el gasto y luego la foto. Al revés, si fallara
+// lo segundo quedaría un gasto apuntando a una foto que ya no está.
+export async function quitarGasto(id, ticket = null) {
   const { error } = await supabase.from("gastos").delete().eq("id", id);
   if (error) throw fallo(error, "No hemos podido quitar el gasto.");
+
+  if (ticket) await borrarFotos([ticket]);
+}
+
+const TICKETS = "tickets";
+
+// Sube la foto y se la pega al gasto. Si ya tenía otra, la vieja se borra después.
+export async function ponerTicket(viajeId, gastoId, foto, anterior = null) {
+  const ruta = rutaDelTicket(viajeId, gastoId);
+
+  const subida = await supabase.storage.from(TICKETS).upload(ruta, foto, { contentType: "image/jpeg" });
+  if (subida.error) throw fallo(subida.error, "El gasto está guardado, pero la foto no se ha podido subir.");
+
+  const { data, error } = await supabase.from("gastos").update({ ticket: ruta }).eq("id", gastoId).select("id");
+  if (error || !data.length) {
+    await borrarFotos([ruta]);
+    throw fallo(error, "El gasto está guardado, pero la foto no se ha podido subir.");
+  }
+
+  if (anterior) await borrarFotos([anterior]);
+}
+
+export async function quitarTicket(gastoId, ruta) {
+  const { data, error } = await supabase.from("gastos").update({ ticket: null }).eq("id", gastoId).select("id");
+  if (error || !data.length) throw fallo(error, "No hemos podido quitar la foto.");
+
+  await borrarFotos([ruta]);
+}
+
+// Un enlace que caduca en una hora: el bucket es privado y la etiqueta <img> no
+// puede mandar nuestra cabecera con el código.
+export async function urlDelTicket(ruta) {
+  const { data, error } = await supabase.storage.from(TICKETS).createSignedUrl(ruta, 3600);
+  if (error) throw fallo(error, "No hemos podido abrir la foto.");
+  return data.signedUrl;
+}
+
+// Si no se puede borrar, se queda la foto suelta en el bucket, pero el gasto ya
+// no la enseña. No merece la pena darle un error a nadie por eso.
+async function borrarFotos(rutas) {
+  const { error } = await supabase.storage.from(TICKETS).remove(rutas);
+  if (error) console.error("No se ha podido borrar la foto", error);
 }
 
 // Vaciar el viaje: fuera viajeros (y con ellos, sus gastos) y fuera gastos.
 export async function vaciarViaje(viajeId) {
+  // Las fotos primero, que luego ya no sabríamos cuáles eran.
+  const { data: fotos } = await supabase.storage.from(TICKETS).list(viajeId, { limit: 1000 });
+
   const { error: errorSaldados } = await supabase
     .from("pagos_saldados")
     .delete()
@@ -408,6 +457,8 @@ export async function vaciarViaje(viajeId) {
     .eq("viaje_id", viajeId);
 
   if (errorViajeros) throw fallo(errorViajeros, "No hemos podido vaciar el viaje.");
+
+  if (fotos?.length) await borrarFotos(fotos.map((f) => `${viajeId}/${f.name}`));
 }
 
 // Cada cuánto miramos si los demás han apuntado algo.

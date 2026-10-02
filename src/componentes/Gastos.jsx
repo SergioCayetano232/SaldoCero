@@ -7,9 +7,22 @@ import { hoy, comoTitulo, porDias } from "../fechas";
 import { sugerirConceptos } from "../sugerencias";
 import { gastoAlFormulario, repetirGasto } from "../repetir";
 import { BOTE } from "../bote";
+import { esImagen } from "../tickets";
 import Deslizable from "./Deslizable";
+import VisorTicket from "./VisorTicket";
 
-function Gastos({ viajeros, hayBote = false, gastos, monedaViaje, recienLlegados, cerrado, onAnadir, onEditar, onQuitar }) {
+function Gastos({
+  viajeros,
+  hayBote = false,
+  gastos,
+  monedaViaje,
+  recienLlegados,
+  cerrado,
+  onAnadir,
+  onEditar,
+  onQuitar,
+  verTicket,
+}) {
   const [pagadorId, setPagadorId] = useState("");
   const [importe, setImporte] = useState("");
   const [moneda, setMoneda] = useState(monedaViaje);
@@ -40,6 +53,12 @@ function Gastos({ viajeros, hayBote = false, gastos, monedaViaje, recienLlegados
         : cambioTraido?.moneda === moneda
           ? cambioTraido.tasa
           : undefined;
+  // La foto nueva que has elegido, la que ya tenía el gasto que editas, y si la quitas.
+  const [foto, setFoto] = useState(null);
+  const [ticketActual, setTicketActual] = useState(null);
+  const [quitarFoto, setQuitarFoto] = useState(false);
+  // El gasto cuyo ticket estás mirando.
+  const [viendo, setViendo] = useState(null);
   // Entre quiénes se reparte. null = no lo has tocado, así que van todos.
   const [participantes, setParticipantes] = useState(null);
   // El gasto que estás tocando ahora mismo. Vacío si estás apuntando uno nuevo.
@@ -109,6 +128,9 @@ function Gastos({ viajeros, hayBote = false, gastos, monedaViaje, recienLlegados
     setFecha(hoy());
     setParticipantes(null);
     setEditando(null);
+    setFoto(null);
+    setTicketActual(null);
+    setQuitarFoto(false);
   }
 
   function rellenar(f) {
@@ -131,6 +153,16 @@ function Gastos({ viajeros, hayBote = false, gastos, monedaViaje, recienLlegados
   function editar(gasto) {
     setEditando(gasto.id);
     rellenar(gastoAlFormulario(gasto, viajeros, monedaViaje));
+    setFoto(null);
+    setTicketActual(gasto.ticket ?? null);
+    setQuitarFoto(false);
+  }
+
+  function elegirFoto(e) {
+    const archivo = e.target.files?.[0];
+    // Que se pueda volver a elegir la misma si la quitas.
+    e.target.value = "";
+    if (esImagen(archivo)) setFoto(archivo);
   }
 
   // Otro igual pero de hoy: el desayuno de cada día, la gasolina...
@@ -138,6 +170,10 @@ function Gastos({ viajeros, hayBote = false, gastos, monedaViaje, recienLlegados
   function repetir(gasto) {
     setEditando(null);
     rellenar(repetirGasto(gasto, viajeros, monedaViaje, hoy()));
+    // El ticket es de aquel día, no de este.
+    setFoto(null);
+    setTicketActual(null);
+    setQuitarFoto(false);
   }
 
   // Lo que le toca a cada uno de los marcados. Por defecto, una parte.
@@ -184,6 +220,9 @@ function Gastos({ viajeros, hayBote = false, gastos, monedaViaje, recienLlegados
       participantes: marcados,
       // Solo mandamos las partes si de verdad hay reparto desigual.
       partes: repartoAbierto ? partesDeLosMarcados() : null,
+      foto,
+      quitarFoto: quitarFoto && !foto,
+      ticketAnterior: ticketActual,
     };
 
     if (editando) {
@@ -339,6 +378,35 @@ function Gastos({ viajeros, hayBote = false, gastos, monedaViaje, recienLlegados
                   if (e.key === "Enter") guardar();
                 }}
               />
+
+              <div className="fila-ticket">
+                {foto ? (
+                  <span className="ticket-elegido">
+                    📷 <span className="ticket-nombre">{foto.name}</span>
+                    <button className="boton-quitar" onClick={() => setFoto(null)} aria-label="No poner esta foto">
+                      ✕
+                    </button>
+                  </span>
+                ) : ticketActual && !quitarFoto ? (
+                  <span className="ticket-elegido">
+                    <button className="enlace" onClick={() => setViendo({ ticket: ticketActual, concepto })}>
+                      🧾 Tiene foto
+                    </button>
+                    <label className="enlace">
+                      Cambiar
+                      <input type="file" accept="image/*" onChange={elegirFoto} hidden />
+                    </label>
+                    <button className="enlace" onClick={() => setQuitarFoto(true)}>
+                      Quitar
+                    </button>
+                  </span>
+                ) : (
+                  <label className="boton-foto">
+                    📷 {quitarFoto ? "Se quitará la foto · poner otra" : "Foto del ticket"}
+                    <input type="file" accept="image/*" onChange={elegirFoto} hidden />
+                  </label>
+                )}
+              </div>
 
               {sugerencias.length > 0 && (
                 <div className="sugerencias">
@@ -548,7 +616,7 @@ function Gastos({ viajeros, hayBote = false, gastos, monedaViaje, recienLlegados
                         recienLlegados?.has(gasto.id) ? "recien-llegado" : ""
                       }`}
                       onEditar={() => editar(gasto)}
-                      onQuitar={() => onQuitar(gasto.id, gasto.concepto)}
+                      onQuitar={() => onQuitar(gasto.id, gasto.concepto, gasto.ticket)}
                       quieto={cerrado}
                     >
                       <span
@@ -560,6 +628,16 @@ function Gastos({ viajeros, hayBote = false, gastos, monedaViaje, recienLlegados
 
                       <span>
                         <span className="gasto-concepto">{gasto.concepto}</span>
+                        {gasto.ticket && (
+                          <button
+                            className="boton-ticket"
+                            onClick={() => setViendo(gasto)}
+                            title="Ver el ticket"
+                            aria-label={`Ver el ticket de ${gasto.concepto}`}
+                          >
+                            🧾
+                          </button>
+                        )}
                         <br />
                         <small className="reparto">
                           {nombrePagador(gasto.pagadorId)} · {textoReparto(gasto)}
@@ -594,7 +672,7 @@ function Gastos({ viajeros, hayBote = false, gastos, monedaViaje, recienLlegados
                           </button>
                           <button
                             className="boton-quitar"
-                            onClick={() => onQuitar(gasto.id, gasto.concepto)}
+                            onClick={() => onQuitar(gasto.id, gasto.concepto, gasto.ticket)}
                           >
                             ✕
                           </button>
@@ -607,6 +685,15 @@ function Gastos({ viajeros, hayBote = false, gastos, monedaViaje, recienLlegados
             ))
           )}
         </>
+      )}
+
+      {viendo && (
+        <VisorTicket
+          ruta={viendo.ticket}
+          concepto={viendo.concepto}
+          cargar={verTicket}
+          onCerrar={() => setViendo(null)}
+        />
       )}
     </section>
   );

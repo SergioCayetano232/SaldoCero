@@ -1967,6 +1967,136 @@ button:active {
   font-variant-numeric: tabular-nums;
 }
 
+/* ===== Foto del ticket ===== */
+.fila-ticket {
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+}
+
+/* Un input de archivo no se deja pintar: se esconde y se pulsa la etiqueta. */
+.boton-foto {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px dashed var(--teal-300);
+  border-radius: var(--radio-pastilla);
+  color: var(--teal-600);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color var(--rapido), border-color var(--rapido);
+}
+
+.boton-foto:hover {
+  background-color: var(--teal-50);
+  border-color: var(--teal-500);
+}
+
+.ticket-elegido {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  font-size: 13px;
+  animation: aparecer-creciendo var(--medio) var(--curva-muelle);
+}
+
+.ticket-elegido label.enlace {
+  cursor: pointer;
+}
+
+.ticket-nombre {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--tinta-suave);
+}
+
+.boton-ticket {
+  margin-left: 6px;
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0.75;
+  transition: transform var(--rapido) var(--curva-muelle), opacity var(--rapido);
+}
+
+.boton-ticket:hover {
+  opacity: 1;
+  transform: scale(1.2) rotate(-6deg);
+}
+
+.visor-ticket {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background-color: var(--velo);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: aparecer var(--rapido) var(--curva-suave);
+}
+
+.visor-caja {
+  display: flex;
+  flex-direction: column;
+  width: min(520px, 100%);
+  max-height: 100%;
+  padding: 12px;
+  border-radius: var(--radio);
+  background-color: var(--papel);
+  box-shadow: var(--sombra-flotante);
+  animation: aparecer-creciendo var(--medio) var(--curva-muelle);
+}
+
+.visor-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 4px 10px;
+  font-weight: 600;
+}
+
+.visor-cabecera span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.visor-cerrar {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: var(--tinta-suave);
+}
+
+.visor-cerrar:hover {
+  background-color: var(--papel-hundido);
+}
+
+/* Que el ticket entero quepa en la pantalla, por largo que sea. */
+.visor-caja img {
+  display: block;
+  min-height: 0;
+  max-width: 100%;
+  max-height: calc(100dvh - 110px);
+  margin: 0 auto;
+  border-radius: var(--radio-sm);
+  object-fit: contain;
+}
+
+.visor-cargando {
+  padding: 40px 0;
+  text-align: center;
+  color: var(--tinta-tenue);
+}
+
 /* ===== Bote común ===== */
 .bote-queda {
   margin-left: auto;

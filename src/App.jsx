@@ -8,6 +8,7 @@ import { borradoConEspera } from "./deshacer";
 import { novedades, textoDeNovedades } from "./novedades";
 import { vibrar } from "./vibrar";
 import { estaCerrado } from "./cerrar";
+import { reducirFoto } from "./tickets";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
 import Viajeros from "./componentes/Viajeros";
@@ -310,12 +311,27 @@ function App() {
         recienLlegados={novedad?.ids}
         cerrado={cerrado}
         onAnadir={(gasto) =>
-          hacer(async () => propios.current.add((await datos.anadirGasto(viaje.id, gasto)).id))
+          hacer(async () => {
+            // La foto se reduce antes de guardar nada: si no se puede leer, mejor
+            // enterarse sin haber apuntado el gasto a medias.
+            const foto = gasto.foto && (await reducirFoto(gasto.foto));
+            const nuevo = await datos.anadirGasto(viaje.id, gasto);
+            propios.current.add(nuevo.id);
+            if (foto) await datos.ponerTicket(viaje.id, nuevo.id, foto);
+          })
         }
-        onEditar={(id, gasto) => hacer(() => datos.editarGasto(id, gasto))}
-        onQuitar={(id, concepto) =>
-          borrarConAviso(id, `"${concepto}"`, () => datos.quitarGasto(id))
+        onEditar={(id, gasto) =>
+          hacer(async () => {
+            const foto = gasto.foto && (await reducirFoto(gasto.foto));
+            await datos.editarGasto(id, gasto);
+            if (foto) await datos.ponerTicket(viaje.id, id, foto, gasto.ticketAnterior);
+            else if (gasto.quitarFoto) await datos.quitarTicket(id, gasto.ticketAnterior);
+          })
         }
+        onQuitar={(id, concepto, ticket) =>
+          borrarConAviso(id, `"${concepto}"`, () => datos.quitarGasto(id, ticket))
+        }
+        verTicket={datos.urlDelTicket}
       />
 
       {gastos.length > 0 && (
