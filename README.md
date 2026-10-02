@@ -24,17 +24,22 @@ Pruébala aquí: https://saldo-cero-eight.vercel.app/
 - Si un gasto no es de todos, marcas solo a los que van.
 - Y si uno come el doble que los demás, lo repartes en partes desiguales.
 - Si te equivocas, editas el gasto y ya está. En el móvil, deslizándolo.
+- Le haces una foto al ticket y se queda guardada con el gasto.
 - El desayuno de cada día lo copias de un toque, y al escribir te sugiere lo
   que ya has apuntado.
 - Buscas y filtras los gastos por concepto, persona o categoría.
 - Si borras algo sin querer, lo deshaces.
 - Puedes pagar en otra moneda y te lo convertimos a la del viaje.
+- Si hacéis bote, apuntas lo que pone cada uno y pagáis desde ahí.
 - Te dice a quién le toca pagar la próxima: al que menos ha puesto.
 - Y al final, la lista de quién paga a quién para quedar todos a cero.
 - Vas marcando las deudas que ya se han pagado, aunque sea solo una parte.
-- Le pones un presupuesto al viaje y ves cuánto os queda.
+- Y al que se hace el loco le mandas un WhatsApp con la cifra ya puesta.
+- Le pones un presupuesto al viaje y ves cuánto os queda y para cuántos días
+  os llega.
 - Al volver, cierras el viaje y ya nadie toca los gastos.
-- El resumen lo compartes por donde quieras o te lo descargas en un txt.
+- El resumen lo compartes por donde quieras o te lo descargas en un txt. Los
+  gastos, en un Excel.
 - Guarda los viajes en los que has estado, para volver sin buscar el código.
 
 
