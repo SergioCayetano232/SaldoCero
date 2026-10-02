@@ -1852,6 +1852,17 @@ button:active {
   transform: scale(1.12);
 }
 
+/* El de pedir el dinero: como el de saldar, pero con el verde de WhatsApp al pasar. */
+.boton-cobrar {
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.boton-cobrar:hover {
+  background-color: var(--whatsapp);
+  border-color: var(--whatsapp);
+}
+
 /* Una deuda ya pagada se queda tachada y apagada, pero sin desaparecer:
    así ves de un vistazo lo que ya está hecho. */
 .pago.pagado {
@@ -1887,8 +1898,9 @@ button:active {
 
 .pago {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 11px;
+  gap: 8px 11px;
   padding: 12px 14px;
   background-color: var(--teal-50);
   border-radius: var(--radio-sm);
@@ -1928,8 +1940,15 @@ button:active {
   animation: flecha-va-y-viene 0.8s infinite var(--curva-suave);
 }
 
-.pago-cantidad {
+/* La cifra y sus botones van juntos: si no caben, bajan a otra línea a la derecha. */
+.pago-final {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-left: auto;
+}
+
+.pago-cantidad {
   font-family: var(--fuente-titulo);
   font-weight: 600;
   color: var(--teal-700);

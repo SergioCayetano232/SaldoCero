@@ -10,6 +10,7 @@ import {
 } from "../calculos";
 import { conMoneda } from "../monedas";
 import { resumenEnTexto, copiarAlPortapapeles, descargarResumen } from "../compartir";
+import { mensajeDeCobro, enlaceWhatsApp } from "../cobrar";
 import { gastoPorCategoria } from "../categorias";
 import { importeDeGasto, parteDe } from "../calculos";
 import Cifra from "./Cifra";
@@ -275,17 +276,40 @@ function Resumen({
                 <span className="pago-flecha">→</span>
                 <Avatar nombre={pago.a} color={colores?.get(pago.a)} pequeno />
                 <strong>{pago.a}</strong>
-                <span className="pago-cantidad">
-                  {conMoneda(pago.cantidad, monedaViaje)}
-                </span>
+                <span className="pago-final">
+                  <span className="pago-cantidad">
+                    {conMoneda(pago.cantidad, monedaViaje)}
+                  </span>
 
-                <button
-                  className="boton-saldar"
-                  onClick={() => (pago.saldado ? onDesaldar(pago) : saldar(pago))}
-                  title={pago.saldado ? "Marcar como pendiente" : "Marcar como pagado"}
-                >
-                  {pago.saldado ? "↩︎" : "✓"}
-                </button>
+                  {!pago.saldado && (
+                    <a
+                      className="boton-saldar boton-cobrar"
+                      href={enlaceWhatsApp(
+                        mensajeDeCobro({
+                          pago,
+                          soy,
+                          nombreViaje: viaje?.nombre ?? "el viaje",
+                          codigo: viaje?.codigo,
+                          moneda: monedaViaje,
+                        })
+                      )}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`Pedírselo a ${pago.de} por WhatsApp`}
+                      aria-label={`Pedírselo a ${pago.de} por WhatsApp`}
+                    >
+                      💬
+                    </a>
+                  )}
+
+                  <button
+                    className="boton-saldar"
+                    onClick={() => (pago.saldado ? onDesaldar(pago) : saldar(pago))}
+                    title={pago.saldado ? "Marcar como pendiente" : "Marcar como pagado"}
+                  >
+                    {pago.saldado ? "↩︎" : "✓"}
+                  </button>
+                </span>
               </div>
             ))}
           </>
