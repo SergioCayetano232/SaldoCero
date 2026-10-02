@@ -79,13 +79,21 @@ function copiarALoAntiguo(texto) {
 
 // Bajarse el resumen en un archivo de texto, por si quieres guardarlo.
 export function descargarResumen(texto, nombreViaje) {
-  const archivo = new Blob([texto], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(archivo);
+  descargar(texto, `${nombreViaje}.txt`, "text/plain;charset=utf-8");
+}
+
+// Y los gastos en CSV. El BOM del principio es para que Excel vea las tildes.
+export function descargarGastos(csv, nombreViaje) {
+  descargar(`\uFEFF${csv}`, `${nombreViaje} - gastos.csv`, "text/csv;charset=utf-8");
+}
+
+function descargar(texto, nombre, tipo) {
+  const url = URL.createObjectURL(new Blob([texto], { type: tipo }));
 
   const enlace = document.createElement("a");
   enlace.href = url;
   // Sin barras ni dos puntos, que hay sistemas que no los admiten.
-  enlace.download = `${nombreViaje.replace(/[\\/:*?"<>|]/g, "-")}.txt`;
+  enlace.download = nombre.replace(/[\\/:*?"<>|]/g, "-");
   enlace.click();
 
   URL.revokeObjectURL(url);

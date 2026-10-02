@@ -1780,10 +1780,14 @@ button:active {
 }
 
 /* Los dos botones del resumen, a la derecha del título. */
+/* En un móvil estrecho no caben los tres: el que sobra baja, a la derecha. */
 .acciones-resumen {
   margin-left: auto;
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 6px;
+  min-width: 0;
 }
 
 .boton-compartir {

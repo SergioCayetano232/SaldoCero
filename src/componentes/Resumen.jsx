@@ -9,7 +9,8 @@ import {
   quedaPorPagar,
 } from "../calculos";
 import { conMoneda } from "../monedas";
-import { resumenEnTexto, copiarAlPortapapeles, descargarResumen } from "../compartir";
+import { resumenEnTexto, copiarAlPortapapeles, descargarResumen, descargarGastos } from "../compartir";
+import { gastosEnCSV } from "../exportar";
 import { mensajeDeCobro, enlaceWhatsApp } from "../cobrar";
 import { BOTE, sinBote } from "../bote";
 import { gastoPorCategoria } from "../categorias";
@@ -116,6 +117,19 @@ function Resumen({
             title="Bajarlo en un archivo"
           >
             Guardar
+          </button>
+
+          <button
+            className="boton-compartir"
+            onClick={() =>
+              descargarGastos(
+                gastosEnCSV({ gastos, viajeros: personas, moneda: monedaViaje }),
+                viaje?.nombre ?? "viaje"
+              )
+            }
+            title="Bajar los gastos en una hoja de cálculo"
+          >
+            Excel
           </button>
         </span>
       </h2>
