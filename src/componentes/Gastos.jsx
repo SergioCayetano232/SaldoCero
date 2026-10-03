@@ -12,6 +12,7 @@ import { esImagen } from "../tickets";
 import { LARGO_NOTA } from "../notas";
 import { cuentaDe, textoCuentaDe, textoParteDe } from "../loDeUno";
 import { posiblesRepetidos } from "../repetidos";
+import { leerSuma, esSuma } from "../sumas";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 
@@ -64,6 +65,15 @@ function Gastos({
         : cambioTraido?.moneda === moneda
           ? cambioTraido.tasa
           : undefined;
+  // Lo escrito puede ser una suma ("12,5+8"): esto es ya el número. NaN si no se entiende.
+  const importeLeido = leerSuma(importe) ?? NaN;
+  const campoImporte = useRef(null);
+
+  function otroSumando() {
+    setImporte(`${importe.trim()}+`);
+    campoImporte.current?.focus();
+  }
+
   // La foto nueva que has elegido, la que ya tenía el gasto que editas, y si la quitas.
   const [foto, setFoto] = useState(null);
   const [ticketActual, setTicketActual] = useState(null);
@@ -215,18 +225,18 @@ function Gastos({
 
   // Para no empezar de cero: lo que les salía con las partes de ahora.
   function pasarAImportes() {
-    setImportes(partesAImportes(partesDeLosMarcados(), marcados, parseFloat(importe)));
+    setImportes(partesAImportes(partesDeLosMarcados(), marcados, importeLeido));
     setPorImportes(true);
   }
 
-  const importeEscrito = parseFloat(importe);
+  const importeEscrito = importeLeido;
   const conImportes = repartoAbierto && porImportes;
   const falta = conImportes && importeEscrito > 0 ? loQueFalta(importes, marcados, importeEscrito) : null;
   const descuadrado = conImportes && !cuadra(importes, marcados, importeEscrito);
 
   // Cuánto sale para cada uno con las partes de ahora, para irlo viendo.
   function loQueLeToca(id) {
-    const total = parseFloat(importe);
+    const total = importeLeido;
     if (isNaN(total) || total <= 0 || typeof tasa !== "number") return null;
     // Por importes ya se ve, solo hace falta si hay que pasarlo de moneda.
     if (conImportes) return leerImporte(importes[id]) * tasa;
@@ -245,7 +255,7 @@ function Gastos({
       : null;
 
   function guardar(aunqueSeParezca = false) {
-    const importeNumero = parseFloat(importe);
+    const importeNumero = importeLeido;
 
     if (pagadorId === "") return;
     if (isNaN(importeNumero) || importeNumero <= 0) return;
@@ -351,14 +361,33 @@ function Gastos({
               </select>
 
               <div className="fila-importe">
-                <input
-                  type="number"
-                  placeholder="Importe"
-                  min="0"
-                  step="0.01"
-                  value={importe}
-                  onChange={(e) => setImporte(e.target.value)}
-                />
+                {/* De texto y no number, que si no el "+" no se deja escribir. El
+                    teclado sigue siendo el de números. */}
+                <div className={`campo-suma ${esSuma(importe) ? "con-suma" : ""}`}>
+                  <input
+                    ref={campoImporte}
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="Importe"
+                    value={importe}
+                    onChange={(e) => setImporte(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") guardar();
+                    }}
+                  />
+                  {/* El teclado del móvil no trae "+": va aquí. */}
+                  {importeLeido > 0 && !importe.trim().endsWith("+") && (
+                    <button
+                      className="boton-sumar"
+                      onPointerDown={(e) => e.preventDefault()}
+                      onClick={otroSumando}
+                      title="Sumarle otro importe"
+                      aria-label="Sumarle otro importe"
+                    >
+                      +
+                    </button>
+                  )}
+                </div>
                 <select
                   className="selector-moneda"
                   value={moneda}
@@ -385,6 +414,14 @@ function Gastos({
                 />
               </div>
 
+              {esSuma(importe) && (
+                <p className={`resultado-suma ${isNaN(importeLeido) ? "suma-mal" : ""}`} role="status">
+                  {isNaN(importeLeido)
+                    ? "Esa suma no se entiende: solo números y +"
+                    : `= ${conMoneda(importeLeido, moneda)}`}
+                </p>
+              )}
+
               {moneda !== monedaViaje && (
                 <div className="conversion">
                   {aMano ? (
@@ -404,8 +441,8 @@ function Gastos({
                         />
                         {monedaViaje}
                       </label>
-                      {tasa && importe > 0 && (
-                        <> · Son <strong>{conMoneda(importe * tasa, monedaViaje)}</strong></>
+                      {tasa && importeLeido > 0 && (
+                        <> · Son <strong>{conMoneda(importeLeido * tasa, monedaViaje)}</strong></>
                       )}
                       {typeof cambioTraido?.tasa === "number" && cambioTraido.moneda === moneda && (
                         <button className="enlace" onClick={() => setTasaAMano(null)}>
@@ -417,8 +454,8 @@ function Gastos({
                     <>Mirando a cuánto está el cambio…</>
                   ) : (
                     <>
-                      {importe > 0 && (
-                        <>Son <strong>{conMoneda(importe * tasa, monedaViaje)}</strong> · </>
+                      {importeLeido > 0 && (
+                        <>Son <strong>{conMoneda(importeLeido * tasa, monedaViaje)}</strong> · </>
                       )}
                       1 {moneda} = {tasa.toFixed(4)} {monedaViaje}
                       {/* El banco no siempre te cobra el del día. */}

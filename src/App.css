@@ -723,6 +723,58 @@ button:active {
   min-width: 0;
 }
 
+.campo-suma {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+
+/* Con una suma, el campo se queda la fila entera: "12,5+8+3,20" no cabe en el hueco de siempre. */
+.campo-suma.con-suma {
+  flex-basis: 100%;
+}
+
+.campo-suma input {
+  padding-right: 42px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* El "+" dentro del campo, a la derecha, para el teclado que no lo tiene. */
+.boton-sumar {
+  position: absolute;
+  top: 50%;
+  right: 7px;
+  width: 30px;
+  height: 30px;
+  margin-top: -15px;
+  border-radius: 50%;
+  background-color: var(--teal-50);
+  border: 1px solid var(--teal-300);
+  color: var(--teal-600);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  animation: aparecer-creciendo var(--rapido) var(--curva-muelle);
+}
+
+.boton-sumar:hover {
+  background-color: var(--teal-100);
+}
+
+.resultado-suma {
+  margin-top: -2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--teal-600);
+  font-variant-numeric: tabular-nums;
+}
+
+.resultado-suma.suma-mal {
+  color: var(--rojo);
+  font-weight: 500;
+}
+
 .selector-moneda {
   width: auto;
   flex-shrink: 0;
