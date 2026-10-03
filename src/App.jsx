@@ -312,6 +312,7 @@ function App() {
         monedaViaje={viaje.moneda ?? "EUR"}
         recienLlegados={novedad?.ids}
         cerrado={cerrado}
+        soy={soy}
         onAnadir={(gasto) =>
           hacer(async () => {
             // La foto se reduce antes de guardar nada: si no se puede leer, mejor

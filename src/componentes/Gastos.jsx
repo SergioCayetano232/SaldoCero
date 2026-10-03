@@ -10,6 +10,7 @@ import { leerImporte, loQueFalta, cuadra, importesAPartes, partesAImportes } fro
 import { BOTE } from "../bote";
 import { esImagen } from "../tickets";
 import { LARGO_NOTA } from "../notas";
+import { cuentaDe, textoCuentaDe, textoParteDe } from "../loDeUno";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 
@@ -24,6 +25,7 @@ function Gastos({
   onEditar,
   onQuitar,
   verTicket,
+  soy = null,
 }) {
   const [pagadorId, setPagadorId] = useState("");
   const [importe, setImporte] = useState("");
@@ -97,6 +99,11 @@ function Gastos({
   const categoriasUsadas = CATEGORIAS.filter((c) =>
     gastos.some((g) => (g.categoria ?? POR_DEFECTO) === c.id)
   );
+
+  // Filtrando por alguien, cada gasto dice lo que le toca a esa persona.
+  const deQuien = filtrando ? viajeros.find((v) => v.id === filtros.viajeroId) : null;
+  const esYo = Boolean(deQuien) && deQuien.id === soy;
+  const puedoVerLoMio = viajeros.some((v) => v.id === soy);
 
   function filtrar(cambio) {
     setFiltros({ ...filtros, ...cambio });
@@ -639,14 +646,26 @@ function Gastos({
 
           {puedeFiltrar && (
             <div className="filtros">
-              <input
-                type="search"
-                className="filtro-buscar"
-                placeholder="Buscar un gasto"
-                aria-label="Buscar un gasto"
-                value={filtros.texto}
-                onChange={(e) => filtrar({ texto: e.target.value })}
-              />
+              <div className="filtro-fila">
+                <input
+                  type="search"
+                  className="filtro-buscar"
+                  placeholder="Buscar un gasto"
+                  aria-label="Buscar un gasto"
+                  value={filtros.texto}
+                  onChange={(e) => filtrar({ texto: e.target.value })}
+                />
+
+                {puedoVerLoMio && (
+                  <button
+                    className={`filtro-mio ${esYo ? "activo" : ""}`}
+                    onClick={() => filtrar({ viajeroId: esYo ? "" : soy })}
+                    aria-pressed={esYo}
+                  >
+                    Solo lo mío
+                  </button>
+                )}
+              </div>
 
               <div className="filtro-selectores">
                 <select
@@ -681,6 +700,11 @@ function Gastos({
                   <span>
                     {visibles.length} de {gastos.length} gastos · suman{" "}
                     <strong>{conMoneda(calcularTotal(visibles), monedaViaje)}</strong>
+                    {deQuien && (
+                      <span className="filtro-cuenta">
+                        {textoCuentaDe(cuentaDe(visibles, deQuien.id, viajeros), deQuien.nombre, esYo, monedaViaje)}
+                      </span>
+                    )}
                   </span>
                   <button className="enlace" onClick={() => setFiltros(SIN_FILTROS)}>
                     quitar filtros
@@ -741,6 +765,11 @@ function Gastos({
                         <small className="reparto">
                           {nombrePagador(gasto.pagadorId)} · {textoReparto(gasto)}
                         </small>
+                        {deQuien && (
+                          <small className="gasto-parte">
+                            {textoParteDe(gasto, deQuien.id, viajeros, esYo, monedaViaje)}
+                          </small>
+                        )}
                         {gasto.nota && <small className="gasto-nota">{gasto.nota}</small>}
                       </span>
 

@@ -485,6 +485,60 @@ button:active {
   background-position: 14px center;
 }
 
+.filtro-fila {
+  display: flex;
+  gap: 8px;
+}
+
+.filtro-fila .filtro-buscar {
+  flex: 1;
+  min-width: 0;
+}
+
+/* El atajo para verte a ti: una pastilla que se queda encendida. */
+.filtro-mio {
+  flex-shrink: 0;
+  padding: 0 14px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-pastilla);
+  background-color: var(--papel);
+  color: var(--tinta-suave);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.filtro-mio:hover {
+  border-color: var(--teal-300);
+  color: var(--teal-600);
+}
+
+.filtro-mio.activo {
+  border-color: var(--teal-500);
+  background-color: var(--teal-500);
+  color: white;
+  font-weight: 600;
+}
+
+/* Mejor que baje entera a que se quede el € colgando solo. */
+.filtro-cuenta {
+  display: block;
+  white-space: nowrap;
+  margin-top: 2px;
+  color: var(--tinta-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Lo que le toca a la persona del filtro, bajo quién pagó. */
+.gasto-parte {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--teal-600);
+  font-variant-numeric: tabular-nums;
+}
+
 .filtro-selectores {
   display: flex;
   gap: 8px;
@@ -492,6 +546,7 @@ button:active {
 
 .filtro-resumen {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
