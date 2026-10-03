@@ -21,6 +21,8 @@ create table viajeros (
   id uuid primary key default gen_random_uuid(),
   viaje_id uuid not null references viajes(id) on delete cascade,
   nombre text not null,
+  -- Dónde cobra: su móvil de Bizum o su IBAN, pegado y sin espacios.
+  cobro text check (char_length(cobro) <= 40),
   creado_en timestamptz not null default now()
 );
 
@@ -340,6 +342,24 @@ begin
 end;
 $$;
 
+-- Poner el Bizum o el IBAN de alguien. Va aparte de renombrar porque con el
+-- viaje cerrado los viajeros ya no se tocan, y es justo cuando toca pagar.
+create function poner_cobro(v_id uuid, v_cobro text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update viajeros set cobro = nullif(trim(v_cobro), '')
+  where id = v_id and viaje_id = viaje_actual();
+
+  if not found then
+    raise exception 'Ese viajero no está en este viaje';
+  end if;
+end;
+$$;
+
 -- Apuntar un gasto de una vez, con su reparto. Como editar_gasto: o todo o nada.
 -- Antes eran dos peticiones y, si fallaba la segunda, había que borrar el gasto
 -- a mano; si también fallaba eso, se quedaba suelto descuadrando las cuentas.
@@ -503,3 +523,8 @@ $$;
 
 -- Reparto por importes. Las partes pasan a guardar lo que pone cada uno.
 --   alter table gastos_participantes alter column partes type numeric(10, 2);
+
+-- Bizum o IBAN de cada viajero.
+--   alter table viajeros add column cobro text check (char_length(cobro) <= 40);
+--
+--   Pega el "create function poner_cobro" de más arriba.

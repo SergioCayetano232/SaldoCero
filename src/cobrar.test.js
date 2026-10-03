@@ -9,6 +9,16 @@ function mensaje(extra = {}) {
 }
 
 describe("mensajeDeCobro", () => {
+  it("si sabemos el Bizum de quien cobra, va en el mensaje", () => {
+    const cobro = { tipo: "bizum", valor: "612345678" };
+    expect(mensaje({ cobro })).toContain("Bizum a Ana: 612 345 678");
+    expect(mensaje({ cobro, soy: "a" })).toContain("Mi Bizum: 612 345 678");
+  });
+
+  it("sin Bizum ni IBAN, el mensaje de siempre", () => {
+    expect(mensaje()).not.toContain("Bizum");
+  });
+
   it("si cobras tú, va en primera persona", () => {
     const texto = mensaje({ soy: "a" });
 

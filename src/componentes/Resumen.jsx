@@ -12,6 +12,7 @@ import { conMoneda } from "../monedas";
 import { resumenEnTexto, copiarAlPortapapeles, descargarResumen, descargarGastos } from "../compartir";
 import { gastosEnCSV } from "../exportar";
 import { mensajeDeCobro, enlaceWhatsApp } from "../cobrar";
+import { cobroDe, cobroComoTexto } from "../cobro";
 import { BOTE, sinBote } from "../bote";
 import { gastoPorCategoria } from "../categorias";
 import { importeDeGasto, parteDe } from "../calculos";
@@ -45,6 +46,8 @@ function Resumen({
   // Qué fiesta va. Hace de key para que el confeti vuelva a caer si se repite.
   const [fiesta, setFiesta] = useState(null);
   const fiestas = useRef(0);
+  // De qué pago acabas de copiar el Bizum, para decírtelo un momento.
+  const [cobroCopiado, setCobroCopiado] = useState(null);
   // De quién es el desglose. null = del viaje entero.
   const [persona, setPersona] = useState(null);
   const total = calcularTotal(gastos);
@@ -90,6 +93,18 @@ function Resumen({
       vibrar("exito");
       setTimeout(() => setFiesta((f) => (f === esta ? null : f)), 3500);
     }
+  }
+
+  // Lo que se pega en el banco va sin espacios.
+  async function copiarCobro(pago, cobro) {
+    const clave = `${pago.deId}-${pago.aId}`;
+    const hecho = await copiarAlPortapapeles(cobro.valor);
+    setCobroCopiado(hecho ? clave : null);
+    setTimeout(() => setCobroCopiado((c) => (c === clave ? null : c)), 2000);
+  }
+
+  function cobroDeQuienCobra(pago) {
+    return cobroDe(personas.find((v) => v.id === pago.aId));
   }
 
   async function compartir() {
@@ -287,55 +302,78 @@ function Resumen({
               <p className="saldadas">🎉 Todo pagado. Ya estáis a cero.</p>
             )}
 
-            {pagos.map((pago) => (
-              <div
-                className={`pago ${pago.saldado ? "pagado" : ""} ${
-                  soy && (pago.deId === soy || pago.aId === soy) ? "pago-mio" : ""
-                }`}
-                key={`${pago.deId}-${pago.aId}`}
-              >
-                <AvatarDe id={pago.deId} nombre={pago.de} colores={colores} />
-                <strong>{pago.de}</strong>
-                <span className="pago-flecha">→</span>
-                <AvatarDe id={pago.aId} nombre={pago.a} colores={colores} />
-                <strong>{pago.a}</strong>
-                <span className="pago-final">
-                  <span className="pago-cantidad">
-                    {conMoneda(pago.cantidad, monedaViaje)}
+            {pagos.map((pago) => {
+              const cobro = cobroDeQuienCobra(pago);
+
+              return (
+                <div
+                  className={`pago ${pago.saldado ? "pagado" : ""} ${
+                    soy && (pago.deId === soy || pago.aId === soy) ? "pago-mio" : ""
+                  }`}
+                  key={`${pago.deId}-${pago.aId}`}
+                >
+                  <AvatarDe id={pago.deId} nombre={pago.de} colores={colores} />
+                  <strong>{pago.de}</strong>
+                  <span className="pago-flecha">→</span>
+                  <AvatarDe id={pago.aId} nombre={pago.a} colores={colores} />
+                  <strong>{pago.a}</strong>
+                  <span className="pago-final">
+                    <span className="pago-cantidad">
+                      {conMoneda(pago.cantidad, monedaViaje)}
+                    </span>
+
+                    {/* Al bote no se le manda un WhatsApp. */}
+                    {!pago.saldado && pago.deId !== BOTE && pago.aId !== BOTE && (
+                      <a
+                        className="boton-saldar boton-cobrar"
+                        href={enlaceWhatsApp(
+                          mensajeDeCobro({
+                            pago,
+                            soy,
+                            nombreViaje: viaje?.nombre ?? "el viaje",
+                            codigo: viaje?.codigo,
+                            moneda: monedaViaje,
+                            cobro: cobro,
+                          })
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={`Pedírselo a ${pago.de} por WhatsApp`}
+                        aria-label={`Pedírselo a ${pago.de} por WhatsApp`}
+                      >
+                        💬
+                      </a>
+                    )}
+
+                    <button
+                      className="boton-saldar"
+                      onClick={() => (pago.saldado ? onDesaldar(pago) : saldar(pago))}
+                      title={pago.saldado ? "Marcar como pendiente" : "Marcar como pagado"}
+                    >
+                      {pago.saldado ? "↩︎" : "✓"}
+                    </button>
                   </span>
 
-                  {/* Al bote no se le manda un WhatsApp. */}
-                  {!pago.saldado && pago.deId !== BOTE && pago.aId !== BOTE && (
-                    <a
-                      className="boton-saldar boton-cobrar"
-                      href={enlaceWhatsApp(
-                        mensajeDeCobro({
-                          pago,
-                          soy,
-                          nombreViaje: viaje?.nombre ?? "el viaje",
-                          codigo: viaje?.codigo,
-                          moneda: monedaViaje,
-                        })
-                      )}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={`Pedírselo a ${pago.de} por WhatsApp`}
-                      aria-label={`Pedírselo a ${pago.de} por WhatsApp`}
+                  {!pago.saldado && cobro && (
+                    <button
+                      className="pago-cobro"
+                      onClick={() => copiarCobro(pago, cobro)}
+                      title="Copiar"
                     >
-                      💬
-                    </a>
+                      <span className="pago-cobro-tipo">
+                        {cobro.tipo === "bizum" ? "📲 Bizum" : "🏦 IBAN"}
+                      </span>
+                      <span className="pago-cobro-valor">
+                        {cobroComoTexto(cobro)}
+                      </span>
+                      <span className="pago-cobro-copiar">
+                        {cobroCopiado === `${pago.deId}-${pago.aId}` ? "✓ copiado" : "copiar"}
+                      </span>
+                    </button>
                   )}
-
-                  <button
-                    className="boton-saldar"
-                    onClick={() => (pago.saldado ? onDesaldar(pago) : saldar(pago))}
-                    title={pago.saldado ? "Marcar como pendiente" : "Marcar como pagado"}
-                  >
-                    {pago.saldado ? "↩︎" : "✓"}
-                  </button>
-                </span>
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </>
         )}
 

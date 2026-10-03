@@ -2564,6 +2564,108 @@ button:active {
   color: var(--teal-600);
 }
 
+/* ===== Bizum o IBAN ===== */
+.boton-cobro {
+  flex-shrink: 0;
+  width: 30px;
+  height: 26px;
+  border-radius: var(--radio-pastilla);
+  border: 1px dashed var(--linea);
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+.lista li:hover .boton-cobro,
+.lista li:focus-within .boton-cobro,
+.boton-cobro.tiene-cobro {
+  opacity: 1;
+}
+
+/* Con algo puesto deja de estar en gris: se ve quién lo tiene ya. */
+.boton-cobro.tiene-cobro {
+  filter: none;
+  border-style: solid;
+  border-color: var(--teal-300);
+  background-color: var(--teal-50);
+}
+
+.lista li.con-cobro {
+  flex-wrap: wrap;
+}
+
+.editar-cobro {
+  flex-basis: 100%;
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
+}
+
+.editar-cobro .fila-formulario {
+  margin-bottom: 6px;
+}
+
+.editar-cobro input {
+  flex: 1;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.editar-cobro .campo-mal {
+  border-color: var(--rojo);
+  animation: temblor 0.4s var(--curva-suave);
+}
+
+.cobro-ayuda {
+  font-size: 12px;
+  color: var(--tinta-tenue);
+}
+
+.cobro-mal {
+  color: var(--rojo);
+  font-weight: 500;
+}
+
+/* Debajo de la deuda, a lo ancho: dónde pagar y copiarlo de un toque. */
+.pago-cobro {
+  flex-basis: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px dashed var(--teal-300);
+  border-radius: var(--radio-sm);
+  background-color: var(--papel);
+  font-size: 13px;
+  text-align: left;
+}
+
+.pago-cobro:hover {
+  border-style: solid;
+  background-color: var(--teal-50);
+}
+
+.pago-cobro-tipo {
+  flex-shrink: 0;
+  color: var(--tinta-tenue);
+  font-weight: 600;
+}
+
+/* Un IBAN no cabe en un móvil: mejor que baje de línea que cortarlo. */
+.pago-cobro-valor {
+  flex: 1;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.pago-cobro-copiar {
+  flex-shrink: 0;
+  color: var(--teal-600);
+  font-weight: 600;
+}
+
 .aviso-quien-soy {
   margin-top: 14px;
   padding-top: 12px;
@@ -2578,7 +2680,8 @@ button:active {
 
 @media (max-width: 560px) {
   /* Sin ratón no hay "pasar por encima". */
-  .lista li .boton-soy {
+  .lista li .boton-soy,
+  .lista li .boton-cobro {
     opacity: 0.75;
   }
 

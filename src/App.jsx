@@ -283,6 +283,7 @@ function App() {
           hacer(async () => propios.current.add((await datos.anadirViajero(viaje.id, nombre)).id))
         }
         onRenombrar={(id, nombre) => hacer(() => datos.renombrarViajero(id, nombre))}
+        onCobro={(id, cobro) => hacer(() => datos.ponerCobro(id, cobro))}
         onQuitar={(id, nombre) =>
           borrarConAviso(id, `a ${nombre}`, () => datos.quitarViajero(id))
         }

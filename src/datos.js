@@ -125,7 +125,7 @@ async function cargarContenido(viajeId) {
   const [delViaje, viajeros, gastos, participantes, saldados, parciales, bote] = await Promise.all([
     // Lo del viaje otra vez, por si lo ha cambiado alguien desde otro móvil.
     supabase.from("viajes").select("nombre, presupuesto, cerrado_en").eq("id", viajeId).single(),
-    supabase.from("viajeros").select("id, nombre").eq("viaje_id", viajeId).order("creado_en"),
+    supabase.from("viajeros").select("id, nombre, cobro").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
       .select("id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha, ticket")
@@ -216,7 +216,7 @@ export async function anadirViajero(viajeId, nombre) {
   const { data, error } = await supabase
     .from("viajeros")
     .insert({ viaje_id: viajeId, nombre })
-    .select("id, nombre")
+    .select("id, nombre, cobro")
     .single();
 
   if (error) throw fallo(error, "No hemos podido añadir al viajero.");
@@ -227,6 +227,12 @@ export async function renombrarViajero(id, nombre) {
   // Si las reglas no le dejan, no da error: simplemente no cambia nada.
   const { data, error } = await supabase.from("viajeros").update({ nombre }).eq("id", id).select("id");
   if (error || !data.length) throw fallo(error, "No hemos podido cambiarle el nombre.");
+}
+
+// El Bizum o el IBAN, ya limpio. Vacío para quitarlo.
+export async function ponerCobro(id, cobro) {
+  const { error } = await supabase.rpc("poner_cobro", { v_id: id, v_cobro: cobro });
+  if (error) throw fallo(error, "No hemos podido guardar dónde cobra.");
 }
 
 export async function renombrarViaje(viaje, nombre) {

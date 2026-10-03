@@ -2,17 +2,23 @@
 
 import { conMoneda } from "./monedas";
 import { enlaceDelViaje } from "./compartir";
+import { lineaDeCobro } from "./cobro";
 
 // Si eres tú quien cobra, el mensaje va en primera persona. Si no, lo manda
 // alguien de fuera de la deuda y queda raro decir "me debes".
-export function mensajeDeCobro({ pago, soy, nombreViaje, codigo, moneda, base }) {
+export function mensajeDeCobro({ pago, soy, nombreViaje, codigo, moneda, base, cobro = null }) {
   const cantidad = conMoneda(pago.cantidad, moneda);
+  const cobroYo = soy && soy === pago.aId;
 
   const lineas = [
-    soy && soy === pago.aId
+    cobroYo
       ? `Hola ${pago.de}! De *${nombreViaje}* me debes *${cantidad}* 🙏`
       : `Hola ${pago.de}! De *${nombreViaje}* te toca pagarle *${cantidad}* a ${pago.a} 🙏`,
   ];
+
+  // Si sabemos dónde, que no tenga ni que preguntarlo.
+  const donde = lineaDeCobro(cobro, cobroYo ? null : pago.a);
+  if (donde) lineas.push("", donde);
 
   if (codigo) {
     lineas.push("", `Las cuentas, aquí: ${enlaceDelViaje(codigo, base)}`);

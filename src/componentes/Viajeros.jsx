@@ -2,9 +2,42 @@ import { useState } from "react";
 import Avatar from "./Avatar";
 import NombreEditable from "./NombreEditable";
 import { limpiarNombre, LARGO_MAXIMO } from "../nombres";
+import { leerCobro, cobroDe, cobroComoTexto } from "../cobro";
 
-function Viajeros({ viajeros, colores, recienLlegados, cerrado, onAnadir, onRenombrar, onQuitar, soy, onSoyYo }) {
+function Viajeros({
+  viajeros,
+  colores,
+  recienLlegados,
+  cerrado,
+  onAnadir,
+  onRenombrar,
+  onQuitar,
+  onCobro,
+  soy,
+  onSoyYo,
+}) {
   const [nombre, setNombre] = useState("");
+  // De quién estás poniendo el Bizum, y lo que llevas escrito.
+  const [cobrando, setCobrando] = useState(null);
+  const [textoCobro, setTextoCobro] = useState("");
+  const [cobroMal, setCobroMal] = useState(false);
+
+  function abrirCobro(viajero) {
+    if (cobrando === viajero.id) return setCobrando(null);
+    setCobrando(viajero.id);
+    setTextoCobro(cobroComoTexto(cobroDe(viajero)));
+    setCobroMal(false);
+  }
+
+  function guardarCobro() {
+    const texto = textoCobro.trim();
+    const cobro = leerCobro(texto);
+    // Vacío es quitarlo, que también vale.
+    if (texto && !cobro) return setCobroMal(true);
+
+    onCobro(cobrando, cobro?.valor ?? "");
+    setCobrando(null);
+  }
 
   function anadir() {
     const nombreLimpio = limpiarNombre(nombre);
@@ -43,7 +76,7 @@ function Viajeros({ viajeros, colores, recienLlegados, cerrado, onAnadir, onReno
               key={viajero.id}
               className={`${viajero.id === soy ? "soy-yo" : ""} ${
                 recienLlegados?.has(viajero.id) ? "recien-llegado" : ""
-              }`}
+              } ${cobrando === viajero.id ? "con-cobro" : ""}`}
             >
               <span className="viajero-quien">
                 <Avatar nombre={viajero.nombre} color={colores?.get(viajero.nombre)} />
@@ -58,6 +91,15 @@ function Viajeros({ viajeros, colores, recienLlegados, cerrado, onAnadir, onReno
                 )}
                 {viajero.id === soy && <span className="etiqueta-tu">tú</span>}
               </span>
+
+              {/* Con el viaje cerrado también: es cuando más falta hace. */}
+              <button
+                className={`boton-cobro ${cobroDe(viajero) ? "tiene-cobro" : ""}`}
+                onClick={() => abrirCobro(viajero)}
+                title={`Bizum o IBAN de ${viajero.nombre}`}
+              >
+                {cobroDe(viajero)?.tipo === "iban" ? "🏦" : "📲"}
+              </button>
 
               <button
                 className="boton-soy"
@@ -74,6 +116,34 @@ function Viajeros({ viajeros, colores, recienLlegados, cerrado, onAnadir, onReno
                 >
                   ✕
                 </button>
+              )}
+
+              {cobrando === viajero.id && (
+                <div className="editar-cobro">
+                  <div className="fila-formulario">
+                    <input
+                      type="text"
+                      autoFocus
+                      placeholder="Móvil de Bizum o IBAN"
+                      className={cobroMal ? "campo-mal" : ""}
+                      value={textoCobro}
+                      onChange={(e) => {
+                        setTextoCobro(e.target.value);
+                        setCobroMal(false);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") guardarCobro();
+                        if (e.key === "Escape") setCobrando(null);
+                      }}
+                    />
+                    <button onClick={guardarCobro}>Guardar</button>
+                  </div>
+                  <p className={cobroMal ? "cobro-ayuda cobro-mal" : "cobro-ayuda"}>
+                    {cobroMal
+                      ? "Eso no es un móvil español ni un IBAN válido."
+                      : `Para que sepan dónde pagarle a ${viajero.nombre}. Lo ve todo el que tenga el código.`}
+                  </p>
+                </div>
               )}
             </li>
           ))}
