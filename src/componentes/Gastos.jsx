@@ -6,6 +6,7 @@ import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS } from "../
 import { hoy, comoTitulo, porDias } from "../fechas";
 import { sugerirConceptos } from "../sugerencias";
 import { gastoAlFormulario, repetirGasto } from "../repetir";
+import { leerImporte, loQueFalta, cuadra, importesAPartes, partesAImportes } from "../importes";
 import { BOTE } from "../bote";
 import { esImagen } from "../tickets";
 import Deslizable from "./Deslizable";
@@ -31,6 +32,9 @@ function Gastos({
   // Las partes de cada uno. Vacío = a partes iguales, que es lo normal.
   const [partes, setPartes] = useState({});
   const [repartoAbierto, setRepartoAbierto] = useState(false);
+  // O lo que pone cada uno, tal cual se escribe, en la moneda en que se pagó.
+  const [porImportes, setPorImportes] = useState(false);
+  const [importes, setImportes] = useState({});
   // Por defecto hoy, que es cuando se apunta casi todo.
   const [fecha, setFecha] = useState(hoy);
   // El cambio que nos ha dado la API, con la moneda a la que corresponde.
@@ -125,6 +129,8 @@ function Gastos({
     setCategoria(POR_DEFECTO);
     setPartes({});
     setRepartoAbierto(false);
+    setPorImportes(false);
+    setImportes({});
     setFecha(hoy());
     setParticipantes(null);
     setEditando(null);
@@ -143,6 +149,8 @@ function Gastos({
     setFecha(f.fecha ?? hoy());
     setParticipantes(f.participantes);
     setPartes(f.partes);
+    setPorImportes(f.porImportes);
+    setImportes(f.importes);
     setRepartoAbierto(f.repartoAbierto);
 
     // En el móvil el formulario suele quedar arriba, fuera de la vista.
@@ -186,10 +194,23 @@ function Gastos({
     setPartes({ ...partes, [id]: isNaN(numero) || numero < 0 ? 0 : numero });
   }
 
+  // Para no empezar de cero: lo que les salía con las partes de ahora.
+  function pasarAImportes() {
+    setImportes(partesAImportes(partesDeLosMarcados(), marcados, parseFloat(importe)));
+    setPorImportes(true);
+  }
+
+  const importeEscrito = parseFloat(importe);
+  const conImportes = repartoAbierto && porImportes;
+  const falta = conImportes && importeEscrito > 0 ? loQueFalta(importes, marcados, importeEscrito) : null;
+  const descuadrado = conImportes && !cuadra(importes, marcados, importeEscrito);
+
   // Cuánto sale para cada uno con las partes de ahora, para irlo viendo.
   function loQueLeToca(id) {
     const total = parseFloat(importe);
     if (isNaN(total) || total <= 0 || typeof tasa !== "number") return null;
+    // Por importes ya se ve, solo hace falta si hay que pasarlo de moneda.
+    if (conImportes) return leerImporte(importes[id]) * tasa;
 
     const suyas = partesDeLosMarcados();
     const suma = Object.values(suyas).reduce((t, p) => t + p, 0);
@@ -207,6 +228,7 @@ function Gastos({
 
     // Sin cambio no podemos convertir, así que no dejamos guardarlo a medias.
     if (typeof tasa !== "number") return;
+    if (descuadrado) return;
 
     const gasto = {
       pagadorId,
@@ -219,7 +241,11 @@ function Gastos({
       fecha,
       participantes: marcados,
       // Solo mandamos las partes si de verdad hay reparto desigual.
-      partes: repartoAbierto ? partesDeLosMarcados() : null,
+      partes: !repartoAbierto
+        ? null
+        : conImportes
+          ? importesAPartes(importes, marcados)
+          : partesDeLosMarcados(),
       foto,
       quitarFoto: quitarFoto && !foto,
       ticketAnterior: ticketActual,
@@ -487,8 +513,25 @@ function Gastos({
 
                 {repartoAbierto && marcados.length > 1 && (
                   <div className="partes">
+                    <div className="modo-reparto">
+                      <button
+                        className={porImportes ? "" : "activo"}
+                        onClick={() => setPorImportes(false)}
+                      >
+                        Por partes
+                      </button>
+                      <button
+                        className={porImportes ? "activo" : ""}
+                        onClick={() => !porImportes && pasarAImportes()}
+                      >
+                        Por importe
+                      </button>
+                    </div>
+
                     <p className="partes-ayuda">
-                      Cuántas partes paga cada uno. Con 2 y 1, el primero paga el doble.
+                      {porImportes
+                        ? `Lo que pone cada uno, en ${moneda}. Tiene que sumar el importe.`
+                        : "Cuántas partes paga cada uno. Con 2 y 1, el primero paga el doble."}
                     </p>
 
                     {viajeros
@@ -500,16 +543,31 @@ function Gastos({
                           <div className="fila-parte" key={viajero.id}>
                             <span className="parte-nombre">{viajero.nombre}</span>
 
-                            <input
-                              type="number"
-                              className="parte-campo"
-                              min="0"
-                              step="0.5"
-                              value={partes[viajero.id] ?? 1}
-                              onChange={(e) => cambiarParte(viajero.id, e.target.value)}
-                            />
+                            {porImportes ? (
+                              <input
+                                type="number"
+                                className="parte-campo campo-importe"
+                                min="0"
+                                step="0.01"
+                                placeholder="0"
+                                value={importes[viajero.id] ?? ""}
+                                onChange={(e) =>
+                                  setImportes({ ...importes, [viajero.id]: e.target.value })
+                                }
+                              />
+                            ) : (
+                              <input
+                                type="number"
+                                className="parte-campo"
+                                min="0"
+                                step="0.5"
+                                value={partes[viajero.id] ?? 1}
+                                onChange={(e) => cambiarParte(viajero.id, e.target.value)}
+                              />
+                            )}
 
-                            {suyo !== null && (
+                            {/* Por importes en la moneda del viaje, la cifra ya está escrita. */}
+                            {suyo !== null && !(porImportes && moneda === monedaViaje) && (
                               <span className="parte-importe">
                                 {conMoneda(suyo, monedaViaje)}
                               </span>
@@ -517,13 +575,23 @@ function Gastos({
                           </div>
                         );
                       })}
+
+                    {falta !== null && (
+                      <p className={`cuadre ${falta === 0 ? "cuadre-bien" : "cuadre-mal"}`}>
+                        {falta === 0
+                          ? "✓ Cuadra con el importe"
+                          : falta > 0
+                            ? `Faltan ${conMoneda(falta, moneda)} por repartir`
+                            : `Sobran ${conMoneda(-falta, moneda)}`}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
 
               {editando ? (
                 <div className="fila-botones">
-                  <button onClick={guardar} disabled={marcados.length === 0 || typeof tasa !== "number"}>
+                  <button onClick={guardar} disabled={marcados.length === 0 || typeof tasa !== "number" || descuadrado}>
                     Guardar cambios
                   </button>
                   <button className="boton-cancelar" onClick={cancelar}>
@@ -531,7 +599,7 @@ function Gastos({
                   </button>
                 </div>
               ) : (
-                <button onClick={guardar} disabled={marcados.length === 0 || typeof tasa !== "number"}>
+                <button onClick={guardar} disabled={marcados.length === 0 || typeof tasa !== "number" || descuadrado}>
                   Añadir gasto
                 </button>
               )}

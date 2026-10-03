@@ -753,6 +753,50 @@ button:active {
   animation: aparecer-creciendo var(--medio) var(--curva-suave);
 }
 
+/* Por partes o por importe, como un interruptor de dos posiciones. */
+.modo-reparto {
+  display: inline-flex;
+  padding: 3px;
+  margin-bottom: 10px;
+  border-radius: var(--radio-pastilla);
+  background-color: var(--teal-50);
+}
+
+.modo-reparto > button {
+  padding: 5px 14px;
+  border-radius: var(--radio-pastilla);
+  font-size: 13px;
+  color: var(--tinta-suave);
+}
+
+.modo-reparto > button.activo {
+  background-color: var(--papel);
+  color: var(--teal-600);
+  font-weight: 600;
+  box-shadow: var(--sombra-sm);
+}
+
+.campo-importe {
+  width: 96px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.cuadre {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.cuadre-bien {
+  color: var(--verde);
+}
+
+.cuadre-mal {
+  color: var(--rojo);
+}
+
 .partes-ayuda {
   font-size: 12px;
   color: var(--tinta-tenue);

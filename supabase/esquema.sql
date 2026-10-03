@@ -52,7 +52,9 @@ create table gastos_participantes (
   viajero_id uuid not null references viajeros(id) on delete cascade,
   -- Cuánto le toca a este del gasto. Es un peso, no un importe: con 2 y 1 uno
   -- paga el doble que el otro. A 1 todos, que es repartir a partes iguales.
-  partes numeric(6, 2) not null default 1 check (partes >= 0),
+  -- Repartido por importes, el peso es lo que pone cada uno, y eso en yenes o
+  -- dongs no cabe en cuatro cifras: por eso tan ancho.
+  partes numeric(10, 2) not null default 1 check (partes >= 0),
   primary key (gasto_id, viajero_id)
 );
 
@@ -498,3 +500,6 @@ $$;
 --
 --   Pega el "insert into storage.buckets" y las tres policies de los tickets de
 --   más arriba.
+
+-- Reparto por importes. Las partes pasan a guardar lo que pone cada uno.
+--   alter table gastos_participantes alter column partes type numeric(10, 2);

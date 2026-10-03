@@ -31,6 +31,8 @@ describe("gastoAlFormulario", () => {
       fecha: "2026-09-28",
       participantes: ["a", "b"],
       partes: {},
+      importes: {},
+      porImportes: false,
       repartoAbierto: false,
     });
   });
@@ -44,6 +46,15 @@ describe("gastoAlFormulario", () => {
     const pizza = { ...desayuno, partes: { a: 2, b: 1 } };
     const formulario = gastoAlFormulario(pizza, viajeros, "EUR");
     expect(formulario.partes).toEqual({ a: 2, b: 1 });
+    expect(formulario.repartoAbierto).toBe(true);
+  });
+
+  it("si las partes suman el importe, se abre por importes", () => {
+    const cena = { ...desayuno, importe: 30, importeConvertido: 30, partes: { a: 18, b: 12 } };
+    const formulario = gastoAlFormulario(cena, viajeros, "EUR");
+    expect(formulario.porImportes).toBe(true);
+    expect(formulario.importes).toEqual({ a: "18", b: "12" });
+    expect(formulario.partes).toEqual({});
     expect(formulario.repartoAbierto).toBe(true);
   });
 
