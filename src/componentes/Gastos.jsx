@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { calcularTotal, participantesDeGasto } from "../calculos";
+import { calcularTotal, importeDeGasto, participantesDeGasto } from "../calculos";
 import { MONEDAS, cambio, conMoneda, leerTasa, tasaComoTexto } from "../monedas";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe } from "../categorias";
 import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS } from "../filtros";
@@ -11,6 +11,7 @@ import { BOTE } from "../bote";
 import { esImagen } from "../tickets";
 import { LARGO_NOTA } from "../notas";
 import { cuentaDe, textoCuentaDe, textoParteDe } from "../loDeUno";
+import { posiblesRepetidos } from "../repetidos";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 
@@ -73,6 +74,8 @@ function Gastos({
   const [participantes, setParticipantes] = useState(null);
   // El gasto que estás tocando ahora mismo. Vacío si estás apuntando uno nuevo.
   const [editando, setEditando] = useState(null);
+  // El gasto que se parece al que ibas a apuntar, con lo que tenías escrito.
+  const [repetido, setRepetido] = useState(null);
   const formulario = useRef(null);
 
   // Cada vez que cambias de moneda, preguntamos a cuánto está.
@@ -150,6 +153,7 @@ function Gastos({
     setFoto(null);
     setTicketActual(null);
     setQuitarFoto(false);
+    setRepetido(null);
   }
 
   function rellenar(f) {
@@ -234,7 +238,13 @@ function Gastos({
     return ((total * tasa) * (suyas[id] ?? 0)) / suma;
   }
 
-  function guardar() {
+  // Si cambias el importe, el día o la moneda, la pregunta ya no viene a cuento.
+  const avisoRepetido =
+    repetido && repetido.importe === importe && repetido.fecha === fecha && repetido.moneda === moneda
+      ? repetido.gasto
+      : null;
+
+  function guardar(aunqueSeParezca = false) {
     const importeNumero = parseFloat(importe);
 
     if (pagadorId === "") return;
@@ -266,6 +276,15 @@ function Gastos({
       quitarFoto: quitarFoto && !foto,
       ticketAnterior: ticketActual,
     };
+
+    // Solo al apuntar uno nuevo: al editar, ya sabes cuál estás tocando.
+    if (!editando && !aunqueSeParezca) {
+      const [parecido] = posiblesRepetidos(gasto, gastos);
+      if (parecido) {
+        setRepetido({ gasto: parecido, importe, fecha, moneda });
+        return;
+      }
+    }
 
     if (editando) {
       onEditar(editando, gasto);
@@ -629,7 +648,7 @@ function Gastos({
 
               {editando ? (
                 <div className="fila-botones">
-                  <button onClick={guardar} disabled={marcados.length === 0 || typeof tasa !== "number" || descuadrado}>
+                  <button onClick={() => guardar()} disabled={marcados.length === 0 || typeof tasa !== "number" || descuadrado}>
                     Guardar cambios
                   </button>
                   <button className="boton-cancelar" onClick={cancelar}>
@@ -637,9 +656,33 @@ function Gastos({
                   </button>
                 </div>
               ) : (
-                <button onClick={guardar} disabled={marcados.length === 0 || typeof tasa !== "number" || descuadrado}>
-                  Añadir gasto
-                </button>
+                <>
+                  {avisoRepetido && (
+                    <div className="aviso-repetido" role="alert">
+                      <p>
+                        🤔 {avisoRepetido.pagadorId === BOTE ? "Del bote ya salió" : `${nombrePagador(avisoRepetido.pagadorId)} ya apuntó`}{" "}
+                        <strong>{avisoRepetido.concepto}</strong> de{" "}
+                        <strong>{conMoneda(importeDeGasto(avisoRepetido), monedaViaje)}</strong> ese mismo día.
+                        ¿Es otro gasto?
+                      </p>
+                      <div className="aviso-repetido-botones">
+                        <button className="aviso-si" onClick={() => guardar(true)}>
+                          Sí, apuntarlo
+                        </button>
+                        <button className="aviso-no" onClick={cancelar}>
+                          No, ya estaba
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => guardar()}
+                    disabled={marcados.length === 0 || typeof tasa !== "number" || descuadrado || Boolean(avisoRepetido)}
+                  >
+                    Añadir gasto
+                  </button>
+                </>
               )}
             </div>
           )}

@@ -651,6 +651,51 @@ button:active {
   background: var(--linea) !important;
 }
 
+/* "¿Ya lo ha apuntado Luis?": en naranja, que es una duda y no un error. */
+.aviso-repetido {
+  padding: 12px 14px;
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--naranja-400);
+  background-color: var(--naranja-100);
+  font-size: 14px;
+  color: var(--tinta);
+  animation: temblor 0.4s var(--curva-suave), aparecer-creciendo var(--medio) var(--curva-suave);
+}
+
+.aviso-repetido strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.aviso-repetido-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.aviso-repetido-botones button {
+  padding: 8px 14px;
+  border-radius: var(--radio-pastilla);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Tinta oscura y no blanca: sobre el naranja claro del modo oscuro no se leería. */
+.aviso-si {
+  background-color: var(--naranja-500);
+  color: #2b1a08;
+}
+
+.aviso-si:hover {
+  filter: brightness(1.08);
+}
+
+.aviso-no {
+  border: 1px solid var(--naranja-400);
+  color: var(--tinta-suave);
+  background-color: var(--papel);
+}
+
 /* Cuando no hay nadie marcado no se puede añadir el gasto. */
 .aviso {
   color: var(--naranja-500);
