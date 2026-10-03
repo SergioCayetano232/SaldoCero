@@ -20,6 +20,7 @@ import Cifra from "./Cifra";
 import Confeti from "./Confeti";
 import Avatar from "./Avatar";
 import Desglose from "./Desglose";
+import PorDias from "./PorDias";
 import PagosACuenta from "./PagosACuenta";
 import Presupuesto from "./Presupuesto";
 import { esElUltimo } from "../confeti";
@@ -212,6 +213,8 @@ function Resumen({
           )}
         </>
       )}
+
+      <PorDias gastos={gastos} moneda={monedaViaje} />
 
       {/* Cerrado ya no hay "próxima" que pagar. */}
       {leTocaPagar && !cerrado && (

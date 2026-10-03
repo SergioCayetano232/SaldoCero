@@ -1570,6 +1570,202 @@ button:active {
   margin-top: 4px;
 }
 
+/* ===== Día a día ===== */
+.por-dias {
+  --eje: 46px;
+  margin-bottom: 20px;
+}
+
+.por-dias-cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.por-dias-titulo {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.por-dias-media {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--tinta-tenue);
+  font-variant-numeric: tabular-nums;
+}
+
+/* La muestra de la línea de la media, para saber qué es esa raya. */
+.por-dias-clave {
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+  background-color: var(--tinta-suave);
+}
+
+.por-dias-grafica {
+  display: flex;
+  height: 150px;
+}
+
+.por-dias-eje {
+  width: var(--eje);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-right: 8px;
+  /* Que cada cifra quede centrada en su raya. */
+  margin: -7px 0;
+  font-size: 10px;
+  line-height: 14px;
+  text-align: right;
+  color: var(--tinta-tenue);
+  font-variant-numeric: tabular-nums;
+}
+
+.por-dias-zona {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  border-bottom: 1px solid var(--linea);
+}
+
+.por-dias-rejilla {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px solid var(--linea);
+  opacity: 0.6;
+}
+
+.por-dias-linea-media {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  margin-bottom: -1px;
+  border-radius: 1px;
+  background-color: var(--tinta-suave);
+  opacity: 0.55;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.por-dias-columnas {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+
+.por-dias-columna {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  /* Los 2px de aire entre barra y barra. */
+  padding: 0 1px;
+  cursor: default;
+  outline: none;
+}
+
+.por-dias-barra {
+  width: 100%;
+  max-width: 24px;
+  border-radius: 4px 4px 0 0;
+  background-color: var(--teal-500);
+  transform-origin: bottom;
+  animation: crecer-barra var(--lento) var(--curva-muelle) backwards;
+  animation-delay: calc(var(--orden) * 30ms);
+  transition: background-color var(--rapido), opacity var(--rapido);
+}
+
+/* Un día sin gastos se ve igual, como una raya en el suelo. */
+.por-dias-barra.vacia {
+  height: 2px;
+  border-radius: 1px;
+  background-color: var(--linea);
+}
+
+.con-elegido .por-dias-columna:not(.elegida) .por-dias-barra:not(.vacia) {
+  opacity: 0.35;
+}
+
+.por-dias-columna.elegida .por-dias-barra:not(.vacia) {
+  background-color: var(--teal-600);
+}
+
+.por-dias-columna:focus-visible .por-dias-barra {
+  outline: 2px solid var(--teal-300);
+  outline-offset: 2px;
+}
+
+.por-dias-cifra {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -4px);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--tinta-suave);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.por-dias-globo {
+  position: absolute;
+  z-index: 2;
+  transform: translate(-50%, -10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: var(--radio-sm);
+  background-color: var(--papel);
+  border: 1px solid var(--linea);
+  box-shadow: var(--sombra-md);
+  font-size: 11px;
+  color: var(--tinta-tenue);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: entrar-desde-abajo var(--rapido) var(--curva-suave);
+}
+
+.por-dias-globo strong {
+  font-size: 14px;
+  color: var(--tinta);
+  font-variant-numeric: tabular-nums;
+}
+
+.por-dias-fechas {
+  display: flex;
+  margin-left: var(--eje);
+  margin-top: 6px;
+}
+
+/* Cada fecha centrada bajo su barra, aunque se salga de su hueco. */
+.por-dias-fechas span {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--tinta-tenue);
+  white-space: nowrap;
+}
+
+@keyframes crecer-barra {
+  from {
+    transform: scaleY(0);
+  }
+}
+
 /* ===== El viaje en cifras ===== */
 .cifras h2 .boton-compartir {
   margin-left: auto;
