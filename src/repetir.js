@@ -18,6 +18,7 @@ export function gastoAlFormulario(gasto, viajeros, monedaViaje) {
     // Con el cambio que tenía, que si no se recalcula con el de hoy.
     tasaAMano: moneda === monedaViaje ? null : tasaComoTexto(tasaDeGasto(gasto)),
     concepto: gasto.concepto,
+    nota: gasto.nota ?? "",
     categoria: gasto.categoria ?? POR_DEFECTO,
     fecha: gasto.fecha,
     participantes: participantesDeGasto(gasto, viajeros).map((v) => v.id),
@@ -33,5 +34,6 @@ export function gastoAlFormulario(gasto, viajeros, monedaViaje) {
 
 // Lo mismo, pero es otro gasto: el de hoy, no el de aquel día.
 export function repetirGasto(gasto, viajeros, monedaViaje, dia) {
-  return { ...gastoAlFormulario(gasto, viajeros, monedaViaje), fecha: dia };
+  // La nota era de aquel gasto: "Luis no tomó postre" no vale para el de hoy.
+  return { ...gastoAlFormulario(gasto, viajeros, monedaViaje), fecha: dia, nota: "" };
 }

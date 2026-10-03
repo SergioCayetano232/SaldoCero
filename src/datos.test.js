@@ -24,12 +24,18 @@ describe("datosDelGasto", () => {
       g_concepto: "Cena",
       g_categoria: "comida",
       g_fecha: "2026-09-29",
+      g_nota: null,
       g_participantes: [
         { viajero_id: "a", partes: 2 },
         { viajero_id: "b", partes: 1 },
         { viajero_id: "c", partes: 1 },
       ],
     });
+  });
+
+  it("la nota va limpia, y en blanco no se manda", () => {
+    expect(datosDelGasto({ ...gasto, nota: "  incluye\n la propina " }).g_nota).toBe("incluye la propina");
+    expect(datosDelGasto({ ...gasto, nota: "   " }).g_nota).toBeNull();
   });
 
   it("a partes iguales si no hay partes", () => {

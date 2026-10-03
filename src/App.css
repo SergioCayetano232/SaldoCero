@@ -2284,8 +2284,30 @@ button:active {
 /* ===== Foto del ticket ===== */
 .fila-ticket {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  gap: 8px;
   min-height: 32px;
+}
+
+.campo-nota {
+  font-size: 14px;
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
+}
+
+/* La nota bajo el gasto: en cursiva, que se lea como un aparte. */
+.gasto-nota {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--tinta-tenue);
+  overflow-wrap: anywhere;
+}
+
+.gasto-nota::before {
+  content: "📝 ";
+  font-style: normal;
 }
 
 /* Un input de archivo no se deja pintar: se esconde y se pulsa la etiqueta. */

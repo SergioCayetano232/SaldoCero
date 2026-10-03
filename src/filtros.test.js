@@ -8,7 +8,7 @@ const viajeros = [ana, luis, marta];
 
 const gastos = [
   { id: "1", concepto: "Cena en la Cafetería", categoria: "comida", pagadorId: "a", participantes: ["a", "b", "c"] },
-  { id: "2", concepto: "Taxi", categoria: "transporte", pagadorId: "b", participantes: ["b", "c"] },
+  { id: "2", concepto: "Taxi", categoria: "transporte", pagadorId: "b", participantes: ["b", "c"], nota: "Incluye la propina" },
   { id: "3", concepto: "Museo", categoria: "ocio", pagadorId: "c", participantes: ["c"] },
   // De los de antes: sin participantes ni categoría, que va entre todos y en "otros".
   { id: "4", concepto: "Peaje", pagadorId: "a" },
@@ -51,6 +51,10 @@ describe("filtrarGastos", () => {
   it("busca en el concepto sin mirar tildes ni mayúsculas", () => {
     expect(ids(filtrarGastos(gastos, con({ texto: "cafeteria" }), viajeros))).toEqual(["1"]);
     expect(ids(filtrarGastos(gastos, con({ texto: "TAX" }), viajeros))).toEqual(["2"]);
+  });
+
+  it("busca también en la nota", () => {
+    expect(ids(filtrarGastos(gastos, con({ texto: "propina" }), viajeros))).toEqual(["2"]);
   });
 
   it("por categoría", () => {

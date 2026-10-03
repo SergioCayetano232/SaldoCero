@@ -27,6 +27,7 @@ describe("gastoAlFormulario", () => {
       moneda: "EUR",
       tasaAMano: null,
       concepto: "Desayuno",
+      nota: "",
       categoria: "comida",
       fecha: "2026-09-28",
       participantes: ["a", "b"],
@@ -78,6 +79,12 @@ describe("repetirGasto", () => {
     expect(copia.fecha).toBe("2026-10-01");
     expect(copia.concepto).toBe("Desayuno");
     expect(copia.participantes).toEqual(["a", "b"]);
+  });
+
+  it("la nota no se copia, era de aquel gasto", () => {
+    const conNota = { ...desayuno, nota: "Luis no tomó café" };
+    expect(gastoAlFormulario(conNota, viajeros, "EUR").nota).toBe("Luis no tomó café");
+    expect(repetirGasto(conNota, viajeros, "EUR", "2026-10-01").nota).toBe("");
   });
 
   it("no toca el gasto original", () => {

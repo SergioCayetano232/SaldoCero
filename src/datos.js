@@ -5,6 +5,7 @@
 import { supabase, usarCodigo } from "./supabase";
 import { BOTE } from "./bote";
 import { rutaDelTicket } from "./tickets";
+import { limpiarNota } from "./notas";
 
 // Al usuario le decimos algo que entienda, pero el fallo de verdad lo dejamos
 // en la consola, que si no no hay quien averigüe qué ha pasado.
@@ -128,7 +129,7 @@ async function cargarContenido(viajeId) {
     supabase.from("viajeros").select("id, nombre, cobro").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
-      .select("id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha, ticket")
+      .select("id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha, ticket, nota")
       .eq("viaje_id", viajeId)
       .order("fecha")
       .order("creado_en"),
@@ -194,6 +195,7 @@ async function cargarContenido(viajeId) {
       categoria: gasto.categoria ?? "otros",
       fecha: gasto.fecha,
       ticket: gasto.ticket ?? null,
+      nota: gasto.nota ?? null,
       participantes: participantes.data
         .filter((p) => p.gasto_id === gasto.id)
         .map((p) => p.viajero_id),
@@ -295,6 +297,7 @@ export function datosDelGasto(gasto) {
     g_concepto: gasto.concepto,
     g_categoria: gasto.categoria,
     g_fecha: gasto.fecha,
+    g_nota: limpiarNota(gasto.nota),
     g_participantes: gasto.participantes.map((viajeroId) => ({
       viajero_id: viajeroId,
       partes: gasto.partes?.[viajeroId] ?? 1,

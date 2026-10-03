@@ -45,6 +45,8 @@ create table gastos (
   fecha date not null default current_date,
   -- La foto del ticket, si hay: su ruta en el bucket "tickets".
   ticket text,
+  -- Una aclaración corta: "incluye la propina", "Luis no tomó postre".
+  nota text check (char_length(nota) <= 200),
   creado_en timestamptz not null default now()
 );
 
@@ -307,7 +309,9 @@ create function editar_gasto(
   g_categoria text,
   g_fecha date,
   -- [{"viajero_id": "...", "partes": 1}, ...]
-  g_participantes jsonb
+  g_participantes jsonb,
+  -- Con valor por defecto, para que la versión de la web de antes siga guardando.
+  g_nota text default null
 )
 returns void
 language plpgsql
@@ -326,7 +330,8 @@ begin
     importe_convertido = g_convertido,
     concepto = g_concepto,
     categoria = g_categoria,
-    fecha = g_fecha
+    fecha = g_fecha,
+    nota = g_nota
   where id = g_id;
 
   -- Si no lo ve (no existe, o es de otro viaje), no ha tocado nada.
@@ -372,7 +377,8 @@ create function crear_gasto(
   g_concepto text,
   g_categoria text,
   g_fecha date,
-  g_participantes jsonb
+  g_participantes jsonb,
+  g_nota text default null
 )
 returns uuid
 language plpgsql
@@ -386,11 +392,11 @@ begin
     raise exception 'Un gasto tiene que repartirse entre alguien';
   end if;
 
-  insert into gastos (viaje_id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha)
+  insert into gastos (viaje_id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha, nota)
   values (
     g_viaje, g_pagador, g_importe,
     coalesce(g_moneda, 'EUR'), g_convertido, g_concepto,
-    coalesce(g_categoria, 'otros'), coalesce(g_fecha, current_date)
+    coalesce(g_categoria, 'otros'), coalesce(g_fecha, current_date), g_nota
   )
   returning id into nuevo;
 
@@ -528,3 +534,13 @@ $$;
 --   alter table viajeros add column cobro text check (char_length(cobro) <= 40);
 --
 --   Pega el "create function poner_cobro" de más arriba.
+
+-- Notas en los gastos.
+--   alter table gastos add column nota text check (char_length(nota) <= 200);
+--
+--   Las dos funciones de guardar gastos llevan un parámetro más. Hay que
+--   borrarlas antes, que si no Postgres deja las dos versiones a la vez:
+--   drop function crear_gasto(uuid, uuid, numeric, text, numeric, text, text, date, jsonb);
+--   drop function editar_gasto(uuid, uuid, numeric, text, numeric, text, text, date, jsonb);
+--
+--   Y pega los "create function crear_gasto" y "create function editar_gasto" de más arriba.

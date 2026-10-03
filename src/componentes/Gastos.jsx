@@ -9,6 +9,7 @@ import { gastoAlFormulario, repetirGasto } from "../repetir";
 import { leerImporte, loQueFalta, cuadra, importesAPartes, partesAImportes } from "../importes";
 import { BOTE } from "../bote";
 import { esImagen } from "../tickets";
+import { LARGO_NOTA } from "../notas";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 
@@ -29,6 +30,9 @@ function Gastos({
   const [moneda, setMoneda] = useState(monedaViaje);
   const [concepto, setConcepto] = useState("");
   const [categoria, setCategoria] = useState(POR_DEFECTO);
+  // La nota va escondida hasta que la pides: casi ningún gasto la lleva.
+  const [nota, setNota] = useState("");
+  const [notaAbierta, setNotaAbierta] = useState(false);
   // Las partes de cada uno. Vacío = a partes iguales, que es lo normal.
   const [partes, setPartes] = useState({});
   const [repartoAbierto, setRepartoAbierto] = useState(false);
@@ -127,6 +131,8 @@ function Gastos({
     setTasaAMano(null);
     setConcepto("");
     setCategoria(POR_DEFECTO);
+    setNota("");
+    setNotaAbierta(false);
     setPartes({});
     setRepartoAbierto(false);
     setPorImportes(false);
@@ -146,6 +152,8 @@ function Gastos({
     setTasaAMano(f.tasaAMano);
     setConcepto(f.concepto);
     setCategoria(f.categoria);
+    setNota(f.nota);
+    setNotaAbierta(Boolean(f.nota));
     setFecha(f.fecha ?? hoy());
     setParticipantes(f.participantes);
     setPartes(f.partes);
@@ -239,6 +247,7 @@ function Gastos({
       concepto: concepto.trim() === "" ? "Gasto" : concepto.trim(),
       categoria,
       fecha,
+      nota,
       participantes: marcados,
       // Solo mandamos las partes si de verdad hay reparto desigual.
       partes: !repartoAbierto
@@ -432,7 +441,29 @@ function Gastos({
                     <input type="file" accept="image/*" onChange={elegirFoto} hidden />
                   </label>
                 )}
+
+                {!notaAbierta && (
+                  <button className="boton-foto" onClick={() => setNotaAbierta(true)}>
+                    📝 Nota
+                  </button>
+                )}
               </div>
+
+              {notaAbierta && (
+                <input
+                  type="text"
+                  className="campo-nota"
+                  placeholder="Nota (incluye la propina...)"
+                  maxLength={LARGO_NOTA}
+                  value={nota}
+                  // Solo si la acabas de abrir tú, no al subir un gasto para editarlo.
+                  autoFocus={!editando}
+                  onChange={(e) => setNota(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") guardar();
+                  }}
+                />
+              )}
 
               {sugerencias.length > 0 && (
                 <div className="sugerencias">
@@ -710,6 +741,7 @@ function Gastos({
                         <small className="reparto">
                           {nombrePagador(gasto.pagadorId)} · {textoReparto(gasto)}
                         </small>
+                        {gasto.nota && <small className="gasto-nota">{gasto.nota}</small>}
                       </span>
 
                       <span className="gasto-importe">

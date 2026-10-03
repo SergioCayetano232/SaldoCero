@@ -22,7 +22,9 @@ export function filtrarGastos(gastos, filtros, viajeros) {
   const buscado = normalizar(filtros.texto);
 
   return gastos.filter((gasto) => {
-    if (buscado && !normalizar(gasto.concepto).includes(buscado)) return false;
+    // La nota también cuenta: "¿cuál era el de la propina?".
+    const dondeBuscar = normalizar(`${gasto.concepto} ${gasto.nota ?? ""}`);
+    if (buscado && !dondeBuscar.includes(buscado)) return false;
     if (filtros.categoria && (gasto.categoria ?? "otros") !== filtros.categoria) return false;
 
     if (filtros.viajeroId) {
