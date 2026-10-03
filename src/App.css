@@ -1570,6 +1570,80 @@ button:active {
   margin-top: 4px;
 }
 
+/* ===== El viaje en cifras ===== */
+.cifras h2 .boton-compartir {
+  margin-left: auto;
+}
+
+.cifras-total {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-bottom: 16px;
+}
+
+.cifras-numero {
+  font-family: var(--fuente-titulo);
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  color: var(--teal-600);
+  font-variant-numeric: tabular-nums;
+}
+
+.cifras-pie {
+  font-size: 14px;
+  color: var(--tinta-tenue);
+}
+
+.cifras-lista {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.cifras-lista li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: var(--radio-sm);
+  background-color: var(--teal-50);
+  border: 1px solid var(--linea);
+  /* Van saliendo una detrás de otra, con un saltito. */
+  animation: aparecer-creciendo var(--lento) var(--curva-muelle) backwards;
+}
+
+.cifras-lista li:nth-child(2) { animation-delay: 0.07s; }
+.cifras-lista li:nth-child(3) { animation-delay: 0.14s; }
+.cifras-lista li:nth-child(4) { animation-delay: 0.21s; }
+.cifras-lista li:nth-child(5) { animation-delay: 0.28s; }
+
+.cifras-emoji {
+  grid-row: 1 / 3;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.cifras-lista strong {
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cifras-lista li > span:last-child {
+  font-size: 12px;
+  color: var(--tinta-tenue);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ===== Presupuesto ===== */
 .presupuesto,
 .presupuesto-poner {

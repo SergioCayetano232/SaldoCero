@@ -16,6 +16,7 @@ import Bote from "./componentes/Bote";
 import Gastos from "./componentes/Gastos";
 import Resumen from "./componentes/Resumen";
 import CargandoViaje from "./componentes/CargandoViaje";
+import CifrasViaje from "./componentes/CifrasViaje";
 
 // El viaje que hay que abrir al arrancar: el del enlace compartido (#ABC123),
 // o el último en el que estuviste. Vacío si no hay ninguno.
@@ -334,6 +335,15 @@ function App() {
         }
         verTicket={datos.urlDelTicket}
       />
+
+      {cerrado && (
+        <CifrasViaje
+          gastos={gastos}
+          balances={balances}
+          nombre={viaje.nombre}
+          moneda={viaje.moneda ?? "EUR"}
+        />
+      )}
 
       {gastos.length > 0 && (
         <Resumen
