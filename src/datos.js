@@ -6,6 +6,7 @@ import { supabase, usarCodigo } from "./supabase";
 import { BOTE } from "./bote";
 import { rutaDelTicket } from "./tickets";
 import { limpiarNota } from "./notas";
+import { codigoDeTexto } from "./codigos";
 
 // Al usuario le decimos algo que entienda, pero el fallo de verdad lo dejamos
 // en la consola, que si no no hay quien averigüe qué ha pasado.
@@ -105,7 +106,7 @@ export async function crearViaje(nombre, moneda = "EUR") {
 
 // Entrar a un viaje con su código y traerse todo lo suyo.
 export async function abrirViaje(codigo) {
-  const limpio = codigo.trim().toUpperCase();
+  const limpio = codigoDeTexto(codigo);
   if (limpio === "") throw new Error("Escribe el código del viaje.");
 
   const { data, error } = await supabase.rpc("abrir_viaje", { codigo_buscado: limpio });
