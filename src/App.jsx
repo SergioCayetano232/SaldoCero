@@ -9,7 +9,7 @@ import { novedades, textoDeNovedades } from "./novedades";
 import { vibrar } from "./vibrar";
 import { estaCerrado } from "./cerrar";
 import { reducirFoto } from "./tickets";
-import { avisoDeArranque } from "./arranque";
+import { avisoDeArranque, codigoQueAbrir } from "./arranque";
 import { tituloDePestana } from "./titulo";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
@@ -63,6 +63,26 @@ function App() {
   useEffect(() => {
     viajeActual.current = viaje;
   }, [viaje]);
+
+  // Un enlace de otro viaje con la app ya abierta: al arrancar solo se lee una vez.
+  useEffect(() => {
+    function alCambiarEnlace() {
+      const codigo = codigoQueAbrir(window.location.hash, viajeActual.current?.codigo);
+      if (!codigo) return;
+
+      setError("");
+      datos
+        .abrirViaje(codigo)
+        .then((abierto) => {
+          setViaje(abierto);
+          setSoy(datos.soyEn(abierto.codigo));
+        })
+        .catch((fallo) => setError(avisoDeArranque(fallo, true)));
+    }
+
+    window.addEventListener("hashchange", alCambiarEnlace);
+    return () => window.removeEventListener("hashchange", alCambiarEnlace);
+  }, []);
 
   const nombreDelViaje = viaje?.nombre;
 

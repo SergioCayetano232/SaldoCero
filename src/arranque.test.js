@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { avisoDeArranque } from "./arranque";
+import { avisoDeArranque, codigoQueAbrir } from "./arranque";
 
 function noExiste() {
   const fallo = new Error("Ese código no existe. Míralo otra vez.");
@@ -23,5 +23,25 @@ describe("avisoDeArranque", () => {
 
   it("sin mensaje, uno genérico", () => {
     expect(avisoDeArranque(undefined, false)).toBe("No hemos podido abrir el viaje.");
+  });
+});
+
+describe("codigoQueAbrir", () => {
+  it("si el enlace es de otro viaje, ese", () => {
+    expect(codigoQueAbrir("#OTRO2345", "ABCD2345")).toBe("OTRO2345");
+  });
+
+  it("si es el mismo viaje, nada", () => {
+    expect(codigoQueAbrir("#ABCD2345", "ABCD2345")).toBe(null);
+    expect(codigoQueAbrir("#abcd2345", "ABCD2345")).toBe(null);
+  });
+
+  it("sin código en el enlace, como al salir, nada", () => {
+    expect(codigoQueAbrir("", "ABCD2345")).toBe(null);
+    expect(codigoQueAbrir("#", "ABCD2345")).toBe(null);
+  });
+
+  it("fuera de un viaje, cualquiera vale", () => {
+    expect(codigoQueAbrir("#OTRO2345", undefined)).toBe("OTRO2345");
   });
 });
