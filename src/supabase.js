@@ -21,7 +21,9 @@ function conElCodigo(input, init = {}) {
   const cabeceras = new Headers(init.headers);
   cabeceras.set("x-codigo-viaje", codigoViaje);
 
-  return fetch(input, { ...init, headers: cabeceras });
+  // Los borrados con keepalive, para que salgan aunque estés cerrando la pestaña.
+  const keepalive = init.method === "DELETE";
+  return fetch(input, { ...init, headers: cabeceras, keepalive });
 }
 
 export const supabase = hayConexion

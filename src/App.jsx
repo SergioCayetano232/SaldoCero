@@ -64,6 +64,13 @@ function App() {
     viajeActual.current = viaje;
   }, [viaje]);
 
+  // Lo que está pendiente de borrar, para rematarlo al irte (ver más abajo).
+  const borradoActual = useRef(null);
+
+  useEffect(() => {
+    borradoActual.current = borrado;
+  }, [borrado]);
+
   // Un enlace de otro viaje con la app ya abierta: al arrancar solo se lee una vez.
   useEffect(() => {
     function alCambiarEnlace() {
@@ -71,8 +78,8 @@ function App() {
       if (!codigo) return;
 
       setError("");
-      datos
-        .abrirViaje(codigo)
+      Promise.resolve(borradoActual.current?.espera.ahora())
+        .then(() => datos.abrirViaje(codigo))
         .then((abierto) => {
           setViaje(abierto);
           setSoy(datos.soyEn(abierto.codigo));
@@ -153,6 +160,7 @@ function App() {
   const borrarConAviso = useCallback((id, que, quitarDeVerdad) => {
     setError("");
     vibrar("quitar");
+    const deQueViaje = viajeActual.current?.id;
 
     const espera = borradoConEspera(quitarDeVerdad, async (fallo) => {
       setBorrado(null);
@@ -161,13 +169,29 @@ function App() {
       // Tanto si se ha borrado como si ha fallado, volvemos a leer el viaje:
       // así la lista deja de esconderlo y enseña lo que hay de verdad.
       try {
-        setViaje(await datos.refrescarViaje(viajeActual.current));
+        const releido = await datos.refrescarViaje(viajeActual.current);
+        // Si mientras tanto te has ido a otro viaje, no te devolvemos a este.
+        if (viajeActual.current?.id === deQueViaje) setViaje(releido);
       } catch {
         // Si no se puede releer, lo cogerá la escucha de cada pocos segundos.
       }
     });
 
     setBorrado({ id, que, espera });
+  }, []);
+
+  // Si cierras la pestaña o te vas a otra app en esos segundos, se borra ya: si
+  // no, el reloj muere con la página y lo borrado vuelve a salir.
+  useEffect(() => {
+    const borrarYa = () => borradoActual.current?.espera.ahora();
+    const alEsconderse = () => document.hidden && borrarYa();
+
+    document.addEventListener("visibilitychange", alEsconderse);
+    window.addEventListener("pagehide", borrarYa);
+    return () => {
+      document.removeEventListener("visibilitychange", alEsconderse);
+      window.removeEventListener("pagehide", borrarYa);
+    };
   }, []);
 
   function deshacerBorrado() {
@@ -202,7 +226,9 @@ function App() {
     }
   }
 
-  function salirDelViaje() {
+  async function salirDelViaje() {
+    // Antes de soltar el código: sin él, la base de datos no dejaría borrarlo.
+    await borradoActual.current?.espera.ahora();
     datos.olvidarCodigo();
     usarCodigo("");
     window.location.hash = "";
