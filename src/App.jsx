@@ -9,6 +9,7 @@ import { novedades, textoDeNovedades } from "./novedades";
 import { vibrar } from "./vibrar";
 import { estaCerrado } from "./cerrar";
 import { reducirFoto } from "./tickets";
+import { avisoDeArranque } from "./arranque";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
 import Viajeros from "./componentes/Viajeros";
@@ -38,6 +39,7 @@ function App() {
   useEffect(() => {
     const codigo = codigoDeArranque();
     if (!codigo) return;
+    const desdeEnlace = window.location.hash.length > 1;
 
     datos
       .abrirViaje(codigo)
@@ -45,7 +47,11 @@ function App() {
         setViaje(abierto);
         setSoy(datos.soyEn(abierto.codigo));
       })
-      .catch(() => datos.olvidarCodigo()) // el código ya no vale, a la pantalla de entrada
+      .catch((fallo) => {
+        // El código ya no vale, a la pantalla de entrada diciendo por qué.
+        datos.olvidarCodigo();
+        setError(avisoDeArranque(fallo, desdeEnlace));
+      })
       .finally(() => setCargando(false));
   }, []);
 

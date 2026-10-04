@@ -111,7 +111,11 @@ export async function abrirViaje(codigo) {
 
   const { data, error } = await supabase.rpc("abrir_viaje", { codigo_buscado: limpio });
   if (error) throw fallo(error, "No hemos podido conectar. Revisa tu conexión.");
-  if (!data.length) throw new Error("Ese código no existe. Míralo otra vez.");
+  if (!data.length) {
+    const noExiste = new Error("Ese código no existe. Míralo otra vez.");
+    noExiste.noExiste = true;
+    throw noExiste;
+  }
 
   const viaje = data[0];
   // A partir de aquí, todas las peticiones van con este código.
