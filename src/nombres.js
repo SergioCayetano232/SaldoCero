@@ -19,10 +19,11 @@ export function nombreNuevo(texto, actual) {
 
 // Dos "Luis" no hay quien los distinga en el resumen, y encima salen del mismo
 // color. "luis" y "Luís" también cuentan como el mismo. Devuelve el que ya estaba.
-export function nombreRepetido(nombre, viajeros) {
+// Al renombrar a alguien, él no cuenta: de "luis" a "Luis" se puede.
+export function nombreRepetido(nombre, viajeros, salvoId = null) {
   const igualar = (texto) =>
     String(texto ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 
   const buscado = igualar(nombre);
-  return viajeros.find((v) => igualar(v.nombre) === buscado)?.nombre ?? null;
+  return viajeros.find((v) => v.id !== salvoId && igualar(v.nombre) === buscado)?.nombre ?? null;
 }

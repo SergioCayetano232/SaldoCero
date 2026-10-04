@@ -57,6 +57,11 @@ describe("nombreRepetido", () => {
     expect(nombreRepetido("Luis G.", viajeros)).toBe(null);
   });
 
+  it("al renombrar, el propio no cuenta", () => {
+    expect(nombreRepetido("Luis", viajeros, "l")).toBe(null);
+    expect(nombreRepetido("Ana", viajeros, "l")).toBe("Ana");
+  });
+
   it("sin viajeros no hay repetidos", () => {
     expect(nombreRepetido("Luis", [])).toBe(null);
   });

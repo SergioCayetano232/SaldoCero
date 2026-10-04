@@ -17,8 +17,10 @@ function Viajeros({
   onSoyYo,
 }) {
   const [nombre, setNombre] = useState("");
-  // El que ya está con ese nombre, si intentas meter otro igual.
+  // El que ya está con ese nombre, si intentas meter otro igual. Y si era
+  // añadiendo o renombrando, que solo en lo primero se pone rojo el campo.
   const [repetido, setRepetido] = useState(null);
+  const [alRenombrar, setAlRenombrar] = useState(false);
   // De quién estás poniendo el Bizum, y lo que llevas escrito.
   const [cobrando, setCobrando] = useState(null);
   const [textoCobro, setTextoCobro] = useState("");
@@ -41,10 +43,20 @@ function Viajeros({
     setCobrando(null);
   }
 
+  function renombrar(viajero, nuevo) {
+    const yaEsta = nombreRepetido(nuevo, viajeros, viajero.id);
+    setAlRenombrar(true);
+    if (yaEsta) return setRepetido(yaEsta);
+
+    setRepetido(null);
+    onRenombrar(viajero.id, nuevo);
+  }
+
   function anadir() {
     const nombreLimpio = limpiarNombre(nombre);
     if (!nombreLimpio) return;
     const yaEsta = nombreRepetido(nombreLimpio, viajeros);
+    setAlRenombrar(false);
     if (yaEsta) return setRepetido(yaEsta);
 
     onAnadir(nombreLimpio);
@@ -61,7 +73,7 @@ function Viajeros({
             type="text"
             placeholder="Nombre del viajero"
             maxLength={LARGO_MAXIMO}
-            className={repetido ? "campo-mal" : ""}
+            className={repetido && !alRenombrar ? "campo-mal" : ""}
             value={nombre}
             onChange={(e) => {
               setNombre(e.target.value);
@@ -99,7 +111,7 @@ function Viajeros({
                 ) : (
                   <NombreEditable
                     nombre={viajero.nombre}
-                    onGuardar={(nuevo) => onRenombrar(viajero.id, nuevo)}
+                    onGuardar={(nuevo) => renombrar(viajero, nuevo)}
                     titulo={`Cambiar el nombre de ${viajero.nombre}`}
                   />
                 )}
