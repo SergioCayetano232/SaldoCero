@@ -16,3 +16,13 @@ export function nombreNuevo(texto, actual) {
   if (limpio === null || limpio === actual) return null;
   return limpio;
 }
+
+// Dos "Luis" no hay quien los distinga en el resumen, y encima salen del mismo
+// color. "luis" y "Luís" también cuentan como el mismo. Devuelve el que ya estaba.
+export function nombreRepetido(nombre, viajeros) {
+  const igualar = (texto) =>
+    String(texto ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+  const buscado = igualar(nombre);
+  return viajeros.find((v) => igualar(v.nombre) === buscado)?.nombre ?? null;
+}

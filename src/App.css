@@ -3055,7 +3055,8 @@ button:active {
   letter-spacing: 0.02em;
 }
 
-.editar-cobro .campo-mal {
+.editar-cobro .campo-mal,
+.fila-formulario > .campo-mal {
   border-color: var(--rojo);
   animation: temblor 0.4s var(--curva-suave);
 }
@@ -3068,6 +3069,14 @@ button:active {
 .cobro-mal {
   color: var(--rojo);
   font-weight: 500;
+}
+
+/* Pegado al campo: la fila de añadir lleva su margen de abajo. */
+.nombre-repetido {
+  margin: -6px 0 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--rojo);
 }
 
 /* Debajo de la deuda, a lo ancho: dónde pagar y copiarlo de un toque. */

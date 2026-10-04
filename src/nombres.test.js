@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { limpiarNombre, nombreNuevo, LARGO_MAXIMO } from "./nombres";
+import { limpiarNombre, nombreNuevo, nombreRepetido, LARGO_MAXIMO } from "./nombres";
 
 describe("limpiarNombre", () => {
   it("quita espacios de sobra", () => {
@@ -37,5 +37,27 @@ describe("nombreNuevo", () => {
 
   it("no se deja a nadie sin nombre", () => {
     expect(nombreNuevo("   ", "Javier")).toBeNull();
+  });
+});
+
+describe("nombreRepetido", () => {
+  const viajeros = [{ id: "a", nombre: "Ana" }, { id: "l", nombre: "Luis" }];
+
+  it("pilla el mismo nombre y dice cuál", () => {
+    expect(nombreRepetido("Luis", viajeros)).toBe("Luis");
+  });
+
+  it("aunque cambien mayúsculas o tildes", () => {
+    expect(nombreRepetido("luis", viajeros)).toBe("Luis");
+    expect(nombreRepetido("Luís", viajeros)).toBe("Luis");
+    expect(nombreRepetido("ANA", viajeros)).toBe("Ana");
+  });
+
+  it("con la inicial del apellido ya es otro", () => {
+    expect(nombreRepetido("Luis G.", viajeros)).toBe(null);
+  });
+
+  it("sin viajeros no hay repetidos", () => {
+    expect(nombreRepetido("Luis", [])).toBe(null);
   });
 });

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Avatar from "./Avatar";
 import NombreEditable from "./NombreEditable";
-import { limpiarNombre, LARGO_MAXIMO } from "../nombres";
+import { limpiarNombre, nombreRepetido, LARGO_MAXIMO } from "../nombres";
 import { leerCobro, cobroDe, cobroComoTexto } from "../cobro";
 
 function Viajeros({
@@ -17,6 +17,8 @@ function Viajeros({
   onSoyYo,
 }) {
   const [nombre, setNombre] = useState("");
+  // El que ya está con ese nombre, si intentas meter otro igual.
+  const [repetido, setRepetido] = useState(null);
   // De quién estás poniendo el Bizum, y lo que llevas escrito.
   const [cobrando, setCobrando] = useState(null);
   const [textoCobro, setTextoCobro] = useState("");
@@ -42,6 +44,8 @@ function Viajeros({
   function anadir() {
     const nombreLimpio = limpiarNombre(nombre);
     if (!nombreLimpio) return;
+    const yaEsta = nombreRepetido(nombreLimpio, viajeros);
+    if (yaEsta) return setRepetido(yaEsta);
 
     onAnadir(nombreLimpio);
     setNombre("");
@@ -57,14 +61,24 @@ function Viajeros({
             type="text"
             placeholder="Nombre del viajero"
             maxLength={LARGO_MAXIMO}
+            className={repetido ? "campo-mal" : ""}
             value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
+            onChange={(e) => {
+              setNombre(e.target.value);
+              setRepetido(null);
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter") anadir();
             }}
           />
           <button onClick={anadir}>Añadir</button>
         </div>
+      )}
+
+      {repetido && (
+        <p className="nombre-repetido">
+          {repetido} ya está en el viaje. Ponle la inicial del apellido para no liaros.
+        </p>
       )}
 
       {viajeros.length === 0 ? (
