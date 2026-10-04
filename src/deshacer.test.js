@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { borradoConEspera, ESPERA } from "./deshacer";
+import { borradoConEspera, ESPERA, queSeVaConViajero } from "./deshacer";
 
 // Controlamos el reloj, que si no habría que esperar de verdad.
 beforeEach(() => vi.useFakeTimers());
@@ -81,5 +81,30 @@ describe("borradoConEspera", () => {
     cancelar();
     await vi.advanceTimersByTimeAsync(ESPERA * 2);
     expect(alTerminar).not.toHaveBeenCalled();
+  });
+});
+
+describe("queSeVaConViajero", () => {
+  const luis = { id: "l", nombre: "Luis" };
+  const gastos = [
+    { pagadorId: "l", importe: 30 },
+    { pagadorId: "a", importe: 50 },
+    { pagadorId: "l", importe: 45.5, importeConvertido: 12.25 },
+  ];
+
+  it("si no pagó nada, solo el nombre", () => {
+    expect(queSeVaConViajero(luis, [{ pagadorId: "a", importe: 50 }])).toBe("a Luis");
+  });
+
+  it("con un gasto, en singular", () => {
+    expect(queSeVaConViajero(luis, gastos.slice(0, 2))).toBe("a Luis y el gasto que pagó (30.00 €)");
+  });
+
+  it("con varios, cuántos y cuánto en la moneda del viaje", () => {
+    expect(queSeVaConViajero(luis, gastos)).toBe("a Luis y los 2 gastos que pagó (42.25 €)");
+  });
+
+  it("con la moneda del viaje", () => {
+    expect(queSeVaConViajero(luis, gastos.slice(0, 1), "USD")).toBe("a Luis y el gasto que pagó ($30.00)");
   });
 });

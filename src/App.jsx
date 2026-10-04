@@ -4,7 +4,7 @@ import * as datos from "./datos";
 import { hayConexion, usarCodigo } from "./supabase";
 import { balancesConBote, hayBote } from "./bote";
 import { coloresDelViaje } from "./avatares";
-import { borradoConEspera } from "./deshacer";
+import { borradoConEspera, queSeVaConViajero } from "./deshacer";
 import { novedades, textoDeNovedades } from "./novedades";
 import { vibrar } from "./vibrar";
 import { estaCerrado } from "./cerrar";
@@ -286,7 +286,11 @@ function App() {
         onRenombrar={(id, nombre) => hacer(() => datos.renombrarViajero(id, nombre))}
         onCobro={(id, cobro) => hacer(() => datos.ponerCobro(id, cobro))}
         onQuitar={(id, nombre) =>
-          borrarConAviso(id, `a ${nombre}`, () => datos.quitarViajero(id))
+          borrarConAviso(
+            id,
+            queSeVaConViajero({ id, nombre }, gastos, viaje.moneda ?? "EUR"),
+            () => datos.quitarViajero(id)
+          )
         }
       />
 
