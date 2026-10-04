@@ -9,7 +9,7 @@ import { novedades, textoDeNovedades } from "./novedades";
 import { vibrar } from "./vibrar";
 import { estaCerrado } from "./cerrar";
 import { reducirFoto } from "./tickets";
-import { avisoDeArranque, codigoQueAbrir } from "./arranque";
+import { avisoDeArranque, codigoQueAbrir, hayQueOlvidar } from "./arranque";
 import { tituloDePestana } from "./titulo";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
@@ -49,8 +49,8 @@ function App() {
         setSoy(datos.soyEn(abierto.codigo));
       })
       .catch((fallo) => {
-        // El código ya no vale, a la pantalla de entrada diciendo por qué.
-        datos.olvidarCodigo();
+        // A la pantalla de entrada diciendo por qué.
+        if (hayQueOlvidar(fallo, desdeEnlace)) datos.olvidarCodigo();
         setError(avisoDeArranque(fallo, desdeEnlace));
       })
       .finally(() => setCargando(false));

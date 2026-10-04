@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { avisoDeArranque, codigoQueAbrir } from "./arranque";
+import { avisoDeArranque, codigoQueAbrir, hayQueOlvidar } from "./arranque";
 
 function noExiste() {
   const fallo = new Error("Ese código no existe. Míralo otra vez.");
@@ -43,5 +43,19 @@ describe("codigoQueAbrir", () => {
 
   it("fuera de un viaje, cualquiera vale", () => {
     expect(codigoQueAbrir("#OTRO2345", undefined)).toBe("OTRO2345");
+  });
+});
+
+describe("hayQueOlvidar", () => {
+  it("el último viaje, si ya no existe", () => {
+    expect(hayQueOlvidar(noExiste(), false)).toBe(true);
+  });
+
+  it("sin conexión no, que el viaje sigue ahí", () => {
+    expect(hayQueOlvidar(new Error("No hemos podido conectar."), false)).toBe(false);
+  });
+
+  it("con un enlace malo tampoco: lo guardado es otro viaje", () => {
+    expect(hayQueOlvidar(noExiste(), true)).toBe(false);
   });
 });

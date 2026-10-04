@@ -19,3 +19,9 @@ export function codigoQueAbrir(hash, codigoActual) {
   if (!codigo || codigo === codigoActual) return null;
   return codigo;
 }
+
+// El último viaje solo se olvida si ya no existe. Sin conexión sigue valiendo, y
+// un enlace malo no tiene nada que ver con el que tenías guardado.
+export function hayQueOlvidar(fallo, desdeEnlace) {
+  return Boolean(fallo?.noExiste) && !desdeEnlace;
+}
