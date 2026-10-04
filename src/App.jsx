@@ -10,6 +10,7 @@ import { vibrar } from "./vibrar";
 import { estaCerrado } from "./cerrar";
 import { reducirFoto } from "./tickets";
 import { avisoDeArranque } from "./arranque";
+import { tituloDePestana } from "./titulo";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
 import Viajeros from "./componentes/Viajeros";
@@ -62,6 +63,12 @@ function App() {
   useEffect(() => {
     viajeActual.current = viaje;
   }, [viaje]);
+
+  const nombreDelViaje = viaje?.nombre;
+
+  useEffect(() => {
+    document.title = tituloDePestana(nombreDelViaje);
+  }, [nombreDelViaje]);
 
   // Lo que han apuntado los demás, mientras dura el aviso.
   const [novedad, setNovedad] = useState(null);
