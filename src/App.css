@@ -775,6 +775,14 @@ button:active {
   background-color: var(--teal-100);
 }
 
+.borrador-recuperado {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--tinta-suave);
+}
+
 .propinas {
   display: flex;
   align-items: center;

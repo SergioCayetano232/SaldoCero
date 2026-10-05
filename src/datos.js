@@ -89,6 +89,36 @@ export function soyYo(codigo, viajeroId) {
   localStorage.setItem(CLAVE_SOY, JSON.stringify(todos));
 }
 
+// El gasto a medio escribir de cada viaje. Solo en este móvil.
+const CLAVE_BORRADOR = "saldocero-borrador";
+
+function borradores() {
+  try {
+    const guardado = JSON.parse(localStorage.getItem(CLAVE_BORRADOR) ?? "{}");
+    return typeof guardado === "object" && guardado !== null ? guardado : {};
+  } catch {
+    return {};
+  }
+}
+
+export function leerBorrador(codigo) {
+  return borradores()[codigo] ?? null;
+}
+
+// null lo borra. Si el navegador no deja guardar, mala suerte: no es para romper nada.
+export function guardarBorrador(codigo, borrador) {
+  const todos = borradores();
+
+  if (borrador) todos[codigo] = borrador;
+  else delete todos[codigo];
+
+  try {
+    localStorage.setItem(CLAVE_BORRADOR, JSON.stringify(todos));
+  } catch {
+    // Modo privado o sin sitio.
+  }
+}
+
 export async function crearViaje(nombre, moneda = "EUR") {
   const { data, error } = await supabase.rpc("crear_viaje", {
     nombre_viaje: nombre,

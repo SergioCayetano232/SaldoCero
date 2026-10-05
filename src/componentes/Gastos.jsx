@@ -8,6 +8,8 @@ import { sugerirConceptos } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
 import { ordenarGastos, ORDENES, POR_DIAS } from "../ordenar";
 import { conPropina, PROPINAS } from "../propina";
+import { borradorQueVale, hayAlgoEscrito } from "../borrador";
+import * as datos from "../datos";
 import { gastoAlFormulario, repetirGasto } from "../repetir";
 import { leerImporte, loQueFalta, cuadra, importesAPartes, partesAImportes } from "../importes";
 import { BOTE } from "../bote";
@@ -20,6 +22,7 @@ import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 
 function Gastos({
+  codigo,
   viajeros,
   hayBote = false,
   gastos,
@@ -32,16 +35,21 @@ function Gastos({
   verTicket,
   soy = null,
 }) {
-  const [pagadorId, setPagadorId] = useState("");
-  const [importe, setImporte] = useState("");
-  const [moneda, setMoneda] = useState(monedaViaje);
-  const [concepto, setConcepto] = useState("");
-  const [categoria, setCategoria] = useState(POR_DEFECTO);
+  // Lo que dejaste a medias la última vez, si lo hay.
+  const [borrador] = useState(() => borradorQueVale(datos.leerBorrador(codigo), Date.now(), viajeros));
+  const [recuperado, setRecuperado] = useState(Boolean(borrador));
+  const [pagadorId, setPagadorId] = useState(borrador?.pagadorId ?? "");
+  const [importe, setImporte] = useState(borrador?.importe ?? "");
+  const [moneda, setMoneda] = useState(() =>
+    MONEDAS.some((m) => m.codigo === borrador?.moneda) ? borrador.moneda : monedaViaje
+  );
+  const [concepto, setConcepto] = useState(borrador?.concepto ?? "");
+  const [categoria, setCategoria] = useState(borrador?.categoria || POR_DEFECTO);
   // Mientras no la elijas tú, la categoría sigue a lo que escribes en el concepto.
-  const [categoriaAMano, setCategoriaAMano] = useState(false);
+  const [categoriaAMano, setCategoriaAMano] = useState(borrador?.categoriaAMano ?? false);
   // La nota va escondida hasta que la pides: casi ningún gasto la lleva.
-  const [nota, setNota] = useState("");
-  const [notaAbierta, setNotaAbierta] = useState(false);
+  const [nota, setNota] = useState(borrador?.nota ?? "");
+  const [notaAbierta, setNotaAbierta] = useState(Boolean(borrador?.nota));
   // Las partes de cada uno. Vacío = a partes iguales, que es lo normal.
   const [partes, setPartes] = useState({});
   const [repartoAbierto, setRepartoAbierto] = useState(false);
@@ -49,7 +57,7 @@ function Gastos({
   const [porImportes, setPorImportes] = useState(false);
   const [importes, setImportes] = useState({});
   // Por defecto hoy, que es cuando se apunta casi todo.
-  const [fecha, setFecha] = useState(hoy);
+  const [fecha, setFecha] = useState(() => borrador?.fecha || hoy());
   // El cambio que nos ha dado la API, con la moneda a la que corresponde.
   // Así sabemos si lo que tenemos guardado sirve para la moneda de ahora.
   const [cambioTraido, setCambioTraido] = useState(null);
@@ -113,6 +121,14 @@ function Gastos({
   // El gasto que se parece al que ibas a apuntar, con lo que tenías escrito.
   const [repetido, setRepetido] = useState(null);
   const formulario = useRef(null);
+
+  // Cada cambio en un gasto nuevo se guarda en el móvil. Al editar no: ese ya está guardado.
+  useEffect(() => {
+    if (editando) return;
+
+    const ahora = { pagadorId, importe, moneda, concepto, categoria, categoriaAMano, nota, fecha };
+    datos.guardarBorrador(codigo, hayAlgoEscrito(ahora) ? { ...ahora, guardadoEn: Date.now() } : null);
+  }, [codigo, editando, pagadorId, importe, moneda, concepto, categoria, categoriaAMano, nota, fecha]);
 
   // Cada vez que cambias de moneda, preguntamos a cuánto está.
   useEffect(() => {
@@ -188,6 +204,7 @@ function Gastos({
   }
 
   function limpiar() {
+    setRecuperado(false);
     escribirImporte("");
     setMoneda(monedaViaje);
     setTasaAMano(null);
@@ -393,6 +410,15 @@ function Gastos({
           {/* Cerrado, ya no se apuntan gastos. */}
           {!cerrado && (
             <div className="formulario-gasto" ref={formulario}>
+              {recuperado && (
+                <p className="borrador-recuperado" role="status">
+                  ✍️ Lo dejaste a medias.
+                  <button className="enlace" onClick={cancelar}>
+                    Descartar
+                  </button>
+                </p>
+              )}
+
               <select value={pagadorId} onChange={(e) => setPagadorId(e.target.value)}>
                 <option value="">¿Quién pagó?</option>
                 {viajeros.map((viajero) => (
