@@ -140,6 +140,22 @@ function Gastos({
     datos.guardarBorrador(codigo, hayAlgoEscrito(ahora) ? { ...ahora, guardadoEn: Date.now() } : null);
   }, [codigo, editando, pagadorId, importe, moneda, concepto, categoria, categoriaAMano, nota, fecha]);
 
+  // Escape deja la edición, esté donde esté el foco. Pero si hay un visor abierto
+  // o estás en otro campo (el presupuesto, un nombre), ese Escape es para ellos.
+  useEffect(() => {
+    if (!editando) return;
+
+    function alPulsar(e) {
+      if (e.key !== "Escape") return;
+      if (document.querySelector('[aria-modal="true"]')) return;
+      const enOtroCampo = e.target.closest?.("input, textarea, select") && !formulario.current?.contains(e.target);
+      if (!enOtroCampo) cancelar();
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  });
+
   // Cada vez que cambias de moneda, preguntamos a cuánto está.
   useEffect(() => {
     if (moneda === monedaViaje) return;
