@@ -6,6 +6,7 @@ import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS } from "../
 import { hoy, comoTitulo, porDias } from "../fechas";
 import { sugerirConceptos } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
+import { ordenarGastos, ORDENES, POR_DIAS } from "../ordenar";
 import { gastoAlFormulario, repetirGasto } from "../repetir";
 import { leerImporte, loQueFalta, cuadra, importesAPartes, partesAImportes } from "../importes";
 import { BOTE } from "../bote";
@@ -107,6 +108,7 @@ function Gastos({
   }, [moneda, monedaViaje]);
 
   const [filtros, setFiltros] = useState(SIN_FILTROS);
+  const [orden, setOrden] = useState(POR_DIAS);
   // Si quedan pocos gastos la barra se esconde, y con ella lo que hubiera filtrado.
   const puedeFiltrar = gastos.length >= MINIMO_PARA_FILTRAR;
   const filtrando = puedeFiltrar && hayFiltros(filtros);
@@ -142,8 +144,13 @@ function Gastos({
     if (!categoriaAMano) setCategoria(adivinarCategoria(texto) ?? POR_DEFECTO);
   }
 
-  // Los gastos agrupados por día, que es como se leen mejor.
-  const dias = porDias(visibles);
+  // Los gastos agrupados por día, que es como se leen mejor. Ordenados de otra
+  // forma van todos seguidos, en un solo grupo que no lleva título.
+  const ordenVigente = puedeFiltrar ? orden : POR_DIAS;
+  const dias =
+    ordenVigente === POR_DIAS
+      ? porDias(visibles)
+      : [{ fecha: "", gastos: ordenarGastos(visibles, ordenVigente, viajeros) }];
 
   const todosLosIds = viajeros.map((v) => v.id);
   // Mientras no toques las casillas, el gasto va entre todos.
@@ -788,6 +795,19 @@ function Gastos({
                     </option>
                   ))}
                 </select>
+
+                <select
+                  className="filtro-orden"
+                  value={orden}
+                  onChange={(e) => setOrden(e.target.value)}
+                  aria-label="Ordenar gastos"
+                >
+                  {ORDENES.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.nombre}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {filtrando && (
@@ -859,6 +879,8 @@ function Gastos({
                         <br />
                         <small className="reparto">
                           {nombrePagador(gasto.pagadorId)} · {textoReparto(gasto)}
+                          {/* Sin los títulos de los días, la fecha va en cada uno. */}
+                          {ordenVigente !== POR_DIAS && gasto.fecha && ` · ${comoTitulo(gasto.fecha)}`}
                         </small>
                         {deQuien && (
                           <small className="gasto-parte">

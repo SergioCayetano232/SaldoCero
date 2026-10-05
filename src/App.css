@@ -541,7 +541,20 @@ button:active {
 
 .filtro-selectores {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+}
+
+.filtro-selectores > select {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* En el móvil no caben tres: el de ordenar baja a su fila. */
+@media (max-width: 560px) {
+  .filtro-selectores > .filtro-orden {
+    flex-basis: 100%;
+  }
 }
 
 .filtro-resumen {
