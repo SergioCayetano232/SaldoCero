@@ -19,6 +19,7 @@ import { cuentaDe, textoCuentaDe, textoParteDe } from "../loDeUno";
 import { posiblesRepetidos } from "../repetidos";
 import { leerSuma, esSuma } from "../sumas";
 import { pagadorPorDefecto } from "../pagador";
+import { pareceRaro } from "../raros";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 
@@ -128,6 +129,7 @@ function Gastos({
   const [editando, setEditando] = useState(null);
   // El gasto que se parece al que ibas a apuntar, con lo que tenías escrito.
   const [repetido, setRepetido] = useState(null);
+  const [raro, setRaro] = useState(null);
   const formulario = useRef(null);
 
   // Cada cambio en un gasto nuevo se guarda en el móvil. Al editar no: ese ya está guardado.
@@ -232,6 +234,7 @@ function Gastos({
     setTicketActual(null);
     setQuitarFoto(false);
     setRepetido(null);
+    setRaro(null);
   }
 
   function rellenar(f) {
@@ -322,8 +325,9 @@ function Gastos({
     repetido && repetido.importe === importe && repetido.fecha === fecha && repetido.moneda === moneda
       ? repetido.gasto
       : null;
+  const avisoRaro = raro && raro.importe === importe && raro.moneda === moneda ? raro : null;
 
-  function guardar(aunqueSeParezca = false) {
+  function guardar(aunqueSeParezca = false, aunqueSeaMucho = false) {
     const importeNumero = importeLeido;
 
     if (pagadorId === "") return;
@@ -357,6 +361,11 @@ function Gastos({
     };
 
     // Solo al apuntar uno nuevo: al editar, ya sabes cuál estás tocando.
+    if (!editando && !aunqueSeaMucho && pareceRaro(gasto.importeConvertido, gastos)) {
+      setRaro({ importe, moneda, convertido: gasto.importeConvertido });
+      return;
+    }
+
     if (!editando && !aunqueSeParezca) {
       const [parecido] = posiblesRepetidos(gasto, gastos);
       if (parecido) {
@@ -789,6 +798,29 @@ function Gastos({
                 </div>
               ) : (
                 <>
+                  {avisoRaro && (
+                    <div className="aviso-repetido" role="alert">
+                      <p>
+                        🤔 <strong>{conMoneda(avisoRaro.convertido, monedaViaje)}</strong> es mucho más de lo que
+                        se suele gastar en este viaje. ¿Está bien?
+                      </p>
+                      <div className="aviso-repetido-botones">
+                        <button className="aviso-si" onClick={() => guardar(false, true)}>
+                          Sí, está bien
+                        </button>
+                        <button
+                          className="aviso-no"
+                          onClick={() => {
+                            setRaro(null);
+                            campoImporte.current?.focus();
+                          }}
+                        >
+                          Corregir
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {avisoRepetido && (
                     <div className="aviso-repetido" role="alert">
                       <p>
@@ -798,7 +830,7 @@ function Gastos({
                         ¿Es otro gasto?
                       </p>
                       <div className="aviso-repetido-botones">
-                        <button className="aviso-si" onClick={() => guardar(true)}>
+                        <button className="aviso-si" onClick={() => guardar(true, true)}>
                           Sí, apuntarlo
                         </button>
                         <button className="aviso-no" onClick={cancelar}>
@@ -810,7 +842,7 @@ function Gastos({
 
                   <button
                     onClick={() => guardar()}
-                    disabled={marcados.length === 0 || typeof tasa !== "number" || descuadrado || Boolean(avisoRepetido)}
+                    disabled={marcados.length === 0 || typeof tasa !== "number" || descuadrado || Boolean(avisoRepetido) || Boolean(avisoRaro)}
                   >
                     Añadir gasto
                   </button>
