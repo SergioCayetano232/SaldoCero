@@ -18,6 +18,7 @@ import { LARGO_NOTA } from "../notas";
 import { cuentaDe, textoCuentaDe, textoParteDe } from "../loDeUno";
 import { posiblesRepetidos } from "../repetidos";
 import { leerSuma, esSuma } from "../sumas";
+import { pagadorPorDefecto } from "../pagador";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 
@@ -38,7 +39,14 @@ function Gastos({
   // Lo que dejaste a medias la última vez, si lo hay.
   const [borrador] = useState(() => borradorQueVale(datos.leerBorrador(codigo), Date.now(), viajeros));
   const [recuperado, setRecuperado] = useState(Boolean(borrador));
-  const [pagadorId, setPagadorId] = useState(borrador?.pagadorId ?? "");
+  const porDefecto = pagadorPorDefecto(soy, viajeros);
+  const [pagadorId, setPagadorId] = useState(borrador?.pagadorId || porDefecto);
+  // Si dices quién eres con el formulario a estrenar, te pone de pagador ahí mismo.
+  const [porDefectoAntes, setPorDefectoAntes] = useState(porDefecto);
+  if (porDefecto !== porDefectoAntes) {
+    setPorDefectoAntes(porDefecto);
+    if (pagadorId === "") setPagadorId(porDefecto);
+  }
   const [importe, setImporte] = useState(borrador?.importe ?? "");
   const [moneda, setMoneda] = useState(() =>
     MONEDAS.some((m) => m.codigo === borrador?.moneda) ? borrador.moneda : monedaViaje
@@ -360,7 +368,7 @@ function Gastos({
     if (editando) {
       onEditar(editando, gasto);
       // Terminada la edición, el formulario vuelve a estar en blanco.
-      setPagadorId("");
+      setPagadorId(porDefecto);
     } else {
       // Dejamos el pagador puesto por si encadena varios gastos.
       onAnadir(gasto);
@@ -370,7 +378,7 @@ function Gastos({
   }
 
   function cancelar() {
-    setPagadorId("");
+    setPagadorId(porDefecto);
     limpiar();
   }
 
