@@ -170,6 +170,19 @@ export function calcularPagos(balances) {
   return pagos;
 }
 
+// Los pagos sin céntimos, que nadie hace un Bizum de 23,47 €. Lo que se queda
+// en nada, como unos 0,40 €, se perdona y no sale.
+export function redondearPagos(pagos) {
+  return pagos
+    .map((pago) => ({ ...pago, cantidad: Math.round(pago.cantidad) }))
+    .filter((pago) => pago.cantidad > 0);
+}
+
+// Si hay algo que redondear. Si ya va todo en euros justos, el interruptor sobra.
+export function hayCentimos(pagos) {
+  return pagos.some((pago) => Math.abs(pago.cantidad - Math.round(pago.cantidad)) >= MARGEN);
+}
+
 // Si dos pagos son el mismo quién a quién. Por id, que dos pueden llamarse
 // igual; por nombre solo si a alguno le falta, que son los marcados antes.
 export function mismoPago(x, y) {

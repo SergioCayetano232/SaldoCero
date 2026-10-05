@@ -465,7 +465,7 @@ function Gastos({
                   {PROPINAS.map((p) => (
                     <button
                       key={p}
-                      className={`boton-propina ${propina?.porcentaje === p ? "activo" : ""}`}
+                      className="pastilla-interruptor"
                       onClick={() => alternarPropina(p)}
                       aria-pressed={propina?.porcentaje === p}
                     >

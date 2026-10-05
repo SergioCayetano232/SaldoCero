@@ -7,6 +7,8 @@ import {
   calcularTotal,
   marcarSaldados,
   quedaPorPagar,
+  redondearPagos,
+  hayCentimos,
 } from "../calculos";
 import { conMoneda } from "../monedas";
 import { resumenEnTexto, copiarAlPortapapeles, descargarResumen, descargarGastos } from "../compartir";
@@ -37,6 +39,7 @@ function Resumen({
   onDesaldar,
   onParcial,
   onQuitarParcial,
+  onRedondear,
   onPresupuesto,
   cerrado,
   viaje,
@@ -55,7 +58,11 @@ function Resumen({
   // El bote entra en los pagos (lo que sobra se devuelve), pero no es nadie:
   // ni le toca pagar la próxima ni sale en las listas de personas.
   const personas = sinBote(balances);
-  const pagos = marcarSaldados(calcularPagos(balances), saldados);
+  const exactos = calcularPagos(balances);
+  const redondear = viaje?.redondear === true;
+  const pagos = marcarSaldados(redondear ? redondearPagos(exactos) : exactos, saldados);
+  // Encendido se queda a la vista aunque ya no haya céntimos, para poder apagarlo.
+  const verRedondeo = redondear || hayCentimos(exactos);
   // Con lo ya pagado descontado: si todo está saldado, no le toca a nadie.
   const leTocaPagar = calcularLeTocaPagar(balancesTrasPagos(personas, pagos));
   const pendiente = quedaPorPagar(pagos);
@@ -378,6 +385,17 @@ function Resumen({
               );
             })}
           </>
+        )}
+
+        {verRedondeo && (
+          <button
+            className="pastilla-interruptor boton-redondeo"
+            onClick={() => onRedondear(!redondear)}
+            aria-pressed={redondear}
+            title="Para todo el viaje"
+          >
+            {redondear ? "✓ Sin céntimos" : "Quitar los céntimos"}
+          </button>
         )}
 
         <PagosACuenta

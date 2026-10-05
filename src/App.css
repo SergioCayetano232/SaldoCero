@@ -787,7 +787,8 @@ button:active {
   margin-right: 2px;
 }
 
-.boton-propina {
+/* Un botón que se queda encendido: la propina, quitar los céntimos... */
+.pastilla-interruptor {
   padding: 4px 12px;
   border: 1px solid var(--linea);
   border-radius: var(--radio-pastilla);
@@ -798,12 +799,12 @@ button:active {
   font-variant-numeric: tabular-nums;
 }
 
-.boton-propina:hover {
+.pastilla-interruptor:hover {
   border-color: var(--teal-300);
   color: var(--teal-600);
 }
 
-.boton-propina.activo {
+.pastilla-interruptor[aria-pressed="true"] {
   border-color: var(--teal-500);
   background-color: var(--teal-500);
   color: white;
@@ -2339,6 +2340,10 @@ button:active {
   align-items: baseline;
   justify-content: space-between;
   gap: 10px;
+}
+
+.boton-redondeo {
+  margin-top: 12px;
 }
 
 /* Lo que falta por pagar, al lado del título. */

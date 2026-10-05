@@ -421,6 +421,7 @@ function App() {
           onDesaldar={(pago) => hacer(() => datos.desmarcarSaldado(viaje.id, pago))}
           cerrado={cerrado}
           onPresupuesto={(cantidad) => hacer(() => datos.ponerPresupuesto(viaje.id, cantidad))}
+          onRedondear={(redondear) => hacer(() => datos.ponerRedondeo(viaje.id, redondear))}
           parciales={parciales}
           onParcial={(parcial) => hacer(() => datos.anadirParcial(viaje.id, parcial))}
           onQuitarParcial={(parcial, de, a) =>

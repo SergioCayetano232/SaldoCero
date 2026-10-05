@@ -12,6 +12,8 @@ create table viajes (
   moneda text not null default 'EUR',
   -- Lo que queréis gastaros como mucho, en la moneda del viaje. Null = sin tope.
   presupuesto numeric(10, 2) check (presupuesto > 0),
+  -- Las deudas sin céntimos. Va en el viaje para que todos vean la misma cifra.
+  redondear boolean not null default false,
   -- Cerrado ya no se tocan gastos ni viajeros, solo se pagan las deudas.
   cerrado_en timestamptz,
   creado_en timestamptz not null default now()
@@ -164,7 +166,7 @@ alter table aportaciones_bote enable row level security;
 -- Del viaje y de los viajeros solo se cambian estas columnas. El código, o de
 -- qué viaje es cada uno, no se tocan nunca.
 revoke update on viajes from anon, authenticated;
-grant update (nombre, presupuesto, cerrado_en) on viajes to anon, authenticated;
+grant update (nombre, presupuesto, cerrado_en, redondear) on viajes to anon, authenticated;
 revoke update on viajeros from anon, authenticated;
 grant update (nombre) on viajeros to anon, authenticated;
 
@@ -544,3 +546,7 @@ $$;
 --   drop function editar_gasto(uuid, uuid, numeric, text, numeric, text, text, date, jsonb);
 --
 --   Y pega los "create function crear_gasto" y "create function editar_gasto" de más arriba.
+
+-- Redondear las deudas.
+--   alter table viajes add column redondear boolean not null default false;
+--   grant update (redondear) on viajes to anon, authenticated;

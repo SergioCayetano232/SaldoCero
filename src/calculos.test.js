@@ -13,6 +13,8 @@ import {
   balancesTrasPagos,
   repartoDeGasto,
   parteDe,
+  redondearPagos,
+  hayCentimos,
 } from "./calculos";
 
 const ana = { id: "a", nombre: "Ana" };
@@ -582,5 +584,50 @@ describe("pagos a cuenta", () => {
     expect(a.balance).toBeCloseTo(60);
     expect(a.dado).toBe(0);
     expect(a.recibido).toBe(0);
+  });
+});
+
+describe("redondearPagos", () => {
+  const pago = (cantidad) => ({ de: "Luis", a: "Ana", deId: "b", aId: "a", cantidad });
+
+  it("quita los céntimos, al euro más cercano", () => {
+    expect(redondearPagos([pago(23.47), pago(10.5), pago(7.49)]).map((p) => p.cantidad)).toEqual([23, 11, 7]);
+  });
+
+  it("lo que se queda en cero no sale", () => {
+    expect(redondearPagos([pago(0.4), pago(12)])).toEqual([pago(12)]);
+  });
+
+  it("no toca los pagos de fuera", () => {
+    const pagos = [pago(23.47)];
+    redondearPagos(pagos);
+    expect(pagos[0].cantidad).toBe(23.47);
+  });
+
+  it("deja el resto del pago como estaba", () => {
+    expect(redondearPagos([pago(9.9)])).toEqual([pago(10)]);
+  });
+
+  it("con gastos de verdad: 100 € entre tres", () => {
+    const bal = calcularBalances(viajeros, [gasto("a", 100, ["a", "b", "c"])]);
+    expect(redondearPagos(calcularPagos(bal)).map((p) => p.cantidad)).toEqual([33, 33]);
+  });
+});
+
+describe("hayCentimos", () => {
+  it("con algún pago con céntimos, sí", () => {
+    expect(hayCentimos([{ cantidad: 20 }, { cantidad: 33.33 }])).toBe(true);
+  });
+
+  it("todo en euros justos, no", () => {
+    expect(hayCentimos([{ cantidad: 20 }, { cantidad: 15 }])).toBe(false);
+  });
+
+  it("los restos de los decimales no cuentan", () => {
+    expect(hayCentimos([{ cantidad: 20.000000001 }])).toBe(false);
+  });
+
+  it("sin pagos, no", () => {
+    expect(hayCentimos([])).toBe(false);
   });
 });
