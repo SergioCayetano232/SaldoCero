@@ -5,6 +5,7 @@ import { CATEGORIAS, POR_DEFECTO, categoriaDe } from "../categorias";
 import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS } from "../filtros";
 import { hoy, comoTitulo, porDias } from "../fechas";
 import { sugerirConceptos } from "../sugerencias";
+import { adivinarCategoria } from "../adivinar";
 import { gastoAlFormulario, repetirGasto } from "../repetir";
 import { leerImporte, loQueFalta, cuadra, importesAPartes, partesAImportes } from "../importes";
 import { BOTE } from "../bote";
@@ -34,6 +35,8 @@ function Gastos({
   const [moneda, setMoneda] = useState(monedaViaje);
   const [concepto, setConcepto] = useState("");
   const [categoria, setCategoria] = useState(POR_DEFECTO);
+  // Mientras no la elijas tú, la categoría sigue a lo que escribes en el concepto.
+  const [categoriaAMano, setCategoriaAMano] = useState(false);
   // La nota va escondida hasta que la pides: casi ningún gasto la lleva.
   const [nota, setNota] = useState("");
   const [notaAbierta, setNotaAbierta] = useState(false);
@@ -126,7 +129,17 @@ function Gastos({
 
   function usarSugerencia(s) {
     setConcepto(s.concepto);
-    setCategoria(s.categoria);
+    elegirCategoria(s.categoria);
+  }
+
+  function elegirCategoria(id) {
+    setCategoria(id);
+    setCategoriaAMano(true);
+  }
+
+  function escribirConcepto(texto) {
+    setConcepto(texto);
+    if (!categoriaAMano) setCategoria(adivinarCategoria(texto) ?? POR_DEFECTO);
   }
 
   // Los gastos agrupados por día, que es como se leen mejor.
@@ -151,6 +164,7 @@ function Gastos({
     setTasaAMano(null);
     setConcepto("");
     setCategoria(POR_DEFECTO);
+    setCategoriaAMano(false);
     setNota("");
     setNotaAbierta(false);
     setPartes({});
@@ -172,7 +186,8 @@ function Gastos({
     setMoneda(f.moneda);
     setTasaAMano(f.tasaAMano);
     setConcepto(f.concepto);
-    setCategoria(f.categoria);
+    // La que trae el gasto se respeta, aunque luego retoques el concepto.
+    elegirCategoria(f.categoria);
     setNota(f.nota);
     setNotaAbierta(Boolean(f.nota));
     setFecha(f.fecha ?? hoy());
@@ -471,7 +486,7 @@ function Gastos({
                 type="text"
                 placeholder="Concepto (cena, hotel...)"
                 value={concepto}
-                onChange={(e) => setConcepto(e.target.value)}
+                onChange={(e) => escribirConcepto(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") guardar();
                 }}
@@ -554,7 +569,7 @@ function Gastos({
                   <button
                     key={c.id}
                     className={`pastilla-categoria ${categoria === c.id ? "elegida" : ""}`}
-                    onClick={() => setCategoria(c.id)}
+                    onClick={() => elegirCategoria(c.id)}
                     title={c.nombre}
                     style={{ "--color-categoria": c.color }}
                   >
