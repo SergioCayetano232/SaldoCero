@@ -23,6 +23,16 @@
     />
 
     <title>SaldoCero · Reparte los gastos del viaje</title>
+
+    <!-- El tema antes de pintar nada, que si no se ve un fogonazo blanco. Es lo
+         mismo que temaQueToca, en src/tema.js. -->
+    <script>
+      try {
+        var tema = localStorage.getItem("saldocero-tema");
+      } catch (e) {}
+      var oscuro = tema === "oscuro" || (tema !== "claro" && matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.dataset.tema = oscuro ? "oscuro" : "claro";
+    </script>
   </head>
   <body>
     <div id="root"></div>

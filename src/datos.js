@@ -89,6 +89,26 @@ export function soyYo(codigo, viajeroId) {
   localStorage.setItem(CLAVE_SOY, JSON.stringify(todos));
 }
 
+// Claro, oscuro o automático. Lo lee también index.html, así que va en texto tal cual.
+const CLAVE_TEMA = "saldocero-tema";
+
+export function leerTema() {
+  try {
+    return localStorage.getItem(CLAVE_TEMA);
+  } catch {
+    return null;
+  }
+}
+
+export function guardarTema(tema) {
+  try {
+    if (tema === "auto") localStorage.removeItem(CLAVE_TEMA);
+    else localStorage.setItem(CLAVE_TEMA, tema);
+  } catch {
+    // Sin guardar, dura lo que dure la pestaña.
+  }
+}
+
 // El gasto a medio escribir de cada viaje. Solo en este móvil.
 const CLAVE_BORRADOR = "saldocero-borrador";
 

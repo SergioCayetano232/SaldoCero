@@ -11,6 +11,7 @@ import { estaCerrado } from "./cerrar";
 import { reducirFoto } from "./tickets";
 import { avisoDeArranque, codigoQueAbrir, hayQueOlvidar } from "./arranque";
 import { tituloDePestana } from "./titulo";
+import { temaGuardado, siguienteTema, temaDe, temaQueToca } from "./tema";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
 import Viajeros from "./componentes/Viajeros";
@@ -515,7 +516,46 @@ function Pie() {
       <span>Sin cuentas ni contraseñas</span>
       <span className="pie-punto">·</span>
       <span>Solo entra quien tiene el código</span>
+      <BotonTema />
     </footer>
+  );
+}
+
+// El color de la barra del móvil, a juego con el tema.
+const COLOR_BARRA = { claro: "#0e7c7b", oscuro: "#0b1518" };
+
+function BotonTema() {
+  const [tema, setTema] = useState(() => temaGuardado(datos.leerTema()));
+
+  useEffect(() => {
+    const sistema = matchMedia("(prefers-color-scheme: dark)");
+
+    function pintar() {
+      const toca = temaQueToca(tema, sistema.matches);
+      document.documentElement.dataset.tema = toca;
+      for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
+        meta.content = COLOR_BARRA[toca];
+      }
+    }
+
+    pintar();
+    // En automático, si el móvil cambia a oscuro al anochecer, la app también.
+    sistema.addEventListener("change", pintar);
+    return () => sistema.removeEventListener("change", pintar);
+  }, [tema]);
+
+  function cambiar() {
+    const nuevo = siguienteTema(tema);
+    setTema(nuevo);
+    datos.guardarTema(nuevo);
+  }
+
+  const { icono, nombre } = temaDe(tema);
+
+  return (
+    <button className="pie-tema" onClick={cambiar} title="Cambiar el tema">
+      <span aria-hidden="true">{icono}</span> Tema: {nombre.toLowerCase()}
+    </button>
   );
 }
 

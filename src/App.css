@@ -136,15 +136,13 @@
   pointer-events: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  .tarjeta::before {
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.18),
-      transparent
-    );
-  }
+:root[data-tema="oscuro"] .tarjeta::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.18),
+    transparent
+  );
 }
 
 /* Al pasar por encima se levanta un poquito. Lo justo para que se note. */
@@ -3386,21 +3384,19 @@ button:active {
 }
 
 /* En oscuro el fondo negro no destaca: se le da la vuelta. */
-@media (prefers-color-scheme: dark) {
-  .deshacer {
-    background-color: var(--papel);
-    color: var(--tinta);
-    border: 1px solid var(--linea);
-  }
+:root[data-tema="oscuro"] .deshacer {
+  background-color: var(--papel);
+  color: var(--tinta);
+  border: 1px solid var(--linea);
+}
 
-  .deshacer button {
-    background-color: var(--teal-50);
-    color: var(--teal-700);
-  }
+:root[data-tema="oscuro"] .deshacer button {
+  background-color: var(--teal-50);
+  color: var(--teal-700);
+}
 
-  .deshacer button:hover {
-    background-color: var(--teal-100);
-  }
+:root[data-tema="oscuro"] .deshacer button:hover {
+  background-color: var(--teal-100);
 }
 
 /* ===== Instalar la app ===== */
@@ -3463,6 +3459,22 @@ button:active {
 
 .pie-punto {
   opacity: 0.4;
+}
+
+.pie-tema {
+  flex-basis: 100%;
+  margin-top: 6px;
+  background: none;
+  border: none;
+  font: inherit;
+  color: var(--tinta-suave);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.pie-tema:hover {
+  color: var(--teal-600);
 }
 
 @media (max-width: 560px) {
