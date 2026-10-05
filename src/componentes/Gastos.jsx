@@ -7,6 +7,7 @@ import { hoy, comoTitulo, porDias } from "../fechas";
 import { sugerirConceptos } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
 import { ordenarGastos, ORDENES, POR_DIAS } from "../ordenar";
+import { conPropina, PROPINAS } from "../propina";
 import { gastoAlFormulario, repetirGasto } from "../repetir";
 import { leerImporte, loQueFalta, cuadra, importesAPartes, partesAImportes } from "../importes";
 import { BOTE } from "../bote";
@@ -72,8 +73,29 @@ function Gastos({
   // Lo escrito puede ser una suma ("12,5+8"): esto es ya el número. NaN si no se entiende.
   const importeLeido = leerSuma(importe) ?? NaN;
   const campoImporte = useRef(null);
+  // La propina puesta y el importe de antes, para quitarla o cambiarla sin que se acumulen.
+  const [propina, setPropina] = useState(null);
+
+  function escribirImporte(texto) {
+    setImporte(texto);
+    setPropina(null);
+  }
+
+  function alternarPropina(porcentaje) {
+    const sin = propina?.sin ?? importe;
+    if (propina?.porcentaje === porcentaje) {
+      escribirImporte(sin);
+      return;
+    }
+
+    const con = conPropina(sin, porcentaje);
+    if (!con) return;
+    setImporte(con);
+    setPropina({ porcentaje, sin });
+  }
 
   function otroSumando() {
+    setPropina(null);
     setImporte(`${importe.trim()}+`);
     campoImporte.current?.focus();
   }
@@ -166,7 +188,7 @@ function Gastos({
   }
 
   function limpiar() {
-    setImporte("");
+    escribirImporte("");
     setMoneda(monedaViaje);
     setTasaAMano(null);
     setConcepto("");
@@ -189,7 +211,7 @@ function Gastos({
 
   function rellenar(f) {
     setPagadorId(f.pagadorId);
-    setImporte(f.importe);
+    escribirImporte(f.importe);
     setMoneda(f.moneda);
     setTasaAMano(f.tasaAMano);
     setConcepto(f.concepto);
@@ -392,7 +414,7 @@ function Gastos({
                     inputMode="decimal"
                     placeholder="Importe"
                     value={importe}
-                    onChange={(e) => setImporte(e.target.value)}
+                    onChange={(e) => escribirImporte(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") guardar();
                     }}
@@ -435,6 +457,23 @@ function Gastos({
                   title="¿Qué día fue?"
                 />
               </div>
+
+              {/* Solo en lo de comer, que es donde se deja. */}
+              {categoria === "comida" && importeLeido > 0 && (
+                <div className="propinas">
+                  <span>Propina</span>
+                  {PROPINAS.map((p) => (
+                    <button
+                      key={p}
+                      className={`boton-propina ${propina?.porcentaje === p ? "activo" : ""}`}
+                      onClick={() => alternarPropina(p)}
+                      aria-pressed={propina?.porcentaje === p}
+                    >
+                      +{p} %
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {esSuma(importe) && (
                 <p className={`resultado-suma ${isNaN(importeLeido) ? "suma-mal" : ""}`} role="status">

@@ -775,6 +775,41 @@ button:active {
   background-color: var(--teal-100);
 }
 
+.propinas {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--tinta-suave);
+}
+
+.propinas > span {
+  margin-right: 2px;
+}
+
+.boton-propina {
+  padding: 4px 12px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-pastilla);
+  background-color: var(--papel);
+  color: var(--tinta-suave);
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.boton-propina:hover {
+  border-color: var(--teal-300);
+  color: var(--teal-600);
+}
+
+.boton-propina.activo {
+  border-color: var(--teal-500);
+  background-color: var(--teal-500);
+  color: white;
+  font-weight: 600;
+}
+
 .resultado-suma {
   margin-top: -2px;
   font-size: 13px;
