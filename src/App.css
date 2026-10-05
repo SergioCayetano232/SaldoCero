@@ -892,6 +892,17 @@ button:active {
   flex-shrink: 0;
 }
 
+.viaje-dia {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tinta-suave);
+  border: 1px solid var(--linea);
+  padding: 3px 8px;
+  border-radius: var(--radio-pastilla);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 /* ===== Fechas ===== */
 .campo-fecha {
   width: auto;

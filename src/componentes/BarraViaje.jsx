@@ -2,6 +2,8 @@ import { lazy, Suspense, useCallback, useState } from "react";
 import { copiarAlPortapapeles, enlaceDelViaje, invitacion, invitar } from "../compartir";
 import NombreEditable from "./NombreEditable";
 import { textoCerrado } from "../cerrar";
+import { textoDuracion } from "../duracion";
+import { hoy } from "../fechas";
 
 // La librería del QR pesa, y casi nadie lo abre: se baja solo al pulsar.
 const QRViaje = lazy(() => import("./QRViaje"));
@@ -19,6 +21,7 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir }) {
   const [conQR, setConQR] = useState(false);
   // Siempre la misma: si cambiara, la ventana robaría el foco en cada refresco.
   const cerrarQR = useCallback(() => setConQR(false), []);
+  const duracion = textoDuracion(viaje.gastos ?? [], hoy(), cerrado);
 
   async function copiarCodigo() {
     const hecho = await copiarAlPortapapeles(viaje.codigo);
@@ -52,6 +55,7 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir }) {
             titulo="Cambiar el nombre del viaje"
           />
         )}
+        {duracion && <span className="viaje-dia">{duracion}</span>}
         <span className="viaje-moneda">{viaje.moneda ?? "EUR"}</span>
         <button className="boton-salir" onClick={onSalir} title="Salir del viaje">
           ✕
