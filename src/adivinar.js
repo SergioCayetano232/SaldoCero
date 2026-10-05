@@ -44,7 +44,11 @@ export function adivinarCategoria(concepto) {
   const palabras = normalizar(concepto).split(/[^a-z0-9]+/);
 
   for (const palabra of palabras) {
-    const id = CATEGORIA_DE.get(palabra);
+    // En plural también: "cafés", "taxis", "hoteles".
+    const id =
+      CATEGORIA_DE.get(palabra) ??
+      CATEGORIA_DE.get(palabra.replace(/s$/, "")) ??
+      CATEGORIA_DE.get(palabra.replace(/es$/, ""));
     if (id) return id;
   }
 

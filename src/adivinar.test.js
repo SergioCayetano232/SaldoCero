@@ -17,6 +17,14 @@ describe("adivinarCategoria", () => {
     expect(adivinarCategoria("Cabaña")).toBe("alojamiento");
   });
 
+  it("en plural también", () => {
+    expect(adivinarCategoria("Cafés")).toBe("comida");
+    expect(adivinarCategoria("Taxis")).toBe("transporte");
+    expect(adivinarCategoria("Hoteles")).toBe("alojamiento");
+    expect(adivinarCategoria("Dos pensiones")).toBe("alojamiento");
+    expect(adivinarCategoria("Cenas")).toBe("comida");
+  });
+
   it("manda la primera palabra que reconoce", () => {
     expect(adivinarCategoria("Cena en el hotel")).toBe("comida");
     expect(adivinarCategoria("Taxi al restaurante")).toBe("transporte");
