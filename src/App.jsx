@@ -12,6 +12,7 @@ import { reducirFoto } from "./tickets";
 import { avisoDeArranque, codigoQueAbrir, hayQueOlvidar } from "./arranque";
 import { tituloDePestana } from "./titulo";
 import { temaGuardado, siguienteTema, temaDe, temaQueToca } from "./tema";
+import { hayQueSubir } from "./arriba";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
 import Viajeros from "./componentes/Viajeros";
@@ -462,6 +463,7 @@ function App() {
         </div>
       )}
 
+      <BotonArriba />
       <BotonInstalar />
       <Pie />
     </div>
@@ -503,6 +505,34 @@ function BotonInstalar() {
     <button className="boton-instalar" onClick={instalar}>
       <span className="instalar-icono">⬇</span>
       Instalar en el móvil
+    </button>
+  );
+}
+
+// En el móvil, con muchos gastos, el formulario queda muy lejos.
+function BotonArriba() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    function alBajar() {
+      setVisible(hayQueSubir(window.scrollY, window.innerHeight));
+    }
+
+    alBajar();
+    window.addEventListener("scroll", alBajar, { passive: true });
+    return () => window.removeEventListener("scroll", alBajar);
+  }, []);
+
+  if (!visible) return null;
+
+  function subir() {
+    const quieto = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: quieto ? "auto" : "smooth" });
+  }
+
+  return (
+    <button className="boton-arriba" onClick={subir} aria-label="Volver arriba" title="Volver arriba">
+      ↑
     </button>
   );
 }

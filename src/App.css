@@ -3437,6 +3437,38 @@ button:active {
   animation: none;
 }
 
+.boton-arriba {
+  position: fixed;
+  right: 16px;
+  bottom: 20px;
+  z-index: 40;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--cristal-borde);
+  background-color: var(--cristal);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  color: var(--teal-700);
+  font-size: 20px;
+  font-weight: 600;
+  box-shadow: var(--sombra-lg);
+  animation: aparecer-creciendo var(--medio) var(--curva-muelle);
+  transition: transform var(--rapido) var(--curva-suave), bottom var(--medio) var(--curva-suave);
+}
+
+.boton-arriba:hover {
+  transform: translateY(-2px);
+}
+
+/* Con el aviso de deshacer abajo, se aparta para no taparlo en el móvil. */
+.deshacer ~ .boton-arriba {
+  bottom: 84px;
+}
+
 /* ===== Pie ===== */
 .pie {
   display: flex;
