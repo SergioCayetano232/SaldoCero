@@ -2527,6 +2527,19 @@ button:active {
   font-variant-numeric: tabular-nums;
 }
 
+/* Se puede tocar para copiarla: que se note al pasar, sin parecer un botón. */
+button.pago-cantidad {
+  padding: 2px 6px;
+  margin: -2px -6px;
+  border-radius: var(--radio-sm);
+  background: none;
+  font-size: inherit;
+}
+
+button.pago-cantidad:hover {
+  background-color: var(--teal-50);
+}
+
 /* ===== Foto del ticket ===== */
 .fila-ticket {
   display: flex;

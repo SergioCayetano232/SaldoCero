@@ -52,3 +52,10 @@ export function lineaDeCobro(cobro, nombre = null) {
   const como = nombre ? `${tipo} ${tipo === "Bizum" ? "a" : "de"} ${nombre}` : `Mi ${tipo}`;
   return `${como}: ${cobroComoTexto(cobro)}`;
 }
+
+// La cifra para pegar en Bizum o en el banco: con coma, sin símbolo y sin
+// ",00" si es redonda, que hay apps que no lo tragan.
+export function cantidadParaPegar(cantidad) {
+  const redondo = Math.round(cantidad * 100) / 100;
+  return Number.isInteger(redondo) ? String(redondo) : redondo.toFixed(2).replace(".", ",");
+}

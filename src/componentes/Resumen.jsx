@@ -14,7 +14,7 @@ import { conMoneda } from "../monedas";
 import { resumenEnTexto, copiarAlPortapapeles, descargarResumen, descargarGastos } from "../compartir";
 import { gastosEnCSV } from "../exportar";
 import { mensajeDeCobro, enlaceWhatsApp } from "../cobrar";
-import { cobroDe, cobroComoTexto } from "../cobro";
+import { cobroDe, cobroComoTexto, cantidadParaPegar } from "../cobro";
 import { BOTE, sinBote } from "../bote";
 import { gastoPorCategoria } from "../categorias";
 import { importeDeGasto, parteDe } from "../calculos";
@@ -52,6 +52,8 @@ function Resumen({
   const fiestas = useRef(0);
   // De qué pago acabas de copiar el Bizum, para decírtelo un momento.
   const [cobroCopiado, setCobroCopiado] = useState(null);
+  // Y lo mismo con la cifra, que es lo otro que hay que escribir en el Bizum.
+  const [cantidadCopiada, setCantidadCopiada] = useState(null);
   // De quién es el desglose. null = del viaje entero.
   const [persona, setPersona] = useState(null);
   const total = calcularTotal(gastos);
@@ -109,6 +111,13 @@ function Resumen({
     const hecho = await copiarAlPortapapeles(cobro.valor);
     setCobroCopiado(hecho ? clave : null);
     setTimeout(() => setCobroCopiado((c) => (c === clave ? null : c)), 2000);
+  }
+
+  async function copiarCantidad(pago) {
+    const clave = `${pago.deId}-${pago.aId}`;
+    const hecho = await copiarAlPortapapeles(cantidadParaPegar(pago.cantidad));
+    setCantidadCopiada(hecho ? clave : null);
+    setTimeout(() => setCantidadCopiada((c) => (c === clave ? null : c)), 2000);
   }
 
   function cobroDeQuienCobra(pago) {
@@ -328,9 +337,19 @@ function Resumen({
                   <AvatarDe id={pago.aId} nombre={pago.a} colores={colores} />
                   <strong>{pago.a}</strong>
                   <span className="pago-final">
-                    <span className="pago-cantidad">
-                      {conMoneda(pago.cantidad, monedaViaje)}
-                    </span>
+                    {pago.saldado ? (
+                      <span className="pago-cantidad">{conMoneda(pago.cantidad, monedaViaje)}</span>
+                    ) : (
+                      <button
+                        className="pago-cantidad"
+                        onClick={() => copiarCantidad(pago)}
+                        title="Copiar la cifra"
+                      >
+                        {cantidadCopiada === `${pago.deId}-${pago.aId}`
+                          ? "✓ copiado"
+                          : conMoneda(pago.cantidad, monedaViaje)}
+                      </button>
+                    )}
 
                     {/* Al bote no se le manda un WhatsApp. */}
                     {!pago.saldado && pago.deId !== BOTE && pago.aId !== BOTE && (

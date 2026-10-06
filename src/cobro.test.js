@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { leerCobro, cobroComoTexto, cobroDe, lineaDeCobro } from "./cobro";
+import { leerCobro, cobroComoTexto, cobroDe, lineaDeCobro, cantidadParaPegar } from "./cobro";
 
 // Un IBAN de ejemplo que pasa el control.
 const IBAN = "ES9121000418450200051332";
@@ -76,5 +76,21 @@ describe("lineaDeCobro", () => {
 
   it("sin cobro, nada", () => {
     expect(lineaDeCobro(null, "Ana")).toBeNull();
+  });
+});
+
+describe("cantidadParaPegar", () => {
+  it("con coma y dos decimales", () => {
+    expect(cantidadParaPegar(12.5)).toBe("12,50");
+    expect(cantidadParaPegar(0.07)).toBe("0,07");
+  });
+
+  it("si es redonda, sin decimales", () => {
+    expect(cantidadParaPegar(30)).toBe("30");
+  });
+
+  it("sin colas de decimales de las cuentas", () => {
+    expect(cantidadParaPegar(33.333333)).toBe("33,33");
+    expect(cantidadParaPegar(19.999999)).toBe("20");
   });
 });
