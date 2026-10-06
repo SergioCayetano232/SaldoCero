@@ -372,6 +372,23 @@ button:active {
   animation: barrido 0.7s var(--curva-suave);
 }
 
+/* Recién guardado: en verde y con un saltito, un par de segundos. */
+.formulario-gasto > button.hecho {
+  background: var(--verde);
+  animation: saltito 0.45s var(--curva-muelle);
+}
+
+:root[data-tema="oscuro"] .formulario-gasto > button.hecho {
+  color: var(--fondo);
+  font-weight: 600;
+}
+
+@keyframes saltito {
+  from {
+    transform: scale(0.96);
+  }
+}
+
 /* ===== Listas ===== */
 .lista {
   list-style: none;

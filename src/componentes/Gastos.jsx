@@ -20,6 +20,7 @@ import { posiblesRepetidos } from "../repetidos";
 import { leerSuma, esSuma } from "../sumas";
 import { pagadorPorDefecto } from "../pagador";
 import { pareceRaro } from "../raros";
+import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 
@@ -133,6 +134,17 @@ function Gastos({
   const [repetido, setRepetido] = useState(null);
   const [raro, setRaro] = useState(null);
   const formulario = useRef(null);
+  // Lo que se acaba de guardar, mientras el botón lo cuenta.
+  const [hecho, setHecho] = useState(null);
+  const relojHecho = useRef(null);
+
+  useEffect(() => () => clearTimeout(relojHecho.current), []);
+
+  function avisarHecho(como) {
+    clearTimeout(relojHecho.current);
+    setHecho(como);
+    relojHecho.current = setTimeout(() => setHecho(null), DURA_EL_AVISO);
+  }
 
   // Cada cambio en un gasto nuevo se guarda en el móvil. Al editar no: ese ya está guardado.
   useEffect(() => {
@@ -392,14 +404,18 @@ function Gastos({
       }
     }
 
+    const como = editando ? "editado" : "anadido";
+    let guardando;
     if (editando) {
-      onEditar(editando, gasto);
+      guardando = onEditar(editando, gasto);
       // Terminada la edición, el formulario vuelve a estar en blanco.
       setPagadorId(porDefecto);
     } else {
       // Dejamos el pagador puesto por si encadena varios gastos.
-      onAnadir(gasto);
+      guardando = onAnadir(gasto);
     }
+    // Solo si ha ido bien: si falla, ya sale el error arriba.
+    Promise.resolve(guardando).then((bien) => bien && avisarHecho(como));
 
     const queda = monedaDelSiguiente(siguiente, { moneda, tasaAMano }, Boolean(editando));
     setSiguiente(queda);
@@ -874,10 +890,12 @@ function Gastos({
                   )}
 
                   <button
+                    key={hecho ?? "nada"}
+                    className={hecho ? "hecho" : ""}
                     onClick={() => guardar()}
                     disabled={marcados.length === 0 || typeof tasa !== "number" || descuadrado || Boolean(avisoRepetido) || Boolean(avisoRaro)}
                   >
-                    Añadir gasto
+                    {textoAlGuardar(hecho)}
                   </button>
                 </>
               )}
