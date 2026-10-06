@@ -21,7 +21,7 @@ import { leerSuma, esSuma } from "../sumas";
 import { pagadorPorDefecto } from "../pagador";
 import { pareceRaro } from "../raros";
 import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
-import { esOrdenador } from "../teclado";
+import { esAtajoBuscar, esOrdenador } from "../teclado";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 
@@ -201,6 +201,22 @@ function Gastos({
   const deQuien = filtrando ? viajeros.find((v) => v.id === filtros.viajeroId) : null;
   const esYo = Boolean(deQuien) && deQuien.id === soy;
   const puedoVerLoMio = viajeros.some((v) => v.id === soy);
+
+  const buscador = useRef(null);
+
+  useEffect(() => {
+    if (!puedeFiltrar) return;
+
+    function alPulsar(e) {
+      if (!esAtajoBuscar(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      // Si no, la "/" se escribe dentro al coger el foco.
+      e.preventDefault();
+      buscador.current?.focus();
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [puedeFiltrar]);
 
   function filtrar(cambio) {
     setFiltros({ ...filtros, ...cambio });
@@ -921,7 +937,10 @@ function Gastos({
                 <input
                   type="search"
                   className="filtro-buscar"
-                  placeholder="Buscar un gasto"
+                  ref={buscador}
+                  // El atajo solo se cuenta donde hay teclado.
+                  placeholder={esOrdenador() ? "Buscar un gasto (pulsa /)" : "Buscar un gasto"}
+                  aria-keyshortcuts="/"
                   aria-label="Buscar un gasto"
                   value={filtros.texto}
                   onChange={(e) => filtrar({ texto: e.target.value })}
