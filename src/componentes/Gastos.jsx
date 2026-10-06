@@ -21,6 +21,7 @@ import { leerSuma, esSuma } from "../sumas";
 import { pagadorPorDefecto } from "../pagador";
 import { pareceRaro } from "../raros";
 import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
+import { esOrdenador } from "../teclado";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 
@@ -420,6 +421,8 @@ function Gastos({
     const queda = monedaDelSiguiente(siguiente, { moneda, tasaAMano }, Boolean(editando));
     setSiguiente(queda);
     limpiar(queda);
+    // Para ir encadenando gastos sin tocar el ratón.
+    if (como === "anadido" && esOrdenador()) campoImporte.current?.focus({ preventScroll: true });
   }
 
   function cancelar() {
