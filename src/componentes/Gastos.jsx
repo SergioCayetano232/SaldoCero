@@ -3,7 +3,7 @@ import { calcularTotal, importeDeGasto, participantesDeGasto } from "../calculos
 import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, tasaComoTexto } from "../monedas";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe } from "../categorias";
 import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS } from "../filtros";
-import { hoy, comoTitulo, porDias, diasRapidos } from "../fechas";
+import { hoy, comoTitulo, porDias, diasRapidos, cuantosGastos } from "../fechas";
 import { sugerirConceptos } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
 import { ordenarGastos, ORDENES, POR_DIAS } from "../ordenar";
@@ -1008,7 +1008,10 @@ function Gastos({
                 {/* El día solo se pone si el viaje dura más de uno. */}
                 {dias.length > 1 && (
                   <p className="dia-titulo">
-                    {dia.fecha ? comoTitulo(dia.fecha) : "Sin fecha"}
+                    <span>
+                      {dia.fecha ? comoTitulo(dia.fecha) : "Sin fecha"}
+                      <span className="dia-cuantos"> · {cuantosGastos(dia.gastos.length)}</span>
+                    </span>
                     <span className="dia-total">
                       {conMoneda(totalDelDia(dia), monedaViaje)}
                     </span>

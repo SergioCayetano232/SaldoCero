@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { hoy, ayer, diasRapidos, enCorto, comoTitulo, porDias } from "./fechas";
+import { hoy, ayer, diasRapidos, enCorto, comoTitulo, porDias, cuantosGastos } from "./fechas";
 
 describe("hoy", () => {
   it("da la fecha en el formato de la base de datos", () => {
@@ -112,5 +112,15 @@ describe("diasRapidos", () => {
       { nombre: "Ayer", fecha: "2026-10-05" },
     ]);
     vi.useRealTimers();
+  });
+});
+
+describe("cuantosGastos", () => {
+  it("uno en singular", () => {
+    expect(cuantosGastos(1)).toBe("1 gasto");
+  });
+
+  it("varios en plural", () => {
+    expect(cuantosGastos(4)).toBe("4 gastos");
   });
 });

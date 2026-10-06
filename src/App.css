@@ -972,6 +972,14 @@ button:active {
   color: var(--tinta-tenue);
 }
 
+/* Más flojo que el día: es un dato de pasada. */
+.dia-cuantos {
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.8;
+}
+
 .dia-total {
   font-family: var(--fuente-titulo);
   font-size: 13px;

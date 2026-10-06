@@ -51,3 +51,8 @@ export function porDias(gastos) {
     .sort((a, b) => b[0].localeCompare(a[0]))
     .map(([fecha, suyos]) => ({ fecha, gastos: suyos }));
 }
+
+// Lo que lleva cada día, al lado de su título.
+export function cuantosGastos(n) {
+  return n === 1 ? "1 gasto" : `${n} gastos`;
+}
