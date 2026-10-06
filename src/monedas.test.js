@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { cambio, esAMano, leerTasa, leerImporte, tasaDeGasto, tasaComoTexto, conMoneda } from "./monedas";
+import { cambio, esAMano, leerTasa, leerImporte, tasaDeGasto, tasaComoTexto, conMoneda, monedaDelSiguiente } from "./monedas";
 
 describe("leerTasa", () => {
   it("vale con coma o con punto", () => {
@@ -81,5 +81,30 @@ describe("leerImporte", () => {
     expect(leerImporte("0,004")).toBeNull();
     expect(leerImporte("")).toBeNull();
     expect(leerImporte("-5")).toBeNull();
+  });
+});
+
+describe("monedaDelSiguiente", () => {
+  const antes = { moneda: "EUR", tasaAMano: null };
+
+  it("tras apuntar uno, se queda la moneda que usaste", () => {
+    expect(monedaDelSiguiente(antes, { moneda: "USD", tasaAMano: null }, false)).toEqual({
+      moneda: "USD",
+      tasaAMano: null,
+    });
+  });
+
+  it("y el cambio escrito a mano, que sigue valiendo", () => {
+    expect(monedaDelSiguiente(antes, { moneda: "MAD", tasaAMano: "0,092" }, false)).toEqual({
+      moneda: "MAD",
+      tasaAMano: "0,092",
+    });
+  });
+
+  it("al editar uno, vuelve a la de antes", () => {
+    expect(monedaDelSiguiente({ moneda: "MAD", tasaAMano: "0,092" }, { moneda: "EUR", tasaAMano: null }, true)).toEqual({
+      moneda: "MAD",
+      tasaAMano: "0,092",
+    });
   });
 });

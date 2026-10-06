@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { calcularTotal, importeDeGasto, participantesDeGasto } from "../calculos";
-import { MONEDAS, cambio, conMoneda, leerTasa, tasaComoTexto } from "../monedas";
+import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, tasaComoTexto } from "../monedas";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe } from "../categorias";
 import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS } from "../filtros";
 import { hoy, comoTitulo, porDias } from "../fechas";
@@ -72,6 +72,8 @@ function Gastos({
   const [cambioTraido, setCambioTraido] = useState(null);
   // El cambio escrito a mano, tal cual. null = vale el de la API.
   const [tasaAMano, setTasaAMano] = useState(null);
+  // Con la que empieza el formulario en blanco: la del último gasto que apuntaste.
+  const [siguiente, setSiguiente] = useState({ moneda: monedaViaje, tasaAMano: null });
 
   // Si la API no lo sabe, no queda otra que escribirlo.
   const sinCambio = cambioTraido?.moneda === moneda && cambioTraido.tasa === null;
@@ -229,11 +231,11 @@ function Gastos({
     setParticipantes(nuevos);
   }
 
-  function limpiar() {
+  function limpiar(queda = siguiente) {
     setRecuperado(false);
     escribirImporte("");
-    setMoneda(monedaViaje);
-    setTasaAMano(null);
+    setMoneda(queda.moneda);
+    setTasaAMano(queda.tasaAMano);
     setConcepto("");
     setCategoria(POR_DEFECTO);
     setCategoriaAMano(false);
@@ -399,7 +401,9 @@ function Gastos({
       onAnadir(gasto);
     }
 
-    limpiar();
+    const queda = monedaDelSiguiente(siguiente, { moneda, tasaAMano }, Boolean(editando));
+    setSiguiente(queda);
+    limpiar(queda);
   }
 
   function cancelar() {

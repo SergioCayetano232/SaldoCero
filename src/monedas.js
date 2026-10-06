@@ -108,3 +108,9 @@ export function tasaDeGasto(gasto) {
 export function tasaComoTexto(tasa) {
   return String(Number(tasa.toFixed(6))).replace(".", ",");
 }
+
+// Después de apuntar uno, el siguiente suele ir igual: en Marruecos se paga todo
+// en dírhams. Al editar uno viejo no, que ese puede ser de otro día y otra moneda.
+export function monedaDelSiguiente(antes, guardada, editando) {
+  return editando ? antes : { moneda: guardada.moneda, tasaAMano: guardada.tasaAMano };
+}
