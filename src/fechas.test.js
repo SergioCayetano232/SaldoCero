@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { hoy, enCorto, comoTitulo, porDias } from "./fechas";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { hoy, ayer, diasRapidos, enCorto, comoTitulo, porDias } from "./fechas";
 
 describe("hoy", () => {
   it("da la fecha en el formato de la base de datos", () => {
@@ -79,5 +79,38 @@ describe("porDias", () => {
   it("no se pierde ni se duplica ningún gasto", () => {
     const total = porDias(gastos).reduce((t, d) => t + d.gastos.length, 0);
     expect(total).toBe(gastos.length);
+  });
+});
+
+describe("ayer", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("es el día de antes, aunque cambie el mes", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-03-01T10:00:00"));
+
+    expect(ayer()).toBe("2026-02-28");
+  });
+
+  it("y el año", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T00:30:00"));
+
+    expect(ayer()).toBe("2025-12-31");
+  });
+});
+
+describe("diasRapidos", () => {
+  it("hoy primero y luego ayer", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-06T18:00:00"));
+
+    expect(diasRapidos()).toEqual([
+      { nombre: "Hoy", fecha: "2026-10-06" },
+      { nombre: "Ayer", fecha: "2026-10-05" },
+    ]);
+    vi.useRealTimers();
   });
 });

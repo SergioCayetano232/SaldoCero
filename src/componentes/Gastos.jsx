@@ -3,7 +3,7 @@ import { calcularTotal, importeDeGasto, participantesDeGasto } from "../calculos
 import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, tasaComoTexto } from "../monedas";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe } from "../categorias";
 import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS } from "../filtros";
-import { hoy, comoTitulo, porDias } from "../fechas";
+import { hoy, comoTitulo, porDias, diasRapidos } from "../fechas";
 import { sugerirConceptos } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
 import { ordenarGastos, ORDENES, POR_DIAS } from "../ordenar";
@@ -519,6 +519,19 @@ function Gastos({
                   onChange={(e) => setFecha(e.target.value || hoy())}
                   title="¿Qué día fue?"
                 />
+              </div>
+
+              <div className="dias-rapidos">
+                {diasRapidos().map((d) => (
+                  <button
+                    key={d.nombre}
+                    className="pastilla-interruptor"
+                    onClick={() => setFecha(d.fecha)}
+                    aria-pressed={fecha === d.fecha}
+                  >
+                    {d.nombre}
+                  </button>
+                ))}
               </div>
 
               {/* Solo en lo de comer, que es donde se deja. */}

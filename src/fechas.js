@@ -5,6 +5,20 @@ export function hoy() {
   return new Date().toLocaleDateString("sv-SE");
 }
 
+export function ayer() {
+  const dia = new Date();
+  dia.setDate(dia.getDate() - 1);
+  return dia.toLocaleDateString("sv-SE");
+}
+
+// Casi todo es de hoy o de ayer: para esos no hace falta abrir el calendario.
+export function diasRapidos() {
+  return [
+    { nombre: "Hoy", fecha: hoy() },
+    { nombre: "Ayer", fecha: ayer() },
+  ];
+}
+
 // Un día suelto, en corto: "vie, 11 sept".
 export function enCorto(fecha) {
   return new Date(`${fecha}T12:00:00`).toLocaleDateString("es-ES", {
@@ -16,12 +30,8 @@ export function enCorto(fecha) {
 
 // El título de cada grupo de la lista: "Hoy", "Ayer" o el día entero.
 export function comoTitulo(fecha) {
-  const dia = hoy();
-  if (fecha === dia) return "Hoy";
-
-  const ayer = new Date();
-  ayer.setDate(ayer.getDate() - 1);
-  if (fecha === ayer.toLocaleDateString("sv-SE")) return "Ayer";
+  if (fecha === hoy()) return "Hoy";
+  if (fecha === ayer()) return "Ayer";
 
   return enCorto(fecha);
 }

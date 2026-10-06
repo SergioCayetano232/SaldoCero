@@ -781,12 +781,19 @@ button:active {
   color: var(--tinta-suave);
 }
 
-.propinas {
+.propinas,
+.dias-rapidos {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 13px;
   color: var(--tinta-suave);
+}
+
+/* Debajo de la fecha, que es de lo que va. */
+.dias-rapidos {
+  justify-content: flex-end;
+  margin-top: -2px;
 }
 
 .propinas > span {
