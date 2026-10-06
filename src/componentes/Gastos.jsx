@@ -8,7 +8,7 @@ import { sugerirConceptos } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
 import { ordenarGastos, ORDENES, POR_DIAS } from "../ordenar";
 import { conPropina, PROPINAS } from "../propina";
-import { borradorQueVale, hayAlgoEscrito } from "../borrador";
+import { borradorQueVale, hayAlgoEscrito, hayAlgoQueBorrar } from "../borrador";
 import * as datos from "../datos";
 import { gastoAlFormulario, repetirGasto } from "../repetir";
 import { leerImporte, loQueFalta, cuadra, importesAPartes, partesAImportes } from "../importes";
@@ -888,6 +888,16 @@ function Gastos({
                       </div>
                     </div>
                   )}
+
+                  {/* Con el aviso de lo que dejaste a medias ya está su Descartar. */}
+                  {!recuperado &&
+                    hayAlgoQueBorrar({ importe, concepto, nota, foto, participantes, repartoAbierto, fecha }, hoy()) && (
+                      <p className="borrar-escrito">
+                        <button className="enlace" onClick={cancelar}>
+                          Borrar lo escrito
+                        </button>
+                      </p>
+                    )}
 
                   <button
                     key={hecho ?? "nada"}

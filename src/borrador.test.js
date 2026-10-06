@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { hayAlgoEscrito, borradorQueVale } from "./borrador";
+import { hayAlgoEscrito, hayAlgoQueBorrar, borradorQueVale } from "./borrador";
 import { BOTE } from "./bote";
 
 const viajeros = [{ id: "a", nombre: "Ana" }, { id: "l", nombre: "Luis" }];
@@ -73,5 +73,29 @@ describe("borradorQueVale", () => {
       moneda: "",
       categoriaAMano: false,
     });
+  });
+});
+
+describe("hayAlgoQueBorrar", () => {
+  const dia = "2026-10-06";
+  const enBlanco = { importe: "", concepto: "", nota: "", foto: null, participantes: null, repartoAbierto: false, fecha: dia };
+
+  it("el formulario recién abierto, no", () => {
+    expect(hayAlgoQueBorrar(enBlanco, dia)).toBe(false);
+  });
+
+  it("con algo escrito, sí", () => {
+    expect(hayAlgoQueBorrar({ ...enBlanco, concepto: "Cena" }, dia)).toBe(true);
+  });
+
+  it("también lo que se toca sin escribir", () => {
+    expect(hayAlgoQueBorrar({ ...enBlanco, foto: {} }, dia)).toBe(true);
+    expect(hayAlgoQueBorrar({ ...enBlanco, participantes: ["a"] }, dia)).toBe(true);
+    expect(hayAlgoQueBorrar({ ...enBlanco, repartoAbierto: true }, dia)).toBe(true);
+    expect(hayAlgoQueBorrar({ ...enBlanco, fecha: "2026-10-05" }, dia)).toBe(true);
+  });
+
+  it("el pagador puesto no cuenta: se deja a propósito", () => {
+    expect(hayAlgoQueBorrar({ ...enBlanco, pagadorId: "a" }, dia)).toBe(false);
   });
 });

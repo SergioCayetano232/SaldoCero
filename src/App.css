@@ -798,6 +798,14 @@ button:active {
   color: var(--tinta-suave);
 }
 
+/* Discreto y a la derecha, encima de Añadir: no es lo que se busca. */
+.borrar-escrito {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: -4px;
+  font-size: 13px;
+}
+
 .propinas,
 .dias-rapidos {
   display: flex;

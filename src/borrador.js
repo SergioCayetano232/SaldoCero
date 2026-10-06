@@ -14,6 +14,19 @@ export function hayAlgoEscrito(borrador) {
   return ["importe", "concepto", "nota"].some((campo) => String(borrador?.[campo] ?? "").trim() !== "");
 }
 
+// Para sacar el "Borrar lo escrito": además de lo escrito, cuenta lo que se
+// toca sin teclear (la foto, a quién se reparte, otro día).
+export function hayAlgoQueBorrar(formulario, hoy) {
+  const f = formulario ?? {};
+  return (
+    hayAlgoEscrito(f) ||
+    Boolean(f.foto) ||
+    f.participantes != null ||
+    f.repartoAbierto === true ||
+    (Boolean(f.fecha) && f.fecha !== hoy)
+  );
+}
+
 // Lo guardado, si aún sirve. null si no.
 export function borradorQueVale(guardado, ahora, viajeros) {
   if (!guardado || typeof guardado !== "object") return null;
