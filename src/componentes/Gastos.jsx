@@ -14,7 +14,7 @@ import { gastoAlFormulario, repetirGasto } from "../repetir";
 import { leerImporte, loQueFalta, cuadra, importesAPartes, partesAImportes } from "../importes";
 import { BOTE } from "../bote";
 import { esImagen } from "../tickets";
-import { LARGO_NOTA } from "../notas";
+import { LARGO_NOTA, quedanEnNota } from "../notas";
 import { cuentaDe, textoCuentaDe, textoParteDe } from "../loDeUno";
 import { posiblesRepetidos } from "../repetidos";
 import { leerSuma, esSuma } from "../sumas";
@@ -688,19 +688,27 @@ function Gastos({
               </div>
 
               {notaAbierta && (
-                <input
-                  type="text"
-                  className="campo-nota"
-                  placeholder="Nota (incluye la propina...)"
-                  maxLength={LARGO_NOTA}
-                  value={nota}
-                  // Solo si la acabas de abrir tú, no al subir un gasto para editarlo.
-                  autoFocus={!editando}
-                  onChange={(e) => setNota(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") guardar();
-                  }}
-                />
+                <>
+                  <input
+                    type="text"
+                    className="campo-nota"
+                    placeholder="Nota (incluye la propina...)"
+                    enterKeyHint="done"
+                    maxLength={LARGO_NOTA}
+                    value={nota}
+                    // Solo si la acabas de abrir tú, no al subir un gasto para editarlo.
+                    autoFocus={!editando}
+                    onChange={(e) => setNota(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") guardar();
+                    }}
+                  />
+                  {quedanEnNota(nota) !== null && (
+                    <small className={`nota-quedan ${quedanEnNota(nota) === 0 ? "tope" : ""}`} aria-live="polite">
+                      {quedanEnNota(nota) === 0 ? "No cabe más" : `Quedan ${quedanEnNota(nota)} letras`}
+                    </small>
+                  )}
+                </>
               )}
 
               {sugerencias.length > 0 && (

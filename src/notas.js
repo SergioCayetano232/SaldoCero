@@ -8,3 +8,9 @@ export function limpiarNota(texto) {
   const limpia = String(texto ?? "").replace(/\s+/g, " ").trim().slice(0, LARGO_NOTA);
   return limpia || null;
 }
+
+// Lo que queda solo se enseña cerca del tope; antes sería ruido.
+export function quedanEnNota(texto) {
+  const quedan = LARGO_NOTA - String(texto ?? "").length;
+  return quedan <= 40 ? quedan : null;
+}
