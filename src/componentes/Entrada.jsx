@@ -72,11 +72,11 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
             value={codigo}
             onChange={(e) => setCodigo(e.target.value.toUpperCase())}
             onKeyDown={(e) => {
-              if (e.key === "Enter") onEntrar(codigo);
+              if (e.key === "Enter" && codigo.trim()) onEntrar(codigo);
             }}
             disabled={cargando}
           />
-          <button onClick={() => onEntrar(codigo)} disabled={cargando}>
+          <button onClick={() => onEntrar(codigo)} disabled={cargando || !codigo.trim()}>
             Entrar
           </button>
         </div>
