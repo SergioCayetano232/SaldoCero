@@ -63,6 +63,12 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
             type="text"
             className="campo-codigo"
             placeholder="Código del viaje"
+            // Que el corrector del móvil no convierta el código en una palabra.
+            autoCapitalize="characters"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+            enterKeyHint="go"
             value={codigo}
             onChange={(e) => setCodigo(e.target.value.toUpperCase())}
             onKeyDown={(e) => {
