@@ -955,8 +955,13 @@ function Gastos({
                   placeholder={esOrdenador() ? "Buscar un gasto (pulsa /)" : "Buscar un gasto"}
                   aria-keyshortcuts="/"
                   aria-label="Buscar un gasto"
+                  enterKeyHint="search"
                   value={filtros.texto}
                   onChange={(e) => filtrar({ texto: e.target.value })}
+                  // En el móvil, el teclado tapa justo los resultados.
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") e.target.blur();
+                  }}
                 />
 
                 {puedoVerLoMio && (
