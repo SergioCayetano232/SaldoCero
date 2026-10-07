@@ -511,7 +511,10 @@ function Gastos({
                     type="text"
                     inputMode="decimal"
                     placeholder="Importe"
+                    enterKeyHint="done"
                     value={importe}
+                    // Para corregirlo escribes encima, sin borrar antes.
+                    onFocus={(e) => e.target.select()}
                     onChange={(e) => escribirImporte(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") guardar();
