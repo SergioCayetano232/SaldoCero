@@ -332,6 +332,7 @@ function App() {
         onRenombrar={(nombre) => hacer(() => datos.renombrarViaje(viaje, nombre))}
       />
 
+      <AvisoSinConexion />
       {error && <p className="error">{error}</p>}
 
       <Viajeros
@@ -506,6 +507,30 @@ function BotonInstalar() {
       <span className="instalar-icono">⬇</span>
       Instalar en el móvil
     </button>
+  );
+}
+
+// Mejor saberlo antes de apuntar nada que con el error al guardar.
+function AvisoSinConexion() {
+  const [conRed, setConRed] = useState(() => navigator.onLine);
+
+  useEffect(() => {
+    const ponerConRed = () => setConRed(true);
+    const ponerSinRed = () => setConRed(false);
+    window.addEventListener("online", ponerConRed);
+    window.addEventListener("offline", ponerSinRed);
+    return () => {
+      window.removeEventListener("online", ponerConRed);
+      window.removeEventListener("offline", ponerSinRed);
+    };
+  }, []);
+
+  if (conRed) return null;
+
+  return (
+    <p className="sin-conexion" role="status">
+      📡 Sin conexión: hasta que vuelva no se puede guardar nada.
+    </p>
   );
 }
 

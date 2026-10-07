@@ -1593,6 +1593,18 @@ button:active {
 }
 
 /* ===== Errores ===== */
+.sin-conexion {
+  background-color: var(--naranja-100);
+  border: 1px solid rgba(230, 140, 40, 0.3);
+  color: var(--naranja-500);
+  padding: 11px 16px;
+  border-radius: var(--radio-sm);
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 16px;
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
+}
+
 .error {
   background-color: var(--rojo-fondo);
   border: 1px solid rgba(200, 68, 63, 0.25);
