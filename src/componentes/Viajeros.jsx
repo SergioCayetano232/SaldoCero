@@ -72,6 +72,8 @@ function Viajeros({
           <input
             type="text"
             placeholder="Nombre del viajero"
+            autoCapitalize="words"
+            enterKeyHint="done"
             maxLength={LARGO_MAXIMO}
             className={repetido && !alRenombrar ? "campo-mal" : ""}
             value={nombre}

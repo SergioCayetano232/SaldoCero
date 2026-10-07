@@ -645,6 +645,8 @@ function Gastos({
               <input
                 type="text"
                 placeholder="Concepto (cena, hotel...)"
+                autoCapitalize="sentences"
+                enterKeyHint="done"
                 value={concepto}
                 onChange={(e) => escribirConcepto(e.target.value)}
                 onKeyDown={(e) => {
