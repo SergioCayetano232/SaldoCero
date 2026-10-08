@@ -514,7 +514,9 @@ function Gastos({
                     ref={campoImporte}
                     type="text"
                     inputMode="decimal"
-                    placeholder="Importe"
+                    // "Importe" no cabía en el móvil; la moneda ya va al lado.
+                    placeholder="0,00"
+                    aria-label="Importe"
                     enterKeyHint="done"
                     value={importe}
                     // Para corregirlo escribes encima, sin borrar antes.
