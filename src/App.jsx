@@ -38,6 +38,8 @@ function App() {
   const [borrado, setBorrado] = useState(null);
   // Cuál de los viajeros eres tú. Guardado en este navegador.
   const [soy, setSoy] = useState(null);
+  // El código del viaje que acabas de crear: lo siguiente es meter a la gente.
+  const [recienCreado, setRecienCreado] = useState(null);
 
   useEffect(() => {
     const codigo = codigoDeArranque();
@@ -206,7 +208,9 @@ function App() {
     setCargando(true);
     setError("");
     try {
-      setViaje(await datos.crearViaje(nombre, moneda));
+      const creado = await datos.crearViaje(nombre, moneda);
+      setViaje(creado);
+      setRecienCreado(creado.codigo);
     } catch (fallo) {
       setError(fallo.message);
     } finally {
@@ -236,6 +240,7 @@ function App() {
     window.location.hash = "";
     setViaje(null);
     setSoy(null);
+    setRecienCreado(null);
     setError("");
   }
 
@@ -338,6 +343,7 @@ function App() {
       <Viajeros
         viajeros={viajeros}
         colores={colores}
+        enfocar={recienCreado === viaje.codigo}
         soy={soy}
         onSoyYo={elegirQuienSoy}
         recienLlegados={novedad?.ids}

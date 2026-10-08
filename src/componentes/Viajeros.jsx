@@ -13,6 +13,7 @@ function Viajeros({
   onRenombrar,
   onQuitar,
   onCobro,
+  enfocar = false,
   soy,
   onSoyYo,
 }) {
@@ -82,6 +83,7 @@ function Viajeros({
             autoCapitalize="words"
             enterKeyHint="done"
             maxLength={LARGO_VARIOS}
+            autoFocus={enfocar}
             className={repetido && !alRenombrar ? "campo-mal" : ""}
             value={nombre}
             onChange={(e) => {
