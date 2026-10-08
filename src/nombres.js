@@ -27,3 +27,35 @@ export function nombreRepetido(nombre, viajeros, salvoId = null) {
   const buscado = igualar(nombre);
   return viajeros.find((v) => v.id !== salvoId && igualar(v.nombre) === buscado)?.nombre ?? null;
 }
+
+// En el campo de añadir caben varios, "Ana, Luis, Marta", así que va más largo.
+export const LARGO_VARIOS = 200;
+
+// Para meter a todo el grupo de una vez. Los que ya están (o van dos veces)
+// se apartan, para dejarlos en el campo y que les pongas la inicial.
+export function separarNombres(texto, viajeros) {
+  const nuevos = [];
+  const repetidos = [];
+
+  for (const trozo of String(texto ?? "").split(",")) {
+    const nombre = limpiarNombre(trozo);
+    if (!nombre) continue;
+
+    const yaEsta = nombreRepetido(nombre, [...viajeros, ...nuevos.map((n) => ({ nombre: n }))]);
+    if (yaEsta) repetidos.push({ nombre, yaEsta });
+    else nuevos.push(nombre);
+  }
+
+  return { nuevos, repetidos };
+}
+
+// "Luis ya está en el viaje", o "Luis y Pedro ya están" si eran varios.
+export function avisoDeRepetidos(nombres) {
+  const unicos = [...new Set(nombres)];
+  if (unicos.length === 0) return null;
+
+  const quienes =
+    unicos.length === 1 ? unicos[0] : `${unicos.slice(0, -1).join(", ")} y ${unicos.at(-1)}`;
+  const verbo = unicos.length === 1 ? "ya está" : "ya están";
+  return `${quienes} ${verbo} en el viaje. Ponle la inicial del apellido para no liaros.`;
+}

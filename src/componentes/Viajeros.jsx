@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Avatar from "./Avatar";
 import NombreEditable from "./NombreEditable";
-import { limpiarNombre, nombreRepetido, LARGO_MAXIMO } from "../nombres";
+import { nombreRepetido, separarNombres, avisoDeRepetidos, LARGO_VARIOS } from "../nombres";
 import { leerCobro, cobroDe, cobroComoTexto } from "../cobro";
 
 function Viajeros({
@@ -17,7 +17,7 @@ function Viajeros({
   onSoyYo,
 }) {
   const [nombre, setNombre] = useState("");
-  // El que ya está con ese nombre, si intentas meter otro igual. Y si era
+  // El aviso de los que ya están con ese nombre, si intentas meter otro igual. Y si era
   // añadiendo o renombrando, que solo en lo primero se pone rojo el campo.
   const [repetido, setRepetido] = useState(null);
   const [alRenombrar, setAlRenombrar] = useState(false);
@@ -46,21 +46,25 @@ function Viajeros({
   function renombrar(viajero, nuevo) {
     const yaEsta = nombreRepetido(nuevo, viajeros, viajero.id);
     setAlRenombrar(true);
-    if (yaEsta) return setRepetido(yaEsta);
+    if (yaEsta) return setRepetido(avisoDeRepetidos([yaEsta]));
 
     setRepetido(null);
     onRenombrar(viajero.id, nuevo);
   }
 
-  function anadir() {
-    const nombreLimpio = limpiarNombre(nombre);
-    if (!nombreLimpio) return;
-    const yaEsta = nombreRepetido(nombreLimpio, viajeros);
+  async function anadir() {
+    const { nuevos, repetidos } = separarNombres(nombre, viajeros);
+    const sobran = repetidos.map((r) => r.nombre);
     setAlRenombrar(false);
-    if (yaEsta) return setRepetido(yaEsta);
+    setRepetido(avisoDeRepetidos(repetidos.map((r) => r.yaEsta)));
+    setNombre(sobran.join(", "));
 
-    onAnadir(nombreLimpio);
-    setNombre("");
+    for (const [i, nuevo] of nuevos.entries()) {
+      if (await onAnadir(nuevo)) continue;
+      // Si uno falla, lo que faltaba vuelve al campo para darle otra vez.
+      setNombre([...nuevos.slice(i), ...sobran].join(", "));
+      break;
+    }
   }
 
   return (
@@ -74,10 +78,10 @@ function Viajeros({
         <div className="fila-formulario">
           <input
             type="text"
-            placeholder="Nombre del viajero"
+            placeholder="Nombre, o varios: Ana, Luis…"
             autoCapitalize="words"
             enterKeyHint="done"
-            maxLength={LARGO_MAXIMO}
+            maxLength={LARGO_VARIOS}
             className={repetido && !alRenombrar ? "campo-mal" : ""}
             value={nombre}
             onChange={(e) => {
@@ -93,9 +97,7 @@ function Viajeros({
       )}
 
       {repetido && (
-        <p className="nombre-repetido">
-          {repetido} ya está en el viaje. Ponle la inicial del apellido para no liaros.
-        </p>
+        <p className="nombre-repetido">{repetido}</p>
       )}
 
       {viajeros.length === 0 ? (

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { limpiarNombre, nombreNuevo, nombreRepetido, LARGO_MAXIMO } from "./nombres";
+import { limpiarNombre, nombreNuevo, nombreRepetido, separarNombres, avisoDeRepetidos, LARGO_MAXIMO } from "./nombres";
 
 describe("limpiarNombre", () => {
   it("quita espacios de sobra", () => {
@@ -64,5 +64,61 @@ describe("nombreRepetido", () => {
 
   it("sin viajeros no hay repetidos", () => {
     expect(nombreRepetido("Luis", [])).toBe(null);
+  });
+});
+
+describe("separarNombres", () => {
+  const viajeros = [{ id: "a", nombre: "Ana" }];
+
+  it("uno solo, como siempre", () => {
+    expect(separarNombres("Luis", viajeros)).toEqual({ nuevos: ["Luis"], repetidos: [] });
+  });
+
+  it("varios separados por comas, limpios", () => {
+    expect(separarNombres(" Luis ,Marta,  Javier  López", viajeros).nuevos).toEqual([
+      "Luis",
+      "Marta",
+      "Javier López",
+    ]);
+  });
+
+  it("se salta las comas sueltas", () => {
+    expect(separarNombres("Luis,, ,Marta,", viajeros).nuevos).toEqual(["Luis", "Marta"]);
+  });
+
+  it("aparta los que ya están en el viaje", () => {
+    expect(separarNombres("Luis, ana", viajeros)).toEqual({
+      nuevos: ["Luis"],
+      repetidos: [{ nombre: "ana", yaEsta: "Ana" }],
+    });
+  });
+
+  it("y los que van dos veces en lo escrito", () => {
+    expect(separarNombres("Luis, Marta, Luís", viajeros)).toEqual({
+      nuevos: ["Luis", "Marta"],
+      repetidos: [{ nombre: "Luís", yaEsta: "Luis" }],
+    });
+  });
+
+  it("vacío, nada", () => {
+    expect(separarNombres("  ,  ", viajeros)).toEqual({ nuevos: [], repetidos: [] });
+  });
+});
+
+describe("avisoDeRepetidos", () => {
+  it("uno", () => {
+    expect(avisoDeRepetidos(["Luis"])).toMatch(/^Luis ya está en el viaje\./);
+  });
+
+  it("varios, con su y", () => {
+    expect(avisoDeRepetidos(["Luis", "Ana", "Pedro"])).toMatch(/^Luis, Ana y Pedro ya están en el viaje\./);
+  });
+
+  it("si uno sale dos veces, se nombra una", () => {
+    expect(avisoDeRepetidos(["Luis", "Luis"])).toMatch(/^Luis ya está/);
+  });
+
+  it("sin nadie, nada", () => {
+    expect(avisoDeRepetidos([])).toBeNull();
   });
 });
