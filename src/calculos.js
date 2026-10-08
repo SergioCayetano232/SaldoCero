@@ -125,7 +125,7 @@ export function calcularLeTocaPagar(balances) {
   if (balanceMax - balanceMin < MARGEN) return { igualados: true };
 
   const persona = balances.find((v) => v.balance === balanceMin);
-  return { igualados: false, nombre: persona.nombre };
+  return { igualados: false, id: persona.id, nombre: persona.nombre };
 }
 
 // Quién paga a quién para quedar todos a cero.

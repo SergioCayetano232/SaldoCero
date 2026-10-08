@@ -131,6 +131,12 @@ describe("calcularLeTocaPagar", () => {
     expect(calcularLeTocaPagar(bal).nombre).toBe("Luis");
   });
 
+  // Con el id se sabe si eres tú, aunque haya dos que se llamen igual.
+  it("dice también quién es por el id", () => {
+    const bal = calcularBalances(viajeros, [gasto("a", 90, ["a", "b", "c"])]);
+    expect(calcularLeTocaPagar(bal).id).toBe("b");
+  });
+
   it("si está todo igualado, paga quien quiera", () => {
     const bal = calcularBalances(viajeros, []);
     expect(calcularLeTocaPagar(bal)).toEqual({ igualados: true });

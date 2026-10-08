@@ -239,7 +239,8 @@ function Resumen({
             <>✅ Está todo igualado, puede pagar cualquiera.</>
           ) : (
             <>
-              👉 Le toca pagar a <strong>{leTocaPagar.nombre}</strong>
+              👉 {leTocaPagar.id === soy ? "Te" : "Le"} toca pagar a{" "}
+              <strong>{leTocaPagar.id === soy ? "ti" : leTocaPagar.nombre}</strong>
             </>
           )}
         </div>
