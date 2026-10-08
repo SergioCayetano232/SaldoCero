@@ -181,6 +181,10 @@ function Viajeros({
         </ul>
       )}
 
+      {viajeros.length === 1 && !cerrado && (
+        <p className="vacio aviso-falta-otro">Con uno solo no hay nada que repartir: añade a otro más.</p>
+      )}
+
       {viajeros.length > 0 && !soy && (
         <p className="vacio aviso-quien-soy">
           Marca quién eres tú y te lo resaltamos en las cuentas.

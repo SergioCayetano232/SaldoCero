@@ -3281,6 +3281,10 @@ button.pago-cantidad:hover {
   font-weight: 600;
 }
 
+.aviso-falta-otro {
+  margin-top: 12px;
+}
+
 .aviso-quien-soy {
   margin-top: 14px;
   padding-top: 12px;
