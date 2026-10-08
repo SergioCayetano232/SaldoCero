@@ -65,7 +65,10 @@ function Viajeros({
 
   return (
     <section className="tarjeta">
-      <h2><span className="icono">🧳</span> Viajeros</h2>
+      <h2>
+        <span className="icono">🧳</span> Viajeros
+        {viajeros.length > 0 && <span className="titulo-cuantos">{viajeros.length}</span>}
+      </h2>
 
       {!cerrado && (
         <div className="fila-formulario">

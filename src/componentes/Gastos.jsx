@@ -473,7 +473,10 @@ function Gastos({
 
   return (
     <section className="tarjeta">
-      <h2><span className="icono">🧾</span> Gastos</h2>
+      <h2>
+        <span className="icono">🧾</span> Gastos
+        {gastos.length > 0 && <span className="titulo-cuantos">{gastos.length}</span>}
+      </h2>
 
       {viajeros.length === 0 ? (
         <p className="vacio">Primero añade viajeros para poder registrar gastos.</p>

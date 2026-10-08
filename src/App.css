@@ -164,6 +164,20 @@
   color: var(--tinta-suave);
 }
 
+/* Cuántos hay, en una pastilla al lado del título. */
+.tarjeta h2 .titulo-cuantos {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  min-width: 20px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  text-align: center;
+  color: var(--tinta-tenue);
+  background-color: color-mix(in srgb, var(--tinta-tenue) 14%, transparent);
+}
+
 /* El emoji del título, un poco más discreto. El line-height y el ancho fijo
    evitan que se vea recortado dentro del flex. */
 .tarjeta h2 .icono {
