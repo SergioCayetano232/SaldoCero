@@ -376,6 +376,7 @@ function App() {
         key={viaje.codigo}
         codigo={viaje.codigo}
         viajeros={viajeros}
+        colores={colores}
         hayBote={hayBote(aportaciones, gastos)}
         gastos={gastos}
         monedaViaje={viaje.moneda ?? "EUR"}

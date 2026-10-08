@@ -1430,14 +1430,16 @@ button:active {
 .casilla input {
   width: auto;
   margin: 0;
-  accent-color: var(--teal-500);
+  accent-color: var(--color-viajero, var(--teal-500));
   cursor: pointer;
 }
 
+/* Cada uno con el color de su avatar, para encontrarlo de un vistazo. El texto
+   lleva algo de tinta, que los colores son oscuros y en modo oscuro no se leían. */
 .casilla:has(input:checked) {
-  background-color: var(--teal-50);
-  border-color: var(--teal-300);
-  color: var(--teal-700);
+  background-color: color-mix(in srgb, var(--color-viajero, var(--teal-500)) 12%, var(--papel));
+  border-color: color-mix(in srgb, var(--color-viajero, var(--teal-500)) 55%, transparent);
+  color: color-mix(in srgb, var(--color-viajero, var(--teal-500)) 65%, var(--tinta));
   font-weight: 500;
 }
 

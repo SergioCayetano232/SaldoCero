@@ -28,6 +28,7 @@ import VisorTicket from "./VisorTicket";
 function Gastos({
   codigo,
   viajeros,
+  colores,
   hayBote = false,
   gastos,
   monedaViaje,
@@ -771,7 +772,11 @@ function Gastos({
 
                 <div className="casillas">
                   {viajeros.map((viajero) => (
-                    <label key={viajero.id} className="casilla">
+                    <label
+                      key={viajero.id}
+                      className="casilla"
+                      style={{ "--color-viajero": colores?.get(viajero.nombre) }}
+                    >
                       <input
                         type="checkbox"
                         checked={marcados.includes(viajero.id)}
