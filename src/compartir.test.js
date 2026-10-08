@@ -139,6 +139,14 @@ describe("invitar", () => {
     expect(nav.clipboard.writeText).toHaveBeenCalledWith(datos.url);
   });
 
+  // El resumen va sin enlace: lo que se copia es el texto entero.
+  it("sin enlace, copia el texto", async () => {
+    const nav = { clipboard: portapapeles() };
+
+    expect(await invitar({ text: "Lisboa: 326,50 €" }, nav)).toBe("copiado");
+    expect(nav.clipboard.writeText).toHaveBeenCalledWith("Lisboa: 326,50 €");
+  });
+
   it("si tampoco se puede copiar, avisa del fallo", async () => {
     const nav = { clipboard: { writeText: vi.fn().mockRejectedValue(new Error("x")) } };
 

@@ -114,7 +114,8 @@ export function invitacion({ nombre, codigo }, base) {
   };
 }
 
-// Con el menú de compartir del móvil si lo hay, y si no, copiando el enlace.
+// Con el menú de compartir del móvil si lo hay, y si no, copiando el enlace
+// (o el texto, si no hay enlace, como con el resumen).
 // Devuelve "compartido", "cancelado", "copiado" o "fallo".
 export async function invitar(datos, nav = navigator) {
   if (nav.share) {
@@ -127,5 +128,5 @@ export async function invitar(datos, nav = navigator) {
     }
   }
 
-  return (await copiarAlPortapapeles(datos.url, nav)) ? "copiado" : "fallo";
+  return (await copiarAlPortapapeles(datos.url ?? datos.text, nav)) ? "copiado" : "fallo";
 }

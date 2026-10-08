@@ -11,7 +11,7 @@ import {
   hayCentimos,
 } from "../calculos";
 import { conMoneda } from "../monedas";
-import { resumenEnTexto, copiarAlPortapapeles, descargarResumen, descargarGastos } from "../compartir";
+import { resumenEnTexto, copiarAlPortapapeles, descargarResumen, descargarGastos, invitar } from "../compartir";
 import { gastosEnCSV } from "../exportar";
 import { mensajeDeCobro, enlaceWhatsApp } from "../cobrar";
 import { cobroDe, cobroComoTexto, cantidadParaPegar } from "../cobro";
@@ -124,9 +124,12 @@ function Resumen({
     return cobroDe(personas.find((v) => v.id === pago.aId));
   }
 
+  // En el móvil sale su menú y lo mandas directo al grupo. Si no hay, se copia.
   async function compartir() {
-    const hecho = await copiarAlPortapapeles(elResumen());
-    setCopiado(hecho ? "bien" : "mal");
+    const como = await invitar({ text: elResumen() });
+    if (como !== "copiado" && como !== "fallo") return;
+
+    setCopiado(como === "copiado" ? "bien" : "mal");
     setTimeout(() => setCopiado(""), 2500);
   }
 
@@ -138,7 +141,7 @@ function Resumen({
           <button
             className="boton-compartir"
             onClick={compartir}
-            title="Copiar el resumen"
+            title="Compartir el resumen"
           >
             {copiado === "bien" ? "¡Copiado!" : copiado === "mal" ? "No se pudo" : "Compartir"}
           </button>
