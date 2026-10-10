@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { esOrdenador, esAtajoBuscar, esAtajoDeshacer } from "./teclado";
+import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo } from "./teclado";
 
 const con = (matches) => ({ matchMedia: () => ({ matches }) });
 
@@ -68,5 +68,28 @@ describe("esAtajoDeshacer", () => {
   it("escribiendo en un campo deshace el texto, no el borrado", () => {
     expect(esAtajoDeshacer(tecla("z", { ctrlKey: true }, "INPUT"))).toBe(false);
     expect(esAtajoDeshacer(tecla("z", { ctrlKey: true }, "TEXTAREA"))).toBe(false);
+  });
+});
+
+describe("esAtajoNuevo", () => {
+  const tecla = (key, extra = {}, tagName = "BODY") => ({ key, target: { tagName }, ...extra });
+
+  it("la n, en minúscula o mayúscula, sí", () => {
+    expect(esAtajoNuevo(tecla("n"))).toBe(true);
+    expect(esAtajoNuevo(tecla("N", { shiftKey: true }))).toBe(true);
+  });
+
+  it("Ctrl+N o Cmd+N abren otra ventana, no", () => {
+    expect(esAtajoNuevo(tecla("n", { ctrlKey: true }))).toBe(false);
+    expect(esAtajoNuevo(tecla("n", { metaKey: true }))).toBe(false);
+  });
+
+  it("escribiendo, la n es una n", () => {
+    expect(esAtajoNuevo(tecla("n", {}, "INPUT"))).toBe(false);
+    expect(esAtajoNuevo(tecla("n", {}, "SELECT"))).toBe(false);
+  });
+
+  it("con una ventana abierta, no", () => {
+    expect(esAtajoNuevo(tecla("n"), true)).toBe(false);
   });
 });

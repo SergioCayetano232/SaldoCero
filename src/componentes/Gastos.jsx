@@ -21,7 +21,7 @@ import { leerSuma, esSuma } from "../sumas";
 import { pagadorPorDefecto } from "../pagador";
 import { pareceRaro } from "../raros";
 import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
-import { esAtajoBuscar, esOrdenador } from "../teclado";
+import { esAtajoBuscar, esAtajoNuevo, esOrdenador } from "../teclado";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 
@@ -95,6 +95,7 @@ function Gastos({
   // Lo escrito puede ser una suma ("12,5+8"): esto es ya el número. NaN si no se entiende.
   const importeLeido = leerSuma(importe) ?? NaN;
   const campoImporte = useRef(null);
+  const campoPagador = useRef(null);
   // La propina puesta y el importe de antes, para quitarla o cambiarla sin que se acumulen.
   const [propina, setPropina] = useState(null);
 
@@ -218,6 +219,22 @@ function Gastos({
     window.addEventListener("keydown", alPulsar);
     return () => window.removeEventListener("keydown", alPulsar);
   }, [puedeFiltrar]);
+
+  useEffect(() => {
+    if (cerrado) return;
+
+    function alPulsar(e) {
+      if (!esAtajoNuevo(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      // Si ya sabe quién eres, el pagador viene puesto y se va directo al importe.
+      const campo = pagadorId ? campoImporte.current : campoPagador.current;
+      campo?.focus();
+      campo?.scrollIntoView({ block: "center" });
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [cerrado, pagadorId]);
 
   function filtrar(cambio) {
     setFiltros({ ...filtros, ...cambio });
@@ -495,7 +512,11 @@ function Gastos({
                 </p>
               )}
 
-              <select value={pagadorId} onChange={(e) => setPagadorId(e.target.value)}>
+              <select
+                ref={campoPagador}
+                value={pagadorId}
+                onChange={(e) => setPagadorId(e.target.value)}
+              >
                 <option value="">¿Quién pagó?</option>
                 {viajeros.map((viajero) => (
                   <option key={viajero.id} value={viajero.id}>
@@ -517,6 +538,8 @@ function Gastos({
                     // "Importe" no cabía en el móvil; la moneda ya va al lado.
                     placeholder="0,00"
                     aria-label="Importe"
+                    aria-keyshortcuts="N"
+                    title={esOrdenador() ? "Importe (pulsa N para venir aquí)" : undefined}
                     enterKeyHint="done"
                     value={importe}
                     // Para corregirlo escribes encima, sin borrar antes.
