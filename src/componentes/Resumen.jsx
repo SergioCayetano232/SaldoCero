@@ -26,6 +26,7 @@ import PorDias from "./PorDias";
 import PagosACuenta from "./PagosACuenta";
 import Presupuesto from "./Presupuesto";
 import { esElUltimo } from "../confeti";
+import { porcentajes } from "../donut";
 import { vibrar } from "../vibrar";
 
 function Resumen({
@@ -79,6 +80,9 @@ function Resumen({
 
   // Las barras se miden contra el que más ha puesto.
   const maxPuesto = Math.max(...personas.map((v) => v.puesto), 0);
+  // Si solo ha pagado uno, su 100 % no cuenta nada que no se vea ya.
+  const tantoPuesto = porcentajes(personas.map((v) => v.puesto));
+  const variosPusieron = personas.filter((v) => v.puesto > 0).length > 1;
 
   function elResumen() {
     return resumenEnTexto({
@@ -250,7 +254,7 @@ function Resumen({
       )}
 
       <ul className="lista">
-        {personas.map((viajero) => {
+        {personas.map((viajero, i) => {
           const estado = estadoDeBalance(viajero.balance);
 
           return (
@@ -278,7 +282,11 @@ function Resumen({
                   />
                 </div>
                 <small className="reparto">
-                  <span className="sin-partir">puso {conMoneda(viajero.puesto, monedaViaje)}</span> ·{" "}
+                  <span className="sin-partir">
+                    puso {conMoneda(viajero.puesto, monedaViaje)}
+                    {variosPusieron && viajero.puesto > 0 && <span className="reparto-tanto"> ({tantoPuesto[i]} %)</span>}
+                  </span>{" "}
+                  ·{" "}
                   <span className="sin-partir">le tocan {conMoneda(viajero.tocaPagar, monedaViaje)}</span>
                   {/* Si no, puso y le tocan no cuadran con lo que debe. */}
                   {viajero.dado > 0 && (

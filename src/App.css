@@ -1479,6 +1479,11 @@ button:active {
   font-size: 13px;
 }
 
+.reparto-tanto {
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ===== Los viajes por los que ya has pasado ===== */
 .viaje-pasado {
   flex: 1;
