@@ -7,7 +7,8 @@ import { coloresDelViaje } from "./avatares";
 import { borradoConEspera, queSeVaConViajero } from "./deshacer";
 import { novedades, textoDeNovedades } from "./novedades";
 import { vibrar } from "./vibrar";
-import { estaCerrado } from "./cerrar";
+import { avisoAlCerrar, estaCerrado } from "./cerrar";
+import { calcularPagos, marcarSaldados, redondearPagos } from "./calculos";
 import { reducirFoto } from "./tickets";
 import { avisoDeArranque, codigoQueAbrir, hayQueOlvidar } from "./arranque";
 import { tituloDePestana } from "./titulo";
@@ -280,9 +281,10 @@ function App() {
   }
 
   function cerrarViaje() {
-    const confirmado = window.confirm(
-      `¿Cerrar "${viaje.nombre}"? Nadie podrá apuntar, cambiar ni quitar gastos. Se puede reabrir.`
-    );
+    // Los mismos pagos que enseña el resumen, con sus céntimos o sin ellos.
+    const exactos = calcularPagos(balances);
+    const pagos = marcarSaldados(viaje.redondear ? redondearPagos(exactos) : exactos, viaje.saldados ?? []);
+    const confirmado = window.confirm(avisoAlCerrar(viaje.nombre, pagos, viaje.moneda ?? "EUR"));
     if (!confirmado) return;
 
     hacer(() => datos.cerrarViaje(viaje.id));
