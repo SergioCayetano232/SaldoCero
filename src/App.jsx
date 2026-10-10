@@ -14,6 +14,7 @@ import { tituloDePestana } from "./titulo";
 import { temaGuardado, siguienteTema, temaDe, temaQueToca } from "./tema";
 import { hayQueSubir } from "./arriba";
 import { esAtajoDeshacer } from "./teclado";
+import { MINIMO_PARA_FILTRAR } from "./filtros";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
 import Viajeros from "./componentes/Viajeros";
@@ -41,6 +42,9 @@ function App() {
   const [soy, setSoy] = useState(null);
   // El código del viaje que acabas de crear: lo siguiente es meter a la gente.
   const [recienCreado, setRecienCreado] = useState(null);
+  // A quién has tocado en el resumen para ver sus gastos. La vez cuenta para
+  // que tocar dos veces al mismo vuelva a llevarte a la lista.
+  const [verDe, setVerDe] = useState(null);
 
   useEffect(() => {
     const codigo = codigoDeArranque();
@@ -404,6 +408,7 @@ function App() {
         recienLlegados={novedad?.ids}
         cerrado={cerrado}
         soy={soy}
+        verDe={verDe}
         onAnadir={(gasto) =>
           hacer(async () => {
             // La foto se reduce antes de guardar nada: si no se puede leer, mejor
@@ -456,6 +461,11 @@ function App() {
             borrarConAviso(parcial.id, `el pago de ${de} a ${a}`, () => datos.quitarParcial(parcial.id))
           }
           viaje={viaje}
+          onVerGastos={
+            gastos.length >= MINIMO_PARA_FILTRAR
+              ? (id) => setVerDe((antes) => ({ id, vez: (antes?.vez ?? 0) + 1 }))
+              : undefined
+          }
         />
       )}
 

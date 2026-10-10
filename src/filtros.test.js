@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filtrarGastos, normalizar, hayFiltros, SIN_FILTROS } from "./filtros";
+import { filtrarGastos, normalizar, hayFiltros, soloDe, SIN_FILTROS } from "./filtros";
 
 const ana = { id: "a", nombre: "Ana" };
 const luis = { id: "b", nombre: "Luis" };
@@ -40,6 +40,16 @@ describe("hayFiltros", () => {
     expect(hayFiltros(con({ texto: "taxi" }))).toBe(true);
     expect(hayFiltros(con({ viajeroId: "a" }))).toBe(true);
     expect(hayFiltros(con({ categoria: "ocio" }))).toBe(true);
+  });
+});
+
+describe("soloDe", () => {
+  it("filtra por esa persona y nada más", () => {
+    expect(soloDe("b")).toEqual({ texto: "", viajeroId: "b", categoria: "" });
+  });
+
+  it("salen los que pagó y en los que está", () => {
+    expect(ids(filtrarGastos(gastos, soloDe("b"), viajeros))).toEqual(["1", "2", "4"]);
   });
 });
 

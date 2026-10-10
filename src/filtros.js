@@ -13,6 +13,12 @@ export function normalizar(texto) {
   return (texto ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().trim();
 }
 
+// Venir desde el resumen a ver lo de alguien: lo demás que hubiera se quita,
+// que si no puede salir la lista vacía sin saber por qué.
+export function soloDe(viajeroId) {
+  return { ...SIN_FILTROS, viajeroId };
+}
+
 export function hayFiltros(filtros) {
   return Boolean(normalizar(filtros.texto) || filtros.viajeroId || filtros.categoria);
 }

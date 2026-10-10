@@ -504,6 +504,8 @@ button:active {
   flex-direction: column;
   gap: 8px;
   margin-bottom: 16px;
+  /* Al bajar aquí desde el resumen, que no quede pegado al borde. */
+  scroll-margin-top: 16px;
 }
 
 .filtro-buscar {
@@ -2316,6 +2318,29 @@ button:active {
 .balance-nombre {
   font-weight: 600;
   font-size: 15px;
+}
+
+/* El nombre lleva a sus gastos. La flecha se ve siempre: en el móvil no hay hover. */
+.balance-ver {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  font: inherit;
+}
+
+.balance-ver-flecha {
+  color: var(--tinta-tenue);
+  font-weight: 400;
+  transition: transform var(--rapido) var(--curva-suave);
+}
+
+.balance-ver:hover {
+  color: var(--teal-600);
+}
+
+.balance-ver:hover .balance-ver-flecha {
+  transform: translateX(2px);
 }
 
 .barra {

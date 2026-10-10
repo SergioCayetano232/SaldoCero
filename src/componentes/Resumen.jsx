@@ -46,6 +46,7 @@ function Resumen({
   cerrado,
   viaje,
   soy,
+  onVerGastos,
 }) {
   // "" mientras no has copiado, y si no, lo que ha pasado.
   const [copiado, setCopiado] = useState("");
@@ -277,7 +278,18 @@ function Resumen({
 
               <div className="balance-quien">
                 <div className="balance-nombre">
-                  {viajero.nombre}
+                  {onVerGastos ? (
+                    <button
+                      className="balance-ver"
+                      onClick={() => onVerGastos(viajero.id)}
+                      title={`Ver los gastos de ${viajero.nombre}`}
+                    >
+                      {viajero.nombre}
+                      <span className="balance-ver-flecha" aria-hidden="true">›</span>
+                    </button>
+                  ) : (
+                    viajero.nombre
+                  )}
                   {viajero.id === soy && <span className="etiqueta-tu">tú</span>}
                 </div>
                 <div className="barra">
