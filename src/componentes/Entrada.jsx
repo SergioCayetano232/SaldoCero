@@ -1,6 +1,7 @@
 import { useState } from "react";
 import * as datos from "../datos";
 import { MONEDAS } from "../monedas";
+import { haceCuanto } from "../fechas";
 
 // Primera pantalla: o creas un viaje o entras en el de alguien con su código.
 function Entrada({ onCrear, onEntrar, cargando, error }) {
@@ -101,7 +102,10 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
                   disabled={cargando}
                 >
                   <span className="viaje-pasado-nombre">{viaje.nombre}</span>
-                  <small className="reparto">{viaje.codigo}</small>
+                  <small className="reparto">
+                    {viaje.codigo}
+                    {viaje.visto && <span className="viaje-pasado-cuando"> · {haceCuanto(viaje.visto)}</span>}
+                  </small>
                 </button>
                 <button
                   className="boton-quitar"

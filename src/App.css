@@ -1519,6 +1519,12 @@ button:active {
   letter-spacing: 0.09em;
 }
 
+/* El código va en mono y separado; esto no, que se lee peor. */
+.viaje-pasado-cuando {
+  font-family: var(--fuente);
+  letter-spacing: normal;
+}
+
 .viaje-pasado:disabled {
   opacity: 0.5;
   cursor: default;

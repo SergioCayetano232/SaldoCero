@@ -47,7 +47,7 @@ export function historial() {
 // Lo apuntamos al entrar. Si ya estaba, sube al principio con su nombre nuevo.
 function apuntarEnHistorial(viaje) {
   const resto = historial().filter((v) => v.codigo !== viaje.codigo);
-  const lista = [{ codigo: viaje.codigo, nombre: viaje.nombre }, ...resto];
+  const lista = [{ codigo: viaje.codigo, nombre: viaje.nombre, visto: Date.now() }, ...resto];
 
   localStorage.setItem(CLAVE_HISTORICO, JSON.stringify(lista.slice(0, CUANTOS_GUARDAMOS)));
 }

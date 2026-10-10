@@ -56,3 +56,20 @@ export function porDias(gastos) {
 export function cuantosGastos(n) {
   return n === 1 ? "1 gasto" : `${n} gastos`;
 }
+
+// Cuándo entraste por última vez en un viaje: "hoy", "ayer", "hace 3 días"...
+// Cuenta días del calendario, no de 24 horas: lo de anoche ya es "ayer".
+export function haceCuanto(momento, ahora = new Date()) {
+  if (!Number.isFinite(momento)) return "";
+
+  const aMediodia = (d) => new Date(`${new Date(d).toLocaleDateString("sv-SE")}T12:00:00`);
+  const dias = Math.round((aMediodia(ahora) - aMediodia(momento)) / 86400000);
+
+  // Con el reloj del móvil cambiado puede salir del futuro. Se queda en hoy.
+  if (dias <= 0) return "hoy";
+  if (dias === 1) return "ayer";
+  if (dias < 7) return `hace ${dias} días`;
+  if (dias < 30) return Math.floor(dias / 7) === 1 ? "hace una semana" : `hace ${Math.floor(dias / 7)} semanas`;
+  if (dias < 365) return Math.floor(dias / 30) === 1 ? "hace un mes" : `hace ${Math.floor(dias / 30)} meses`;
+  return "hace más de un año";
+}

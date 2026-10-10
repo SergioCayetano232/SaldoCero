@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { hoy, ayer, diasRapidos, enCorto, comoTitulo, porDias, cuantosGastos } from "./fechas";
+import { hoy, ayer, diasRapidos, enCorto, comoTitulo, porDias, cuantosGastos, haceCuanto } from "./fechas";
 
 describe("hoy", () => {
   it("da la fecha en el formato de la base de datos", () => {
@@ -122,5 +122,34 @@ describe("cuantosGastos", () => {
 
   it("varios en plural", () => {
     expect(cuantosGastos(4)).toBe("4 gastos");
+  });
+});
+
+describe("haceCuanto", () => {
+  const ahora = new Date("2026-10-10T18:00:00");
+  const el = (fecha) => new Date(fecha).getTime();
+
+  it("hoy y ayer, por días del calendario", () => {
+    expect(haceCuanto(el("2026-10-10T09:00:00"), ahora)).toBe("hoy");
+    // Anoche fue hace menos de 24 horas, pero es ayer.
+    expect(haceCuanto(el("2026-10-09T23:30:00"), ahora)).toBe("ayer");
+  });
+
+  it("días, semanas y meses", () => {
+    expect(haceCuanto(el("2026-10-07T12:00:00"), ahora)).toBe("hace 3 días");
+    expect(haceCuanto(el("2026-10-02T12:00:00"), ahora)).toBe("hace una semana");
+    expect(haceCuanto(el("2026-09-20T12:00:00"), ahora)).toBe("hace 2 semanas");
+    expect(haceCuanto(el("2026-09-05T12:00:00"), ahora)).toBe("hace un mes");
+    expect(haceCuanto(el("2026-06-01T12:00:00"), ahora)).toBe("hace 4 meses");
+    expect(haceCuanto(el("2025-01-01T12:00:00"), ahora)).toBe("hace más de un año");
+  });
+
+  it("del futuro, hoy", () => {
+    expect(haceCuanto(el("2026-10-12T12:00:00"), ahora)).toBe("hoy");
+  });
+
+  it("los viajes guardados antes de esto no traen la fecha", () => {
+    expect(haceCuanto(undefined, ahora)).toBe("");
+    expect(haceCuanto(null, ahora)).toBe("");
   });
 });
