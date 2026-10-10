@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { esOrdenador, esAtajoBuscar } from "./teclado";
+import { esOrdenador, esAtajoBuscar, esAtajoDeshacer } from "./teclado";
 
 const con = (matches) => ({ matchMedia: () => ({ matches }) });
 
@@ -45,5 +45,28 @@ describe("esAtajoBuscar", () => {
 
   it("con una ventana abierta, no", () => {
     expect(esAtajoBuscar(tecla("/"), true)).toBe(false);
+  });
+});
+
+describe("esAtajoDeshacer", () => {
+  const tecla = (key, extra = {}, tagName = "BODY") => ({ key, target: { tagName }, ...extra });
+
+  it("Ctrl+Z o Cmd+Z, sí", () => {
+    expect(esAtajoDeshacer(tecla("z", { ctrlKey: true }))).toBe(true);
+    expect(esAtajoDeshacer(tecla("z", { metaKey: true }))).toBe(true);
+    expect(esAtajoDeshacer(tecla("Z", { ctrlKey: true }))).toBe(true);
+  });
+
+  it("la z sola es una z", () => {
+    expect(esAtajoDeshacer(tecla("z"))).toBe(false);
+  });
+
+  it("con mayúsculas es rehacer, no", () => {
+    expect(esAtajoDeshacer(tecla("z", { metaKey: true, shiftKey: true }))).toBe(false);
+  });
+
+  it("escribiendo en un campo deshace el texto, no el borrado", () => {
+    expect(esAtajoDeshacer(tecla("z", { ctrlKey: true }, "INPUT"))).toBe(false);
+    expect(esAtajoDeshacer(tecla("z", { ctrlKey: true }, "TEXTAREA"))).toBe(false);
   });
 });

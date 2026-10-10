@@ -12,3 +12,11 @@ export function esAtajoBuscar(e, hayVentana = false) {
   const t = e.target;
   return !(t?.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t?.tagName));
 }
+
+// Ctrl+Z (Cmd+Z en Mac) recupera lo último que has quitado. Dentro de un campo
+// no, que ahí deshace lo que estás escribiendo.
+export function esAtajoDeshacer(e) {
+  if (e.key?.toLowerCase() !== "z" || !(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return false;
+  const t = e.target;
+  return !(t?.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t?.tagName));
+}

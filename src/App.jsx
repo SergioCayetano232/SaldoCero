@@ -13,6 +13,7 @@ import { avisoDeArranque, codigoQueAbrir, hayQueOlvidar } from "./arranque";
 import { tituloDePestana } from "./titulo";
 import { temaGuardado, siguienteTema, temaDe, temaQueToca } from "./tema";
 import { hayQueSubir } from "./arriba";
+import { esAtajoDeshacer } from "./teclado";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
 import Viajeros from "./componentes/Viajeros";
@@ -203,6 +204,20 @@ function App() {
     borrado?.espera.cancelar();
     setBorrado(null);
   }
+
+  useEffect(() => {
+    if (!borrado) return;
+
+    function alPulsar(e) {
+      if (!esAtajoDeshacer(e)) return;
+      e.preventDefault();
+      borrado.espera.cancelar();
+      setBorrado(null);
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [borrado]);
 
   async function crearViaje(nombre, moneda) {
     setCargando(true);
@@ -467,7 +482,9 @@ function App() {
       {borrado && (
         <div className="deshacer">
           <span>Has quitado {borrado.que}</span>
-          <button onClick={deshacerBorrado}>Deshacer</button>
+          <button onClick={deshacerBorrado} title="También con Ctrl+Z (⌘Z en Mac)">
+            Deshacer
+          </button>
         </div>
       )}
 
