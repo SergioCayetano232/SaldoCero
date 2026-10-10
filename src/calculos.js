@@ -226,6 +226,13 @@ export function balancesTrasPagos(balances, pagos) {
   }));
 }
 
+// Los pagos tal y como salen en el resumen: sin céntimos si así lo quiere el
+// viaje y con lo que ya se ha marcado como pagado.
+export function pagosDelViaje(balances, viaje) {
+  const exactos = calcularPagos(balances);
+  return marcarSaldados(viaje?.redondear ? redondearPagos(exactos) : exactos, viaje?.saldados ?? []);
+}
+
 // Lo que queda por pagar de verdad.
 export function quedaPorPagar(pagos) {
   return pagos.filter((pago) => !pago.saldado).reduce((t, p) => t + p.cantidad, 0);

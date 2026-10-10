@@ -8,7 +8,8 @@ import { borradoConEspera, queSeVaConViajero } from "./deshacer";
 import { novedades, textoDeNovedades } from "./novedades";
 import { vibrar } from "./vibrar";
 import { avisoAlCerrar, estaCerrado } from "./cerrar";
-import { calcularPagos, marcarSaldados, redondearPagos } from "./calculos";
+import { pagosDelViaje } from "./calculos";
+import { cuantosMios, ponerGlobito } from "./globito";
 import { reducirFoto } from "./tickets";
 import { avisoDeArranque, codigoQueAbrir, hayQueOlvidar } from "./arranque";
 import { tituloDePestana } from "./titulo";
@@ -281,9 +282,7 @@ function App() {
   }
 
   function cerrarViaje() {
-    // Los mismos pagos que enseña el resumen, con sus céntimos o sin ellos.
-    const exactos = calcularPagos(balances);
-    const pagos = marcarSaldados(viaje.redondear ? redondearPagos(exactos) : exactos, viaje.saldados ?? []);
+    const pagos = pagosDelViaje(balances, viaje);
     const confirmado = window.confirm(avisoAlCerrar(viaje.nombre, pagos, viaje.moneda ?? "EUR"));
     if (!confirmado) return;
 
@@ -500,6 +499,7 @@ function App() {
         </div>
       )}
 
+      <Globito cuantos={cuantosMios(pagosDelViaje(balances, viaje), soy)} />
       <BotonArriba />
       <BotonInstalar />
       <Pie />
@@ -568,6 +568,17 @@ function AvisoSinConexion() {
       📡 Sin conexión: hasta que vuelva no se puede guardar nada.
     </p>
   );
+}
+
+// No pinta nada: solo pone el número en el icono. Al salir del viaje se va con él.
+function Globito({ cuantos }) {
+  useEffect(() => {
+    ponerGlobito(cuantos);
+  }, [cuantos]);
+
+  useEffect(() => () => ponerGlobito(0), []);
+
+  return null;
 }
 
 // En el móvil, con muchos gastos, el formulario queda muy lejos.

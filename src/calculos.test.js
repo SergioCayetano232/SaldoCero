@@ -16,6 +16,7 @@ import {
   parteDe,
   redondearPagos,
   hayCentimos,
+  pagosDelViaje,
 } from "./calculos";
 
 const ana = { id: "a", nombre: "Ana" };
@@ -656,5 +657,27 @@ describe("hayCentimos", () => {
 
   it("sin pagos, no", () => {
     expect(hayCentimos([])).toBe(false);
+  });
+});
+
+describe("pagosDelViaje", () => {
+  const balances = [
+    { id: "a", nombre: "Ana", balance: 20.5 },
+    { id: "b", nombre: "Luis", balance: -20.5 },
+  ];
+
+  it("los pagos con lo ya pagado marcado", () => {
+    const viaje = { saldados: [{ deId: "b", aId: "a", cantidad: 20.5 }] };
+    expect(pagosDelViaje(balances, viaje)).toEqual([
+      expect.objectContaining({ deId: "b", aId: "a", cantidad: 20.5, saldado: true }),
+    ]);
+  });
+
+  it("sin céntimos si el viaje lo pide", () => {
+    expect(pagosDelViaje(balances, { redondear: true })[0].cantidad).toBe(21);
+  });
+
+  it("de los de antes, sin saldados ni redondeo", () => {
+    expect(pagosDelViaje(balances, {})[0]).toEqual(expect.objectContaining({ cantidad: 20.5, saldado: false }));
   });
 });
