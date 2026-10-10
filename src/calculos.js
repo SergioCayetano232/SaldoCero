@@ -21,6 +21,12 @@ export function calcularTotal(gastos) {
   return gastos.reduce((suma, gasto) => suma + importeDeGasto(gasto), 0);
 }
 
+// Lo que sale cada gasto de media. Con uno solo no hay media que dar.
+export function mediaPorGasto(gastos) {
+  if (gastos.length < 2) return null;
+  return Math.round((calcularTotal(gastos) / gastos.length) * 100) / 100;
+}
+
 // Cuánto le toca de un gasto a cada uno de los suyos.
 //
 // Normalmente a partes iguales, pero un gasto puede traer partes: si uno se

@@ -5,6 +5,7 @@ import {
   estadoDeBalance,
   calcularPagos,
   calcularTotal,
+  mediaPorGasto,
   marcarSaldados,
   quedaPorPagar,
   redondearPagos,
@@ -58,6 +59,7 @@ function Resumen({
   // De quién es el desglose. null = del viaje entero.
   const [persona, setPersona] = useState(null);
   const total = calcularTotal(gastos);
+  const media = mediaPorGasto(gastos);
   // El bote entra en los pagos (lo que sobra se devuelve), pero no es nadie:
   // ni le toca pagar la próxima ni sale en las listas de personas.
   const personas = sinBote(balances);
@@ -181,6 +183,9 @@ function Resumen({
         <div className="total-detalle">
           {gastos.length} {gastos.length === 1 ? "gasto" : "gastos"} · {personas.length}{" "}
           {personas.length === 1 ? "viajero" : "viajeros"}
+          {media !== null && (
+            <> · <span className="sin-partir">{conMoneda(media, monedaViaje)} de media</span></>
+          )}
         </div>
         <Presupuesto
           total={total}

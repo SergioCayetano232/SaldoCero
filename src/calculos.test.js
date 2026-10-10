@@ -3,6 +3,7 @@ import {
   participantesDeGasto,
   importeDeGasto,
   calcularTotal,
+  mediaPorGasto,
   calcularBalances,
   calcularLeTocaPagar,
   estadoDeBalance,
@@ -52,6 +53,26 @@ describe("calcularTotal", () => {
 
   it("sin gastos, cero", () => {
     expect(calcularTotal([])).toBe(0);
+  });
+});
+
+describe("mediaPorGasto", () => {
+  it("el total entre el número de gastos", () => {
+    expect(mediaPorGasto([gasto("a", 60, ["a"]), gasto("b", 30, ["b"])])).toBe(45);
+  });
+
+  it("redondea a céntimos", () => {
+    expect(mediaPorGasto([gasto("a", 10, ["a"]), gasto("b", 10, ["b"]), gasto("c", 0, ["c"])])).toBe(6.67);
+  });
+
+  it("cuenta lo pagado en otra moneda ya convertido", () => {
+    const enDolares = { ...gasto("a", 110, ["a"]), importeConvertido: 100 };
+    expect(mediaPorGasto([enDolares, gasto("b", 50, ["b"])])).toBe(75);
+  });
+
+  it("con uno o ninguno, no hay media", () => {
+    expect(mediaPorGasto([gasto("a", 30, ["a"])])).toBeNull();
+    expect(mediaPorGasto([])).toBeNull();
   });
 });
 
