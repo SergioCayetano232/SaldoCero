@@ -7,6 +7,7 @@ import { BOTE } from "./bote";
 import { rutaDelTicket } from "./tickets";
 import { limpiarNota } from "./notas";
 import { codigoDeTexto } from "./codigos";
+import { POR_DIAS } from "./ordenar";
 
 // Al usuario le decimos algo que entienda, pero el fallo de verdad lo dejamos
 // en la consola, que si no no hay quien averigüe qué ha pasado.
@@ -87,6 +88,36 @@ export function soyYo(codigo, viajeroId) {
   else delete todos[codigo];
 
   localStorage.setItem(CLAVE_SOY, JSON.stringify(todos));
+}
+
+// El orden de la lista de gastos de cada viaje. Por días no se guarda, que es
+// lo que sale sin nada.
+const CLAVE_ORDEN = "saldocero-orden";
+
+function ordenes() {
+  try {
+    const guardado = JSON.parse(localStorage.getItem(CLAVE_ORDEN) ?? "{}");
+    return typeof guardado === "object" && guardado !== null ? guardado : {};
+  } catch {
+    return {};
+  }
+}
+
+export function leerOrden(codigo) {
+  return ordenes()[codigo] ?? null;
+}
+
+export function guardarOrden(codigo, orden) {
+  const todos = ordenes();
+
+  if (orden === POR_DIAS) delete todos[codigo];
+  else todos[codigo] = orden;
+
+  try {
+    localStorage.setItem(CLAVE_ORDEN, JSON.stringify(todos));
+  } catch {
+    // Sin guardar, vuelve a por días la próxima vez. Nada grave.
+  }
 }
 
 // Claro, oscuro o automático. Lo lee también index.html, así que va en texto tal cual.

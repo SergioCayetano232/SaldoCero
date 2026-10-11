@@ -6,7 +6,7 @@ import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, so
 import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
 import { sugerirConceptos } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
-import { ordenarGastos, ORDENES, POR_DIAS } from "../ordenar";
+import { ordenarGastos, ordenGuardado, ORDENES, POR_DIAS } from "../ordenar";
 import { conPropina, PROPINAS } from "../propina";
 import { borradorQueVale, hayAlgoEscrito, hayAlgoQueBorrar } from "../borrador";
 import * as datos from "../datos";
@@ -192,7 +192,7 @@ function Gastos({
   }, [moneda, monedaViaje]);
 
   const [filtros, setFiltros] = useState(SIN_FILTROS);
-  const [orden, setOrden] = useState(POR_DIAS);
+  const [orden, setOrden] = useState(() => ordenGuardado(datos.leerOrden(codigo)));
   const [verDeAntes, setVerDeAntes] = useState(verDe);
   if (verDe !== verDeAntes) {
     setVerDeAntes(verDe);
@@ -1065,7 +1065,10 @@ function Gastos({
                 <select
                   className="filtro-orden"
                   value={orden}
-                  onChange={(e) => setOrden(e.target.value)}
+                  onChange={(e) => {
+                    setOrden(e.target.value);
+                    datos.guardarOrden(codigo, e.target.value);
+                  }}
                   aria-label="Ordenar gastos"
                 >
                   {ORDENES.map((o) => (

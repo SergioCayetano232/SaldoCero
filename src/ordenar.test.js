@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { ordenarGastos, ORDENES, POR_DIAS } from "./ordenar";
+import { ordenarGastos, ordenGuardado, ORDENES, POR_DIAS } from "./ordenar";
 import { BOTE } from "./bote";
 
 const viajeros = [
@@ -47,5 +47,22 @@ describe("ordenarGastos", () => {
   it("los órdenes tienen nombre y el primero es por días", () => {
     expect(ORDENES[0].id).toBe(POR_DIAS);
     for (const o of ORDENES) expect(o.nombre).toBeTruthy();
+  });
+});
+
+describe("ordenGuardado", () => {
+  it("el que había, si existe", () => {
+    expect(ordenGuardado("importe")).toBe("importe");
+    expect(ordenGuardado("pagador")).toBe("pagador");
+  });
+
+  it("sin nada guardado, por días", () => {
+    expect(ordenGuardado(null)).toBe(POR_DIAS);
+    expect(ordenGuardado(undefined)).toBe(POR_DIAS);
+  });
+
+  it("uno que ya no existe, por días", () => {
+    expect(ordenGuardado("alfabetico")).toBe(POR_DIAS);
+    expect(ordenGuardado(42)).toBe(POR_DIAS);
   });
 });
