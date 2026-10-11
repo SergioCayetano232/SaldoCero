@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { estadoPresupuesto, textoPresupuesto, ritmoDeGasto, textoRitmo } from "./presupuesto";
+import { estadoPresupuesto, textoPresupuesto, ritmoDeGasto, textoRitmo, porCabezaYDia } from "./presupuesto";
 
 describe("estadoPresupuesto", () => {
   it("sin presupuesto, nada", () => {
@@ -128,5 +128,29 @@ describe("textoRitmo", () => {
 
   it("respeta la moneda del viaje", () => {
     expect(textoRitmo(ritmo, null, "GBP")).toBe("£45.00 al día");
+  });
+});
+
+describe("porCabezaYDia", () => {
+  it("lo del día repartido entre todos", () => {
+    // 300 en tres días entre cuatro: 100 al día, 25 cada uno.
+    const gastos = [gasto("2026-09-12", 120), gasto("2026-09-13", 80), gasto("2026-09-14", 100)];
+    expect(porCabezaYDia(gastos, 4)).toBe(25);
+  });
+
+  it("los días sin gastos en medio también cuentan", () => {
+    expect(porCabezaYDia([gasto("2026-09-12", 60), gasto("2026-09-14", 30)], 3)).toBe(10);
+  });
+
+  it("con un día solo, nada", () => {
+    expect(porCabezaYDia([gasto("2026-09-12", 40), gasto("2026-09-12", 50)], 3)).toBeNull();
+  });
+
+  it("con una persona sola, nada", () => {
+    expect(porCabezaYDia([gasto("2026-09-12", 40), gasto("2026-09-13", 50)], 1)).toBeNull();
+  });
+
+  it("sin gastos, nada", () => {
+    expect(porCabezaYDia([], 4)).toBeNull();
   });
 });

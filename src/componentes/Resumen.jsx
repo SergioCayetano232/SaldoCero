@@ -26,6 +26,7 @@ import Desglose from "./Desglose";
 import PorDias from "./PorDias";
 import PagosACuenta from "./PagosACuenta";
 import Presupuesto from "./Presupuesto";
+import { porCabezaYDia } from "../presupuesto";
 import { esElUltimo } from "../confeti";
 import { porcentajes } from "../donut";
 import { vibrar } from "../vibrar";
@@ -65,6 +66,7 @@ function Resumen({
   // El bote entra en los pagos (lo que sobra se devuelve), pero no es nadie:
   // ni le toca pagar la próxima ni sale en las listas de personas.
   const personas = sinBote(balances);
+  const alDia = porCabezaYDia(gastos, personas.length);
   const exactos = calcularPagos(balances);
   const redondear = viaje?.redondear === true;
   const pagos = marcarSaldados(redondear ? redondearPagos(exactos) : exactos, saldados);
@@ -189,6 +191,9 @@ function Resumen({
             <> · <span className="sin-partir">{conMoneda(media, monedaViaje)} de media</span></>
           )}
         </div>
+        {alDia !== null && (
+          <div className="total-detalle">Sale a {conMoneda(alDia, monedaViaje)} por cabeza y día</div>
+        )}
         <Presupuesto
           total={total}
           gastos={gastos}

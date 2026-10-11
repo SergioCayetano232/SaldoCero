@@ -42,6 +42,14 @@ export function ritmoDeGasto(gastos) {
   return { dias, porDia: calcularTotal(gastos) / dias };
 }
 
+// Lo que sale cada uno al día, para comparar viajes o avisar al que viene el
+// año que viene. Con un día o una persona sola ya lo dice el total.
+export function porCabezaYDia(gastos, cuantos) {
+  const ritmo = ritmoDeGasto(gastos);
+  if (!ritmo || ritmo.dias < 2 || cuantos < 2) return null;
+  return ritmo.porDia / cuantos;
+}
+
 // "45.00 € al día · os llega para 6 días más". Cerrado o pasados, solo la media.
 export function textoRitmo(ritmo, estado, moneda, cerrado = false) {
   const media = `${conMoneda(ritmo.porDia, moneda)} al día`;
