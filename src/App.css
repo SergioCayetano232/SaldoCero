@@ -2482,6 +2482,14 @@ button:active {
   margin-top: 12px;
 }
 
+/* Saldar todo lo de alguien, bajo la lista de pagos. */
+.de-golpe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
 /* Lo que falta por pagar, al lado del título. */
 .pendiente {
   font-family: var(--fuente);

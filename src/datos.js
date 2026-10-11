@@ -383,15 +383,22 @@ export async function editarGasto(id, gasto) {
 
 // Dar una deuda por pagada.
 export async function marcarSaldado(viajeId, pago) {
+  await marcarVariosSaldados(viajeId, [pago]);
+}
+
+// Todo en una petición: o se marcan todos o ninguno, sin quedarse a medias.
+export async function marcarVariosSaldados(viajeId, pagos) {
   const { error } = await supabase
     .from("pagos_saldados")
-    .insert({
-      viaje_id: viajeId,
-      de_id: sinBote(pago.deId),
-      a_id: sinBote(pago.aId),
-      de_nombre: pago.de,
-      a_nombre: pago.a,
-    });
+    .insert(
+      pagos.map((pago) => ({
+        viaje_id: viajeId,
+        de_id: sinBote(pago.deId),
+        a_id: sinBote(pago.aId),
+        de_nombre: pago.de,
+        a_nombre: pago.a,
+      }))
+    );
 
   if (error) throw fallo(error, "No hemos podido marcar el pago.");
 }

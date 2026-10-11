@@ -27,7 +27,8 @@ import PorDias from "./PorDias";
 import PagosACuenta from "./PagosACuenta";
 import Presupuesto from "./Presupuesto";
 import { porCabezaYDia } from "../presupuesto";
-import { esElUltimo } from "../confeti";
+import { esElUltimo, sonLosUltimos } from "../confeti";
+import { deudoresConVarias } from "../deGolpe";
 import { porcentajes } from "../donut";
 import { vibrar } from "../vibrar";
 
@@ -39,6 +40,7 @@ function Resumen({
   saldados = [],
   parciales = [],
   onSaldar,
+  onSaldarVarios,
   onDesaldar,
   onParcial,
   onQuitarParcial,
@@ -70,6 +72,7 @@ function Resumen({
   const exactos = calcularPagos(balances);
   const redondear = viaje?.redondear === true;
   const pagos = marcarSaldados(redondear ? redondearPagos(exactos) : exactos, saldados);
+  const deGolpe = deudoresConVarias(pagos);
   // Encendido se queda a la vista aunque ya no haya céntimos, para poder apagarlo.
   const verRedondeo = redondear || hayCentimos(exactos);
   // Con lo ya pagado descontado: si todo está saldado, no le toca a nadie.
@@ -105,14 +108,21 @@ function Resumen({
   async function saldar(pago) {
     const ultimo = esElUltimo(pagos, pago);
     const bien = await onSaldar(pago);
-
     // Solo si se ha guardado: celebrarlo y que luego falle queda fatal.
-    if (ultimo && bien) {
-      const esta = ++fiestas.current;
-      setFiesta(esta);
-      vibrar("exito");
-      setTimeout(() => setFiesta((f) => (f === esta ? null : f)), 3500);
-    }
+    if (ultimo && bien) celebrar();
+  }
+
+  async function saldarTodoDe(deudor) {
+    const ultimos = sonLosUltimos(pagos, deudor.pagos);
+    const bien = await onSaldarVarios(deudor.pagos);
+    if (ultimos && bien) celebrar();
+  }
+
+  function celebrar() {
+    const esta = ++fiestas.current;
+    setFiesta(esta);
+    vibrar("exito");
+    setTimeout(() => setFiesta((f) => (f === esta ? null : f)), 3500);
   }
 
   // Lo que se pega en el banco va sin espacios.
@@ -439,6 +449,22 @@ function Resumen({
               );
             })}
           </>
+        )}
+
+        {deGolpe.length > 0 && (
+          <div className="de-golpe">
+            {deGolpe.map((deudor) => (
+              <button
+                key={deudor.deId ?? deudor.de}
+                className="pastilla-interruptor"
+                onClick={() => saldarTodoDe(deudor)}
+                title={`Marcar como pagadas sus ${deudor.pagos.length} deudas`}
+              >
+                ✓ {deudor.deId === soy ? "Lo he pagado todo" : `${deudor.de} lo ha pagado todo`} ·{" "}
+                {conMoneda(deudor.cantidad, monedaViaje)}
+              </button>
+            ))}
+          </div>
         )}
 
         {verRedondeo && (

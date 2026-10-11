@@ -1,8 +1,23 @@
 import { describe, it, expect } from "vitest";
-import { esElUltimo, trozosDeConfeti, COLORES, CUANTOS } from "./confeti";
+import { esElUltimo, sonLosUltimos, trozosDeConfeti, COLORES, CUANTOS } from "./confeti";
 
 const anaALuis = { de: "Ana", a: "Luis", cantidad: 30, saldado: false };
 const pepeALuis = { de: "Pepe", a: "Luis", cantidad: 10, saldado: false };
+
+describe("sonLosUltimos", () => {
+  it("si con estos ya no queda nada, toca fiesta", () => {
+    expect(sonLosUltimos([anaALuis, pepeALuis], [anaALuis, pepeALuis])).toBe(true);
+  });
+
+  it("si queda otro fuera, todavía no", () => {
+    const martaAPepe = { de: "Marta", a: "Pepe", cantidad: 5, saldado: false };
+    expect(sonLosUltimos([anaALuis, pepeALuis, martaAPepe], [anaALuis, pepeALuis])).toBe(false);
+  });
+
+  it("sin nada pendiente, no", () => {
+    expect(sonLosUltimos([{ ...anaALuis, saldado: true }], [])).toBe(false);
+  });
+});
 
 describe("esElUltimo", () => {
   it("con un solo pago pendiente, ese es el último", () => {

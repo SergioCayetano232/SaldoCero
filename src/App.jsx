@@ -455,6 +455,7 @@ function App() {
           monedaViaje={viaje.moneda ?? "EUR"}
           saldados={viaje.saldados ?? []}
           onSaldar={(pago) => hacer(() => datos.marcarSaldado(viaje.id, pago))}
+          onSaldarVarios={(pagos) => hacer(() => datos.marcarVariosSaldados(viaje.id, pagos))}
           onDesaldar={(pago) => hacer(() => datos.desmarcarSaldado(viaje.id, pago))}
           cerrado={cerrado}
           onPresupuesto={(cantidad) => hacer(() => datos.ponerPresupuesto(viaje.id, cantidad))}

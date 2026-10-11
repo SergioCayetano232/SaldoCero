@@ -14,6 +14,12 @@ export function esElUltimo(pagos, pago) {
   return pendientes.length === 1 && mismoPago(pendientes[0], pago);
 }
 
+// Lo mismo marcando varios de golpe.
+export function sonLosUltimos(pagos, estos) {
+  const pendientes = pagos.filter((p) => !p.saldado);
+  return pendientes.length > 0 && pendientes.every((p) => estos.some((e) => mismoPago(e, p)));
+}
+
 function entre(min, max, azar) {
   return min + (max - min) * azar();
 }
