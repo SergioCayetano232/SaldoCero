@@ -1484,6 +1484,12 @@ button:active {
   font-size: 13px;
 }
 
+/* "hace 5 min" no se parte en dos líneas. */
+.gasto-hace {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
 .reparto-tanto {
   opacity: 0.75;
   font-variant-numeric: tabular-nums;

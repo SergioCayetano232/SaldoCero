@@ -73,3 +73,16 @@ export function haceCuanto(momento, ahora = new Date()) {
   if (dias < 365) return Math.floor(dias / 30) === 1 ? "hace un mes" : `hace ${Math.floor(dias / 30)} meses`;
   return "hace más de un año";
 }
+
+// Cuándo se apuntó un gasto, para ver qué es nuevo: "hace 5 min", "hace 3 h".
+// Pasado un día ya no dice nada, que en todos los gastos sería ruido.
+export function apuntadoHace(momento, ahora = Date.now()) {
+  const minutos = Math.floor((ahora - Date.parse(momento)) / 60000);
+  if (!Number.isFinite(minutos)) return null;
+
+  // Con el reloj del móvil adelantado puede salir del futuro.
+  if (minutos < 1) return "ahora mismo";
+  if (minutos < 60) return `hace ${minutos} min`;
+  if (minutos < 24 * 60) return `hace ${Math.floor(minutos / 60)} h`;
+  return null;
+}

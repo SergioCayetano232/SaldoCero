@@ -3,7 +3,7 @@ import { calcularTotal, importeDeGasto, participantesDeGasto } from "../calculos
 import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, tasaComoTexto } from "../monedas";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe } from "../categorias";
 import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
-import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos } from "../fechas";
+import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
 import { sugerirConceptos } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
 import { ordenarGastos, ORDENES, POR_DIAS } from "../ordenar";
@@ -225,6 +225,13 @@ function Gastos({
   const puedoVerLoMio = viajeros.some((v) => v.id === soy);
 
   const buscador = useRef(null);
+
+  // Para que el "hace 5 min" de cada gasto no se quede parado si nadie toca nada.
+  const [ahora, setAhora] = useState(() => Date.now());
+  useEffect(() => {
+    const reloj = setInterval(() => setAhora(Date.now()), 60000);
+    return () => clearInterval(reloj);
+  }, []);
 
   useEffect(() => {
     if (!puedeFiltrar) return;
@@ -1144,6 +1151,9 @@ function Gastos({
                           {nombrePagador(gasto.pagadorId)} · {textoReparto(gasto)}
                           {/* Sin los títulos de los días, la fecha va en cada uno. */}
                           {ordenVigente !== POR_DIAS && gasto.fecha && ` · ${comoTitulo(gasto.fecha)}`}
+                          {apuntadoHace(gasto.creadoEn, ahora) && (
+                            <span className="gasto-hace"> · {apuntadoHace(gasto.creadoEn, ahora)}</span>
+                          )}
                         </small>
                         {deQuien && (
                           <small className="gasto-parte">

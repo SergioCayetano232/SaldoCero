@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { hoy, ayer, diasRapidos, enCorto, comoTitulo, porDias, cuantosGastos, haceCuanto } from "./fechas";
+import { hoy, ayer, diasRapidos, enCorto, comoTitulo, porDias, cuantosGastos, haceCuanto, apuntadoHace } from "./fechas";
 
 describe("hoy", () => {
   it("da la fecha en el formato de la base de datos", () => {
@@ -151,5 +151,41 @@ describe("haceCuanto", () => {
   it("los viajes guardados antes de esto no traen la fecha", () => {
     expect(haceCuanto(undefined, ahora)).toBe("");
     expect(haceCuanto(null, ahora)).toBe("");
+  });
+});
+
+describe("apuntadoHace", () => {
+  const ahora = Date.parse("2026-10-11T18:00:00Z");
+  const antes = (minutos) => new Date(ahora - minutos * 60000).toISOString();
+
+  it("recién apuntado", () => {
+    expect(apuntadoHace(antes(0), ahora)).toBe("ahora mismo");
+  });
+
+  it("en minutos", () => {
+    expect(apuntadoHace(antes(5), ahora)).toBe("hace 5 min");
+    expect(apuntadoHace(antes(59), ahora)).toBe("hace 59 min");
+  });
+
+  it("en horas, sin redondear hacia arriba", () => {
+    expect(apuntadoHace(antes(60), ahora)).toBe("hace 1 h");
+    expect(apuntadoHace(antes(179), ahora)).toBe("hace 2 h");
+  });
+
+  it("pasado un día, nada", () => {
+    expect(apuntadoHace(antes(24 * 60), ahora)).toBeNull();
+  });
+
+  it("del futuro, ahora mismo", () => {
+    expect(apuntadoHace(antes(-10), ahora)).toBe("ahora mismo");
+  });
+
+  it("sin fecha, nada", () => {
+    expect(apuntadoHace(undefined, ahora)).toBeNull();
+  });
+
+  it("con la fecha como la manda Supabase", () => {
+    const deSupabase = "2026-10-11T17:29:59.900000+00:00";
+    expect(apuntadoHace(deSupabase, ahora)).toBe("hace 30 min");
   });
 });

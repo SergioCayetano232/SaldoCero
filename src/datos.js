@@ -184,7 +184,7 @@ async function cargarContenido(viajeId) {
     supabase.from("viajeros").select("id, nombre, cobro").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
-      .select("id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha, ticket, nota")
+      .select("id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha, ticket, nota, creado_en")
       .eq("viaje_id", viajeId)
       .order("fecha")
       .order("creado_en"),
@@ -253,6 +253,8 @@ async function cargarContenido(viajeId) {
       fecha: gasto.fecha,
       ticket: gasto.ticket ?? null,
       nota: gasto.nota ?? null,
+      // Cuándo se apuntó, que no es lo mismo que el día del gasto.
+      creadoEn: gasto.creado_en ?? null,
       participantes: participantes.data
         .filter((p) => p.gasto_id === gasto.id)
         .map((p) => p.viajero_id),
