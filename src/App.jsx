@@ -17,6 +17,7 @@ import { temaGuardado, siguienteTema, temaDe, temaQueToca } from "./tema";
 import { hayQueSubir } from "./arriba";
 import { esAtajoDeshacer } from "./teclado";
 import { MINIMO_PARA_FILTRAR } from "./filtros";
+import { nombreDeLaRepeticion, genteParaRepetir, quienEresEnElNuevo } from "./repetirViaje";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
 import Viajeros from "./componentes/Viajeros";
@@ -45,6 +46,8 @@ function App() {
   const [soy, setSoy] = useState(null);
   // El código del viaje que acabas de crear: lo siguiente es meter a la gente.
   const [recienCreado, setRecienCreado] = useState(null);
+  // Mientras se crea el repetido, que dos toques no hagan dos viajes.
+  const [repitiendo, setRepitiendo] = useState(false);
   // A quién has tocado en el resumen para ver sus gastos. La vez cuenta para
   // que tocar dos veces al mismo vuelva a llevarte a la lista.
   const [verDe, setVerDe] = useState(null);
@@ -292,6 +295,33 @@ function App() {
     hacer(() => datos.cerrarViaje(viaje.id));
   }
 
+  async function repetirViaje(gente) {
+    const nombre = nombreDeLaRepeticion(viaje.nombre);
+    const quienes = gente.map((v) => v.nombre).join(", ");
+    if (!window.confirm(`¿Crear "${nombre}" con ${quienes}? Empieza sin gastos.`)) return;
+
+    setRepitiendo(true);
+    setError("");
+    try {
+      // Lo que estés borrando, antes de cambiar de código, como al salir.
+      await borradoActual.current?.espera.ahora();
+      const nuevo = await datos.repetirViaje(nombre, viaje.moneda ?? "EUR", genteParaRepetir(gente));
+      const yo = quienEresEnElNuevo(soy, gente, nuevo.viajeros);
+      datos.soyYo(nuevo.codigo, yo);
+      // Si se queda el enlace del viaje viejo, al recargar te devolvería a él.
+      window.location.hash = "";
+      setViaje(nuevo);
+      setSoy(yo);
+      setRecienCreado(null);
+      if (nuevo.sinGente) setError("Hemos creado el viaje, pero no hemos podido pasar a la gente. Añádela a mano.");
+      window.scrollTo({ top: 0 });
+    } catch (fallo) {
+      setError(fallo.message);
+    } finally {
+      setRepitiendo(false);
+    }
+  }
+
   function reabrirViaje() {
     if (!window.confirm(`¿Reabrir "${viaje.nombre}"? Se podrán volver a tocar los gastos.`)) return;
     hacer(() => datos.cerrarViaje(viaje.id, false));
@@ -480,16 +510,24 @@ function App() {
         />
       )}
 
-      {!cerrado && (viajeros.length > 0 || gastos.length > 0) && (
+      {(viajeros.length > 0 || gastos.length > 0) && (
         <div className="botones-final">
-          {gastos.length > 0 && (
+          {!cerrado && gastos.length > 0 && (
             <button className="boton-cerrar-viaje" onClick={cerrarViaje}>
               🔒 Cerrar el viaje
             </button>
           )}
-          <button className="boton-reiniciar" onClick={vaciarViaje}>
-            Vaciar este viaje
-          </button>
+          {/* Con uno solo no hay grupo que repetir. */}
+          {viajeros.length > 1 && (
+            <button className="boton-repetir-viaje" onClick={() => repetirViaje(viajeros)} disabled={repitiendo}>
+              {repitiendo ? "Creando…" : "🔁 Repetir con la misma gente"}
+            </button>
+          )}
+          {!cerrado && (
+            <button className="boton-reiniciar" onClick={vaciarViaje}>
+              Vaciar este viaje
+            </button>
+          )}
         </div>
       )}
 

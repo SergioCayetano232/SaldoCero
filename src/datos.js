@@ -185,6 +185,26 @@ export async function crearViaje(nombre, moneda = "EUR") {
   return { ...viaje, viajeros: [], gastos: [] };
 }
 
+// Un viaje nuevo con la gente de otro, todos de una vez. Si el viaje se crea
+// pero la gente no pasa, te quedas dentro igual: añadirlos a mano es menos lío
+// que tener un viaje vacío suelto que no sabes ni que existe.
+export async function repetirViaje(nombre, moneda, gente) {
+  const nuevo = await crearViaje(nombre, moneda);
+  if (gente.length === 0) return nuevo;
+
+  const { data, error } = await supabase
+    .from("viajeros")
+    .insert(gente.map((v) => ({ viaje_id: nuevo.id, nombre: v.nombre, cobro: v.cobro })))
+    .select("id, nombre, cobro");
+
+  if (error) {
+    console.error("No hemos podido pasar a la gente.", error);
+    return { ...nuevo, sinGente: true };
+  }
+
+  return { ...nuevo, viajeros: data };
+}
+
 // Entrar a un viaje con su código y traerse todo lo suyo.
 export async function abrirViaje(codigo) {
   const limpio = codigoDeTexto(codigo);

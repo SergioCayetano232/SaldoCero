@@ -3118,7 +3118,8 @@ button.pago-cantidad:hover {
   margin: 0;
 }
 
-.boton-cerrar-viaje {
+.boton-cerrar-viaje,
+.boton-repetir-viaje {
   padding: 10px 18px;
   font-size: 14px;
   font-weight: 500;
@@ -3127,9 +3128,15 @@ button.pago-cantidad:hover {
   border-radius: var(--radio-sm);
 }
 
-.boton-cerrar-viaje:hover {
+.boton-cerrar-viaje:hover,
+.boton-repetir-viaje:hover:not(:disabled) {
   background-color: var(--teal-50);
   border-color: var(--teal-300);
+}
+
+.boton-repetir-viaje:disabled {
+  opacity: 0.6;
+  cursor: progress;
 }
 
 .viaje-cerrado {
