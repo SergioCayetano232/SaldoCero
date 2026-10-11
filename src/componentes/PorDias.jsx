@@ -1,13 +1,17 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { gastoPorDia, topeRedondo, diasConEtiqueta } from "../barras";
 import { ritmoDeGasto } from "../presupuesto";
 import { conMoneda } from "../monedas";
 import { enCorto } from "../fechas";
 
 // Lo que se gastó cada día, en barras, con la media del viaje de referencia.
-function PorDias({ gastos, moneda }) {
+function PorDias({ gastos, moneda, onVerDia }) {
   // El día que estás mirando, con el dedo o el ratón.
   const [elegido, setElegido] = useState(null);
+  // Con el dedo, tocar ya es mirar: los gastos se abren desde el globo.
+  const [conDedo, setConDedo] = useState(false);
+  const puntero = useRef("mouse");
+  const botonVer = useRef(null);
 
   const dias = gastoPorDia(gastos);
   // Con un día solo no hay nada que comparar.
@@ -25,12 +29,31 @@ function PorDias({ gastos, moneda }) {
   // Igual que en el donut: con ratón basta pasar por encima, con el dedo se toca.
   function mirar(i) {
     return {
-      onPointerEnter: (e) => e.pointerType === "mouse" && setElegido(i),
+      onPointerEnter: (e) => {
+        if (e.pointerType !== "mouse") return;
+        setConDedo(false);
+        setElegido(i);
+      },
       onPointerLeave: (e) => e.pointerType === "mouse" && setElegido(null),
-      onPointerUp: (e) => e.pointerType !== "mouse" && setElegido(elegido === i ? null : i),
+      onPointerDown: (e) => (puntero.current = e.pointerType),
+      onPointerUp: (e) => {
+        if (e.pointerType === "mouse") return;
+        setConDedo(true);
+        setElegido(elegido === i ? null : i);
+      },
+      onClick: () => puntero.current === "mouse" && verDia(i),
+      onKeyDown: (e) => e.key === "Enter" && verDia(i),
       onFocus: () => setElegido(i),
-      onBlur: () => setElegido(null),
+      // Si el foco se va al botón del globo, el globo tiene que seguir ahí.
+      onBlur: (e) => e.relatedTarget !== botonVer.current && setElegido(null),
     };
+  }
+
+  // Un día sin gastos no tiene nada que enseñar.
+  const sePuedeVer = (i) => Boolean(onVerDia) && dias[i].gastos > 0;
+
+  function verDia(i) {
+    if (sePuedeVer(i)) onVerDia(dias[i].fecha);
   }
 
   const visto = elegido !== null ? dias[elegido] : null;
@@ -68,7 +91,9 @@ function PorDias({ gastos, moneda }) {
             {dias.map((d, i) => (
               <div
                 key={d.fecha}
-                className={`por-dias-columna ${i === elegido ? "elegida" : ""}`}
+                className={`por-dias-columna ${i === elegido ? "elegida" : ""} ${
+                  sePuedeVer(i) ? "se-puede-ver" : ""
+                }`}
                 tabIndex={0}
                 aria-label={`${enCorto(d.fecha)}: ${conMoneda(d.total, moneda)}`}
                 style={{ "--orden": i }}
@@ -105,6 +130,11 @@ function PorDias({ gastos, moneda }) {
                   ? "sin gastos"
                   : `${visto.gastos} ${visto.gastos === 1 ? "gasto" : "gastos"}`}
               </small>
+              {conDedo && sePuedeVer(elegido) && (
+                <button className="enlace por-dias-ver" ref={botonVer} onClick={() => verDia(elegido)}>
+                  Ver gastos
+                </button>
+              )}
             </div>
           )}
         </div>

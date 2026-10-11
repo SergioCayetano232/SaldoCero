@@ -6,7 +6,7 @@ import { participantesDeGasto } from "./calculos";
 // Con menos gastos que estos, la barra de filtros estorba más que ayuda.
 export const MINIMO_PARA_FILTRAR = 4;
 
-export const SIN_FILTROS = { texto: "", viajeroId: "", categoria: "" };
+export const SIN_FILTROS = { texto: "", viajeroId: "", categoria: "", fecha: "" };
 
 // "Cafetería" y "cafeteria" tienen que dar lo mismo al buscar.
 export function normalizar(texto) {
@@ -19,8 +19,13 @@ export function soloDe(viajeroId) {
   return { ...SIN_FILTROS, viajeroId };
 }
 
+// Lo mismo al tocar un día en la gráfica.
+export function soloDelDia(fecha) {
+  return { ...SIN_FILTROS, fecha };
+}
+
 export function hayFiltros(filtros) {
-  return Boolean(normalizar(filtros.texto) || filtros.viajeroId || filtros.categoria);
+  return Boolean(normalizar(filtros.texto) || filtros.viajeroId || filtros.categoria || filtros.fecha);
 }
 
 // Por persona valen los que pagó y en los que está: es lo que miras al repasar lo tuyo.
@@ -32,6 +37,7 @@ export function filtrarGastos(gastos, filtros, viajeros) {
     const dondeBuscar = normalizar(`${gasto.concepto} ${gasto.nota ?? ""}`);
     if (buscado && !dondeBuscar.includes(buscado)) return false;
     if (filtros.categoria && (gasto.categoria ?? "otros") !== filtros.categoria) return false;
+    if (filtros.fecha && gasto.fecha !== filtros.fecha) return false;
 
     if (filtros.viajeroId) {
       const pago = gasto.pagadorId === filtros.viajeroId;

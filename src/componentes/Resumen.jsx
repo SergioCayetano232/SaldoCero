@@ -47,6 +47,7 @@ function Resumen({
   viaje,
   soy,
   onVerGastos,
+  onVerDia,
 }) {
   // "" mientras no has copiado, y si no, lo que ha pasado.
   const [copiado, setCopiado] = useState("");
@@ -243,7 +244,7 @@ function Resumen({
         </>
       )}
 
-      <PorDias gastos={gastos} moneda={monedaViaje} />
+      <PorDias gastos={gastos} moneda={monedaViaje} onVerDia={onVerDia} />
 
       {/* Cerrado ya no hay "próxima" que pagar. */}
       {leTocaPagar && !cerrado && (

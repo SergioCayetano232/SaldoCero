@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { calcularTotal, importeDeGasto, participantesDeGasto } from "../calculos";
 import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, tasaComoTexto } from "../monedas";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe } from "../categorias";
-import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe } from "../filtros";
-import { hoy, comoTitulo, porDias, diasRapidos, cuantosGastos } from "../fechas";
+import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
+import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos } from "../fechas";
 import { sugerirConceptos } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
 import { ordenarGastos, ORDENES, POR_DIAS } from "../ordenar";
@@ -41,6 +41,7 @@ function Gastos({
   verTicket,
   soy = null,
   verDe = null,
+  verDia = null,
 }) {
   // Lo que dejaste a medias la última vez, si lo hay.
   const [borrador] = useState(() => borradorQueVale(datos.leerBorrador(codigo), Date.now(), viajeros));
@@ -197,13 +198,18 @@ function Gastos({
     setVerDeAntes(verDe);
     if (verDe) setFiltros(soloDe(verDe.id));
   }
+  const [verDiaAntes, setVerDiaAntes] = useState(verDia);
+  if (verDia !== verDiaAntes) {
+    setVerDiaAntes(verDia);
+    if (verDia) setFiltros(soloDelDia(verDia.fecha));
+  }
   const barraFiltros = useRef(null);
 
   useEffect(() => {
-    if (!verDe) return;
+    if (!verDe && !verDia) return;
     const quieto = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     barraFiltros.current?.scrollIntoView({ behavior: quieto ? "auto" : "smooth", block: "start" });
-  }, [verDe]);
+  }, [verDe, verDia]);
   // Si quedan pocos gastos la barra se esconde, y con ella lo que hubiera filtrado.
   const puedeFiltrar = gastos.length >= MINIMO_PARA_FILTRAR;
   const filtrando = puedeFiltrar && hayFiltros(filtros);
@@ -1066,7 +1072,8 @@ function Gastos({
               {filtrando && (
                 <p className="filtro-resumen" role="status">
                   <span>
-                    {visibles.length} de {gastos.length} gastos · suman{" "}
+                    {visibles.length} de {gastos.length} gastos
+                    {filtros.fecha && ` del ${enCorto(filtros.fecha)}`} · suman{" "}
                     <strong>{conMoneda(calcularTotal(visibles), monedaViaje)}</strong>
                     {deQuien && (
                       <span className="filtro-cuenta">

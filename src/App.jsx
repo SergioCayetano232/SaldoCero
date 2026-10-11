@@ -47,6 +47,8 @@ function App() {
   // A quién has tocado en el resumen para ver sus gastos. La vez cuenta para
   // que tocar dos veces al mismo vuelva a llevarte a la lista.
   const [verDe, setVerDe] = useState(null);
+  // Y el día que has tocado en la gráfica, igual.
+  const [verDia, setVerDia] = useState(null);
 
   useEffect(() => {
     const codigo = codigoDeArranque();
@@ -410,6 +412,7 @@ function App() {
         cerrado={cerrado}
         soy={soy}
         verDe={verDe}
+        verDia={verDia}
         onAnadir={(gasto) =>
           hacer(async () => {
             // La foto se reduce antes de guardar nada: si no se puede leer, mejor
@@ -465,6 +468,11 @@ function App() {
           onVerGastos={
             gastos.length >= MINIMO_PARA_FILTRAR
               ? (id) => setVerDe((antes) => ({ id, vez: (antes?.vez ?? 0) + 1 }))
+              : undefined
+          }
+          onVerDia={
+            gastos.length >= MINIMO_PARA_FILTRAR
+              ? (fecha) => setVerDia((antes) => ({ fecha, vez: (antes?.vez ?? 0) + 1 }))
               : undefined
           }
         />

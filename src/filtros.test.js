@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filtrarGastos, normalizar, hayFiltros, soloDe, SIN_FILTROS } from "./filtros";
+import { filtrarGastos, normalizar, hayFiltros, soloDe, soloDelDia, SIN_FILTROS } from "./filtros";
 
 const ana = { id: "a", nombre: "Ana" };
 const luis = { id: "b", nombre: "Luis" };
@@ -45,7 +45,7 @@ describe("hayFiltros", () => {
 
 describe("soloDe", () => {
   it("filtra por esa persona y nada más", () => {
-    expect(soloDe("b")).toEqual({ texto: "", viajeroId: "b", categoria: "" });
+    expect(soloDe("b")).toEqual({ texto: "", viajeroId: "b", categoria: "", fecha: "" });
   });
 
   it("salen los que pagó y en los que está", () => {
@@ -92,5 +92,37 @@ describe("filtrarGastos", () => {
 
   it("si nada encaja, lista vacía", () => {
     expect(filtrarGastos(gastos, con({ texto: "submarinismo" }), viajeros)).toEqual([]);
+  });
+});
+
+describe("por día", () => {
+  const conFecha = [
+    { id: "1", concepto: "Cena", pagadorId: "a", fecha: "2026-10-10" },
+    { id: "2", concepto: "Taxi", pagadorId: "b", fecha: "2026-10-11" },
+    { id: "3", concepto: "Café", pagadorId: "a", fecha: "2026-10-11" },
+    // Los de antes de las fechas no traen ninguna.
+    { id: "4", concepto: "Peaje", pagadorId: "a" },
+  ];
+
+  it("solo los de ese día", () => {
+    expect(ids(filtrarGastos(conFecha, soloDelDia("2026-10-11"), viajeros))).toEqual(["2", "3"]);
+  });
+
+  it("cuenta como filtro", () => {
+    expect(hayFiltros(soloDelDia("2026-10-11"))).toBe(true);
+  });
+
+  it("quita lo que hubiera filtrado antes", () => {
+    expect(soloDelDia("2026-10-10")).toEqual({ ...SIN_FILTROS, fecha: "2026-10-10" });
+  });
+
+  it("se suma a los demás filtros", () => {
+    const filtros = con({ fecha: "2026-10-11", texto: "café" });
+    expect(ids(filtrarGastos(conFecha, filtros, viajeros))).toEqual(["3"]);
+  });
+
+  it("un filtro de antes, sin fecha, no deja fuera a nadie", () => {
+    const viejo = { texto: "", viajeroId: "", categoria: "transporte" };
+    expect(ids(filtrarGastos(gastos, viejo, viajeros))).toEqual(["2"]);
   });
 });

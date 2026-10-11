@@ -605,6 +605,8 @@ button:active {
 .filtro-resumen strong {
   color: var(--tinta);
   font-variant-numeric: tabular-nums;
+  /* Que el € no se quede solo en la línea de abajo. */
+  white-space: nowrap;
 }
 
 /* ===== Deslizar los gastos ===== */
@@ -1997,6 +1999,10 @@ button:active {
   opacity: 0.35;
 }
 
+.por-dias-columna.se-puede-ver {
+  cursor: pointer;
+}
+
 .por-dias-columna.elegida .por-dias-barra:not(.vacia) {
   background-color: var(--teal-600);
 }
@@ -2035,6 +2041,14 @@ button:active {
   white-space: nowrap;
   pointer-events: none;
   animation: entrar-desde-abajo var(--rapido) var(--curva-suave);
+}
+
+/* El globo deja pasar el dedo a las barras, menos este botón. */
+.por-dias-ver {
+  pointer-events: auto;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .por-dias-globo strong {
