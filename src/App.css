@@ -924,7 +924,8 @@ button:active {
 }
 
 /* Lo que costó en la moneda del viaje, bajo el importe original. */
-.gasto-convertido {
+.gasto-convertido,
+.gasto-por-cabeza {
   display: block;
   font-family: var(--fuente);
   font-size: 12px;

@@ -20,6 +20,7 @@ import { posiblesRepetidos } from "../repetidos";
 import { leerSuma, esSuma } from "../sumas";
 import { pagadorPorDefecto } from "../pagador";
 import { pareceRaro } from "../raros";
+import { porCabeza } from "../porCabeza";
 import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
 import { esAtajoBuscar, esAtajoNuevo, esOrdenador } from "../teclado";
 import Deslizable from "./Deslizable";
@@ -1150,6 +1151,12 @@ function Gastos({
                         {gasto.moneda && gasto.moneda !== monedaViaje && (
                           <small className="gasto-convertido">
                             {conMoneda(gasto.importeConvertido, monedaViaje)}
+                          </small>
+                        )}
+                        {/* Con "lo de uno" abierto ya sale lo suyo, y esto sobraría. */}
+                        {!deQuien && porCabeza(gasto, viajeros) !== null && (
+                          <small className="gasto-por-cabeza">
+                            {conMoneda(porCabeza(gasto, viajeros), monedaViaje)} c/u
                           </small>
                         )}
                       </span>
