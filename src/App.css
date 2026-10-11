@@ -3672,6 +3672,51 @@ button.pago-cantidad:hover {
   color: var(--teal-600);
 }
 
+/* Debajo del tema va en su línea, sin tanto aire. */
+.pie-tema + .pie-tema {
+  margin-top: 0;
+}
+
+.ventana-atajos {
+  text-align: left;
+}
+
+.atajos {
+  display: grid;
+  gap: 10px;
+}
+
+.atajo {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.atajo dt {
+  display: flex;
+  gap: 4px;
+}
+
+.atajo dd {
+  font-size: 14px;
+  color: var(--tinta-suave);
+}
+
+kbd {
+  min-width: 26px;
+  padding: 3px 7px;
+  border: 1px solid var(--linea);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background-color: var(--papel);
+  font-family: var(--fuente-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--tinta);
+}
+
 @media (max-width: 560px) {
   /* En el movil los separadores sobran, cada cosa en su linea. */
   .pie {

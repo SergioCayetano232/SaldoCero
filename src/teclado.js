@@ -28,3 +28,24 @@ export function esAtajoNuevo(e, hayVentana = false) {
   if (e.key?.toLowerCase() !== "n" || e.ctrlKey || e.metaKey || e.altKey) return false;
   return !hayVentana && !escribiendo(e.target);
 }
+
+// La "?" enseña todos estos. Con Mayúsculas, que es como sale la "?".
+export function esAtajoAyuda(e, hayVentana = false) {
+  if (e.key !== "?" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
+export function esMac(navegador = typeof navigator === "undefined" ? undefined : navigator) {
+  return /Mac|iPhone|iPad/.test(navegador?.platform || navegador?.userAgent || "");
+}
+
+// Lo que sale en la ventana de la "?". En Mac se dice ⌘, que Ctrl allí no es.
+export function listaDeAtajos(mac = false) {
+  return [
+    { teclas: ["N"], que: "Apuntar un gasto nuevo" },
+    { teclas: ["/"], que: "Buscar un gasto" },
+    { teclas: [mac ? "⌘" : "Ctrl", "Z"], que: "Recuperar lo último que has quitado" },
+    { teclas: ["Esc"], que: "Dejar de editar un gasto o cerrar una ventana" },
+    { teclas: ["?"], que: "Ver estos atajos" },
+  ];
+}

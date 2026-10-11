@@ -25,6 +25,7 @@ import Gastos from "./componentes/Gastos";
 import Resumen from "./componentes/Resumen";
 import CargandoViaje from "./componentes/CargandoViaje";
 import CifrasViaje from "./componentes/CifrasViaje";
+import Atajos from "./componentes/Atajos";
 
 // El viaje que hay que abrir al arrancar: el del enlace compartido (#ABC123),
 // o el último en el que estuviste. Vacío si no hay ninguno.
@@ -511,7 +512,7 @@ function App() {
       <Globito cuantos={cuantosMios(pagosDelViaje(balances, viaje), soy)} />
       <BotonArriba />
       <BotonInstalar />
-      <Pie />
+      <Pie enViaje />
     </div>
   );
 }
@@ -619,7 +620,8 @@ function BotonArriba() {
 }
 
 // Un pie discreto, que la pantalla no acabe en un vacío enorme.
-function Pie() {
+// Los atajos solo sirven dentro de un viaje, así que fuera no se enseñan.
+function Pie({ enViaje = false }) {
   return (
     <footer className="pie">
       <span className="pie-marca">SaldoCero</span>
@@ -628,6 +630,7 @@ function Pie() {
       <span className="pie-punto">·</span>
       <span>Solo entra quien tiene el código</span>
       <BotonTema />
+      {enViaje && <Atajos />}
     </footer>
   );
 }

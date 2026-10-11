@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo } from "./teclado";
+import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoAyuda, esMac, listaDeAtajos } from "./teclado";
 
 const con = (matches) => ({ matchMedia: () => ({ matches }) });
 
@@ -91,5 +91,67 @@ describe("esAtajoNuevo", () => {
 
   it("con una ventana abierta, no", () => {
     expect(esAtajoNuevo(tecla("n"), true)).toBe(false);
+  });
+});
+
+describe("esAtajoAyuda", () => {
+  const tecla = (key, tagName = "BODY", extra = {}) => ({ key, target: { tagName }, ...extra });
+
+  it("la interrogación, sí, aunque lleve Mayúsculas", () => {
+    expect(esAtajoAyuda(tecla("?", "BODY", { shiftKey: true }))).toBe(true);
+  });
+
+  it("escribiendo, la interrogación es una interrogación", () => {
+    expect(esAtajoAyuda(tecla("?", "INPUT"))).toBe(false);
+    expect(esAtajoAyuda(tecla("?", "TEXTAREA"))).toBe(false);
+  });
+
+  it("con otra ventana abierta, no", () => {
+    expect(esAtajoAyuda(tecla("?"), true)).toBe(false);
+  });
+
+  it("con Ctrl, Cmd o Alt, no", () => {
+    expect(esAtajoAyuda(tecla("?", "BODY", { ctrlKey: true }))).toBe(false);
+    expect(esAtajoAyuda(tecla("?", "BODY", { metaKey: true }))).toBe(false);
+    expect(esAtajoAyuda(tecla("?", "BODY", { altKey: true }))).toBe(false);
+  });
+
+  it("la barra sola no, que es la del buscador", () => {
+    expect(esAtajoAyuda(tecla("/"))).toBe(false);
+  });
+});
+
+describe("esMac", () => {
+  it("en Mac, sí", () => {
+    expect(esMac({ platform: "MacIntel" })).toBe(true);
+  });
+
+  it("en Windows, no", () => {
+    expect(esMac({ platform: "Win32" })).toBe(false);
+  });
+
+  it("si no trae platform, mira el userAgent", () => {
+    expect(esMac({ platform: "", userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)" })).toBe(true);
+  });
+
+  it("sin navegador, no", () => {
+    expect(esMac(null)).toBe(false);
+  });
+});
+
+describe("listaDeAtajos", () => {
+  it("en Mac, deshacer va con ⌘", () => {
+    const deshacer = listaDeAtajos(true).find((a) => a.teclas.includes("Z"));
+    expect(deshacer.teclas).toEqual(["⌘", "Z"]);
+  });
+
+  it("si no, con Ctrl", () => {
+    const deshacer = listaDeAtajos(false).find((a) => a.teclas.includes("Z"));
+    expect(deshacer.teclas).toEqual(["Ctrl", "Z"]);
+  });
+
+  it("están todos los que hay", () => {
+    const teclas = listaDeAtajos().map((a) => a.teclas.at(-1));
+    expect(teclas).toEqual(["N", "/", "Z", "Esc", "?"]);
   });
 });
