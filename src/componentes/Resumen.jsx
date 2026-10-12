@@ -6,6 +6,7 @@ import {
   calcularPagos,
   calcularTotal,
   mediaPorGasto,
+  gastoMasCaro,
   marcarSaldados,
   quedaPorPagar,
   redondearPagos,
@@ -66,6 +67,7 @@ function Resumen({
   const [persona, setPersona] = useState(null);
   const total = calcularTotal(gastos);
   const media = mediaPorGasto(gastos);
+  const masCaro = gastoMasCaro(gastos);
   // El bote entra en los pagos (lo que sobra se devuelve), pero no es nadie:
   // ni le toca pagar la próxima ni sale en las listas de personas.
   const personas = sinBote(balances);
@@ -204,6 +206,12 @@ function Resumen({
             <> · <span className="sin-partir">{conMoneda(media, monedaViaje)} de media</span></>
           )}
         </div>
+        {masCaro && (
+          <div className="total-detalle">
+            El más caro: <span className="total-mas-caro">{masCaro.concepto}</span>,{" "}
+            <span className="sin-partir">{conMoneda(importeDeGasto(masCaro), monedaViaje)}</span>
+          </div>
+        )}
         {alDia !== null && (
           <div className="total-detalle">Sale a {conMoneda(alDia, monedaViaje)} por cabeza y día</div>
         )}

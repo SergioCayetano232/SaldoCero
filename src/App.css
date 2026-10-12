@@ -1919,6 +1919,10 @@ button:active {
   margin-top: 4px;
 }
 
+.total-mas-caro {
+  font-weight: 600;
+}
+
 /* Lo tuyo, en una pastilla sobre el degradado. El punto dice si es a favor o en contra. */
 .mi-saldo {
   display: inline-flex;

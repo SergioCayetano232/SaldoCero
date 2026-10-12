@@ -4,6 +4,7 @@ import {
   importeDeGasto,
   calcularTotal,
   mediaPorGasto,
+  gastoMasCaro,
   calcularBalances,
   calcularLeTocaPagar,
   estadoDeBalance,
@@ -74,6 +75,30 @@ describe("mediaPorGasto", () => {
   it("con uno o ninguno, no hay media", () => {
     expect(mediaPorGasto([gasto("a", 30, ["a"])])).toBeNull();
     expect(mediaPorGasto([])).toBeNull();
+  });
+});
+
+describe("gastoMasCaro", () => {
+  it("el de más importe", () => {
+    const hotel = { ...gasto("a", 300, ["a"]), concepto: "Hotel" };
+    expect(gastoMasCaro([gasto("a", 60, ["a"]), hotel, gasto("b", 30, ["b"])])).toBe(hotel);
+  });
+
+  it("lo pagado en otra moneda cuenta convertido", () => {
+    const yenes = { ...gasto("a", 5000, ["a"]), importeConvertido: 31 };
+    const cena = gasto("b", 50, ["b"]);
+    expect(gastoMasCaro([yenes, cena])).toBe(cena);
+  });
+
+  it("si empatan, el primero", () => {
+    const uno = { ...gasto("a", 40, ["a"]), id: "uno" };
+    const otro = { ...gasto("b", 40, ["b"]), id: "otro" };
+    expect(gastoMasCaro([uno, otro])).toBe(uno);
+  });
+
+  it("con uno o ninguno, nada", () => {
+    expect(gastoMasCaro([gasto("a", 30, ["a"])])).toBeNull();
+    expect(gastoMasCaro([])).toBeNull();
   });
 });
 

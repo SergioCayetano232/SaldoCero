@@ -27,6 +27,13 @@ export function mediaPorGasto(gastos) {
   return Math.round((calcularTotal(gastos) / gastos.length) * 100) / 100;
 }
 
+// El gasto más gordo del viaje. Con uno solo no tiene gracia: es ese.
+// Si empatan, el primero que se apuntó.
+export function gastoMasCaro(gastos) {
+  if (gastos.length < 2) return null;
+  return gastos.reduce((max, g) => (importeDeGasto(g) > importeDeGasto(max) ? g : max));
+}
+
 // Cuánto le toca de un gasto a cada uno de los suyos.
 //
 // Normalmente a partes iguales, pero un gasto puede traer partes: si uno se
