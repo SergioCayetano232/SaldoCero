@@ -25,18 +25,18 @@ function lineas(csv) {
 describe("gastosEnCSV", () => {
   it("una cabecera con una columna por viajero", () => {
     const [cabecera] = lineas(gastosEnCSV({ gastos: [], viajeros, moneda: "EUR" }));
-    expect(cabecera).toBe("Fecha;Concepto;Categoría;Pagó;Importe;Moneda;Importe en EUR;Ana;Luis");
+    expect(cabecera).toBe("Fecha;Concepto;Categoría;Pagó;Importe;Moneda;Importe en EUR;Nota;Ana;Luis");
   });
 
   it("un gasto por fila, con coma decimal y lo que le toca a cada uno", () => {
     const [, fila] = lineas(gastosEnCSV({ gastos: [cena], viajeros, moneda: "EUR" }));
-    expect(fila).toBe("2026-09-13;Cena;Comida;Ana;30,00;EUR;30,00;15,00;15,00");
+    expect(fila).toBe("2026-09-13;Cena;Comida;Ana;30,00;EUR;30,00;;15,00;15,00");
   });
 
   it("en otra moneda, lo pagado y lo convertido", () => {
     const yenes = { ...cena, importe: 5000, importeConvertido: 31.25, moneda: "JPY" };
     const [, fila] = lineas(gastosEnCSV({ gastos: [yenes], viajeros, moneda: "EUR" }));
-    expect(fila).toContain("5000,00;JPY;31,25;15,63;15,63");
+    expect(fila).toContain("5000,00;JPY;31,25;;15,63;15,63");
   });
 
   it("con reparto desigual y gente que no va", () => {
@@ -55,6 +55,16 @@ describe("gastosEnCSV", () => {
     const taxi = { ...cena, id: "g2", concepto: "Taxi", fecha: "2026-09-12" };
     const filas = lineas(gastosEnCSV({ gastos: [cena, taxi], viajeros, moneda: "EUR" }));
     expect(filas.slice(1).map((f) => f.split(";")[1])).toEqual(["Taxi", "Cena"]);
+  });
+
+  it("con la nota, y entre comillas si lleva saltos de línea", () => {
+    const conNota = { ...cena, nota: "Luis no tomó postre" };
+    const [, fila] = lineas(gastosEnCSV({ gastos: [conNota], viajeros, moneda: "EUR" }));
+    expect(fila.split(";")[7]).toBe("Luis no tomó postre");
+
+    const enDos = { ...cena, nota: "con propina\ny el agua" };
+    const csv = gastosEnCSV({ gastos: [enDos], viajeros, moneda: "EUR" });
+    expect(csv).toContain(';"con propina\ny el agua";');
   });
 
   it("una categoría que ya no existe sale como Otros", () => {

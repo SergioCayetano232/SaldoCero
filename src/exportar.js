@@ -29,6 +29,7 @@ export function gastosEnCSV({ gastos, viajeros, moneda }) {
     "Importe",
     "Moneda",
     `Importe en ${moneda}`,
+    "Nota",
     // Lo que le toca a cada uno de cada gasto, para poder rehacer las cuentas.
     ...viajeros.map((v) => v.nombre),
   ];
@@ -43,6 +44,7 @@ export function gastosEnCSV({ gastos, viajeros, moneda }) {
       cifra(g.importe),
       g.moneda ?? moneda,
       cifra(importeDeGasto(g)),
+      g.nota ?? "",
       ...viajeros.map((v) => cifra(parteDe(g, v.id, viajeros))),
     ]);
 
