@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { porCabeza } from "./porCabeza";
+import { porCabeza, porCabezaDelDia } from "./porCabeza";
 import { BOTE } from "./bote";
 
 const viajeros = [{ id: "a" }, { id: "b" }, { id: "c" }, { id: "d" }];
@@ -41,5 +41,21 @@ describe("porCabeza", () => {
 
   it("también los del bote", () => {
     expect(porCabeza({ pagadorId: BOTE, importe: 40 }, viajeros)).toBe(10);
+  });
+});
+
+describe("porCabezaDelDia", () => {
+  it("el total del día entre todos", () => {
+    const dia = [{ importe: 40 }, { importe: 100, importeConvertido: 20 }];
+    expect(porCabezaDelDia(dia, 4)).toBe(15);
+  });
+
+  it("con uno solo no hay cabezas que repartir", () => {
+    expect(porCabezaDelDia([{ importe: 40 }], 1)).toBeNull();
+  });
+
+  it("un día a cero no dice nada", () => {
+    expect(porCabezaDelDia([], 3)).toBeNull();
+    expect(porCabezaDelDia([{ importe: 0 }], 3)).toBeNull();
   });
 });

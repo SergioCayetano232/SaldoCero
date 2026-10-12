@@ -1042,6 +1042,12 @@ button:active {
   letter-spacing: 0;
   color: var(--tinta-suave);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.dia-por-cabeza {
+  font-weight: 500;
+  color: var(--tinta-tenue);
 }
 
 @media (max-width: 560px) {

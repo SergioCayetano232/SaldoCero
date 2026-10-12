@@ -20,7 +20,7 @@ import { posiblesRepetidos } from "../repetidos";
 import { leerSuma, esSuma } from "../sumas";
 import { pagadorPorDefecto } from "../pagador";
 import { pareceRaro } from "../raros";
-import { porCabeza } from "../porCabeza";
+import { porCabeza, porCabezaDelDia } from "../porCabeza";
 import { mensajeDeGasto } from "../avisarGasto";
 import { enlaceWhatsApp } from "../cobrar";
 import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
@@ -1117,6 +1117,12 @@ function Gastos({
                     </span>
                     <span className="dia-total">
                       {conMoneda(totalDelDia(dia), monedaViaje)}
+                      {/* Con filtros la lista no es el día entero, y la media engañaría. */}
+                      {!filtrando && porCabezaDelDia(dia.gastos, viajeros.length) !== null && (
+                        <span className="dia-por-cabeza">
+                          {" "}· {conMoneda(porCabezaDelDia(dia.gastos, viajeros.length), monedaViaje)} c/u
+                        </span>
+                      )}
                     </span>
                   </p>
                 )}
