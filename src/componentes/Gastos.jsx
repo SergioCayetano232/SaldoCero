@@ -20,6 +20,7 @@ import { posiblesRepetidos } from "../repetidos";
 import { leerSuma, esSuma } from "../sumas";
 import { pagadorPorDefecto } from "../pagador";
 import { pareceRaro } from "../raros";
+import { fechaRara, fechaConAno } from "../fechaRara";
 import { porCabeza, porCabezaDelDia } from "../porCabeza";
 import { mensajeDeGasto } from "../avisarGasto";
 import { enlaceWhatsApp } from "../cobrar";
@@ -141,6 +142,8 @@ function Gastos({
   // El gasto que se parece al que ibas a apuntar, con lo que tenías escrito.
   const [repetido, setRepetido] = useState(null);
   const [raro, setRaro] = useState(null);
+  const [otraFecha, setOtraFecha] = useState(null);
+  const campoFecha = useRef(null);
   const formulario = useRef(null);
   // Lo que se acaba de guardar, mientras el botón lo cuenta.
   const [hecho, setHecho] = useState(null);
@@ -329,6 +332,7 @@ function Gastos({
     setQuitarFoto(false);
     setRepetido(null);
     setRaro(null);
+    setOtraFecha(null);
   }
 
   function rellenar(f) {
@@ -420,8 +424,9 @@ function Gastos({
       ? repetido.gasto
       : null;
   const avisoRaro = raro && raro.importe === importe && raro.moneda === moneda ? raro : null;
+  const avisoFecha = otraFecha === fecha ? otraFecha : null;
 
-  function guardar(aunqueSeParezca = false, aunqueSeaMucho = false) {
+  function guardar(aunqueSeParezca = false, aunqueSeaMucho = false, aunqueSeaOtraFecha = false) {
     const importeNumero = importeLeido;
 
     if (pagadorId === "") return;
@@ -457,6 +462,11 @@ function Gastos({
     // Solo al apuntar uno nuevo: al editar, ya sabes cuál estás tocando.
     if (!editando && !aunqueSeaMucho && pareceRaro(gasto.importeConvertido, gastos)) {
       setRaro({ importe, moneda, convertido: gasto.importeConvertido });
+      return;
+    }
+
+    if (!editando && !aunqueSeaOtraFecha && fechaRara(fecha, gastos)) {
+      setOtraFecha(fecha);
       return;
     }
 
@@ -608,6 +618,7 @@ function Gastos({
                 </select>
 
                 <input
+                  ref={campoFecha}
                   type="date"
                   className="campo-fecha"
                   value={fecha}
@@ -964,6 +975,29 @@ function Gastos({
                     </div>
                   )}
 
+                  {avisoFecha && (
+                    <div className="aviso-repetido" role="alert">
+                      <p>
+                        🤔 El <strong>{fechaConAno(avisoFecha)}</strong> queda muy lejos{" "}
+                        {gastos.some((g) => g.fecha) ? "del resto de gastos del viaje" : "de hoy"}. ¿Es ese día?
+                      </p>
+                      <div className="aviso-repetido-botones">
+                        <button className="aviso-si" onClick={() => guardar(false, true, true)}>
+                          Sí, ese día
+                        </button>
+                        <button
+                          className="aviso-no"
+                          onClick={() => {
+                            setOtraFecha(null);
+                            campoFecha.current?.focus();
+                          }}
+                        >
+                          Corregir
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {avisoRepetido && (
                     <div className="aviso-repetido" role="alert">
                       <p>
@@ -973,7 +1007,7 @@ function Gastos({
                         ¿Es otro gasto?
                       </p>
                       <div className="aviso-repetido-botones">
-                        <button className="aviso-si" onClick={() => guardar(true, true)}>
+                        <button className="aviso-si" onClick={() => guardar(true, true, true)}>
                           Sí, apuntarlo
                         </button>
                         <button className="aviso-no" onClick={cancelar}>
@@ -997,7 +1031,7 @@ function Gastos({
                     key={hecho ?? "nada"}
                     className={hecho ? "hecho" : ""}
                     onClick={() => guardar()}
-                    disabled={marcados.length === 0 || typeof tasa !== "number" || descuadrado || Boolean(avisoRepetido) || Boolean(avisoRaro)}
+                    disabled={marcados.length === 0 || typeof tasa !== "number" || descuadrado || Boolean(avisoRepetido) || Boolean(avisoRaro) || Boolean(avisoFecha)}
                   >
                     {textoAlGuardar(hecho)}
                   </button>
