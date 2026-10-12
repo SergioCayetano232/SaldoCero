@@ -31,6 +31,7 @@ import { esElUltimo, sonLosUltimos } from "../confeti";
 import { deudoresConVarias } from "../deGolpe";
 import { porcentajes } from "../donut";
 import { vibrar } from "../vibrar";
+import { miSaldo, textoMiSaldo, estadoMiSaldo } from "../miSaldo";
 
 function Resumen({
   balances,
@@ -86,6 +87,8 @@ function Resumen({
     ? gastoPorCategoria(gastos, (g) => parteDe(g, deQuien.id, personas))
     : delViaje;
   const todoPagado = pagos.length > 0 && pendiente === 0;
+  // Si se ha ido del viaje, ya no hay saldo suyo que enseñar.
+  const loMio = personas.some((v) => v.id === soy) ? miSaldo(pagos, soy) : null;
 
   // Las barras se miden contra el que más ha puesto.
   const maxPuesto = Math.max(...personas.map((v) => v.puesto), 0);
@@ -203,6 +206,9 @@ function Resumen({
         </div>
         {alDia !== null && (
           <div className="total-detalle">Sale a {conMoneda(alDia, monedaViaje)} por cabeza y día</div>
+        )}
+        {loMio && gastos.length > 0 && (
+          <div className={`mi-saldo ${estadoMiSaldo(loMio)}`}>{textoMiSaldo(loMio, monedaViaje)}</div>
         )}
         <Presupuesto
           total={total}

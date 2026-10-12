@@ -1878,6 +1878,40 @@ button:active {
   margin-top: 4px;
 }
 
+/* Lo tuyo, en una pastilla sobre el degradado. El punto dice si es a favor o en contra. */
+.mi-saldo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 6px 13px 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  position: relative;
+  animation: aparecer-creciendo var(--medio) var(--curva-muelle);
+}
+
+.mi-saldo::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+
+.mi-saldo.le-deben::before {
+  background: #7ef0b0;
+}
+
+.mi-saldo.debe::before {
+  background: #ffb199;
+}
+
 /* ===== Día a día ===== */
 .por-dias {
   --eje: 46px;
