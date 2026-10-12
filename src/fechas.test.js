@@ -34,6 +34,22 @@ describe("comoTitulo", () => {
     expect(comoTitulo(ayer.toLocaleDateString("sv-SE"))).toBe("Ayer");
   });
 
+  it("los de este año, sin el año", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-12T10:00:00"));
+
+    expect(comoTitulo("2026-08-15")).toBe(enCorto("2026-08-15"));
+    vi.useRealTimers();
+  });
+
+  it("los de otro año, con el año", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-12T10:00:00"));
+
+    expect(comoTitulo("2025-10-11")).toBe(`${enCorto("2025-10-11")} 2025`);
+    vi.useRealTimers();
+  });
+
   it("los demás llevan su fecha", () => {
     const titulo = comoTitulo("2020-06-10");
 

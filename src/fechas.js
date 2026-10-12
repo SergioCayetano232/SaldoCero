@@ -39,11 +39,13 @@ export function enCorto(fecha) {
 }
 
 // El título de cada grupo de la lista: "Hoy", "Ayer" o el día entero.
+// Si es de otro año, con el año: si no, un gasto del año pasado no se distingue.
 export function comoTitulo(fecha) {
   if (fecha === hoy()) return "Hoy";
   if (fecha === ayer()) return "Ayer";
 
-  return enCorto(fecha);
+  const ano = fecha.slice(0, 4);
+  return ano === hoy().slice(0, 4) ? enCorto(fecha) : `${enCorto(fecha)} ${ano}`;
 }
 
 // Los gastos por días, del más reciente al más antiguo.
