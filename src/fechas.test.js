@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { hoy, ayer, diasRapidos, enCorto, comoTitulo, porDias, cuantosGastos, haceCuanto, apuntadoHace } from "./fechas";
+import { hoy, ayer, anteayer, diasRapidos, enCorto, comoTitulo, porDias, cuantosGastos, haceCuanto, apuntadoHace } from "./fechas";
 
 describe("hoy", () => {
   it("da la fecha en el formato de la base de datos", () => {
@@ -102,14 +102,25 @@ describe("ayer", () => {
   });
 });
 
+describe("anteayer", () => {
+  it("dos días antes, aunque cambie el mes", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-03-01T10:00:00"));
+
+    expect(anteayer()).toBe("2026-02-27");
+    vi.useRealTimers();
+  });
+});
+
 describe("diasRapidos", () => {
-  it("hoy primero y luego ayer", () => {
+  it("hoy primero, luego ayer y anteayer", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-10-06T18:00:00"));
 
     expect(diasRapidos()).toEqual([
       { nombre: "Hoy", fecha: "2026-10-06" },
       { nombre: "Ayer", fecha: "2026-10-05" },
+      { nombre: "Anteayer", fecha: "2026-10-04" },
     ]);
     vi.useRealTimers();
   });

@@ -6,16 +6,26 @@ export function hoy() {
 }
 
 export function ayer() {
+  return haceDias(1);
+}
+
+export function anteayer() {
+  return haceDias(2);
+}
+
+function haceDias(cuantos) {
   const dia = new Date();
-  dia.setDate(dia.getDate() - 1);
+  dia.setDate(dia.getDate() - cuantos);
   return dia.toLocaleDateString("sv-SE");
 }
 
 // Casi todo es de hoy o de ayer: para esos no hace falta abrir el calendario.
+// Anteayer también, que a la vuelta se apunta lo del sábado el lunes.
 export function diasRapidos() {
   return [
     { nombre: "Hoy", fecha: hoy() },
     { nombre: "Ayer", fecha: ayer() },
+    { nombre: "Anteayer", fecha: anteayer() },
   ];
 }
 
