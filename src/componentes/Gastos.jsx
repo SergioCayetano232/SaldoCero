@@ -21,6 +21,8 @@ import { leerSuma, esSuma } from "../sumas";
 import { pagadorPorDefecto } from "../pagador";
 import { pareceRaro } from "../raros";
 import { porCabeza } from "../porCabeza";
+import { mensajeDeGasto } from "../avisarGasto";
+import { enlaceWhatsApp } from "../cobrar";
 import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
 import { esAtajoBuscar, esAtajoNuevo, esOrdenador } from "../teclado";
 import Deslizable from "./Deslizable";
@@ -1183,6 +1185,18 @@ function Gastos({
 
                       {!cerrado && (
                         <span className="acciones">
+                          <a
+                            className="boton-avisar"
+                            href={enlaceWhatsApp(
+                              mensajeDeGasto({ gasto, viajeros, moneda: monedaViaje, codigo })
+                            )}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Contarlo por WhatsApp"
+                            aria-label={`Contar ${gasto.concepto} por WhatsApp`}
+                          >
+                            💬
+                          </a>
                           <button
                             className="boton-repetir"
                             onClick={() => repetir(gasto)}

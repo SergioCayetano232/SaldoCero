@@ -435,7 +435,8 @@ button:active {
 /* Los botones de quitar y editar solo salen cuando vas a por ellos. */
 .lista li .boton-quitar,
 .lista li .boton-editar,
-.lista li .boton-repetir {
+.lista li .boton-repetir,
+.lista li .boton-avisar {
   opacity: 0.25;
 }
 
@@ -444,7 +445,9 @@ button:active {
 .lista li:hover .boton-repetir,
 .lista li:focus-within .boton-quitar,
 .lista li:focus-within .boton-editar,
-.lista li:focus-within .boton-repetir {
+.lista li:focus-within .boton-repetir,
+.lista li:hover .boton-avisar,
+.lista li:focus-within .boton-avisar {
   opacity: 0.6;
 }
 
@@ -495,6 +498,38 @@ button:active {
   background-color: var(--teal-50);
   opacity: 1 !important;
   transform: scale(1.1);
+}
+
+.boton-avisar {
+  font-size: 14px;
+  line-height: 1;
+  padding: 6px 8px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: transform var(--rapido) var(--curva-muelle);
+}
+
+.boton-avisar:hover {
+  background-color: var(--teal-50);
+  opacity: 1 !important;
+  transform: scale(1.1);
+}
+
+/* En el móvil los cuatro botones no caben al lado del concepto: bajan con el
+   importe a una segunda línea. */
+@media (max-width: 560px) {
+  .lista-deslizable li {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    row-gap: 4px;
+  }
+
+  .lista-deslizable .acciones {
+    margin-left: auto;
+  }
 }
 
 /* El gasto que estás tocando, resaltado para no perderlo de vista. */
@@ -3833,7 +3868,8 @@ kbd {
   /* Sin ratón no hay "pasar por encima": los botones siempre a la vista. */
   .lista li .boton-quitar,
   .lista li .boton-editar,
-  .lista li .boton-repetir {
+  .lista li .boton-repetir,
+  .lista li .boton-avisar {
     opacity: 0.6;
   }
 }
