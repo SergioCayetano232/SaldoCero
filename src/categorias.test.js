@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { CATEGORIAS, categoriaDe, gastoPorCategoria } from "./categorias";
+import { CATEGORIAS, categoriaDe, conceptoSinEscribir, gastoPorCategoria } from "./categorias";
 import { importeDeGasto } from "./calculos";
 
 describe("categoriaDe", () => {
@@ -86,5 +86,18 @@ describe("gastoPorCategoria con el reparto de uno", () => {
       { importe: 40, categoria: "ocio", mia: 0 },
     ];
     expect(gastoPorCategoria(gastos, (g) => g.mia).map((c) => c.id)).toEqual(["comida"]);
+  });
+});
+
+describe("conceptoSinEscribir", () => {
+  it("el nombre de la categoría", () => {
+    expect(conceptoSinEscribir("comida")).toBe("Comida");
+    expect(conceptoSinEscribir("alojamiento")).toBe("Alojamiento");
+  });
+
+  it("en otros, o sin categoría, Gasto como antes", () => {
+    expect(conceptoSinEscribir("otros")).toBe("Gasto");
+    expect(conceptoSinEscribir(undefined)).toBe("Gasto");
+    expect(conceptoSinEscribir("submarinismo")).toBe("Gasto");
   });
 });

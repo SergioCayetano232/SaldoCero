@@ -44,6 +44,14 @@ describe("sugerirConceptos", () => {
     expect(conceptos(sugerirConceptos(gastos, "gast"))).toEqual([]);
   });
 
+  it("ni el nombre de la categoría que se pone solo", () => {
+    const lista = [
+      { concepto: "Comida", categoria: "comida" },
+      { concepto: "Comida china", categoria: "comida" },
+    ];
+    expect(conceptos(sugerirConceptos(lista, "com"))).toEqual(["Comida china"]);
+  });
+
   it("si ya está escrito entero, no lo repite", () => {
     expect(sugerirConceptos(gastos, "gasolina ")).toEqual([]);
   });

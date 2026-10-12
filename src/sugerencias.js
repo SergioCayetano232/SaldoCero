@@ -2,7 +2,7 @@
 // en el móvil. Y de paso, con la categoría que llevaban.
 
 import { normalizar } from "./filtros";
-import { POR_DEFECTO } from "./categorias";
+import { POR_DEFECTO, conceptoSinEscribir } from "./categorias";
 
 // Más de tres pastillas debajo del campo ya tapan el formulario.
 export const CUANTAS = 3;
@@ -18,8 +18,10 @@ export function sugerirConceptos(gastos, texto, cuantas = CUANTAS) {
   // Vienen de más viejo a más nuevo, así que el último que pasa es el bueno.
   gastos.forEach((gasto, orden) => {
     const clave = normalizar(gasto.concepto);
-    // "Gasto" es lo que se pone cuando lo dejas vacío, no lo escribió nadie.
+    // "Gasto" o "Comida" a secas es lo que se pone cuando lo dejas vacío, no lo
+    // escribió nadie.
     if (!clave.includes(buscado) || clave === "gasto") return;
+    if (clave === normalizar(conceptoSinEscribir(gasto.categoria))) return;
 
     const antes = vistos.get(clave);
     vistos.set(clave, {

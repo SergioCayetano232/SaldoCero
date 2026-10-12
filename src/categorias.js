@@ -17,6 +17,13 @@ export function categoriaDe(id) {
   return CATEGORIAS.find((c) => c.id === id) ?? CATEGORIAS.find((c) => c.id === POR_DEFECTO);
 }
 
+// El concepto de un gasto que dejas en blanco. "Comida" dice algo; "Otros", no,
+// así que esos se quedan en "Gasto" como siempre.
+export function conceptoSinEscribir(categoria) {
+  const c = categoriaDe(categoria);
+  return c.id === POR_DEFECTO ? "Gasto" : c.nombre;
+}
+
 // Cuánto se ha ido en cada cosa, de más a menos.
 // Solo salen las que tienen algo: una lista con seis ceros no dice nada.
 export function gastoPorCategoria(gastos, importeDeGasto) {

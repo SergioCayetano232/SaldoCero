@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { calcularTotal, importeDeGasto, participantesDeGasto } from "../calculos";
 import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, tasaComoTexto } from "../monedas";
-import { CATEGORIAS, POR_DEFECTO, categoriaDe } from "../categorias";
+import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
 import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
 import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
 import { sugerirConceptos } from "../sugerencias";
@@ -438,7 +438,7 @@ function Gastos({
       moneda,
       // Lo guardamos ya convertido: si mañana cambia el cambio, este viaje no.
       importeConvertido: Number((importeNumero * tasa).toFixed(2)),
-      concepto: concepto.trim() === "" ? "Gasto" : concepto.trim(),
+      concepto: concepto.trim() === "" ? conceptoSinEscribir(categoria) : concepto.trim(),
       categoria,
       fecha,
       nota,
