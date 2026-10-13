@@ -31,7 +31,7 @@ Pruébala aquí: https://saldo-cero-eight.vercel.app/
 - Si alguien ya apuntó lo mismo ese día, te pregunta antes de duplicarlo.
 - El desayuno de cada día lo copias de un toque, y al escribir te sugiere lo
   que ya has apuntado.
-- Buscas y filtras los gastos por concepto, persona o categoría, o ves solo
+- Buscas y filtras los gastos por concepto, importe, persona o categoría, o ves solo
   los tuyos con lo que te toca de cada uno.
 - Si borras algo sin querer, lo deshaces.
 - Puedes pagar en otra moneda y te lo convertimos a la del viaje.

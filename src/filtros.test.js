@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filtrarGastos, normalizar, hayFiltros, soloDe, soloDelDia, SIN_FILTROS } from "./filtros";
+import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, soloDelDia, SIN_FILTROS } from "./filtros";
 
 const ana = { id: "a", nombre: "Ana" };
 const luis = { id: "b", nombre: "Luis" };
@@ -124,5 +124,47 @@ describe("por día", () => {
   it("un filtro de antes, sin fecha, no deja fuera a nadie", () => {
     const viejo = { texto: "", viajeroId: "", categoria: "transporte" };
     expect(ids(filtrarGastos(gastos, viejo, viajeros))).toEqual(["2"]);
+  });
+});
+
+describe("cuadraElImporte", () => {
+  const cena = { importe: 12.5 };
+  // Pagado en libras, con el cambio ya hecho.
+  const pub = { importe: 20, importeConvertido: 23.4 };
+
+  it("con céntimos, justo ese, con coma o punto", () => {
+    expect(cuadraElImporte(cena, "12,50")).toBe(true);
+    expect(cuadraElImporte(cena, "12.5")).toBe(true);
+    expect(cuadraElImporte(cena, "12,51")).toBe(false);
+  });
+
+  it("sin céntimos, cualquiera de ese euro", () => {
+    expect(cuadraElImporte(cena, "12")).toBe(true);
+    expect(cuadraElImporte(cena, "13")).toBe(false);
+  });
+
+  it("vale lo pagado y lo convertido", () => {
+    expect(cuadraElImporte(pub, "20")).toBe(true);
+    expect(cuadraElImporte(pub, "23,40")).toBe(true);
+  });
+
+  it("lo que no es un número, no", () => {
+    expect(cuadraElImporte(cena, "cena")).toBe(false);
+    expect(cuadraElImporte(cena, "")).toBe(false);
+    expect(cuadraElImporte(cena, "12,505")).toBe(false);
+  });
+});
+
+describe("buscar por importe", () => {
+  const conImportes = [
+    { id: "1", concepto: "Cena", importe: 45.6, pagadorId: "a" },
+    { id: "2", concepto: "Menú 2", importe: 12, pagadorId: "a" },
+    { id: "3", concepto: "Taxi", importe: 2.3, pagadorId: "a" },
+  ];
+
+  it("encuentra por importe y sigue encontrando por concepto", () => {
+    expect(ids(filtrarGastos(conImportes, con({ texto: "45,60" }), viajeros))).toEqual(["1"]);
+    // "2" está en el concepto del menú y es el euro del taxi.
+    expect(ids(filtrarGastos(conImportes, con({ texto: "2" }), viajeros))).toEqual(["2", "3"]);
   });
 });

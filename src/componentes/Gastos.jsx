@@ -1048,7 +1048,7 @@ function Gastos({
                   className="filtro-buscar"
                   ref={buscador}
                   // El atajo solo se cuenta donde hay teclado.
-                  placeholder={esOrdenador() ? "Buscar un gasto (pulsa /)" : "Buscar un gasto"}
+                  placeholder={esOrdenador() ? "Concepto o importe (pulsa /)" : "Concepto o importe"}
                   aria-keyshortcuts="/"
                   aria-label="Buscar un gasto"
                   enterKeyHint="search"
