@@ -22,6 +22,11 @@ export function cifrasDelViaje(gastos, personas) {
   const quienMas = personas.reduce((max, p) => (!max || p.puesto > max.puesto ? p : max), null);
   const [categoria] = gastoPorCategoria(gastos, importeDeGasto);
 
+  // Cuántas veces sacó la cartera cada uno. Lo del bote no es de nadie.
+  const veces = personas.map((p) => ({ ...p, veces: gastos.filter((g) => g.pagadorId === p.id).length }));
+  const masVeces = Math.max(0, ...veces.map((p) => p.veces));
+  const losQueMas = veces.filter((p) => p.veces === masVeces);
+
   return {
     total,
     gastos: gastos.length,
@@ -38,6 +43,8 @@ export function cifrasDelViaje(gastos, personas) {
     // Si todos han puesto lo mismo, no hay nadie a quien señalar.
     quienMasPuso:
       quienMas && personas.some((p) => p.puesto < quienMas.puesto) ? quienMas : null,
+    // Con empate, o una sola vez, no hay nada que contar.
+    quienMasVeces: masVeces > 1 && losQueMas.length === 1 ? losQueMas[0] : null,
     categoria: categoria
       ? { ...categoria, porcentaje: Math.round((categoria.total / total) * 100) }
       : null,
@@ -54,6 +61,9 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   }
   if (cifras.quienMasPuso) {
     lineas.push(`🏆 El que más puso: ${cifras.quienMasPuso.nombre}, ${conMoneda(cifras.quienMasPuso.puesto, moneda)}`);
+  }
+  if (cifras.quienMasVeces) {
+    lineas.push(`💳 El que más veces pagó: ${cifras.quienMasVeces.nombre}, ${cifras.quienMasVeces.veces} veces`);
   }
   if (cifras.diaMasCaro) {
     lineas.push(`📅 El día más caro: ${enCorto(cifras.diaMasCaro.fecha)}, ${conMoneda(cifras.diaMasCaro.total, moneda)}`);

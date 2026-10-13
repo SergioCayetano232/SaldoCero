@@ -42,6 +42,25 @@ describe("cifrasDelViaje", () => {
     expect(cifras.quienMasPuso.nombre).toBe("Ana");
   });
 
+  it("quién pagó más veces, aunque no sea quien más puso", () => {
+    const otroTaxi = [...gastos, { pagadorId: "b", importe: 10, concepto: "Bus", fecha: "2026-09-12" }];
+    expect(cifrasDelViaje(otroTaxi, personas).quienMasVeces).toMatchObject({ nombre: "Luis", veces: 3 });
+  });
+
+  it("si empatan a veces, nadie", () => {
+    // Ana y Luis, dos cada uno.
+    expect(cifras.quienMasVeces).toBeNull();
+  });
+
+  it("pagar una vez no es pagar más veces", () => {
+    expect(cifrasDelViaje(gastos.slice(0, 1), personas).quienMasVeces).toBeNull();
+  });
+
+  it("lo del bote no cuenta como de nadie", () => {
+    const delBote = gastos.map((g) => ({ ...g, pagadorId: BOTE }));
+    expect(cifrasDelViaje(delBote, personas).quienMasVeces).toBeNull();
+  });
+
   it("la categoría que más se llevó, con su porcentaje", () => {
     expect(cifras.categoria).toMatchObject({ id: "alojamiento", total: 120, porcentaje: 50 });
   });
@@ -94,6 +113,14 @@ describe("cifrasEnTexto", () => {
     expect(texto).toContain("El gasto más gordo: Hotel, 120.00 € (Ana)");
     expect(texto).toContain("alojamiento, el 50 %");
     expect(texto).toContain("26.67 € por persona y día");
+  });
+
+  it("el que más veces pagó, si lo hay", () => {
+    const otroTaxi = [...gastos, { pagadorId: "b", importe: 10, concepto: "Bus", fecha: "2026-09-12" }];
+    expect(cifrasEnTexto(cifrasDelViaje(otroTaxi, personas), "Lisboa", "EUR")).toContain(
+      "El que más veces pagó: Luis, 3 veces",
+    );
+    expect(texto).not.toContain("más veces");
   });
 
   it("lo que no hay, no sale", () => {
