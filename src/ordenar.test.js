@@ -34,6 +34,19 @@ describe("ordenarGastos", () => {
     expect(ids(ordenarGastos(gastos, "pagador", viajeros))).toEqual([7, 3, 4, 1, 5, 2, 6]);
   });
 
+  it("últimos apuntados: lo último arriba, aunque sea de otro día", () => {
+    const apuntados = [
+      { id: "cena", fecha: "2026-10-10", creadoEn: "2026-10-10T21:00:00Z" },
+      { id: "taxi", fecha: "2026-10-12", creadoEn: "2026-10-12T09:00:00Z" },
+      // La comida del primer día, apuntada tarde.
+      { id: "comida", fecha: "2026-10-10", creadoEn: "2026-10-13T08:00:00Z" },
+      // Sin la hora en que se apuntó, al final.
+      { id: "viejo", fecha: "2026-10-09" },
+    ];
+
+    expect(ids(ordenarGastos(apuntados, "recientes", viajeros))).toEqual(["comida", "taxi", "cena", "viejo"]);
+  });
+
   it("no toca la lista de fuera", () => {
     const copia = [...gastos];
     ordenarGastos(gastos, "importe", viajeros);

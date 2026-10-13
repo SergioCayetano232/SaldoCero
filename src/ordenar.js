@@ -7,6 +7,7 @@ export const ORDENES = [
   { id: "dias", nombre: "Por días" },
   { id: "importe", nombre: "Más caros" },
   { id: "pagador", nombre: "Por quién pagó" },
+  { id: "recientes", nombre: "Últimos apuntados" },
 ];
 
 export const POR_DIAS = "dias";
@@ -16,6 +17,11 @@ export function ordenarGastos(gastos, orden, viajeros) {
   const masCaro = (a, b) => importeDeGasto(b) - importeDeGasto(a);
 
   if (orden === "importe") return [...gastos].sort(masCaro);
+
+  // Por cuándo se apuntó, no por el día del gasto: es para ver qué acaba de meter alguien.
+  if (orden === "recientes") {
+    return [...gastos].sort((a, b) => (b.creadoEn ?? "").localeCompare(a.creadoEn ?? ""));
+  }
 
   if (orden === "pagador") {
     const nombre = new Map(viajeros.map((v) => [v.id, v.nombre]));
