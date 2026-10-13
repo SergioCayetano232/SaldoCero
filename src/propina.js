@@ -18,5 +18,5 @@ export function conPropina(importe, porcentaje) {
   const propina = Math.round(base * porcentaje) / 100;
   if (propina <= 0) return null;
 
-  return `${String(importe).trim().replace(/\+$/, "")}+${comoTexto(propina)}`;
+  return `${String(importe).trim().replace(/[+-]$/, "")}+${comoTexto(propina)}`;
 }

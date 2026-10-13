@@ -25,6 +25,12 @@ describe("conPropina", () => {
     expect(conPropina("40+", 10)).toBe("40+4");
   });
 
+  it("sobre una resta, calcula sobre lo que queda", () => {
+    expect(conPropina("60-10", 10)).toBe("60-10+5");
+    expect(conPropina("40-", 10)).toBe("40+4");
+    expect(conPropina("10-20", 10)).toBeNull();
+  });
+
   it("lo que sale se lee bien como suma", () => {
     expect(leerSuma(conPropina("37,80", 10))).toBe(41.58);
   });

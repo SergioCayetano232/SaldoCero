@@ -27,7 +27,7 @@ Pruébala aquí: https://saldo-cero-eight.vercel.app/
 - Si te equivocas, editas el gasto y ya está. En el móvil, deslizándolo.
 - Le haces una foto al ticket y se queda guardada con el gasto. Y si hace
   falta, una nota: "incluye la propina".
-- En el importe puedes sumar, "12,5+8", sin sacar la calculadora.
+- En el importe puedes sumar y restar, "12,5+8" o "60-10", sin sacar la calculadora.
 - Si alguien ya apuntó lo mismo ese día, te pregunta antes de duplicarlo.
 - El desayuno de cada día lo copias de un toque, y al escribir te sugiere lo
   que ya has apuntado.

@@ -821,14 +821,25 @@ button:active {
   font-variant-numeric: tabular-nums;
 }
 
-/* El "+" dentro del campo, a la derecha, para el teclado que no lo tiene. */
-.boton-sumar {
+/* Con el campo ancho caben el − y el +. */
+.campo-suma.con-suma input {
+  padding-right: 76px;
+}
+
+/* El "+" y el "−" dentro del campo, a la derecha, para el teclado que no los tiene. */
+.botones-suma {
   position: absolute;
   top: 50%;
   right: 7px;
+  display: flex;
+  gap: 6px;
+  transform: translateY(-50%);
+}
+
+.boton-sumar {
   width: 30px;
   height: 30px;
-  margin-top: -15px;
+  padding: 0;
   border-radius: 50%;
   background-color: var(--teal-50);
   border: 1px solid var(--teal-300);
