@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { leerSuma, esSuma, llevaSigno, ponerSigno } from "./sumas";
+import { leerSuma, esSuma, llevaSigno, ponerSigno, signoColgando } from "./sumas";
 
 describe("leerSuma", () => {
   it("un número solo, como siempre", () => {
@@ -25,6 +25,26 @@ describe("leerSuma", () => {
     expect(leerSuma("60-10")).toBe(50);
     expect(leerSuma("45,60-5,60+2")).toBe(42);
     expect(leerSuma("12-")).toBe(12);
+  });
+
+  it("multiplica, con ×, x o *", () => {
+    expect(leerSuma("3×4,5")).toBe(13.5);
+    expect(leerSuma("3x4,5")).toBe(13.5);
+    expect(leerSuma("3X4,5")).toBe(13.5);
+    expect(leerSuma("3*4,5")).toBe(13.5);
+    expect(leerSuma("3×")).toBe(3);
+  });
+
+  it("primero multiplica y luego suma y resta", () => {
+    expect(leerSuma("2+3×4")).toBe(14);
+    expect(leerSuma("60-2×5")).toBe(50);
+    expect(leerSuma("3×2,5+4×1,20")).toBe(12.3);
+  });
+
+  it("una multiplicación a medias no se entiende", () => {
+    expect(leerSuma("3××4")).toBeNull();
+    expect(leerSuma("×4")).toBeNull();
+    expect(leerSuma("3×+4")).toBeNull();
   });
 
   it("si se pasa restando, sale cero o negativo, sin más", () => {
@@ -57,6 +77,8 @@ describe("esSuma", () => {
   it("con una resta, también", () => {
     expect(esSuma("60-10")).toBe(true);
     expect(esSuma("60-")).toBe(false);
+    expect(esSuma("3×4")).toBe(true);
+    expect(esSuma("3×")).toBe(false);
   });
 
   it("un número solo, o con el + colgando, no", () => {
@@ -70,6 +92,7 @@ describe("llevaSigno", () => {
   it("cuenta el signo colgando, que ya vas a escribir otro", () => {
     expect(llevaSigno("60+")).toBe(true);
     expect(llevaSigno("60-10")).toBe(true);
+    expect(llevaSigno("3×")).toBe(true);
     expect(llevaSigno("60")).toBe(false);
     expect(llevaSigno("")).toBe(false);
   });
@@ -84,5 +107,21 @@ describe("ponerSigno", () => {
   it("si ya había uno colgando, lo cambia", () => {
     expect(ponerSigno("60+", "-")).toBe("60-");
     expect(ponerSigno("60-10-", "+")).toBe("60-10+");
+    expect(ponerSigno("3x", "+")).toBe("3+");
+    expect(ponerSigno("3+", "×")).toBe("3×");
+  });
+});
+
+describe("signoColgando", () => {
+  it("el que haya al final, y los de multiplicar como ×", () => {
+    expect(signoColgando("60+")).toBe("+");
+    expect(signoColgando("60-")).toBe("-");
+    expect(signoColgando("3x")).toBe("×");
+    expect(signoColgando("3* ")).toBe("×");
+  });
+
+  it("si acaba en número, ninguno", () => {
+    expect(signoColgando("60-10")).toBeNull();
+    expect(signoColgando("")).toBeNull();
   });
 });

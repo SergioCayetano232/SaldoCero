@@ -1,7 +1,7 @@
 // La propina de un toque. Va como un sumando más ("40+4"), así se ve qué es el
 // gasto y qué la propina, y se puede retocar a mano.
 
-import { leerSuma } from "./sumas";
+import { leerSuma, ponerSigno } from "./sumas";
 
 export const PROPINAS = [5, 10];
 
@@ -18,5 +18,5 @@ export function conPropina(importe, porcentaje) {
   const propina = Math.round(base * porcentaje) / 100;
   if (propina <= 0) return null;
 
-  return `${String(importe).trim().replace(/[+-]$/, "")}+${comoTexto(propina)}`;
+  return `${ponerSigno(importe, "+")}${comoTexto(propina)}`;
 }

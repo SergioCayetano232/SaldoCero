@@ -821,9 +821,9 @@ button:active {
   font-variant-numeric: tabular-nums;
 }
 
-/* Con el campo ancho caben el − y el +. */
+/* Con el campo ancho caben el ×, el − y el +. */
 .campo-suma.con-suma input {
-  padding-right: 76px;
+  padding-right: 110px;
 }
 
 /* El "+" y el "−" dentro del campo, a la derecha, para el teclado que no los tiene. */

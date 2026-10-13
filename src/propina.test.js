@@ -31,6 +31,11 @@ describe("conPropina", () => {
     expect(conPropina("10-20", 10)).toBeNull();
   });
 
+  it("sobre una multiplicación, también", () => {
+    expect(conPropina("4×10", 10)).toBe("4×10+4");
+    expect(conPropina("40×", 10)).toBe("40+4");
+  });
+
   it("lo que sale se lee bien como suma", () => {
     expect(leerSuma(conPropina("37,80", 10))).toBe(41.58);
   });

@@ -17,7 +17,7 @@ import { esImagen } from "../tickets";
 import { LARGO_NOTA, quedanEnNota } from "../notas";
 import { cuentaDe, textoCuentaDe, textoParteDe } from "../loDeUno";
 import { posiblesRepetidos } from "../repetidos";
-import { leerSuma, esSuma, llevaSigno, ponerSigno } from "../sumas";
+import { leerSuma, esSuma, llevaSigno, ponerSigno, signoColgando } from "../sumas";
 import { arreglarConcepto } from "../concepto";
 import { pagadorPorDefecto } from "../pagador";
 import { pareceRaro } from "../raros";
@@ -130,12 +130,13 @@ function Gastos({
     campoImporte.current?.focus();
   }
 
-  // Estrecho solo cabe el +. Con un signo ya puesto el campo se ensancha y sale
-  // también el −, menos el que ya esté colgando al final.
+  // Estrecho solo cabe el +. Con un signo ya puesto el campo se ensancha y salen
+  // también el × y el −, menos el que ya esté colgando al final.
   const conSigno = llevaSigno(importe);
-  const colgando = importe.trim().slice(-1);
+  const colgando = signoColgando(importe);
   const verMas = conSigno ? !isNaN(importeLeido) && colgando !== "+" : importeLeido > 0;
   const verMenos = conSigno && !isNaN(importeLeido) && colgando !== "-";
+  const verPor = conSigno && !isNaN(importeLeido) && colgando !== "×";
 
   // La foto nueva que has elegido, la que ya tenía el gasto que editas, y si la quitas.
   const [foto, setFoto] = useState(null);
@@ -596,8 +597,19 @@ function Gastos({
                       if (e.key === "Enter") guardar();
                     }}
                   />
-                  {/* El teclado del móvil no trae ni "+" ni "-": van aquí. */}
+                  {/* El teclado del móvil no trae ni "+" ni "-" ni "×": van aquí. */}
                   <div className="botones-suma">
+                    {verPor && (
+                      <button
+                        className="boton-sumar"
+                        onPointerDown={(e) => e.preventDefault()}
+                        onClick={() => otroSumando("×")}
+                        title="Multiplicarlo"
+                        aria-label="Multiplicarlo"
+                      >
+                        ×
+                      </button>
+                    )}
                     {verMenos && (
                       <button
                         className="boton-sumar"
@@ -682,7 +694,7 @@ function Gastos({
               {esSuma(importe) && (
                 <p className={`resultado-suma ${!(importeLeido > 0) ? "suma-mal" : ""}`} role="status">
                   {isNaN(importeLeido)
-                    ? "Esa cuenta no se entiende: solo números, + y −"
+                    ? "Esa cuenta no se entiende: solo números, +, − y ×"
                     : importeLeido > 0
                       ? `= ${conMoneda(importeLeido, moneda)}`
                       : "Así no queda nada que pagar"}
