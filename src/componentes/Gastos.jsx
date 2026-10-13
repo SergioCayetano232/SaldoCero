@@ -18,6 +18,7 @@ import { LARGO_NOTA, quedanEnNota } from "../notas";
 import { cuentaDe, textoCuentaDe, textoParteDe } from "../loDeUno";
 import { posiblesRepetidos } from "../repetidos";
 import { leerSuma, esSuma, llevaSigno, ponerSigno } from "../sumas";
+import { arreglarConcepto } from "../concepto";
 import { pagadorPorDefecto } from "../pagador";
 import { pareceRaro } from "../raros";
 import { fechaRara, fechaConAno } from "../fechaRara";
@@ -450,7 +451,7 @@ function Gastos({
       moneda,
       // Lo guardamos ya convertido: si mañana cambia el cambio, este viaje no.
       importeConvertido: Number((importeNumero * tasa).toFixed(2)),
-      concepto: concepto.trim() === "" ? conceptoSinEscribir(categoria) : concepto.trim(),
+      concepto: concepto.trim() === "" ? conceptoSinEscribir(categoria) : arreglarConcepto(concepto),
       categoria,
       fecha,
       nota,
