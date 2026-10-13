@@ -34,6 +34,18 @@ describe("cifrasDelViaje", () => {
     expect(cifras.diaMasCaro).toEqual({ fecha: "2026-09-10", total: 160 });
   });
 
+  it("el día más barato", () => {
+    expect(cifras.diaMasBarato).toEqual({ fecha: "2026-09-11", total: 30 });
+  });
+
+  it("si todos los días costaron lo mismo, no hay día más barato", () => {
+    const iguales = [
+      { pagadorId: "a", importe: 50, concepto: "Cena", fecha: "2026-09-10" },
+      { pagadorId: "b", importe: 50, concepto: "Cena", fecha: "2026-09-11" },
+    ];
+    expect(cifrasDelViaje(iguales, personas).diaMasBarato).toBeNull();
+  });
+
   it("el gasto más gordo, con quién lo pagó", () => {
     expect(cifras.gastoMasGrande).toEqual({ concepto: "Hotel", importe: 120, quien: "Ana" });
   });
@@ -84,6 +96,7 @@ describe("cifrasDelViaje", () => {
     const unDia = gastos.slice(0, 2);
     const c = cifrasDelViaje(unDia, personas);
     expect(c.diaMasCaro).toBeNull();
+    expect(c.diaMasBarato).toBeNull();
     expect(c.porPersonaYDia).toBeNull();
   });
 
@@ -113,6 +126,8 @@ describe("cifrasEnTexto", () => {
     expect(texto).toContain("El gasto más gordo: Hotel, 120.00 € (Ana)");
     expect(texto).toContain("alojamiento, el 50 %");
     expect(texto).toContain("26.67 € por persona y día");
+    expect(texto).toContain("El día más tranquilo:");
+    expect(texto).toContain("30.00 €");
   });
 
   it("el que más veces pagó, si lo hay", () => {

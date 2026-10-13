@@ -17,6 +17,7 @@ export function cifrasDelViaje(gastos, personas) {
     .map((d) => ({ fecha: d.fecha, total: calcularTotal(d.gastos) }));
 
   const masCaro = dias.reduce((max, d) => (!max || d.total > max.total ? d : max), null);
+  const masBarato = dias.reduce((min, d) => (!min || d.total < min.total ? d : min), null);
   const grande = gastos.reduce((max, g) => (importeDeGasto(g) > importeDeGasto(max) ? g : max));
   const pagador = personas.find((p) => p.id === grande.pagadorId);
   const quienMas = personas.reduce((max, p) => (!max || p.puesto > max.puesto ? p : max), null);
@@ -35,6 +36,8 @@ export function cifrasDelViaje(gastos, personas) {
     porPersonaYDia:
       dias.length > 1 && personas.length > 0 ? total / personas.length / dias.length : null,
     diaMasCaro: dias.length > 1 ? masCaro : null,
+    // Si todos los días costaron lo mismo, el más barato es también el más caro.
+    diaMasBarato: dias.length > 1 && masBarato.total < masCaro.total ? masBarato : null,
     gastoMasGrande: {
       concepto: grande.concepto,
       importe: importeDeGasto(grande),
@@ -67,6 +70,9 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   }
   if (cifras.diaMasCaro) {
     lineas.push(`📅 El día más caro: ${enCorto(cifras.diaMasCaro.fecha)}, ${conMoneda(cifras.diaMasCaro.total, moneda)}`);
+  }
+  if (cifras.diaMasBarato) {
+    lineas.push(`🧘 El día más tranquilo: ${enCorto(cifras.diaMasBarato.fecha)}, ${conMoneda(cifras.diaMasBarato.total, moneda)}`);
   }
   const g = cifras.gastoMasGrande;
   lineas.push(`💸 El gasto más gordo: ${g.concepto}, ${conMoneda(g.importe, moneda)}${g.quien ? ` (${g.quien})` : ""}`);
