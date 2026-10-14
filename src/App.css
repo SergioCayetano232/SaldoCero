@@ -926,6 +926,14 @@ button:active {
   font-weight: 500;
 }
 
+/* No frena nada, solo que lo sepas antes de darle. */
+.aviso-presupuesto {
+  margin-top: -2px;
+  font-size: 13px;
+  color: var(--naranja-500);
+  font-variant-numeric: tabular-nums;
+}
+
 .selector-moneda {
   width: auto;
   flex-shrink: 0;

@@ -439,6 +439,7 @@ function App() {
         hayBote={hayBote(aportaciones, gastos)}
         gastos={gastos}
         monedaViaje={viaje.moneda ?? "EUR"}
+        presupuesto={viaje.presupuesto}
         recienLlegados={novedad?.ids}
         cerrado={cerrado}
         soy={soy}

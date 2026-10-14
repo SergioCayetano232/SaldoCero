@@ -21,6 +21,7 @@ import { leerSuma, esSuma, llevaSigno, ponerSigno, signoColgando } from "../suma
 import { arreglarConcepto } from "../concepto";
 import { pagadorPorDefecto } from "../pagador";
 import { pareceRaro } from "../raros";
+import { teSacaDelPresupuesto } from "../presupuesto";
 import { fechaRara, fechaConAno } from "../fechaRara";
 import { porCabeza, porCabezaDelDia } from "../porCabeza";
 import { mensajeDeGasto } from "../avisarGasto";
@@ -37,6 +38,7 @@ function Gastos({
   hayBote = false,
   gastos,
   monedaViaje,
+  presupuesto = null,
   recienLlegados,
   cerrado,
   onAnadir,
@@ -437,6 +439,12 @@ function Gastos({
       : null;
   const avisoRaro = raro && raro.importe === importe && raro.moneda === moneda ? raro : null;
   const avisoFecha = otraFecha === fecha ? otraFecha : null;
+  // Al editar, el gasto de antes no cuenta: lo vas a cambiar por este.
+  const pasoDelPresupuesto = teSacaDelPresupuesto(
+    calcularTotal(gastos.filter((g) => g.id !== editando)),
+    typeof tasa === "number" ? importeLeido * tasa : NaN,
+    presupuesto,
+  );
 
   function guardar(aunqueSeParezca = false, aunqueSeaMucho = false, aunqueSeaOtraFecha = false) {
     const importeNumero = importeLeido;
@@ -758,6 +766,12 @@ function Gastos({
                     </>
                   )}
                 </div>
+              )}
+
+              {pasoDelPresupuesto !== null && (
+                <p className="aviso-presupuesto" role="status">
+                  Con este os pasáis del presupuesto en {conMoneda(pasoDelPresupuesto, monedaViaje)}
+                </p>
               )}
 
               <input

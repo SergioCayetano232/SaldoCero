@@ -28,6 +28,16 @@ export function textoPresupuesto(estado, presupuesto, moneda) {
   return `Quedan ${conMoneda(Math.max(estado.queda, 0), moneda)} de ${conMoneda(presupuesto, moneda)}`;
 }
 
+// Lo que os pasaríais con el gasto que estás apuntando. Solo si es este el que
+// os saca: si ya ibais pasados, eso ya lo dice la barra. null si no.
+export function teSacaDelPresupuesto(gastado, importe, presupuesto) {
+  if (!(presupuesto > 0) || !(importe > 0)) return null;
+  if (presupuesto - gastado < -0.005) return null;
+
+  const pasado = gastado + importe - presupuesto;
+  return pasado > 0.005 ? pasado : null;
+}
+
 // La media por día, del primer gasto al último. No sabemos cuándo acaba el
 // viaje, así que solo contamos los días que ya tienen algo apuntado en medio.
 export function ritmoDeGasto(gastos) {
