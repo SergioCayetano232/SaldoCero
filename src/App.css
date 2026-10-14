@@ -1229,6 +1229,15 @@ button:active {
   animation-delay: 80ms;
 }
 
+/* Lo que costó la última vez, que se sepa qué va a poner en el importe. */
+.sugerencia-importe {
+  margin-left: 2px;
+  padding-left: 7px;
+  border-left: 1px solid var(--linea);
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
 /* El emoji delante de cada gasto en la lista. */
 .gasto-icono {
   font-size: 17px;

@@ -4,7 +4,7 @@ import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, tasaComoTexto
 import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
 import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
 import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
-import { sugerirConceptos } from "../sugerencias";
+import { sugerirConceptos, importeSugerido } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
 import { ordenarGastos, ordenGuardado, ORDENES, POR_DIAS } from "../ordenar";
 import { conPropina, PROPINAS } from "../propina";
@@ -287,6 +287,8 @@ function Gastos({
   function usarSugerencia(s) {
     setConcepto(s.concepto);
     elegirCategoria(s.categoria);
+    const deLaUltimaVez = importeSugerido(s, importe, moneda);
+    if (deLaUltimaVez) escribirImporte(deLaUltimaVez);
   }
 
   function elegirCategoria(id) {
@@ -833,6 +835,7 @@ function Gastos({
                 <div className="sugerencias">
                   {sugerencias.map((s) => {
                     const c = categoriaDe(s.categoria);
+                    const conImporte = importeSugerido(s, importe, moneda) !== null;
                     return (
                       <button
                         key={s.concepto}
@@ -842,6 +845,9 @@ function Gastos({
                       >
                         <span className="pastilla-emoji">{c.emoji}</span>
                         {s.concepto}
+                        {conImporte && (
+                          <span className="sugerencia-importe">{conMoneda(s.importe, moneda)}</span>
+                        )}
                       </button>
                     );
                   })}

@@ -8,7 +8,7 @@ import { POR_DEFECTO, conceptoSinEscribir } from "./categorias";
 export const CUANTAS = 3;
 
 // Los que empiezan por lo escrito van antes que los que solo lo contienen; y
-// entre esos, el más repetido. La categoría, la de la última vez.
+// entre esos, el más repetido. La categoría y el importe, los de la última vez.
 export function sugerirConceptos(gastos, texto, cuantas = CUANTAS) {
   const buscado = normalizar(texto);
   if (!buscado) return [];
@@ -27,6 +27,8 @@ export function sugerirConceptos(gastos, texto, cuantas = CUANTAS) {
     vistos.set(clave, {
       concepto: gasto.concepto.trim(),
       categoria: gasto.categoria ?? POR_DEFECTO,
+      importe: gasto.importe ?? null,
+      moneda: gasto.moneda ?? null,
       veces: (antes?.veces ?? 0) + 1,
       orden,
     });
@@ -40,5 +42,14 @@ export function sugerirConceptos(gastos, texto, cuantas = CUANTAS) {
   return [...vistos.values()]
     .sort((a, b) => empieza(b) - empieza(a) || b.veces - a.veces || b.orden - a.orden)
     .slice(0, cuantas)
-    .map(({ concepto, categoria }) => ({ concepto, categoria }));
+    .map(({ concepto, categoria, importe, moneda }) => ({ concepto, categoria, importe, moneda }));
+}
+
+// Lo que se pone en el importe al tocar la sugerencia: el de la última vez, con
+// coma. Solo si no has escrito nada y vas en la misma moneda, que si no el
+// número no significa lo mismo.
+export function importeSugerido(sugerencia, escrito, moneda) {
+  if (String(escrito ?? "").trim() !== "") return null;
+  if (!(sugerencia.importe > 0) || sugerencia.moneda !== moneda) return null;
+  return String(Math.round(sugerencia.importe * 100) / 100).replace(".", ",");
 }

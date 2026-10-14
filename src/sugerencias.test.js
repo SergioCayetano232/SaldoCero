@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { sugerirConceptos } from "./sugerencias";
+import { sugerirConceptos, importeSugerido } from "./sugerencias";
 
 // De más viejo a más nuevo, como llegan de la base de datos.
 const gastos = [
@@ -29,7 +29,9 @@ describe("sugerirConceptos", () => {
   });
 
   it("cada concepto sale una vez, con la categoría de la última", () => {
-    expect(sugerirConceptos(gastos, "caf")).toEqual([{ concepto: "café", categoria: "otros" }]);
+    expect(sugerirConceptos(gastos, "caf")).toEqual([
+      { concepto: "café", categoria: "otros", importe: null, moneda: null },
+    ]);
   });
 
   it("el más repetido va antes", () => {
@@ -64,7 +66,39 @@ describe("sugerirConceptos", () => {
 
   it("los de antes sin categoría van a otros", () => {
     expect(sugerirConceptos([{ concepto: "Peaje" }], "pea")).toEqual([
-      { concepto: "Peaje", categoria: "otros" },
+      { concepto: "Peaje", categoria: "otros", importe: null, moneda: null },
     ]);
+  });
+
+  it("trae el importe y la moneda de la última vez", () => {
+    const lista = [
+      { concepto: "Café", importe: 1.2, moneda: "EUR" },
+      { concepto: "Café", importe: 1.5, moneda: "EUR" },
+    ];
+    const [cafe] = sugerirConceptos(lista, "caf");
+    expect(cafe.importe).toBe(1.5);
+    expect(cafe.moneda).toBe("EUR");
+  });
+});
+
+describe("importeSugerido", () => {
+  const cafe = { concepto: "Café", importe: 1.5, moneda: "EUR" };
+
+  it("con el campo vacío, el de la última vez y con coma", () => {
+    expect(importeSugerido(cafe, "", "EUR")).toBe("1,5");
+    expect(importeSugerido(cafe, "  ", "EUR")).toBe("1,5");
+    expect(importeSugerido({ ...cafe, importe: 20 }, "", "EUR")).toBe("20");
+  });
+
+  it("si ya has escrito algo, no lo pisa", () => {
+    expect(importeSugerido(cafe, "2", "EUR")).toBeNull();
+  });
+
+  it("en otra moneda no vale", () => {
+    expect(importeSugerido(cafe, "", "USD")).toBeNull();
+  });
+
+  it("sin importe guardado, nada", () => {
+    expect(importeSugerido({ concepto: "Peaje", importe: null, moneda: null }, "", "EUR")).toBeNull();
   });
 });
