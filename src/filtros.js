@@ -6,7 +6,7 @@ import { importeDeGasto, participantesDeGasto } from "./calculos";
 // Con menos gastos que estos, la barra de filtros estorba más que ayuda.
 export const MINIMO_PARA_FILTRAR = 4;
 
-export const SIN_FILTROS = { texto: "", viajeroId: "", categoria: "", fecha: "" };
+export const SIN_FILTROS = { texto: "", viajeroId: "", categoria: "", fecha: "", conTicket: false };
 
 // "Cafetería" y "cafeteria" tienen que dar lo mismo al buscar.
 export function normalizar(texto) {
@@ -40,7 +40,14 @@ export function soloDelDia(fecha) {
 }
 
 export function hayFiltros(filtros) {
-  return Boolean(normalizar(filtros.texto) || filtros.viajeroId || filtros.categoria || filtros.fecha);
+  return Boolean(
+    normalizar(filtros.texto) || filtros.viajeroId || filtros.categoria || filtros.fecha || filtros.conTicket,
+  );
+}
+
+// Si no hay ni una foto, el botón de los tickets sobra.
+export function hayTickets(gastos) {
+  return gastos.some((gasto) => Boolean(gasto.ticket));
 }
 
 // Por persona valen los que pagó y en los que está: es lo que miras al repasar lo tuyo.
@@ -53,6 +60,8 @@ export function filtrarGastos(gastos, filtros, viajeros) {
     if (buscado && !dondeBuscar.includes(buscado) && !cuadraElImporte(gasto, filtros.texto)) return false;
     if (filtros.categoria && (gasto.categoria ?? "otros") !== filtros.categoria) return false;
     if (filtros.fecha && gasto.fecha !== filtros.fecha) return false;
+    // Para dar con el ticket que te pide alguien sin abrir gasto por gasto.
+    if (filtros.conTicket && !gasto.ticket) return false;
 
     if (filtros.viajeroId) {
       const pago = gasto.pagadorId === filtros.viajeroId;

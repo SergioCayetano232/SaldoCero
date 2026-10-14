@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { calcularTotal, importeDeGasto, participantesDeGasto } from "../calculos";
 import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, tasaComoTexto } from "../monedas";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
-import { filtrarGastos, hayFiltros, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
+import { filtrarGastos, hayFiltros, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
 import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
 import { sugerirConceptos, importeSugerido } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
@@ -1136,6 +1136,18 @@ function Gastos({
                     Solo lo mío
                   </button>
                 )}
+
+                {hayTickets(gastos) && (
+                  <button
+                    className={`filtro-mio ${filtros.conTicket ? "activo" : ""}`}
+                    onClick={() => filtrar({ conTicket: !filtros.conTicket })}
+                    aria-pressed={filtros.conTicket}
+                    aria-label="Solo con ticket"
+                    title="Solo los que tienen foto del ticket"
+                  >
+                    📷<span className="filtro-palabra"> Tickets</span>
+                  </button>
+                )}
               </div>
 
               <div className="filtro-selectores">
@@ -1186,7 +1198,8 @@ function Gastos({
                 <p className="filtro-resumen" role="status">
                   <span>
                     {visibles.length} de {gastos.length} gastos
-                    {filtros.fecha && ` del ${enCorto(filtros.fecha)}`} · suman{" "}
+                    {filtros.fecha && ` del ${enCorto(filtros.fecha)}`}
+                    {filtros.conTicket && " con ticket"} · suman{" "}
                     <strong>{conMoneda(calcularTotal(visibles), monedaViaje)}</strong>
                     {deQuien && (
                       <span className="filtro-cuenta">

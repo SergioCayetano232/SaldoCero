@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, soloDelDia, SIN_FILTROS } from "./filtros";
+import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, soloDelDia, SIN_FILTROS, hayTickets } from "./filtros";
 
 const ana = { id: "a", nombre: "Ana" };
 const luis = { id: "b", nombre: "Luis" };
@@ -8,7 +8,7 @@ const viajeros = [ana, luis, marta];
 
 const gastos = [
   { id: "1", concepto: "Cena en la Cafetería", categoria: "comida", pagadorId: "a", participantes: ["a", "b", "c"] },
-  { id: "2", concepto: "Taxi", categoria: "transporte", pagadorId: "b", participantes: ["b", "c"], nota: "Incluye la propina" },
+  { id: "2", concepto: "Taxi", categoria: "transporte", pagadorId: "b", participantes: ["b", "c"], nota: "Incluye la propina", ticket: "v1/2.jpg" },
   { id: "3", concepto: "Museo", categoria: "ocio", pagadorId: "c", participantes: ["c"] },
   // De los de antes: sin participantes ni categoría, que va entre todos y en "otros".
   { id: "4", concepto: "Peaje", pagadorId: "a" },
@@ -45,7 +45,7 @@ describe("hayFiltros", () => {
 
 describe("soloDe", () => {
   it("filtra por esa persona y nada más", () => {
-    expect(soloDe("b")).toEqual({ texto: "", viajeroId: "b", categoria: "", fecha: "" });
+    expect(soloDe("b")).toEqual({ texto: "", viajeroId: "b", categoria: "", fecha: "", conTicket: false });
   });
 
   it("salen los que pagó y en los que está", () => {
@@ -166,5 +166,31 @@ describe("buscar por importe", () => {
     expect(ids(filtrarGastos(conImportes, con({ texto: "45,60" }), viajeros))).toEqual(["1"]);
     // "2" está en el concepto del menú y es el euro del taxi.
     expect(ids(filtrarGastos(conImportes, con({ texto: "2" }), viajeros))).toEqual(["2", "3"]);
+  });
+});
+
+describe("solo con ticket", () => {
+  it("cuenta como filtro", () => {
+    expect(hayFiltros(con({ conTicket: true }))).toBe(true);
+  });
+
+  it("deja solo los que llevan foto", () => {
+    expect(ids(filtrarGastos(gastos, con({ conTicket: true }), viajeros))).toEqual(["2"]);
+  });
+
+  it("se junta con los demás filtros", () => {
+    expect(ids(filtrarGastos(gastos, con({ conTicket: true, categoria: "comida" }), viajeros))).toEqual([]);
+  });
+
+  it("apagado no quita nada", () => {
+    expect(filtrarGastos(gastos, SIN_FILTROS, viajeros)).toHaveLength(4);
+  });
+});
+
+describe("hayTickets", () => {
+  it("con alguna foto, sí; sin ninguna, no", () => {
+    expect(hayTickets(gastos)).toBe(true);
+    expect(hayTickets(gastos.filter((g) => !g.ticket))).toBe(false);
+    expect(hayTickets([])).toBe(false);
   });
 });
