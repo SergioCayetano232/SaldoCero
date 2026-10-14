@@ -30,6 +30,7 @@ import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
 import { esAtajoBuscar, esAtajoNuevo, esOrdenador } from "../teclado";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
+import Resaltado from "./Resaltado";
 
 function Gastos({
   codigo,
@@ -231,6 +232,7 @@ function Gastos({
   const puedeFiltrar = gastos.length >= MINIMO_PARA_FILTRAR;
   const filtrando = puedeFiltrar && hayFiltros(filtros);
   const visibles = filtrando ? filtrarGastos(gastos, filtros, viajeros) : gastos;
+  const buscado = filtrando ? filtros.texto : "";
   // Solo las categorías que hay, que elegir una vacía no sirve de nada.
   const categoriasUsadas = CATEGORIAS.filter((c) =>
     gastos.some((g) => (g.categoria ?? POR_DEFECTO) === c.id)
@@ -1260,7 +1262,9 @@ function Gastos({
                       </span>
 
                       <span>
-                        <span className="gasto-concepto">{gasto.concepto}</span>
+                        <span className="gasto-concepto">
+                          <Resaltado texto={gasto.concepto} buscado={buscado} />
+                        </span>
                         {gasto.ticket && (
                           <button
                             className="boton-ticket"
@@ -1285,7 +1289,11 @@ function Gastos({
                             {textoParteDe(gasto, deQuien.id, viajeros, esYo, monedaViaje)}
                           </small>
                         )}
-                        {gasto.nota && <small className="gasto-nota">{gasto.nota}</small>}
+                        {gasto.nota && (
+                          <small className="gasto-nota">
+                            <Resaltado texto={gasto.nota} buscado={buscado} />
+                          </small>
+                        )}
                       </span>
 
                       <span className="gasto-importe">

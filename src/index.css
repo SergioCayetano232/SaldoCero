@@ -15,6 +15,8 @@
   --naranja-100: #fdeee0;
   --naranja-400: #f4a259;
   --naranja-500: #e8862e;
+  /* El fondo de lo que has buscado en la lista. */
+  --resaltado: #fde7a6;
 
   /* Grises con un puntito de verde, que peguen con el teal. */
   --tinta: #14262c;
@@ -92,6 +94,7 @@
   --naranja-100: #3a2a18;
   --naranja-400: #f4a259;
   --naranja-500: #f0a765;
+  --resaltado: #6b5214;
 
   --tinta: #e8f0f1;
   --tinta-suave: #9db3ba;
