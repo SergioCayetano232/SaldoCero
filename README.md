@@ -31,9 +31,9 @@ Pruébala aquí: https://saldo-cero-eight.vercel.app/
   "3×4,5" o "120÷4", sin sacar la calculadora.
 - Si alguien ya apuntó lo mismo ese día, te pregunta antes de duplicarlo.
 - El desayuno de cada día lo copias de un toque, y al escribir te sugiere lo
-  que ya has apuntado.
-- Buscas y filtras los gastos por concepto, importe, persona o categoría, o ves solo
-  los tuyos con lo que te toca de cada uno.
+  que ya has apuntado, con lo que costó la última vez.
+- Buscas y filtras los gastos por concepto, importe, persona, categoría o si
+  llevan ticket, o ves solo los tuyos con lo que te toca de cada uno.
 - Si borras algo sin querer, lo deshaces.
 - Puedes pagar en otra moneda y te lo convertimos a la del viaje.
 - Si hacéis bote, apuntas lo que pone cada uno y pagáis desde ahí.
@@ -43,8 +43,8 @@ Pruébala aquí: https://saldo-cero-eight.vercel.app/
 - Y al que se hace el loco le mandas un WhatsApp con la cifra ya puesta, y tu
   Bizum o tu IBAN para que no tenga excusa.
 - Le pones un presupuesto al viaje y ves cuánto os queda y para cuántos días
-  os llega.
-- Una gráfica te enseña lo que se gastó cada día.
+  os llega. Y te avisa si un gasto os hace pasaros.
+- Una gráfica te enseña lo que se gastó cada día, y el resumen lo que lleváis hoy.
 - Al volver, cierras el viaje y ya nadie toca los gastos. Y te sale el viaje
   en cifras: el día más caro, quién puso más...
 - El resumen lo compartes por donde quieras o te lo descargas en un txt. Los
