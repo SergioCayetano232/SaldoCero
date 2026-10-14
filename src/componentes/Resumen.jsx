@@ -28,6 +28,7 @@ import PorDias from "./PorDias";
 import PagosACuenta from "./PagosACuenta";
 import Presupuesto from "./Presupuesto";
 import { porCabezaYDia } from "../presupuesto";
+import { gastadoHoy } from "../loDeHoy";
 import { esElUltimo, sonLosUltimos } from "../confeti";
 import { deudoresConVarias } from "../deGolpe";
 import { porcentajes } from "../donut";
@@ -72,6 +73,7 @@ function Resumen({
   // ni le toca pagar la próxima ni sale en las listas de personas.
   const personas = sinBote(balances);
   const alDia = porCabezaYDia(gastos, personas.length);
+  const deHoy = gastadoHoy(gastos);
   const exactos = calcularPagos(balances);
   const redondear = viaje?.redondear === true;
   const pagos = marcarSaldados(redondear ? redondearPagos(exactos) : exactos, saldados);
@@ -214,6 +216,12 @@ function Resumen({
         )}
         {alDia !== null && (
           <div className="total-detalle">Sale a {conMoneda(alDia, monedaViaje)} por cabeza y día</div>
+        )}
+        {deHoy && (
+          <div className="total-detalle">
+            Hoy lleváis <span className="sin-partir">{conMoneda(deHoy.total, monedaViaje)}</span> en{" "}
+            {deHoy.gastos} {deHoy.gastos === 1 ? "gasto" : "gastos"}
+          </div>
         )}
         {loMio && gastos.length > 0 && (
           <div className={`mi-saldo ${estadoMiSaldo(loMio)}`}>{textoMiSaldo(loMio, monedaViaje)}</div>
