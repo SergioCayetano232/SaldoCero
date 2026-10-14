@@ -6,6 +6,15 @@ import { porDias, enCorto } from "./fechas";
 import { conMoneda } from "./monedas";
 import { BOTE } from "./bote";
 
+function resumenDeGasto(gasto, personas) {
+  const pagador = personas.find((p) => p.id === gasto.pagadorId);
+  return {
+    concepto: gasto.concepto,
+    importe: importeDeGasto(gasto),
+    quien: gasto.pagadorId === BOTE ? "el bote" : (pagador?.nombre ?? null),
+  };
+}
+
 // personas: los viajeros con lo que ha puesto cada uno (bote incluido).
 export function cifrasDelViaje(gastos, personas) {
   if (gastos.length === 0) return null;
@@ -19,7 +28,7 @@ export function cifrasDelViaje(gastos, personas) {
   const masCaro = dias.reduce((max, d) => (!max || d.total > max.total ? d : max), null);
   const masBarato = dias.reduce((min, d) => (!min || d.total < min.total ? d : min), null);
   const grande = gastos.reduce((max, g) => (importeDeGasto(g) > importeDeGasto(max) ? g : max));
-  const pagador = personas.find((p) => p.id === grande.pagadorId);
+  const pequeno = gastos.reduce((min, g) => (importeDeGasto(g) < importeDeGasto(min) ? g : min));
   const quienMas = personas.reduce((max, p) => (!max || p.puesto > max.puesto ? p : max), null);
   const [categoria] = gastoPorCategoria(gastos, importeDeGasto);
 
@@ -38,11 +47,10 @@ export function cifrasDelViaje(gastos, personas) {
     diaMasCaro: dias.length > 1 ? masCaro : null,
     // Si todos los días costaron lo mismo, el más barato es también el más caro.
     diaMasBarato: dias.length > 1 && masBarato.total < masCaro.total ? masBarato : null,
-    gastoMasGrande: {
-      concepto: grande.concepto,
-      importe: importeDeGasto(grande),
-      quien: grande.pagadorId === BOTE ? "el bote" : (pagador?.nombre ?? null),
-    },
+    gastoMasGrande: resumenDeGasto(grande, personas),
+    // Con uno solo, o si todos costaron igual, sería el mismo que el más gordo.
+    gastoMasPequeno:
+      importeDeGasto(pequeno) < importeDeGasto(grande) ? resumenDeGasto(pequeno, personas) : null,
     // Si todos han puesto lo mismo, no hay nadie a quien señalar.
     quienMasPuso:
       quienMas && personas.some((p) => p.puesto < quienMas.puesto) ? quienMas : null,
@@ -76,6 +84,10 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   }
   const g = cifras.gastoMasGrande;
   lineas.push(`💸 El gasto más gordo: ${g.concepto}, ${conMoneda(g.importe, moneda)}${g.quien ? ` (${g.quien})` : ""}`);
+  const p = cifras.gastoMasPequeno;
+  if (p) {
+    lineas.push(`🪙 El más pequeño: ${p.concepto}, ${conMoneda(p.importe, moneda)}${p.quien ? ` (${p.quien})` : ""}`);
+  }
   if (cifras.categoria) {
     lineas.push(`${cifras.categoria.emoji} Donde más se fue: ${cifras.categoria.nombre.toLowerCase()}, el ${cifras.categoria.porcentaje} %`);
   }

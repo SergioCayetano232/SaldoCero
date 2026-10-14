@@ -50,6 +50,21 @@ describe("cifrasDelViaje", () => {
     expect(cifras.gastoMasGrande).toEqual({ concepto: "Hotel", importe: 120, quien: "Ana" });
   });
 
+  it("el gasto más pequeño, con quién lo pagó", () => {
+    expect(cifras.gastoMasPequeno).toEqual({ concepto: "Taxi", importe: 20, quien: "Luis" });
+  });
+
+  it("si todos costaron lo mismo, no hay más pequeño", () => {
+    const iguales = gastos.map((g) => ({ ...g, importe: 10 }));
+    expect(cifrasDelViaje(iguales, personas).gastoMasPequeno).toBeNull();
+    expect(cifrasDelViaje(gastos.slice(0, 1), personas).gastoMasPequeno).toBeNull();
+  });
+
+  it("el más pequeño también va por lo convertido", () => {
+    const enDolares = [...gastos, { pagadorId: "a", importe: 21, importeConvertido: 19, concepto: "Bus", fecha: "2026-09-12" }];
+    expect(cifrasDelViaje(enDolares, personas).gastoMasPequeno.concepto).toBe("Bus");
+  });
+
   it("quién puso más", () => {
     expect(cifras.quienMasPuso.nombre).toBe("Ana");
   });
@@ -124,6 +139,7 @@ describe("cifrasEnTexto", () => {
   it("lleva cada cifra", () => {
     expect(texto).toContain("El que más puso: Ana, 150.00 €");
     expect(texto).toContain("El gasto más gordo: Hotel, 120.00 € (Ana)");
+    expect(texto).toContain("El más pequeño: Taxi, 20.00 € (Luis)");
     expect(texto).toContain("alojamiento, el 50 %");
     expect(texto).toContain("26.67 € por persona y día");
     expect(texto).toContain("El día más tranquilo:");
