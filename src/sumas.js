@@ -1,25 +1,42 @@
 // Sumar en el campo del importe: "12,5+8+3,20" son 23,70. Para juntar varios
 // tickets en un gasto sin sacar la calculadora. Y restar: "60-10" con el descuento.
-// Y multiplicar: "3×4,5", tres cañas. Como en el cole, primero se multiplica.
+// Y multiplicar: "3×4,5", tres cañas. Y dividir: "120÷4", la cuenta entre cuatro.
+// Como en el cole, primero se multiplica y se divide.
 
 // Un número con coma o punto: 12, 12,5, 0.75, ,5
 const NUMERO = /^\d*[.,]?\d+$/;
 
 // Para multiplicar vale lo que haya a mano: × del botón, x o * del teclado.
+// Para dividir, ÷ o /.
 const POR = /[×xX*]/;
-const SIGNO = /[+\-×xX*]/;
-const SIGNO_AL_FINAL = /[+\-×xX*]$/;
+const ENTRE = /[÷/]/;
+const SIGNO = /[+\-×xX*÷/]/;
+const SIGNO_AL_FINAL = /[+\-×xX*÷/]$/;
 
 // Sin espacios y sin el signo del final, que es que vas a escribir el siguiente.
 function sinColgar(texto) {
   return String(texto ?? "").replace(/\s/g, "").replace(SIGNO_AL_FINAL, "");
 }
 
-// "3×4,5" → 13,5. null si algún trozo no es un número.
+// "3×4,5" → 13,5 y "120÷4" → 30, de izquierda a derecha. null si algún trozo
+// no es un número o se divide entre cero.
 function multiplicar(termino) {
-  const factores = termino.split(POR);
+  const trozos = termino.split(/([×xX*÷/])/);
+  const factores = trozos.filter((_, i) => i % 2 === 0);
   if (!factores.every((f) => NUMERO.test(f))) return null;
-  return factores.reduce((total, f) => total * parseFloat(f.replace(",", ".")), 1);
+
+  const numeros = factores.map((f) => parseFloat(f.replace(",", ".")));
+  let total = numeros[0];
+  for (let i = 1; i < numeros.length; i++) {
+    if (ENTRE.test(trozos[i * 2 - 1])) {
+      if (numeros[i] === 0) return null;
+      total /= numeros[i];
+    } else {
+      total *= numeros[i];
+    }
+  }
+
+  return total;
 }
 
 // El total, redondeado a céntimos. null si no se entiende.
@@ -51,11 +68,13 @@ export function llevaSigno(texto) {
   return SIGNO.test(String(texto ?? ""));
 }
 
-// El signo que se ha quedado colgando al final, si hay. Los de multiplicar, todos como ×.
+// El signo que se ha quedado colgando al final, si hay. Los de multiplicar, todos
+// como ×, y los de dividir como ÷.
 export function signoColgando(texto) {
   const ultimo = String(texto ?? "").trim().slice(-1);
   if (!SIGNO.test(ultimo)) return null;
-  return POR.test(ultimo) ? "×" : ultimo;
+  if (POR.test(ultimo)) return "×";
+  return ENTRE.test(ultimo) ? "÷" : ultimo;
 }
 
 // Lo que hacen los botones. Si ya había un signo al final, lo cambia:

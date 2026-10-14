@@ -45,6 +45,26 @@ describe("leerSuma", () => {
     expect(leerSuma("3××4")).toBeNull();
     expect(leerSuma("×4")).toBeNull();
     expect(leerSuma("3×+4")).toBeNull();
+    expect(leerSuma("12÷÷3")).toBeNull();
+    expect(leerSuma("÷3")).toBeNull();
+  });
+
+  it("divide, con ÷ o /", () => {
+    expect(leerSuma("120÷4")).toBe(30);
+    expect(leerSuma("120/4")).toBe(30);
+    expect(leerSuma("100÷3")).toBe(33.33);
+    expect(leerSuma("120÷")).toBe(120);
+  });
+
+  it("multiplica y divide de izquierda a derecha, antes que sumar", () => {
+    expect(leerSuma("90÷3×2")).toBe(60);
+    expect(leerSuma("10+60÷4")).toBe(25);
+    expect(leerSuma("80-40÷2")).toBe(60);
+  });
+
+  it("entre cero no se puede", () => {
+    expect(leerSuma("50÷0")).toBeNull();
+    expect(leerSuma("50÷0,0")).toBeNull();
   });
 
   it("si se pasa restando, sale cero o negativo, sin más", () => {
@@ -79,6 +99,8 @@ describe("esSuma", () => {
     expect(esSuma("60-")).toBe(false);
     expect(esSuma("3×4")).toBe(true);
     expect(esSuma("3×")).toBe(false);
+    expect(esSuma("120÷4")).toBe(true);
+    expect(esSuma("120÷")).toBe(false);
   });
 
   it("un número solo, o con el + colgando, no", () => {
@@ -93,6 +115,7 @@ describe("llevaSigno", () => {
     expect(llevaSigno("60+")).toBe(true);
     expect(llevaSigno("60-10")).toBe(true);
     expect(llevaSigno("3×")).toBe(true);
+    expect(llevaSigno("120÷")).toBe(true);
     expect(llevaSigno("60")).toBe(false);
     expect(llevaSigno("")).toBe(false);
   });
@@ -109,6 +132,7 @@ describe("ponerSigno", () => {
     expect(ponerSigno("60-10-", "+")).toBe("60-10+");
     expect(ponerSigno("3x", "+")).toBe("3+");
     expect(ponerSigno("3+", "×")).toBe("3×");
+    expect(ponerSigno("120×", "÷")).toBe("120÷");
   });
 });
 
@@ -118,6 +142,8 @@ describe("signoColgando", () => {
     expect(signoColgando("60-")).toBe("-");
     expect(signoColgando("3x")).toBe("×");
     expect(signoColgando("3* ")).toBe("×");
+    expect(signoColgando("120÷")).toBe("÷");
+    expect(signoColgando("120/")).toBe("÷");
   });
 
   it("si acaba en número, ninguno", () => {
