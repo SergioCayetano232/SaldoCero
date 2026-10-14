@@ -6,6 +6,7 @@ import { BOTE } from "./bote";
 export const ORDENES = [
   { id: "dias", nombre: "Por días" },
   { id: "importe", nombre: "Más caros" },
+  { id: "baratos", nombre: "Más baratos" },
   { id: "pagador", nombre: "Por quién pagó" },
   { id: "recientes", nombre: "Últimos apuntados" },
 ];
@@ -17,6 +18,8 @@ export function ordenarGastos(gastos, orden, viajeros) {
   const masCaro = (a, b) => importeDeGasto(b) - importeDeGasto(a);
 
   if (orden === "importe") return [...gastos].sort(masCaro);
+  // Para cazar los pequeños, o el de 12 € que se apuntó como 1,20.
+  if (orden === "baratos") return [...gastos].sort((a, b) => masCaro(b, a));
 
   // Por cuándo se apuntó, no por el día del gasto: es para ver qué acaba de meter alguien.
   if (orden === "recientes") {

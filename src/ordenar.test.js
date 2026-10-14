@@ -30,6 +30,14 @@ describe("ordenarGastos", () => {
     expect(ids(ordenarGastos(gastos, "importe", viajeros))).toEqual([2, 4, 5, 7, 1, 3, 6]);
   });
 
+  it("más baratos, también en la moneda del viaje", () => {
+    expect(ids(ordenarGastos(gastos, "baratos", viajeros))).toEqual([6, 3, 1, 7, 5, 4, 2]);
+  });
+
+  it("un orden guardado de más baratos se respeta", () => {
+    expect(ordenGuardado("baratos")).toBe("baratos");
+  });
+
   it("por quién pagó: por nombre, sin liarse con las tildes, y el bote al final", () => {
     expect(ids(ordenarGastos(gastos, "pagador", viajeros))).toEqual([7, 3, 4, 1, 5, 2, 6]);
   });
