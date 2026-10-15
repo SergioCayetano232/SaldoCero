@@ -27,6 +27,11 @@ export function cifrasDelViaje(gastos, personas) {
 
   const masCaro = dias.reduce((max, d) => (!max || d.total > max.total ? d : max), null);
   const masBarato = dias.reduce((min, d) => (!min || d.total < min.total ? d : min), null);
+  const cuantos = porDias(gastos)
+    .filter((d) => d.fecha)
+    .map((d) => ({ fecha: d.fecha, gastos: d.gastos.length }));
+  const masGastos = Math.max(0, ...cuantos.map((d) => d.gastos));
+  const losMasMovidos = cuantos.filter((d) => d.gastos === masGastos);
   const grande = gastos.reduce((max, g) => (importeDeGasto(g) > importeDeGasto(max) ? g : max));
   const pequeno = gastos.reduce((min, g) => (importeDeGasto(g) < importeDeGasto(min) ? g : min));
   const quienMas = personas.reduce((max, p) => (!max || p.puesto > max.puesto ? p : max), null);
@@ -49,6 +54,8 @@ export function cifrasDelViaje(gastos, personas) {
     diaMasCaro: dias.length > 1 ? masCaro : null,
     // Si todos los días costaron lo mismo, el más barato es también el más caro.
     diaMasBarato: dias.length > 1 && masBarato.total < masCaro.total ? masBarato : null,
+    // El que más gastos tuvo, que no tiene por qué ser el más caro. Con empate, nada.
+    diaMasMovido: dias.length > 1 && losMasMovidos.length === 1 ? losMasMovidos[0] : null,
     gastoMasGrande: resumenDeGasto(grande, personas),
     // Con uno solo, o si todos costaron igual, sería el mismo que el más gordo.
     gastoMasPequeno:
@@ -89,6 +96,9 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   }
   if (cifras.diaMasBarato) {
     lineas.push(`🧘 El día más tranquilo: ${enCorto(cifras.diaMasBarato.fecha)}, ${conMoneda(cifras.diaMasBarato.total, moneda)}`);
+  }
+  if (cifras.diaMasMovido) {
+    lineas.push(`🐝 El día más movido: ${enCorto(cifras.diaMasMovido.fecha)}, ${cifras.diaMasMovido.gastos} gastos`);
   }
   const g = cifras.gastoMasGrande;
   lineas.push(`💸 El gasto más gordo: ${g.concepto}, ${conMoneda(g.importe, moneda)}${g.quien ? ` (${g.quien})` : ""}`);

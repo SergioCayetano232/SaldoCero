@@ -116,6 +116,20 @@ describe("cifrasDelViaje", () => {
     expect(cifrasDelViaje(gastos, sinPoner).quienMenosPuso.nombre).toBe("Óscar");
   });
 
+  it("el día más movido, aunque no sea el más caro", () => {
+    const otroTaxi = [...gastos, { pagadorId: "b", importe: 5, concepto: "Bus", fecha: "2026-09-12" }];
+    expect(cifrasDelViaje(otroTaxi, personas).diaMasMovido).toMatchObject({ fecha: "2026-09-12", gastos: 3 });
+  });
+
+  it("si empatan en gastos, no hay día más movido", () => {
+    // El 10 y el 12 llevan dos cada uno.
+    expect(cifras.diaMasMovido).toBeNull();
+  });
+
+  it("con un solo día, tampoco", () => {
+    expect(cifrasDelViaje(gastos.slice(0, 2), personas).diaMasMovido).toBeNull();
+  });
+
   it("si lo pagó el bote, lo dice", () => {
     const delBote = [{ ...gastos[0], pagadorId: BOTE }];
     expect(cifrasDelViaje(delBote, personas).gastoMasGrande.quien).toBe("el bote");
@@ -172,6 +186,12 @@ describe("cifrasEnTexto", () => {
       "El que más veces pagó: Luis, 3 veces",
     );
     expect(texto).not.toContain("más veces");
+  });
+
+  it("el día más movido, si lo hay", () => {
+    const otroTaxi = [...gastos, { pagadorId: "b", importe: 5, concepto: "Bus", fecha: "2026-09-12" }];
+    expect(cifrasEnTexto(cifrasDelViaje(otroTaxi, personas), "Lisboa", "EUR")).toContain("El día más movido:");
+    expect(texto).not.toContain("más movido");
   });
 
   it("lo que no hay, no sale", () => {
