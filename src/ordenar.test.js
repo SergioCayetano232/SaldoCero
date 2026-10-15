@@ -55,6 +55,18 @@ describe("ordenarGastos", () => {
     expect(ids(ordenarGastos(apuntados, "recientes", viajeros))).toEqual(["comida", "taxi", "cena", "viejo"]);
   });
 
+  it("primeros apuntados: como se fue apuntando, con los que no traen hora delante", () => {
+    const apuntados = [
+      { id: "cena", fecha: "2026-10-10", creadoEn: "2026-10-10T21:00:00Z" },
+      { id: "taxi", fecha: "2026-10-12", creadoEn: "2026-10-12T09:00:00Z" },
+      { id: "comida", fecha: "2026-10-10", creadoEn: "2026-10-13T08:00:00Z" },
+      { id: "viejo", fecha: "2026-10-09" },
+      { id: "otro-viejo", fecha: "2026-10-11" },
+    ];
+
+    expect(ids(ordenarGastos(apuntados, "antiguos", viajeros))).toEqual(["viejo", "otro-viejo", "cena", "taxi", "comida"]);
+  });
+
   it("por categoría: como salen al apuntar y los más caros primero en cada una", () => {
     const conCategoria = [
       { id: 1, categoria: "ocio", importe: 20 },

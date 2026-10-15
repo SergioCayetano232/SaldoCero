@@ -11,6 +11,7 @@ export const ORDENES = [
   { id: "pagador", nombre: "Por quién pagó" },
   { id: "categoria", nombre: "Por categoría" },
   { id: "recientes", nombre: "Últimos apuntados" },
+  { id: "antiguos", nombre: "Primeros apuntados" },
 ];
 
 export const POR_DIAS = "dias";
@@ -26,6 +27,12 @@ export function ordenarGastos(gastos, orden, viajeros) {
   // Por cuándo se apuntó, no por el día del gasto: es para ver qué acaba de meter alguien.
   if (orden === "recientes") {
     return [...gastos].sort((a, b) => (b.creadoEn ?? "").localeCompare(a.creadoEn ?? ""));
+  }
+
+  // Al revés: el viaje tal y como se fue apuntando. Los que no traen la hora son
+  // de antes de guardarla, así que van los primeros.
+  if (orden === "antiguos") {
+    return [...gastos].sort((a, b) => (a.creadoEn ?? "").localeCompare(b.creadoEn ?? ""));
   }
 
   if (orden === "pagador") {
