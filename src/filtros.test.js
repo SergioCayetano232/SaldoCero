@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, soloDelDia, SIN_FILTROS, hayTickets } from "./filtros";
+import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, soloDelDia, SIN_FILTROS, hayTickets, hayNotas } from "./filtros";
 
 const ana = { id: "a", nombre: "Ana" };
 const luis = { id: "b", nombre: "Luis" };
@@ -45,7 +45,7 @@ describe("hayFiltros", () => {
 
 describe("soloDe", () => {
   it("filtra por esa persona y nada más", () => {
-    expect(soloDe("b")).toEqual({ texto: "", viajeroId: "b", categoria: "", fecha: "", conTicket: false });
+    expect(soloDe("b")).toEqual({ texto: "", viajeroId: "b", categoria: "", fecha: "", conTicket: false, conNota: false });
   });
 
   it("salen los que pagó y en los que está", () => {
@@ -192,5 +192,33 @@ describe("hayTickets", () => {
     expect(hayTickets(gastos)).toBe(true);
     expect(hayTickets(gastos.filter((g) => !g.ticket))).toBe(false);
     expect(hayTickets([])).toBe(false);
+  });
+});
+
+describe("solo con nota", () => {
+  it("cuenta como filtro", () => {
+    expect(hayFiltros(con({ conNota: true }))).toBe(true);
+  });
+
+  it("deja solo los que llevan nota", () => {
+    expect(ids(filtrarGastos(gastos, con({ conNota: true }), viajeros))).toEqual(["2"]);
+  });
+
+  it("una nota en blanco no cuenta", () => {
+    const enBlanco = [{ id: "5", concepto: "Pan", pagadorId: "a", nota: "   " }];
+    expect(filtrarGastos(enBlanco, con({ conNota: true }), viajeros)).toEqual([]);
+    expect(hayNotas(enBlanco)).toBe(false);
+  });
+
+  it("se junta con los demás filtros", () => {
+    expect(ids(filtrarGastos(gastos, con({ conNota: true, viajeroId: "a" }), viajeros))).toEqual([]);
+  });
+});
+
+describe("hayNotas", () => {
+  it("con alguna nota, sí; sin ninguna, no", () => {
+    expect(hayNotas(gastos)).toBe(true);
+    expect(hayNotas(gastos.filter((g) => !g.nota))).toBe(false);
+    expect(hayNotas([])).toBe(false);
   });
 });

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { calcularTotal, importeDeGasto, participantesDeGasto } from "../calculos";
 import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, tasaComoTexto } from "../monedas";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
-import { filtrarGastos, hayFiltros, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
+import { filtrarGastos, hayFiltros, hayNotas, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
 import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
 import { sugerirConceptos, importeSugerido } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
@@ -1150,6 +1150,18 @@ function Gastos({
                     📷<span className="filtro-palabra"> Tickets</span>
                   </button>
                 )}
+
+                {hayNotas(gastos) && (
+                  <button
+                    className={`filtro-mio ${filtros.conNota ? "activo" : ""}`}
+                    onClick={() => filtrar({ conNota: !filtros.conNota })}
+                    aria-pressed={filtros.conNota}
+                    aria-label="Solo con nota"
+                    title="Solo los que tienen nota"
+                  >
+                    📝<span className="filtro-palabra"> Notas</span>
+                  </button>
+                )}
               </div>
 
               <div className="filtro-selectores">
@@ -1201,7 +1213,8 @@ function Gastos({
                   <span>
                     {visibles.length} de {gastos.length} gastos
                     {filtros.fecha && ` del ${enCorto(filtros.fecha)}`}
-                    {filtros.conTicket && " con ticket"} · suman{" "}
+                    {filtros.conTicket && " con ticket"}
+                    {filtros.conNota && (filtros.conTicket ? " y nota" : " con nota")} · suman{" "}
                     <strong>{conMoneda(calcularTotal(visibles), monedaViaje)}</strong>
                     {deQuien && (
                       <span className="filtro-cuenta">

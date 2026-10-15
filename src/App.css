@@ -586,7 +586,7 @@ button:active {
   font-weight: 600;
 }
 
-/* En el móvil el de los tickets se queda en la cámara, que si no el buscador no cabe. */
+/* En el móvil los de tickets y notas se quedan en el dibujo, que si no el buscador no cabe. */
 @media (max-width: 560px) {
   .filtro-palabra {
     display: none;
