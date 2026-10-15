@@ -2,6 +2,7 @@
 // cuentas del resumen siguen siendo las del viaje entero.
 
 import { importeDeGasto, participantesDeGasto } from "./calculos";
+import { hoy } from "./fechas";
 
 // Con menos gastos que estos, la barra de filtros estorba más que ayuda.
 export const MINIMO_PARA_FILTRAR = 4;
@@ -57,6 +58,11 @@ function tieneNota(gasto) {
 
 export function hayNotas(gastos) {
   return gastos.some(tieneNota);
+}
+
+// El botón de hoy solo sale si hoy se ha apuntado algo, que si no da una lista vacía.
+export function hayGastosDeHoy(gastos, dia = hoy()) {
+  return gastos.some((gasto) => gasto.fecha === dia);
 }
 
 // Por persona valen los que pagó y en los que está: es lo que miras al repasar lo tuyo.

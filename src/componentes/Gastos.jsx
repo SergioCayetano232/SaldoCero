@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { calcularTotal, importeDeGasto, participantesDeGasto } from "../calculos";
 import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, tasaComoTexto } from "../monedas";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
-import { filtrarGastos, hayFiltros, hayNotas, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
+import { filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
 import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
 import { sugerirConceptos, importeSugerido } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
@@ -1136,6 +1136,17 @@ function Gastos({
                     aria-pressed={esYo}
                   >
                     Solo lo mío
+                  </button>
+                )}
+
+                {hayGastosDeHoy(gastos) && (
+                  <button
+                    className={`filtro-mio ${filtros.fecha === hoy() ? "activo" : ""}`}
+                    onClick={() => filtrar({ fecha: filtros.fecha === hoy() ? "" : hoy() })}
+                    aria-pressed={filtros.fecha === hoy()}
+                    aria-label="Solo lo de hoy"
+                  >
+                    Hoy
                   </button>
                 )}
 

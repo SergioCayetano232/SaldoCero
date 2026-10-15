@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, soloDelDia, SIN_FILTROS, hayTickets, hayNotas } from "./filtros";
+import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, soloDelDia, SIN_FILTROS, hayTickets, hayNotas, hayGastosDeHoy } from "./filtros";
 
 const ana = { id: "a", nombre: "Ana" };
 const luis = { id: "b", nombre: "Luis" };
@@ -220,5 +220,25 @@ describe("hayNotas", () => {
     expect(hayNotas(gastos)).toBe(true);
     expect(hayNotas(gastos.filter((g) => !g.nota))).toBe(false);
     expect(hayNotas([])).toBe(false);
+  });
+});
+
+describe("hayGastosDeHoy", () => {
+  const conFecha = [
+    { id: "1", concepto: "Cena", pagadorId: "a", fecha: "2026-10-14" },
+    { id: "2", concepto: "Taxi", pagadorId: "a", fecha: "2026-10-15" },
+  ];
+
+  it("con algo apuntado ese día, sí", () => {
+    expect(hayGastosDeHoy(conFecha, "2026-10-15")).toBe(true);
+  });
+
+  it("sin nada ese día, no", () => {
+    expect(hayGastosDeHoy(conFecha, "2026-10-16")).toBe(false);
+    expect(hayGastosDeHoy([], "2026-10-15")).toBe(false);
+  });
+
+  it("los de antes de las fechas no cuentan", () => {
+    expect(hayGastosDeHoy(gastos, "2026-10-15")).toBe(false);
   });
 });

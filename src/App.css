@@ -586,8 +586,22 @@ button:active {
   font-weight: 600;
 }
 
-/* En el móvil los de tickets y notas se quedan en el dibujo, que si no el buscador no cabe. */
+/* En el móvil no caben todos al lado del buscador: él arriba y las pastillas
+   debajo, los de tickets y notas solo con el dibujo. */
 @media (max-width: 560px) {
+  .filtro-fila {
+    flex-wrap: wrap;
+  }
+
+  .filtro-fila .filtro-buscar {
+    flex-basis: 100%;
+  }
+
+  .filtro-mio {
+    min-height: 36px;
+    padding: 0 12px;
+  }
+
   .filtro-palabra {
     display: none;
   }
