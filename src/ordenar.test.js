@@ -67,6 +67,18 @@ describe("ordenarGastos", () => {
     expect(ids(ordenarGastos(apuntados, "antiguos", viajeros))).toEqual(["viejo", "otro-viejo", "cena", "taxi", "comida"]);
   });
 
+  it("por concepto: de la A a la Z, sin liarse con tildes, mayúsculas ni números", () => {
+    const conConcepto = [
+      { id: 1, concepto: "taxi", importe: 10 },
+      { id: 2, concepto: "Menú 10", importe: 12 },
+      { id: 3, concepto: "Ópera", importe: 40 },
+      { id: 4, concepto: "Menú 2", importe: 12 },
+      { id: 5, concepto: "Taxi", importe: 25 },
+      { id: 6, concepto: "agua", importe: 1 },
+    ];
+    expect(ids(ordenarGastos(conConcepto, "concepto", viajeros))).toEqual([6, 4, 2, 3, 5, 1]);
+  });
+
   it("por categoría: como salen al apuntar y los más caros primero en cada una", () => {
     const conCategoria = [
       { id: 1, categoria: "ocio", importe: 20 },

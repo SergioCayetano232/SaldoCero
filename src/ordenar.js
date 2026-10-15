@@ -10,6 +10,7 @@ export const ORDENES = [
   { id: "baratos", nombre: "Más baratos" },
   { id: "pagador", nombre: "Por quién pagó" },
   { id: "categoria", nombre: "Por categoría" },
+  { id: "concepto", nombre: "Por concepto (A-Z)" },
   { id: "recientes", nombre: "Últimos apuntados" },
   { id: "antiguos", nombre: "Primeros apuntados" },
 ];
@@ -41,6 +42,12 @@ export function ordenarGastos(gastos, orden, viajeros) {
     const clave = (g) => (g.pagadorId === BOTE ? "￿" : nombre.get(g.pagadorId) ?? "￿￿");
 
     return [...gastos].sort((a, b) => clave(a).localeCompare(clave(b), "es") || masCaro(a, b));
+  }
+
+  // Con numeric, "Menú 2" va antes que "Menú 10". Los que se llaman igual, el más caro arriba.
+  if (orden === "concepto") {
+    const porNombre = (a, b) => (a.concepto ?? "").localeCompare(b.concepto ?? "", "es", { sensitivity: "base", numeric: true });
+    return [...gastos].sort((a, b) => porNombre(a, b) || masCaro(a, b));
   }
 
   // En el orden en que salen al apuntar, que "Otros" ya va el último.
