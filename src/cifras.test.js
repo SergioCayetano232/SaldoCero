@@ -97,6 +97,25 @@ describe("cifrasDelViaje", () => {
     expect(cifrasDelViaje(enDirhams, personas).total).toBe(120);
   });
 
+  it("quién puso menos", () => {
+    expect(cifras.quienMenosPuso).toMatchObject({ nombre: "Marta", puesto: 30 });
+  });
+
+  it("si empatan los que menos pusieron, no se señala a nadie", () => {
+    const empate = personas.map((p) => (p.id === "b" ? { ...p, puesto: 30 } : p));
+    expect(cifrasDelViaje(gastos, empate).quienMenosPuso).toBeNull();
+  });
+
+  it("si todos pusieron lo mismo, tampoco", () => {
+    const iguales = personas.map((p) => ({ ...p, puesto: 80 }));
+    expect(cifrasDelViaje(gastos, iguales).quienMenosPuso).toBeNull();
+  });
+
+  it("el que no puso nada también cuenta como el que menos", () => {
+    const sinPoner = [...personas, { id: "d", nombre: "Óscar", puesto: 0 }];
+    expect(cifrasDelViaje(gastos, sinPoner).quienMenosPuso.nombre).toBe("Óscar");
+  });
+
   it("si lo pagó el bote, lo dice", () => {
     const delBote = [{ ...gastos[0], pagadorId: BOTE }];
     expect(cifrasDelViaje(delBote, personas).gastoMasGrande.quien).toBe("el bote");
@@ -138,6 +157,7 @@ describe("cifrasEnTexto", () => {
 
   it("lleva cada cifra", () => {
     expect(texto).toContain("El que más puso: Ana, 150.00 €");
+    expect(texto).toContain("El que menos puso: Marta, 30.00 €");
     expect(texto).toContain("El gasto más gordo: Hotel, 120.00 € (Ana)");
     expect(texto).toContain("El más pequeño: Taxi, 20.00 € (Luis)");
     expect(texto).toContain("alojamiento, el 50 %");

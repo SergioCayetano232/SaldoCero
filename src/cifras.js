@@ -30,6 +30,8 @@ export function cifrasDelViaje(gastos, personas) {
   const grande = gastos.reduce((max, g) => (importeDeGasto(g) > importeDeGasto(max) ? g : max));
   const pequeno = gastos.reduce((min, g) => (importeDeGasto(g) < importeDeGasto(min) ? g : min));
   const quienMas = personas.reduce((max, p) => (!max || p.puesto > max.puesto ? p : max), null);
+  const menos = Math.min(...personas.map((p) => p.puesto));
+  const losQueMenos = personas.filter((p) => p.puesto === menos);
   const [categoria] = gastoPorCategoria(gastos, importeDeGasto);
 
   // Cuántas veces sacó la cartera cada uno. Lo del bote no es de nadie.
@@ -54,6 +56,9 @@ export function cifrasDelViaje(gastos, personas) {
     // Si todos han puesto lo mismo, no hay nadie a quien señalar.
     quienMasPuso:
       quienMas && personas.some((p) => p.puesto < quienMas.puesto) ? quienMas : null,
+    // Si empatan por abajo, señalar a uno solo sería injusto.
+    quienMenosPuso:
+      losQueMenos.length === 1 && personas.some((p) => p.puesto > menos) ? losQueMenos[0] : null,
     // Con empate, o una sola vez, no hay nada que contar.
     quienMasVeces: masVeces > 1 && losQueMas.length === 1 ? losQueMas[0] : null,
     categoria: categoria
@@ -72,6 +77,9 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   }
   if (cifras.quienMasPuso) {
     lineas.push(`🏆 El que más puso: ${cifras.quienMasPuso.nombre}, ${conMoneda(cifras.quienMasPuso.puesto, moneda)}`);
+  }
+  if (cifras.quienMenosPuso) {
+    lineas.push(`🤏 El que menos puso: ${cifras.quienMenosPuso.nombre}, ${conMoneda(cifras.quienMenosPuso.puesto, moneda)}`);
   }
   if (cifras.quienMasVeces) {
     lineas.push(`💳 El que más veces pagó: ${cifras.quienMasVeces.nombre}, ${cifras.quienMasVeces.veces} veces`);
