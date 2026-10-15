@@ -55,6 +55,21 @@ describe("ordenarGastos", () => {
     expect(ids(ordenarGastos(apuntados, "recientes", viajeros))).toEqual(["comida", "taxi", "cena", "viejo"]);
   });
 
+  it("por categoría: como salen al apuntar y los más caros primero en cada una", () => {
+    const conCategoria = [
+      { id: 1, categoria: "ocio", importe: 20 },
+      { id: 2, categoria: "comida", importe: 10 },
+      // De los de antes, sin categoría: van con los de "otros".
+      { id: 3, importe: 5 },
+      { id: 4, categoria: "comida", importe: 30 },
+      { id: 5, categoria: "otros", importe: 8 },
+      // Una que ya no existe, también a "otros".
+      { id: 6, categoria: "rara", importe: 1 },
+      { id: 7, categoria: "transporte", importe: 100, moneda: "USD", importeConvertido: 92 },
+    ];
+    expect(ids(ordenarGastos(conCategoria, "categoria", viajeros))).toEqual([4, 2, 7, 1, 5, 3, 6]);
+  });
+
   it("no toca la lista de fuera", () => {
     const copia = [...gastos];
     ordenarGastos(gastos, "importe", viajeros);
