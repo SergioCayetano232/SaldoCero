@@ -252,6 +252,8 @@ describe("cifrasEnTexto", () => {
 
   it("con un solo gasto, sin media", () => {
     const uno = cifrasEnTexto(cifrasDelViaje(gastos.slice(0, 1), personas), "Lisboa", "EUR");
+    expect(uno).toContain("120.00 € en 1 gasto");
+    expect(uno).not.toContain("gastos");
     expect(uno).not.toContain("de media");
   });
 

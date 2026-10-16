@@ -139,7 +139,7 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   const lineas = [`*${nombre}* en cifras 📊`, ""];
 
   const media = cifras.media !== null ? ` (${conMoneda(cifras.media, moneda)} de media)` : "";
-  lineas.push(`💰 ${conMoneda(cifras.total, moneda)} en ${cifras.gastos} gastos${media}`);
+  lineas.push(`💰 ${conMoneda(cifras.total, moneda)} en ${cifras.gastos} ${cifras.gastos === 1 ? "gasto" : "gastos"}${media}`);
   if (cifras.porPersonaYDia !== null) {
     lineas.push(`🧍 ${conMoneda(cifras.porPersonaYDia, moneda)} por persona y día`);
   }
