@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { calcularTotal, importeDeGasto, participantesDeGasto } from "../calculos";
 import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, tasaComoTexto } from "../monedas";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
-import { filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
+import { filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
 import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
 import { sugerirConceptos, importeSugerido } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
@@ -231,7 +231,7 @@ function Gastos({
   // Si quedan pocos gastos la barra se esconde, y con ella lo que hubiera filtrado.
   const puedeFiltrar = gastos.length >= MINIMO_PARA_FILTRAR;
   const filtrando = puedeFiltrar && hayFiltros(filtros);
-  const visibles = filtrando ? filtrarGastos(gastos, filtros, viajeros) : gastos;
+  const visibles = filtrando ? filtrarGastos(gastos, filtros, viajeros, monedaViaje) : gastos;
   const buscado = filtrando ? filtros.texto : "";
   // Solo las categorías que hay, que elegir una vacía no sirve de nada.
   const categoriasUsadas = CATEGORIAS.filter((c) =>
@@ -1173,6 +1173,18 @@ function Gastos({
                     📝<span className="filtro-palabra"> Notas</span>
                   </button>
                 )}
+
+                {hayOtrasMonedas(gastos, monedaViaje) && (
+                  <button
+                    className={`filtro-mio ${filtros.otraMoneda ? "activo" : ""}`}
+                    onClick={() => filtrar({ otraMoneda: !filtros.otraMoneda })}
+                    aria-pressed={filtros.otraMoneda}
+                    aria-label="Solo en otra moneda"
+                    title={`Solo los que no se pagaron en ${monedaViaje}`}
+                  >
+                    💱<span className="filtro-palabra"> Monedas</span>
+                  </button>
+                )}
               </div>
 
               <div className="filtro-selectores">
@@ -1225,7 +1237,8 @@ function Gastos({
                     {visibles.length} de {gastos.length} gastos
                     {filtros.fecha && ` del ${enCorto(filtros.fecha)}`}
                     {filtros.conTicket && " con ticket"}
-                    {filtros.conNota && (filtros.conTicket ? " y nota" : " con nota")} · suman{" "}
+                    {filtros.conNota && (filtros.conTicket ? " y nota" : " con nota")}
+                    {filtros.otraMoneda && " en otra moneda"} · suman{" "}
                     <strong>{conMoneda(calcularTotal(visibles), monedaViaje)}</strong>
                     {deQuien && (
                       <span className="filtro-cuenta">

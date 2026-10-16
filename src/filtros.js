@@ -7,7 +7,7 @@ import { hoy } from "./fechas";
 // Con menos gastos que estos, la barra de filtros estorba más que ayuda.
 export const MINIMO_PARA_FILTRAR = 4;
 
-export const SIN_FILTROS = { texto: "", viajeroId: "", categoria: "", fecha: "", conTicket: false, conNota: false };
+export const SIN_FILTROS = { texto: "", viajeroId: "", categoria: "", fecha: "", conTicket: false, conNota: false, otraMoneda: false };
 
 // "Cafetería" y "cafeteria" tienen que dar lo mismo al buscar.
 export function normalizar(texto) {
@@ -42,7 +42,7 @@ export function soloDelDia(fecha) {
 
 export function hayFiltros(filtros) {
   return Boolean(
-    normalizar(filtros.texto) || filtros.viajeroId || filtros.categoria || filtros.fecha || filtros.conTicket || filtros.conNota,
+    normalizar(filtros.texto) || filtros.viajeroId || filtros.categoria || filtros.fecha || filtros.conTicket || filtros.conNota || filtros.otraMoneda,
   );
 }
 
@@ -60,13 +60,22 @@ export function hayNotas(gastos) {
   return gastos.some(tieneNota);
 }
 
+// Los gastos de antes de las monedas no la traen, y esos iban en la del viaje.
+function enOtraMoneda(gasto, monedaViaje) {
+  return Boolean(gasto.moneda) && gasto.moneda !== monedaViaje;
+}
+
+export function hayOtrasMonedas(gastos, monedaViaje) {
+  return gastos.some((gasto) => enOtraMoneda(gasto, monedaViaje));
+}
+
 // El botón de hoy solo sale si hoy se ha apuntado algo, que si no da una lista vacía.
 export function hayGastosDeHoy(gastos, dia = hoy()) {
   return gastos.some((gasto) => gasto.fecha === dia);
 }
 
 // Por persona valen los que pagó y en los que está: es lo que miras al repasar lo tuyo.
-export function filtrarGastos(gastos, filtros, viajeros) {
+export function filtrarGastos(gastos, filtros, viajeros, monedaViaje) {
   const buscado = normalizar(filtros.texto);
 
   return gastos.filter((gasto) => {
@@ -78,6 +87,8 @@ export function filtrarGastos(gastos, filtros, viajeros) {
     // Para dar con el ticket que te pide alguien sin abrir gasto por gasto.
     if (filtros.conTicket && !gasto.ticket) return false;
     if (filtros.conNota && !tieneNota(gasto)) return false;
+    // Para repasar los cambios que se metieron a mano.
+    if (filtros.otraMoneda && !enOtraMoneda(gasto, monedaViaje)) return false;
 
     if (filtros.viajeroId) {
       const pago = gasto.pagadorId === filtros.viajeroId;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, soloDelDia, SIN_FILTROS, hayTickets, hayNotas, hayGastosDeHoy } from "./filtros";
+import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, soloDelDia, SIN_FILTROS, hayTickets, hayNotas, hayOtrasMonedas, hayGastosDeHoy } from "./filtros";
 
 const ana = { id: "a", nombre: "Ana" };
 const luis = { id: "b", nombre: "Luis" };
@@ -45,7 +45,7 @@ describe("hayFiltros", () => {
 
 describe("soloDe", () => {
   it("filtra por esa persona y nada más", () => {
-    expect(soloDe("b")).toEqual({ texto: "", viajeroId: "b", categoria: "", fecha: "", conTicket: false, conNota: false });
+    expect(soloDe("b")).toEqual({ texto: "", viajeroId: "b", categoria: "", fecha: "", conTicket: false, conNota: false, otraMoneda: false });
   });
 
   it("salen los que pagó y en los que está", () => {
@@ -212,6 +212,42 @@ describe("solo con nota", () => {
 
   it("se junta con los demás filtros", () => {
     expect(ids(filtrarGastos(gastos, con({ conNota: true, viajeroId: "a" }), viajeros))).toEqual([]);
+  });
+});
+
+describe("solo en otra moneda", () => {
+  const conMonedas = [
+    { id: "1", concepto: "Cena", pagadorId: "a", moneda: "EUR" },
+    { id: "2", concepto: "Tuk-tuk", pagadorId: "b", participantes: ["b"], moneda: "THB", importe: 200, importeConvertido: 5.2 },
+    { id: "3", concepto: "Taxi", pagadorId: "c", participantes: ["c"], moneda: "USD", importe: 10, importeConvertido: 10 },
+    // De antes de las monedas: va en la del viaje.
+    { id: "4", concepto: "Peaje", pagadorId: "a" },
+  ];
+
+  it("cuenta como filtro", () => {
+    expect(hayFiltros(con({ otraMoneda: true }))).toBe(true);
+  });
+
+  it("deja solo los que no van en la moneda del viaje", () => {
+    expect(ids(filtrarGastos(conMonedas, con({ otraMoneda: true }), viajeros, "EUR"))).toEqual(["2", "3"]);
+  });
+
+  it("aunque el cambio fuera uno a uno", () => {
+    expect(ids(filtrarGastos(conMonedas, con({ otraMoneda: true }), viajeros, "EUR"))).toContain("3");
+  });
+
+  it("en un viaje en dólares, el euro es la otra", () => {
+    expect(ids(filtrarGastos(conMonedas, con({ otraMoneda: true }), viajeros, "USD"))).toEqual(["1", "2"]);
+  });
+
+  it("se junta con los demás filtros", () => {
+    expect(ids(filtrarGastos(conMonedas, con({ otraMoneda: true, viajeroId: "b" }), viajeros, "EUR"))).toEqual(["2"]);
+  });
+
+  it("hayOtrasMonedas: solo si alguno va en otra", () => {
+    expect(hayOtrasMonedas(conMonedas, "EUR")).toBe(true);
+    expect(hayOtrasMonedas([conMonedas[0], conMonedas[3]], "EUR")).toBe(false);
+    expect(hayOtrasMonedas([], "EUR")).toBe(false);
   });
 });
 
