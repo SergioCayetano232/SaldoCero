@@ -5,6 +5,8 @@ import { gastoPorCategoria } from "./categorias";
 import { porDias, enCorto } from "./fechas";
 import { conMoneda } from "./monedas";
 import { BOTE } from "./bote";
+import { normalizar } from "./filtros";
+import { conceptoSinEscribir } from "./categorias";
 
 function resumenDeGasto(gasto, personas) {
   const pagador = personas.find((p) => p.id === gasto.pagadorId);
@@ -13,6 +15,31 @@ function resumenDeGasto(gasto, personas) {
     importe: importeDeGasto(gasto),
     quien: gasto.pagadorId === BOTE ? "el bote" : (pagador?.nombre ?? null),
   };
+}
+
+// Lo que más veces se apuntó: "Café, 7 veces". Sin mirar tildes ni mayúsculas.
+function loMasRepetido(gastos) {
+  const veces = new Map();
+
+  for (const gasto of gastos) {
+    const clave = normalizar(gasto.concepto);
+    // "Gasto" o "Comida" a secas es lo que sale si lo dejas vacío, no cuenta.
+    if (!clave || clave === "gasto" || clave === normalizar(conceptoSinEscribir(gasto.categoria))) continue;
+
+    const antes = veces.get(clave);
+    veces.set(clave, {
+      concepto: antes?.concepto ?? gasto.concepto.trim(),
+      veces: (antes?.veces ?? 0) + 1,
+      total: (antes?.total ?? 0) + importeDeGasto(gasto),
+    });
+  }
+
+  const lista = [...veces.values()];
+  const max = Math.max(0, ...lista.map((c) => c.veces));
+  const losQueMas = lista.filter((c) => c.veces === max);
+
+  // Una vez no es repetirse, y con empate no hay uno que contar.
+  return max > 1 && losQueMas.length === 1 ? losQueMas[0] : null;
 }
 
 // personas: los viajeros con lo que ha puesto cada uno (bote incluido).
@@ -68,6 +95,7 @@ export function cifrasDelViaje(gastos, personas) {
       losQueMenos.length === 1 && personas.some((p) => p.puesto > menos) ? losQueMenos[0] : null,
     // Con empate, o una sola vez, no hay nada que contar.
     quienMasVeces: masVeces > 1 && losQueMas.length === 1 ? losQueMas[0] : null,
+    masRepetido: loMasRepetido(gastos),
     categoria: categoria
       ? { ...categoria, porcentaje: Math.round((categoria.total / total) * 100) }
       : null,
@@ -105,6 +133,10 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   const p = cifras.gastoMasPequeno;
   if (p) {
     lineas.push(`🪙 El más pequeño: ${p.concepto}, ${conMoneda(p.importe, moneda)}${p.quien ? ` (${p.quien})` : ""}`);
+  }
+  if (cifras.masRepetido) {
+    const r = cifras.masRepetido;
+    lineas.push(`🔁 Lo que más se repitió: ${r.concepto}, ${r.veces} veces (${conMoneda(r.total, moneda)})`);
   }
   if (cifras.categoria) {
     lineas.push(`${cifras.categoria.emoji} Donde más se fue: ${cifras.categoria.nombre.toLowerCase()}, el ${cifras.categoria.porcentaje} %`);

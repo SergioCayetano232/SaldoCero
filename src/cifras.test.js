@@ -130,6 +130,40 @@ describe("cifrasDelViaje", () => {
     expect(cifrasDelViaje(gastos.slice(0, 2), personas).diaMasMovido).toBeNull();
   });
 
+  it("lo que más se repitió, con las veces y lo que costó", () => {
+    const cafes = [
+      ...gastos,
+      { pagadorId: "a", importe: 1.5, concepto: "Café", fecha: "2026-09-10" },
+      { pagadorId: "b", importe: 1.8, concepto: "cafe ", fecha: "2026-09-11" },
+      { pagadorId: "c", importe: 1.2, concepto: "CAFÉ", fecha: "2026-09-12" },
+    ];
+    expect(cifrasDelViaje(cafes, personas).masRepetido).toEqual({ concepto: "Café", veces: 3, total: 4.5 });
+  });
+
+  it("si nada se repite, o empatan, no hay más repetido", () => {
+    expect(cifras.masRepetido).toBeNull();
+    const empate = [...gastos, { ...gastos[0] }, { ...gastos[1] }];
+    expect(cifrasDelViaje(empate, personas).masRepetido).toBeNull();
+  });
+
+  it("los conceptos que salen al dejarlo vacío no cuentan", () => {
+    const vacios = [
+      ...gastos,
+      { pagadorId: "a", importe: 5, concepto: "Gasto", categoria: "otros", fecha: "2026-09-10" },
+      { pagadorId: "a", importe: 5, concepto: "Gasto", categoria: "otros", fecha: "2026-09-11" },
+      { pagadorId: "a", importe: 9, concepto: "Comida", categoria: "comida", fecha: "2026-09-11" },
+    ];
+    expect(cifrasDelViaje(vacios, personas).masRepetido).toBeNull();
+  });
+
+  it("lo repetido suma lo convertido", () => {
+    const enDolares = [
+      { pagadorId: "a", importe: 11, importeConvertido: 10, concepto: "Taxi", fecha: "2026-09-10" },
+      { pagadorId: "a", importe: 22, importeConvertido: 20, concepto: "Taxi", fecha: "2026-09-11" },
+    ];
+    expect(cifrasDelViaje(enDolares, personas).masRepetido.total).toBe(30);
+  });
+
   it("si lo pagó el bote, lo dice", () => {
     const delBote = [{ ...gastos[0], pagadorId: BOTE }];
     expect(cifrasDelViaje(delBote, personas).gastoMasGrande.quien).toBe("el bote");
@@ -192,6 +226,14 @@ describe("cifrasEnTexto", () => {
     const otroTaxi = [...gastos, { pagadorId: "b", importe: 5, concepto: "Bus", fecha: "2026-09-12" }];
     expect(cifrasEnTexto(cifrasDelViaje(otroTaxi, personas), "Lisboa", "EUR")).toContain("El día más movido:");
     expect(texto).not.toContain("más movido");
+  });
+
+  it("lo que más se repitió, si lo hay", () => {
+    const taxis = [...gastos, { pagadorId: "b", importe: 15, concepto: "Taxi", fecha: "2026-09-12" }];
+    expect(cifrasEnTexto(cifrasDelViaje(taxis, personas), "Lisboa", "EUR")).toContain(
+      "Lo que más se repitió: Taxi, 2 veces (35.00 €)",
+    );
+    expect(texto).not.toContain("se repitió");
   });
 
   it("lo que no hay, no sale", () => {
