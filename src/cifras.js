@@ -1,6 +1,7 @@
 // El viaje en cifras, para cuando se cierra: el día más caro, quién puso más...
 
-import { importeDeGasto, calcularTotal, mediaPorGasto } from "./calculos";
+import { importeDeGasto, calcularTotal, mediaPorGasto, participantesDeGasto } from "./calculos";
+import { porCabeza } from "./porCabeza";
 import { gastoPorCategoria } from "./categorias";
 import { porDias, enCorto } from "./fechas";
 import { conMoneda } from "./monedas";
@@ -40,6 +41,25 @@ function loMasRepetido(gastos) {
 
   // Una vez no es repetirse, y con empate no hay uno que contar.
   return max > 1 && losQueMas.length === 1 ? losQueMas[0] : null;
+}
+
+// Lo que más le costó a cada uno de los que iban, que no tiene por qué ser lo
+// más gordo. Solo los repartidos a partes iguales, que si no no hay una cifra.
+function masCaroPorCabeza(gastos, personas, grande) {
+  let max = null;
+
+  for (const gasto of gastos) {
+    const cada = porCabeza(gasto, personas);
+    if (cada !== null && (!max || cada > max.porCabeza + 0.005)) max = { gasto, porCabeza: cada };
+  }
+
+  // Si es el mismo que el más gordo, ya sale arriba.
+  if (!max || max.gasto === grande) return null;
+  return {
+    concepto: max.gasto.concepto,
+    porCabeza: max.porCabeza,
+    cuantos: participantesDeGasto(max.gasto, personas).length,
+  };
 }
 
 // personas: los viajeros con lo que ha puesto cada uno (bote incluido).
@@ -96,6 +116,7 @@ export function cifrasDelViaje(gastos, personas) {
       losQueMenos.length === 1 && personas.some((p) => p.puesto > menos) ? losQueMenos[0] : null,
     // Con empate, o una sola vez, no hay nada que contar.
     quienMasVeces: masVeces > 1 && losQueMas.length === 1 ? losQueMas[0] : null,
+    masCaroPorCabeza: masCaroPorCabeza(gastos, personas, grande),
     masRepetido: loMasRepetido(gastos),
     categoria: categoria
       ? { ...categoria, porcentaje: Math.round((categoria.total / total) * 100) }
@@ -135,6 +156,10 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   const p = cifras.gastoMasPequeno;
   if (p) {
     lineas.push(`🪙 El más pequeño: ${p.concepto}, ${conMoneda(p.importe, moneda)}${p.quien ? ` (${p.quien})` : ""}`);
+  }
+  if (cifras.masCaroPorCabeza) {
+    const c = cifras.masCaroPorCabeza;
+    lineas.push(`👤 Lo más caro por cabeza: ${c.concepto}, ${conMoneda(c.porCabeza, moneda)} cada uno (entre ${c.cuantos})`);
   }
   if (cifras.masRepetido) {
     const r = cifras.masRepetido;

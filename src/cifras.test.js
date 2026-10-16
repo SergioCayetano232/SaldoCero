@@ -135,6 +135,33 @@ describe("cifrasDelViaje", () => {
     expect(cifrasDelViaje(gastos.slice(0, 2), personas).diaMasMovido).toBeNull();
   });
 
+  describe("lo más caro por cabeza", () => {
+    // El hotel, 120 entre los tres: 40. La cena de dos, 90: 45.
+    const conCena = [...gastos, { pagadorId: "b", importe: 90, concepto: "Marisco", participantes: ["a", "b"], fecha: "2026-09-11" }];
+
+    it("aunque no sea el más gordo", () => {
+      expect(cifrasDelViaje(conCena, personas).masCaroPorCabeza).toEqual({ concepto: "Marisco", porCabeza: 45, cuantos: 2 });
+    });
+
+    it("si es el mismo que el más gordo, no sale", () => {
+      expect(cifras.masCaroPorCabeza).toBeNull();
+    });
+
+    it("los de uno solo o a partes desiguales no cuentan", () => {
+      const raros = [
+        ...gastos,
+        { pagadorId: "c", importe: 100, concepto: "Abrigo", participantes: ["c"], fecha: "2026-09-11" },
+        { pagadorId: "b", importe: 110, concepto: "Chuletón", participantes: ["a", "b"], partes: { a: 3, b: 1 }, fecha: "2026-09-11" },
+      ];
+      expect(cifrasDelViaje(raros, personas).masCaroPorCabeza).toBeNull();
+    });
+
+    it("va por lo convertido", () => {
+      const enDolares = [...gastos, { pagadorId: "a", importe: 100, importeConvertido: 92, concepto: "Barco", participantes: ["a", "b"], fecha: "2026-09-11" }];
+      expect(cifrasDelViaje(enDolares, personas).masCaroPorCabeza.porCabeza).toBe(46);
+    });
+  });
+
   it("lo que más se repitió, con las veces y lo que costó", () => {
     const cafes = [
       ...gastos,
@@ -244,6 +271,14 @@ describe("cifrasEnTexto", () => {
       "Lo que más se repitió: Taxi, 2 veces (35.00 €)",
     );
     expect(texto).not.toContain("se repitió");
+  });
+
+  it("lo más caro por cabeza, si lo hay", () => {
+    const conCena = [...gastos, { pagadorId: "b", importe: 90, concepto: "Marisco", participantes: ["a", "b"], fecha: "2026-09-11" }];
+    expect(cifrasEnTexto(cifrasDelViaje(conCena, personas), "Lisboa", "EUR")).toContain(
+      "Lo más caro por cabeza: Marisco, 45.00 € cada uno (entre 2)",
+    );
+    expect(texto).not.toContain("por cabeza");
   });
 
   it("lo que no hay, no sale", () => {
