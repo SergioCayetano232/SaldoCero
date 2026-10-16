@@ -1,6 +1,6 @@
 // El viaje en cifras, para cuando se cierra: el día más caro, quién puso más...
 
-import { importeDeGasto, calcularTotal } from "./calculos";
+import { importeDeGasto, calcularTotal, mediaPorGasto } from "./calculos";
 import { gastoPorCategoria } from "./categorias";
 import { porDias, enCorto } from "./fechas";
 import { conMoneda } from "./monedas";
@@ -74,6 +74,7 @@ export function cifrasDelViaje(gastos, personas) {
   return {
     total,
     gastos: gastos.length,
+    media: mediaPorGasto(gastos),
     dias: dias.length,
     // Con un solo día o sin fechas, la media por día no dice nada nuevo.
     porPersonaYDia:
@@ -106,7 +107,8 @@ export function cifrasDelViaje(gastos, personas) {
 export function cifrasEnTexto(cifras, nombre, moneda) {
   const lineas = [`*${nombre}* en cifras 📊`, ""];
 
-  lineas.push(`💰 ${conMoneda(cifras.total, moneda)} en ${cifras.gastos} gastos`);
+  const media = cifras.media !== null ? ` (${conMoneda(cifras.media, moneda)} de media)` : "";
+  lineas.push(`💰 ${conMoneda(cifras.total, moneda)} en ${cifras.gastos} gastos${media}`);
   if (cifras.porPersonaYDia !== null) {
     lineas.push(`🧍 ${conMoneda(cifras.porPersonaYDia, moneda)} por persona y día`);
   }

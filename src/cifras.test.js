@@ -25,6 +25,11 @@ describe("cifrasDelViaje", () => {
     expect(cifras.dias).toBe(3);
   });
 
+  it("la media por gasto", () => {
+    expect(cifras.media).toBe(48);
+    expect(cifrasDelViaje(gastos.slice(0, 1), personas).media).toBeNull();
+  });
+
   it("la media por persona y día", () => {
     // 240 entre 3 personas y 3 días.
     expect(cifras.porPersonaYDia).toBeCloseTo(26.67);
@@ -200,7 +205,12 @@ describe("cifrasEnTexto", () => {
 
   it("lleva el nombre y el total", () => {
     expect(texto).toContain("*Lisboa* en cifras");
-    expect(texto).toContain("240.00 € en 5 gastos");
+    expect(texto).toContain("240.00 € en 5 gastos (48.00 € de media)");
+  });
+
+  it("con un solo gasto, sin media", () => {
+    const uno = cifrasEnTexto(cifrasDelViaje(gastos.slice(0, 1), personas), "Lisboa", "EUR");
+    expect(uno).not.toContain("de media");
   });
 
   it("lleva cada cifra", () => {

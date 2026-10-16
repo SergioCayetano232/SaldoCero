@@ -39,6 +39,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda }) {
         <span className="cifras-pie">
           en {cifras.gastos} {cifras.gastos === 1 ? "gasto" : "gastos"}
           {cifras.dias > 1 && ` y ${cifras.dias} días`}
+          {cifras.media !== null && `, ${conMoneda(cifras.media, moneda)} de media`}
         </span>
       </div>
 
