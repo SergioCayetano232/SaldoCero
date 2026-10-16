@@ -7,7 +7,7 @@ import { hoy } from "./fechas";
 // Con menos gastos que estos, la barra de filtros estorba más que ayuda.
 export const MINIMO_PARA_FILTRAR = 4;
 
-export const SIN_FILTROS = { texto: "", viajeroId: "", categoria: "", fecha: "", conTicket: false, conNota: false, otraMoneda: false };
+export const SIN_FILTROS = { texto: "", viajeroId: "", categoria: "", fecha: "", conTicket: false, conNota: false, otraMoneda: false, deAlgunos: false };
 
 // "Cafetería" y "cafeteria" tienen que dar lo mismo al buscar.
 export function normalizar(texto) {
@@ -42,7 +42,7 @@ export function soloDelDia(fecha) {
 
 export function hayFiltros(filtros) {
   return Boolean(
-    normalizar(filtros.texto) || filtros.viajeroId || filtros.categoria || filtros.fecha || filtros.conTicket || filtros.conNota || filtros.otraMoneda,
+    normalizar(filtros.texto) || filtros.viajeroId || filtros.categoria || filtros.fecha || filtros.conTicket || filtros.conNota || filtros.otraMoneda || filtros.deAlgunos,
   );
 }
 
@@ -69,6 +69,15 @@ export function hayOtrasMonedas(gastos, monedaViaje) {
   return gastos.some((gasto) => enOtraMoneda(gasto, monedaViaje));
 }
 
+// Si alguien se apuntó al viaje después, lo de antes tampoco es suyo.
+function deAlgunos(gasto, viajeros) {
+  return participantesDeGasto(gasto, viajeros).length < viajeros.length;
+}
+
+export function hayDeAlgunos(gastos, viajeros) {
+  return gastos.some((gasto) => deAlgunos(gasto, viajeros));
+}
+
 // El botón de hoy solo sale si hoy se ha apuntado algo, que si no da una lista vacía.
 export function hayGastosDeHoy(gastos, dia = hoy()) {
   return gastos.some((gasto) => gasto.fecha === dia);
@@ -89,6 +98,8 @@ export function filtrarGastos(gastos, filtros, viajeros, monedaViaje) {
     if (filtros.conNota && !tieneNota(gasto)) return false;
     // Para repasar los cambios que se metieron a mano.
     if (filtros.otraMoneda && !enOtraMoneda(gasto, monedaViaje)) return false;
+    // Los que más dudas dan al repasar: "¿y este por qué no me toca?".
+    if (filtros.deAlgunos && !deAlgunos(gasto, viajeros)) return false;
 
     if (filtros.viajeroId) {
       const pago = gasto.pagadorId === filtros.viajeroId;

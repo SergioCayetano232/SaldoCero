@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, soloDelDia, SIN_FILTROS, hayTickets, hayNotas, hayOtrasMonedas, hayGastosDeHoy } from "./filtros";
+import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, soloDelDia, SIN_FILTROS, hayTickets, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayGastosDeHoy } from "./filtros";
 
 const ana = { id: "a", nombre: "Ana" };
 const luis = { id: "b", nombre: "Luis" };
@@ -45,7 +45,7 @@ describe("hayFiltros", () => {
 
 describe("soloDe", () => {
   it("filtra por esa persona y nada más", () => {
-    expect(soloDe("b")).toEqual({ texto: "", viajeroId: "b", categoria: "", fecha: "", conTicket: false, conNota: false, otraMoneda: false });
+    expect(soloDe("b")).toEqual({ texto: "", viajeroId: "b", categoria: "", fecha: "", conTicket: false, conNota: false, otraMoneda: false, deAlgunos: false });
   });
 
   it("salen los que pagó y en los que está", () => {
@@ -248,6 +248,37 @@ describe("solo en otra moneda", () => {
     expect(hayOtrasMonedas(conMonedas, "EUR")).toBe(true);
     expect(hayOtrasMonedas([conMonedas[0], conMonedas[3]], "EUR")).toBe(false);
     expect(hayOtrasMonedas([], "EUR")).toBe(false);
+  });
+});
+
+describe("solo los que no son de todos", () => {
+  it("cuenta como filtro", () => {
+    expect(hayFiltros(con({ deAlgunos: true }))).toBe(true);
+  });
+
+  it("deja los que no van entre todos", () => {
+    // El 1 lleva a los tres y el 4 es de antes, sin participantes: esos son de todos.
+    expect(ids(filtrarGastos(gastos, con({ deAlgunos: true }), viajeros))).toEqual(["2", "3"]);
+  });
+
+  it("repartido entre todos, aunque sea a partes desiguales, es de todos", () => {
+    const desigual = [{ id: "5", concepto: "Cena", pagadorId: "a", participantes: ["a", "b", "c"], partes: { a: 2, b: 1, c: 1 } }];
+    expect(filtrarGastos(desigual, con({ deAlgunos: true }), viajeros)).toEqual([]);
+  });
+
+  it("si llega alguien nuevo, lo de antes ya no es de todos", () => {
+    const conOscar = [...viajeros, { id: "d", nombre: "Óscar" }];
+    expect(ids(filtrarGastos(gastos, con({ deAlgunos: true }), conOscar))).toEqual(["1", "2", "3"]);
+  });
+
+  it("se junta con los demás filtros", () => {
+    expect(ids(filtrarGastos(gastos, con({ deAlgunos: true, categoria: "ocio" }), viajeros))).toEqual(["3"]);
+  });
+
+  it("hayDeAlgunos: solo si alguno no es de todos", () => {
+    expect(hayDeAlgunos(gastos, viajeros)).toBe(true);
+    expect(hayDeAlgunos([gastos[0], gastos[3]], viajeros)).toBe(false);
+    expect(hayDeAlgunos([], viajeros)).toBe(false);
   });
 });
 

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { calcularTotal, importeDeGasto, participantesDeGasto } from "../calculos";
 import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, tasaComoTexto } from "../monedas";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
-import { filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
+import { filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
 import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
 import { sugerirConceptos, importeSugerido } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
@@ -1185,6 +1185,18 @@ function Gastos({
                     💱<span className="filtro-palabra"> Monedas</span>
                   </button>
                 )}
+
+                {hayDeAlgunos(gastos, viajeros) && (
+                  <button
+                    className={`filtro-mio ${filtros.deAlgunos ? "activo" : ""}`}
+                    onClick={() => filtrar({ deAlgunos: !filtros.deAlgunos })}
+                    aria-pressed={filtros.deAlgunos}
+                    aria-label="Solo los que no son de todos"
+                    title="Solo los que no se reparten entre todos"
+                  >
+                    👥<span className="filtro-palabra"> No de todos</span>
+                  </button>
+                )}
               </div>
 
               <div className="filtro-selectores">
@@ -1238,7 +1250,8 @@ function Gastos({
                     {filtros.fecha && ` del ${enCorto(filtros.fecha)}`}
                     {filtros.conTicket && " con ticket"}
                     {filtros.conNota && (filtros.conTicket ? " y nota" : " con nota")}
-                    {filtros.otraMoneda && " en otra moneda"} · suman{" "}
+                    {filtros.otraMoneda && " en otra moneda"}
+                    {filtros.deAlgunos && " que no son de todos"} · suman{" "}
                     <strong>{conMoneda(calcularTotal(visibles), monedaViaje)}</strong>
                     {deQuien && (
                       <span className="filtro-cuenta">
