@@ -1,6 +1,6 @@
 // En qué orden se ve la lista de gastos. Como los filtros, solo cambia lo que se ve.
 
-import { importeDeGasto } from "./calculos";
+import { importeDeGasto, parteDe } from "./calculos";
 import { BOTE } from "./bote";
 import { CATEGORIAS, categoriaDe } from "./categorias";
 
@@ -13,12 +13,18 @@ export const ORDENES = [
   { id: "concepto", nombre: "Por concepto (A-Z)" },
   { id: "recientes", nombre: "Últimos apuntados" },
   { id: "antiguos", nombre: "Primeros apuntados" },
+  { id: "mio", nombre: "Lo que más me toca", conYo: true },
 ];
+
+// "Lo que más me toca" solo tiene sentido si has dicho quién eres.
+export function ordenesPara(hayYo) {
+  return ORDENES.filter((o) => hayYo || !o.conYo);
+}
 
 export const POR_DIAS = "dias";
 
 // Por días no se toca: eso ya lo agrupa la lista.
-export function ordenarGastos(gastos, orden, viajeros) {
+export function ordenarGastos(gastos, orden, viajeros, soy = null) {
   const masCaro = (a, b) => importeDeGasto(b) - importeDeGasto(a);
 
   if (orden === "importe") return [...gastos].sort(masCaro);
@@ -54,6 +60,13 @@ export function ordenarGastos(gastos, orden, viajeros) {
   if (orden === "categoria") {
     const puesto = (g) => CATEGORIAS.indexOf(categoriaDe(g.categoria));
     return [...gastos].sort((a, b) => puesto(a) - puesto(b) || masCaro(a, b));
+  }
+
+  // Lo que me cuesta a mí, no lo que costó: la cena de 90 € entre seis pesa menos
+  // que el taxi de 30 entre dos. Los que no van conmigo, al final.
+  if (orden === "mio" && soy) {
+    const mio = (g) => parteDe(g, soy, viajeros);
+    return [...gastos].sort((a, b) => mio(b) - mio(a) || masCaro(a, b));
   }
 
   return gastos;

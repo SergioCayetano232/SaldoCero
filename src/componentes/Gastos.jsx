@@ -6,7 +6,7 @@ import { filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, h
 import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
 import { sugerirConceptos, importeSugerido } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
-import { ordenarGastos, ordenGuardado, ORDENES, POR_DIAS } from "../ordenar";
+import { ordenarGastos, ordenGuardado, ordenesPara, POR_DIAS } from "../ordenar";
 import { conPropina, PROPINAS } from "../propina";
 import { borradorQueVale, hayAlgoEscrito, hayAlgoQueBorrar } from "../borrador";
 import * as datos from "../datos";
@@ -307,11 +307,12 @@ function Gastos({
 
   // Los gastos agrupados por día, que es como se leen mejor. Ordenados de otra
   // forma van todos seguidos, en un solo grupo que no lleva título.
-  const ordenVigente = puedeFiltrar ? orden : POR_DIAS;
+  // Si ya no sabemos quién eres, el de "lo que más me toca" vuelve a por días.
+  const ordenVigente = puedeFiltrar && ordenesPara(puedoVerLoMio).some((o) => o.id === orden) ? orden : POR_DIAS;
   const dias =
     ordenVigente === POR_DIAS
       ? porDias(visibles)
-      : [{ fecha: "", gastos: ordenarGastos(visibles, ordenVigente, viajeros) }];
+      : [{ fecha: "", gastos: ordenarGastos(visibles, ordenVigente, viajeros, soy) }];
 
   const todosLosIds = viajeros.map((v) => v.id);
   // Mientras no toques las casillas, el gasto va entre todos.
@@ -1228,14 +1229,14 @@ function Gastos({
 
                 <select
                   className="filtro-orden"
-                  value={orden}
+                  value={ordenVigente}
                   onChange={(e) => {
                     setOrden(e.target.value);
                     datos.guardarOrden(codigo, e.target.value);
                   }}
                   aria-label="Ordenar gastos"
                 >
-                  {ORDENES.map((o) => (
+                  {ordenesPara(puedoVerLoMio).map((o) => (
                     <option key={o.id} value={o.id}>
                       {o.nombre}
                     </option>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { ordenarGastos, ordenGuardado, ORDENES, POR_DIAS } from "./ordenar";
+import { ordenarGastos, ordenGuardado, ordenesPara, ORDENES, POR_DIAS } from "./ordenar";
 import { BOTE } from "./bote";
 
 const viajeros = [
@@ -124,5 +124,51 @@ describe("ordenGuardado", () => {
   it("uno que ya no existe, por días", () => {
     expect(ordenGuardado("alfabetico")).toBe(POR_DIAS);
     expect(ordenGuardado(42)).toBe(POR_DIAS);
+  });
+});
+
+describe("lo que más me toca", () => {
+  const tres = [
+    { id: "a", nombre: "Ana" },
+    { id: "b", nombre: "Luis" },
+    { id: "c", nombre: "Marta" },
+  ];
+  const cuentas = [
+    // 90 entre los tres: 30 cada uno.
+    { id: 1, pagadorId: "a", importe: 90 },
+    // 50 entre Ana y Luis: 25.
+    { id: 2, pagadorId: "b", importe: 50, participantes: ["a", "b"] },
+    // 40 con Ana a doble: 20 / 10 / 10. A Luis le toca 10.
+    { id: 3, pagadorId: "c", importe: 40, participantes: ["a", "b", "c"], partes: { a: 2, b: 1, c: 1 } },
+    // Solo de Marta: a Ana no le toca nada.
+    { id: 4, pagadorId: "c", importe: 200, participantes: ["c"] },
+    // En dólares, cuenta lo convertido: 36 entre los tres, 12.
+    { id: 5, pagadorId: "a", importe: 40, moneda: "USD", importeConvertido: 36 },
+  ];
+
+  it("de lo que más me cuesta a lo que menos, y lo que no es mío al final", () => {
+    expect(ids(ordenarGastos(cuentas, "mio", tres, "a"))).toEqual([1, 2, 3, 5, 4]);
+  });
+
+  it("depende de quién seas", () => {
+    expect(ids(ordenarGastos(cuentas, "mio", tres, "c"))).toEqual([4, 1, 5, 3, 2]);
+  });
+
+  it("si te toca lo mismo, el más caro arriba", () => {
+    const iguales = [
+      { id: 1, pagadorId: "a", importe: 30, participantes: ["a", "b"] },
+      { id: 2, pagadorId: "a", importe: 45, participantes: ["a", "b", "c"] },
+    ];
+    expect(ids(ordenarGastos(iguales, "mio", tres, "a"))).toEqual([2, 1]);
+  });
+
+  it("sin saber quién eres, no ordena", () => {
+    expect(ordenarGastos(cuentas, "mio", tres, null)).toBe(cuentas);
+  });
+
+  it("solo se ofrece si sabemos quién eres", () => {
+    expect(ordenesPara(true).map((o) => o.id)).toContain("mio");
+    expect(ordenesPara(false).map((o) => o.id)).not.toContain("mio");
+    expect(ordenesPara(false)).toHaveLength(ORDENES.length - 1);
   });
 });
