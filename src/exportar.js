@@ -1,6 +1,6 @@
 // Los gastos en una hoja de cálculo, para quien quiera echar sus propias cuentas.
 
-import { importeDeGasto, parteDe } from "./calculos";
+import { importeDeGasto, parteDe, calcularTotal } from "./calculos";
 import { categoriaDe } from "./categorias";
 import { BOTE } from "./bote";
 
@@ -48,5 +48,20 @@ export function gastosEnCSV({ gastos, viajeros, moneda }) {
       ...viajeros.map((v) => cifra(parteDe(g, v.id, viajeros))),
     ]);
 
-  return [cabecera, ...filas].map((fila) => fila.map(celda).join(SEPARADOR)).join("\r\n");
+  // Con una fila en blanco antes, que si no el Excel la mete al ordenar la tabla.
+  // Lo pagado no se suma: cada uno puede ir en una moneda.
+  const total = [
+    "",
+    "Total",
+    "",
+    "",
+    "",
+    "",
+    cifra(calcularTotal(gastos)),
+    "",
+    ...viajeros.map((v) => cifra(gastos.reduce((t, g) => t + parteDe(g, v.id, viajeros), 0))),
+  ];
+  const alFinal = gastos.length > 0 ? [[], total] : [];
+
+  return [cabecera, ...filas, ...alFinal].map((fila) => fila.map(celda).join(SEPARADOR)).join("\r\n");
 }

@@ -54,7 +54,7 @@ describe("gastosEnCSV", () => {
   it("del más antiguo al más nuevo", () => {
     const taxi = { ...cena, id: "g2", concepto: "Taxi", fecha: "2026-09-12" };
     const filas = lineas(gastosEnCSV({ gastos: [cena, taxi], viajeros, moneda: "EUR" }));
-    expect(filas.slice(1).map((f) => f.split(";")[1])).toEqual(["Taxi", "Cena"]);
+    expect(filas.slice(1, -2).map((f) => f.split(";")[1])).toEqual(["Taxi", "Cena"]);
   });
 
   it("con la nota, y entre comillas si lleva saltos de línea", () => {
@@ -65,6 +65,17 @@ describe("gastosEnCSV", () => {
     const enDos = { ...cena, nota: "con propina\ny el agua" };
     const csv = gastosEnCSV({ gastos: [enDos], viajeros, moneda: "EUR" });
     expect(csv).toContain(';"con propina\ny el agua";');
+  });
+
+  it("al final, el total y lo de cada uno, tras una fila en blanco", () => {
+    const yenes = { ...cena, id: "g2", importe: 5000, importeConvertido: 31.25, moneda: "JPY", participantes: ["a"] };
+    const filas = lineas(gastosEnCSV({ gastos: [cena, yenes], viajeros, moneda: "EUR" }));
+    expect(filas.at(-2)).toBe("");
+    expect(filas.at(-1)).toBe(";Total;;;;;61,25;;46,25;15,00");
+  });
+
+  it("sin gastos, sin fila de total", () => {
+    expect(lineas(gastosEnCSV({ gastos: [], viajeros, moneda: "EUR" }))).toHaveLength(1);
   });
 
   it("una categoría que ya no existe sale como Otros", () => {
