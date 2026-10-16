@@ -5,7 +5,7 @@ import { porCabeza } from "./porCabeza";
 import { gastoPorCategoria } from "./categorias";
 import { porDias, enCorto } from "./fechas";
 import { conMoneda } from "./monedas";
-import { BOTE } from "./bote";
+import { BOTE, esDelBote } from "./bote";
 import { normalizar } from "./filtros";
 import { conceptoSinEscribir } from "./categorias";
 
@@ -60,6 +60,15 @@ function masCaroPorCabeza(gastos, personas, grande) {
     porCabeza: max.porCabeza,
     cuantos: participantesDeGasto(max.gasto, personas).length,
   };
+}
+
+// Lo que se pagó desde el bote. Si no lo hubo, nada.
+function loDelBote(gastos, total) {
+  const delBote = gastos.filter(esDelBote);
+  if (delBote.length === 0) return null;
+
+  const suma = calcularTotal(delBote);
+  return { total: suma, gastos: delBote.length, porcentaje: Math.round((suma / total) * 100) };
 }
 
 // personas: los viajeros con lo que ha puesto cada uno (bote incluido).
@@ -118,6 +127,7 @@ export function cifrasDelViaje(gastos, personas) {
     quienMasVeces: masVeces > 1 && losQueMas.length === 1 ? losQueMas[0] : null,
     masCaroPorCabeza: masCaroPorCabeza(gastos, personas, grande),
     masRepetido: loMasRepetido(gastos),
+    delBote: loDelBote(gastos, total),
     categoria: categoria
       ? { ...categoria, porcentaje: Math.round((categoria.total / total) * 100) }
       : null,
@@ -164,6 +174,10 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   if (cifras.masRepetido) {
     const r = cifras.masRepetido;
     lineas.push(`🔁 Lo que más se repitió: ${r.concepto}, ${r.veces} veces (${conMoneda(r.total, moneda)})`);
+  }
+  if (cifras.delBote) {
+    const b = cifras.delBote;
+    lineas.push(`🫙 Del bote salieron ${conMoneda(b.total, moneda)} en ${b.gastos} ${b.gastos === 1 ? "gasto" : "gastos"}, el ${b.porcentaje} %`);
   }
   if (cifras.categoria) {
     lineas.push(`${cifras.categoria.emoji} Donde más se fue: ${cifras.categoria.nombre.toLowerCase()}, el ${cifras.categoria.porcentaje} %`);

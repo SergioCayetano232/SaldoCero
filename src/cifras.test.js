@@ -196,6 +196,21 @@ describe("cifrasDelViaje", () => {
     expect(cifrasDelViaje(enDolares, personas).masRepetido.total).toBe(30);
   });
 
+  it("lo que salió del bote, con su parte del total", () => {
+    const conBote = gastos.map((g, i) => (i < 2 ? { ...g, pagadorId: BOTE } : g));
+    // El hotel y la cena: 160 de 240.
+    expect(cifrasDelViaje(conBote, personas).delBote).toEqual({ total: 160, gastos: 2, porcentaje: 67 });
+  });
+
+  it("sin bote, nada del bote", () => {
+    expect(cifras.delBote).toBeNull();
+  });
+
+  it("lo del bote va por lo convertido", () => {
+    const enDolares = [{ ...gastos[0], pagadorId: BOTE, importe: 130, importeConvertido: 120 }, gastos[1]];
+    expect(cifrasDelViaje(enDolares, personas).delBote.total).toBe(120);
+  });
+
   it("si lo pagó el bote, lo dice", () => {
     const delBote = [{ ...gastos[0], pagadorId: BOTE }];
     expect(cifrasDelViaje(delBote, personas).gastoMasGrande.quien).toBe("el bote");
@@ -279,6 +294,14 @@ describe("cifrasEnTexto", () => {
       "Lo más caro por cabeza: Marisco, 45.00 € cada uno (entre 2)",
     );
     expect(texto).not.toContain("por cabeza");
+  });
+
+  it("lo del bote, si lo hubo, y en singular si fue uno", () => {
+    const uno = gastos.map((g, i) => (i === 0 ? { ...g, pagadorId: BOTE } : g));
+    expect(cifrasEnTexto(cifrasDelViaje(uno, personas), "Lisboa", "EUR")).toContain(
+      "Del bote salieron 120.00 € en 1 gasto, el 50 %",
+    );
+    expect(texto).not.toContain("bote");
   });
 
   it("lo que no hay, no sale", () => {
