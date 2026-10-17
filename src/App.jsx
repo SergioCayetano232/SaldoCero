@@ -6,6 +6,7 @@ import { balancesConBote, hayBote } from "./bote";
 import { coloresDelViaje } from "./avatares";
 import { borradoConEspera, queSeVaConViajero } from "./deshacer";
 import { novedades, textoDeNovedades } from "./novedades";
+import { turnos } from "./turnos";
 import { vibrar } from "./vibrar";
 import { avisoAlCerrar, estaCerrado } from "./cerrar";
 import { pagosDelViaje } from "./calculos";
@@ -120,6 +121,8 @@ function App() {
   const propios = useRef(new Set());
   // Mientras guardas algo, lo que llegue puede ser lo tuyo a medio guardar.
   const enMarcha = useRef(0);
+  // Para que una lectura que llega tarde no deshaga lo que acabas de hacer.
+  const [lecturas] = useState(turnos);
 
   // Nos vamos enterando de lo que apunten los demás.
   const viajeId = viaje?.id;
@@ -141,14 +144,15 @@ function App() {
         clearTimeout(reloj);
         setNovedad({ texto, ids: new Set([...hay.gastos, ...hay.viajeros].map((x) => x.id)) });
         reloj = setTimeout(() => setNovedad(null), 4500);
-      }
+      },
+      lecturas
     );
 
     return () => {
       dejarDeEscuchar();
       clearTimeout(reloj);
     };
-  }, [viajeId]);
+  }, [viajeId, lecturas]);
 
   // Todas las operaciones fallan igual: avisamos y dejamos el viaje como estaba.
   // Devuelve si ha ido bien, por si alguien quiere hacer algo después.
@@ -158,7 +162,9 @@ function App() {
       enMarcha.current++;
       try {
         await operacion();
-        setViaje(await datos.refrescarViaje(viaje));
+        const turno = lecturas.pedir();
+        const nuevo = await datos.refrescarViaje(viaje);
+        if (lecturas.vale(turno)) setViaje(nuevo);
         vibrar("toque");
         return true;
       } catch (fallo) {
@@ -169,7 +175,7 @@ function App() {
         enMarcha.current--;
       }
     },
-    [viaje]
+    [viaje, lecturas]
   );
 
   // Borrar algo, dando unos segundos para arrepentirse.
@@ -186,16 +192,17 @@ function App() {
       // Tanto si se ha borrado como si ha fallado, volvemos a leer el viaje:
       // así la lista deja de esconderlo y enseña lo que hay de verdad.
       try {
+        const turno = lecturas.pedir();
         const releido = await datos.refrescarViaje(viajeActual.current);
         // Si mientras tanto te has ido a otro viaje, no te devolvemos a este.
-        if (viajeActual.current?.id === deQueViaje) setViaje(releido);
+        if (viajeActual.current?.id === deQueViaje && lecturas.vale(turno)) setViaje(releido);
       } catch {
         // Si no se puede releer, lo cogerá la escucha de cada pocos segundos.
       }
     });
 
     setBorrado({ id, que, espera });
-  }, []);
+  }, [lecturas]);
 
   // Si cierras la pestaña o te vas a otra app en esos segundos, se borra ya: si
   // no, el reloj muere con la página y lo borrado vuelve a salir.

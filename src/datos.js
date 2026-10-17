@@ -620,17 +620,24 @@ const CADA = 5000;
 // El tiempo real de Supabase no nos vale: comprueba los permisos igual que el
 // resto, pero el WebSocket no lleva nuestra cabecera con el código, así que
 // nunca nos llegaría nada. Preguntamos cada pocos segundos y listo.
-export function escucharCambios(dameElViaje, alCambiar) {
+export function escucharCambios(dameElViaje, alCambiar, lecturas) {
+  function leer() {
+    const turno = lecturas?.pedir();
+    refrescarViaje(dameElViaje())
+      .then((nuevo) => {
+        if (!lecturas || lecturas.vale(turno)) alCambiar(nuevo);
+      })
+      .catch(() => {});
+  }
+
   // Si la pestaña está de fondo, no gastamos peticiones.
   const reloj = setInterval(() => {
-    if (document.hidden) return;
-
-    refrescarViaje(dameElViaje()).then(alCambiar).catch(() => {});
+    if (!document.hidden) leer();
   }, CADA);
 
   // Y al volver a ella, nos ponemos al día enseguida.
   function alVolver() {
-    if (!document.hidden) refrescarViaje(dameElViaje()).then(alCambiar).catch(() => {});
+    if (!document.hidden) leer();
   }
 
   document.addEventListener("visibilitychange", alVolver);
