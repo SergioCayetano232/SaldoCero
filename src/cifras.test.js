@@ -237,6 +237,16 @@ describe("cifrasDelViaje", () => {
     expect(c.total).toBe(240);
   });
 
+  it("cuántos llevan ticket", () => {
+    const conFotos = gastos.map((g, i) => (i < 2 ? { ...g, ticket: `viaje/${i}.jpg` } : g));
+    expect(cifrasDelViaje(conFotos, personas).tickets).toEqual({ conTicket: 2, gastos: 5 });
+  });
+
+  it("si nadie hizo foto, nada de tickets", () => {
+    expect(cifras.tickets).toBeNull();
+    expect(cifrasDelViaje(gastos.map((g) => ({ ...g, ticket: null })), personas).tickets).toBeNull();
+  });
+
   it("sin gastos, nada", () => {
     expect(cifrasDelViaje([], personas)).toBeNull();
   });
@@ -304,6 +314,15 @@ describe("cifrasEnTexto", () => {
       "Del bote salieron 120.00 € en 1 gasto, el 50 %",
     );
     expect(texto).not.toContain("bote");
+  });
+
+  it("los tickets, y en singular si solo hubo un gasto", () => {
+    const conFoto = gastos.map((g, i) => (i === 0 ? { ...g, ticket: "viaje/0.jpg" } : g));
+    expect(cifrasEnTexto(cifrasDelViaje(conFoto, personas), "Lisboa", "EUR")).toContain("1 de 5 gastos con ticket");
+    expect(cifrasEnTexto(cifrasDelViaje(conFoto.slice(0, 1), personas), "Lisboa", "EUR")).toContain(
+      "1 de 1 gasto con ticket",
+    );
+    expect(cifrasEnTexto(cifrasDelViaje(gastos, personas), "Lisboa", "EUR")).not.toContain("ticket");
   });
 
   it("lo que no hay, no sale", () => {

@@ -71,6 +71,12 @@ function loDelBote(gastos, total) {
   return { total: suma, gastos: delBote.length, porcentaje: Math.round((suma / total) * 100) };
 }
 
+// Cuántos llevan la foto del ticket. Si nadie hizo ninguna, no hay nada que contar.
+function losDelTicket(gastos) {
+  const conTicket = gastos.filter((g) => g.ticket).length;
+  return conTicket > 0 ? { conTicket, gastos: gastos.length } : null;
+}
+
 // personas: los viajeros con lo que ha puesto cada uno (bote incluido).
 export function cifrasDelViaje(gastos, personas) {
   if (gastos.length === 0) return null;
@@ -128,6 +134,7 @@ export function cifrasDelViaje(gastos, personas) {
     masCaroPorCabeza: masCaroPorCabeza(gastos, personas, grande),
     masRepetido: loMasRepetido(gastos),
     delBote: loDelBote(gastos, total),
+    tickets: losDelTicket(gastos),
     categoria: categoria
       ? { ...categoria, porcentaje: Math.round((categoria.total / total) * 100) }
       : null,
@@ -178,6 +185,10 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   if (cifras.delBote) {
     const b = cifras.delBote;
     lineas.push(`🫙 Del bote salieron ${conMoneda(b.total, moneda)} en ${b.gastos} ${b.gastos === 1 ? "gasto" : "gastos"}, el ${b.porcentaje} %`);
+  }
+  if (cifras.tickets) {
+    const t = cifras.tickets;
+    lineas.push(`🧾 ${t.conTicket} de ${t.gastos} ${t.gastos === 1 ? "gasto" : "gastos"} con ticket`);
   }
   if (cifras.categoria) {
     lineas.push(`${cifras.categoria.emoji} Donde más se fue: ${cifras.categoria.nombre.toLowerCase()}, el ${cifras.categoria.porcentaje} %`);
