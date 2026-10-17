@@ -12,7 +12,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda }) {
 
   // En lo que puso cada uno también cuenta lo que metió en el bote.
   const personas = sinBote(balances).map((v) => ({ ...v, puesto: v.puesto + (v.alBote ?? 0) }));
-  const cifras = cifrasDelViaje(gastos, personas);
+  const cifras = cifrasDelViaje(gastos, personas, moneda);
   if (!cifras) return null;
 
   async function compartir() {
@@ -21,7 +21,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda }) {
     setTimeout(() => setCopiado(""), 2500);
   }
 
-  const { quienMasPuso, quienMenosPuso, quienMasVeces, diaMasCaro, diaMasBarato, diaMasMovido, gastoMasGrande, gastoMasPequeno, masCaroPorCabeza, masRepetido, delBote, tickets, categoria, porPersonaYDia } = cifras;
+  const { quienMasPuso, quienMenosPuso, quienMasVeces, diaMasCaro, diaMasBarato, diaMasMovido, gastoMasGrande, gastoMasPequeno, masCaroPorCabeza, masRepetido, delBote, tickets, monedas, categoria, porPersonaYDia } = cifras;
 
   return (
     <section className="tarjeta cifras">
@@ -137,6 +137,13 @@ function CifrasViaje({ gastos, balances, nombre, moneda }) {
             <span>
               salieron del bote, en {delBote.gastos} {delBote.gastos === 1 ? "gasto" : "gastos"} (el {delBote.porcentaje} %)
             </span>
+          </li>
+        )}
+        {monedas && (
+          <li>
+            <span className="cifras-emoji">🌍</span>
+            <strong>{monedas.length} monedas</strong>
+            <span>en las que pagasteis: {monedas.join(", ")}</span>
           </li>
         )}
         {tickets && (

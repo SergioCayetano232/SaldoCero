@@ -77,8 +77,16 @@ function losDelTicket(gastos) {
   return conTicket > 0 ? { conTicket, gastos: gastos.length } : null;
 }
 
+// En qué monedas se pagó, la del viaje primero. Con una sola no hay nada que contar.
+function lasMonedas(gastos, monedaViaje) {
+  // Los gastos de antes de las monedas no la traen, y esos iban en la del viaje.
+  const monedas = [...new Set(gastos.map((g) => g.moneda ?? monedaViaje).filter(Boolean))];
+  monedas.sort((a, b) => (b === monedaViaje) - (a === monedaViaje));
+  return monedas.length > 1 ? monedas : null;
+}
+
 // personas: los viajeros con lo que ha puesto cada uno (bote incluido).
-export function cifrasDelViaje(gastos, personas) {
+export function cifrasDelViaje(gastos, personas, monedaViaje) {
   if (gastos.length === 0) return null;
 
   const total = calcularTotal(gastos);
@@ -135,6 +143,7 @@ export function cifrasDelViaje(gastos, personas) {
     masRepetido: loMasRepetido(gastos),
     delBote: loDelBote(gastos, total),
     tickets: losDelTicket(gastos),
+    monedas: lasMonedas(gastos, monedaViaje),
     categoria: categoria
       ? { ...categoria, porcentaje: Math.round((categoria.total / total) * 100) }
       : null,
@@ -185,6 +194,9 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   if (cifras.delBote) {
     const b = cifras.delBote;
     lineas.push(`🫙 Del bote salieron ${conMoneda(b.total, moneda)} en ${b.gastos} ${b.gastos === 1 ? "gasto" : "gastos"}, el ${b.porcentaje} %`);
+  }
+  if (cifras.monedas) {
+    lineas.push(`🌍 Pagasteis en ${cifras.monedas.length} monedas: ${cifras.monedas.join(", ")}`);
   }
   if (cifras.tickets) {
     const t = cifras.tickets;

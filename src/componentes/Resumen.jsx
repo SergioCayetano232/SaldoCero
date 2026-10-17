@@ -104,7 +104,7 @@ function Resumen({
   function elResumen(conCifras = false) {
     const nombre = viaje?.nombre ?? "El viaje";
     const conBote = personas.map((v) => ({ ...v, puesto: v.puesto + (v.alBote ?? 0) }));
-    const cifras = conCifras && cerrado ? cifrasDelViaje(gastos, conBote) : null;
+    const cifras = conCifras && cerrado ? cifrasDelViaje(gastos, conBote, monedaViaje) : null;
 
     return resumenEnTexto({
       nombre,

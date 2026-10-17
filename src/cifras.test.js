@@ -247,6 +247,22 @@ describe("cifrasDelViaje", () => {
     expect(cifrasDelViaje(gastos.map((g) => ({ ...g, ticket: null })), personas).tickets).toBeNull();
   });
 
+  it("en qué monedas se pagó, la del viaje primero", () => {
+    const fuera = gastos.map((g, i) => ({ ...g, moneda: ["MAD", "EUR", "USD", "MAD", "EUR"][i] }));
+    expect(cifrasDelViaje(fuera, personas, "EUR").monedas).toEqual(["EUR", "MAD", "USD"]);
+  });
+
+  it("con una sola moneda, nada de monedas", () => {
+    expect(cifrasDelViaje(gastos.map((g) => ({ ...g, moneda: "EUR" })), personas, "EUR").monedas).toBeNull();
+    // Los de antes no traen moneda: van en la del viaje.
+    expect(cifrasDelViaje(gastos, personas, "EUR").monedas).toBeNull();
+  });
+
+  it("si todo se pagó fuera, la del viaje no cuenta", () => {
+    const fuera = gastos.map((g, i) => ({ ...g, moneda: i < 2 ? "USD" : "MAD" }));
+    expect(cifrasDelViaje(fuera, personas, "EUR").monedas).toEqual(["USD", "MAD"]);
+  });
+
   it("sin gastos, nada", () => {
     expect(cifrasDelViaje([], personas)).toBeNull();
   });
@@ -323,6 +339,14 @@ describe("cifrasEnTexto", () => {
       "1 de 1 gasto con ticket",
     );
     expect(cifrasEnTexto(cifrasDelViaje(gastos, personas), "Lisboa", "EUR")).not.toContain("ticket");
+  });
+
+  it("las monedas, si hubo más de una", () => {
+    const fuera = gastos.map((g, i) => (i === 0 ? { ...g, moneda: "MAD" } : g));
+    expect(cifrasEnTexto(cifrasDelViaje(fuera, personas, "EUR"), "Lisboa", "EUR")).toContain(
+      "Pagasteis en 2 monedas: EUR, MAD",
+    );
+    expect(cifrasEnTexto(cifrasDelViaje(gastos, personas, "EUR"), "Lisboa", "EUR")).not.toContain("monedas");
   });
 
   it("lo que no hay, no sale", () => {
