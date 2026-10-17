@@ -88,6 +88,20 @@ describe("gastosEnCSV", () => {
     expect(filas.at(-1)).toBe(";Total;;;;;61,25;;;;46,25;15,00");
   });
 
+  it("arriba, el nombre del viaje y sus días", () => {
+    const taxi = { ...cena, id: "g2", fecha: "2026-09-11" };
+    const antiguo = { ...cena, id: "g3", fecha: undefined };
+    const filas = lineas(gastosEnCSV({ gastos: [cena, taxi, antiguo], viajeros, moneda: "EUR", nombre: "Lisboa" }));
+    expect(filas[0]).toBe("Lisboa;del 2026-09-11 al 2026-09-13");
+    expect(filas[1]).toBe("");
+    expect(filas[2]).toMatch(/^Fecha;/);
+  });
+
+  it("con un solo día, el día; y sin gastos, solo el nombre", () => {
+    expect(lineas(gastosEnCSV({ gastos: [cena], viajeros, moneda: "EUR", nombre: "Lisboa" }))[0]).toBe("Lisboa;2026-09-13");
+    expect(lineas(gastosEnCSV({ gastos: [], viajeros, moneda: "EUR", nombre: "Lisboa" }))[0]).toBe("Lisboa;");
+  });
+
   it("sin gastos, sin fila de total", () => {
     expect(lineas(gastosEnCSV({ gastos: [], viajeros, moneda: "EUR" }))).toHaveLength(1);
   });

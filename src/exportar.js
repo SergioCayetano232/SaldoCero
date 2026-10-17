@@ -17,6 +17,19 @@ function momento(iso) {
   return new Date(iso).toLocaleString("sv-SE", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
 }
 
+// El nombre del viaje y sus días, para que el archivo se entienda sin abrir la app.
+// Con una fila en blanco detrás, por lo mismo que la del total.
+function arriba(nombre, gastos) {
+  if (!nombre) return [];
+
+  const dias = gastos.map((g) => g.fecha).filter(Boolean).sort();
+  const desde = dias[0];
+  const hasta = dias.at(-1);
+  const cuando = !desde ? "" : desde === hasta ? desde : `del ${desde} al ${hasta}`;
+
+  return [[nombre, cuando], []];
+}
+
 // Entre comillas si hace falta. Y si empieza por = + - @, Excel lo tomaría por
 // una fórmula: con un apóstrofo delante se queda en texto.
 export function celda(valor) {
@@ -26,7 +39,7 @@ export function celda(valor) {
   return texto;
 }
 
-export function gastosEnCSV({ gastos, viajeros, moneda }) {
+export function gastosEnCSV({ gastos, viajeros, moneda, nombre }) {
   const cabecera = [
     "Fecha",
     "Concepto",
@@ -77,5 +90,5 @@ export function gastosEnCSV({ gastos, viajeros, moneda }) {
   ];
   const alFinal = gastos.length > 0 ? [[], total] : [];
 
-  return [cabecera, ...filas, ...alFinal].map((fila) => fila.map(celda).join(SEPARADOR)).join("\r\n");
+  return [...arriba(nombre, gastos), cabecera, ...filas, ...alFinal].map((fila) => fila.map(celda).join(SEPARADOR)).join("\r\n");
 }
