@@ -25,18 +25,18 @@ function lineas(csv) {
 describe("gastosEnCSV", () => {
   it("una cabecera con una columna por viajero", () => {
     const [cabecera] = lineas(gastosEnCSV({ gastos: [], viajeros, moneda: "EUR" }));
-    expect(cabecera).toBe("Fecha;Concepto;Categoría;Pagó;Importe;Moneda;Importe en EUR;Nota;Ticket;Ana;Luis");
+    expect(cabecera).toBe("Fecha;Concepto;Categoría;Pagó;Importe;Moneda;Importe en EUR;Nota;Ticket;Apuntado;Ana;Luis");
   });
 
   it("un gasto por fila, con coma decimal y lo que le toca a cada uno", () => {
     const [, fila] = lineas(gastosEnCSV({ gastos: [cena], viajeros, moneda: "EUR" }));
-    expect(fila).toBe("2026-09-13;Cena;Comida;Ana;30,00;EUR;30,00;;No;15,00;15,00");
+    expect(fila).toBe("2026-09-13;Cena;Comida;Ana;30,00;EUR;30,00;;No;;15,00;15,00");
   });
 
   it("en otra moneda, lo pagado y lo convertido", () => {
     const yenes = { ...cena, importe: 5000, importeConvertido: 31.25, moneda: "JPY" };
     const [, fila] = lineas(gastosEnCSV({ gastos: [yenes], viajeros, moneda: "EUR" }));
-    expect(fila).toContain("5000,00;JPY;31,25;;No;15,63;15,63");
+    expect(fila).toContain("5000,00;JPY;31,25;;No;;15,63;15,63");
   });
 
   it("con reparto desigual y gente que no va", () => {
@@ -75,11 +75,17 @@ describe("gastosEnCSV", () => {
     expect(sinFoto.split(";")[8]).toBe("No");
   });
 
+  it("cuándo se apuntó, en la hora de aquí", () => {
+    // Sin zona, la fecha se lee en la hora local y la prueba no depende de dónde se corra.
+    const [, fila] = lineas(gastosEnCSV({ gastos: [{ ...cena, creadoEn: "2026-09-13T21:05:40" }], viajeros, moneda: "EUR" }));
+    expect(fila.split(";")[9]).toBe("2026-09-13 21:05");
+  });
+
   it("al final, el total y lo de cada uno, tras una fila en blanco", () => {
     const yenes = { ...cena, id: "g2", importe: 5000, importeConvertido: 31.25, moneda: "JPY", participantes: ["a"] };
     const filas = lineas(gastosEnCSV({ gastos: [cena, yenes], viajeros, moneda: "EUR" }));
     expect(filas.at(-2)).toBe("");
-    expect(filas.at(-1)).toBe(";Total;;;;;61,25;;;46,25;15,00");
+    expect(filas.at(-1)).toBe(";Total;;;;;61,25;;;;46,25;15,00");
   });
 
   it("sin gastos, sin fila de total", () => {

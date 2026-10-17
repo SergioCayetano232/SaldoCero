@@ -11,6 +11,12 @@ function cifra(numero) {
   return numero.toFixed(2).replace(".", ",");
 }
 
+// "2026-10-17 20:30", en la hora de aquí, como las fechas de los gastos.
+function momento(iso) {
+  if (!iso) return "";
+  return new Date(iso).toLocaleString("sv-SE", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+}
+
 // Entre comillas si hace falta. Y si empieza por = + - @, Excel lo tomaría por
 // una fórmula: con un apóstrofo delante se queda en texto.
 export function celda(valor) {
@@ -31,6 +37,7 @@ export function gastosEnCSV({ gastos, viajeros, moneda }) {
     `Importe en ${moneda}`,
     "Nota",
     "Ticket",
+    "Apuntado",
     // Lo que le toca a cada uno de cada gasto, para poder rehacer las cuentas.
     ...viajeros.map((v) => v.nombre),
   ];
@@ -48,6 +55,8 @@ export function gastosEnCSV({ gastos, viajeros, moneda }) {
       g.nota ?? "",
       // La foto no cabe en un Excel, pero así sabes cuáles tienen justificante.
       g.ticket ? "Sí" : "No",
+      // Los gastos de antes no lo guardaban.
+      momento(g.creadoEn),
       ...viajeros.map((v) => cifra(parteDe(g, v.id, viajeros))),
     ]);
 
@@ -61,6 +70,7 @@ export function gastosEnCSV({ gastos, viajeros, moneda }) {
     "",
     "",
     cifra(calcularTotal(gastos)),
+    "",
     "",
     "",
     ...viajeros.map((v) => cifra(gastos.reduce((t, g) => t + parteDe(g, v.id, viajeros), 0))),
