@@ -70,7 +70,7 @@ export function hayOtrasMonedas(gastos, monedaViaje) {
 }
 
 // Si alguien se apuntó al viaje después, lo de antes tampoco es suyo.
-function deAlgunos(gasto, viajeros) {
+export function deAlgunos(gasto, viajeros) {
   return participantesDeGasto(gasto, viajeros).length < viajeros.length;
 }
 

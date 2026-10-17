@@ -263,6 +263,16 @@ describe("cifrasDelViaje", () => {
     expect(cifrasDelViaje(fuera, personas, "EUR").monedas).toEqual(["USD", "MAD"]);
   });
 
+  it("cuántos no fueron de todos", () => {
+    const sinMarta = gastos.map((g, i) => (i < 2 ? { ...g, participantes: ["a", "b"] } : g));
+    expect(cifrasDelViaje(sinMarta, personas).deAlgunos).toEqual({ deAlgunos: 2, gastos: 5 });
+  });
+
+  it("si todo fue entre todos, nada", () => {
+    expect(cifras.deAlgunos).toBeNull();
+    expect(cifrasDelViaje(gastos.map((g) => ({ ...g, participantes: ["a", "b", "c"] })), personas).deAlgunos).toBeNull();
+  });
+
   it("sin gastos, nada", () => {
     expect(cifrasDelViaje([], personas)).toBeNull();
   });
@@ -347,6 +357,14 @@ describe("cifrasEnTexto", () => {
       "Pagasteis en 2 monedas: EUR, MAD",
     );
     expect(cifrasEnTexto(cifrasDelViaje(gastos, personas, "EUR"), "Lisboa", "EUR")).not.toContain("monedas");
+  });
+
+  it("los que no fueron de todos, con el verbo bien", () => {
+    const uno = gastos.map((g, i) => (i === 0 ? { ...g, participantes: ["a"] } : g));
+    const dos = gastos.map((g, i) => (i < 2 ? { ...g, participantes: ["a"] } : g));
+    expect(cifrasEnTexto(cifrasDelViaje(uno, personas), "Lisboa", "EUR")).toContain("1 de 5 gastos no fue de todos");
+    expect(cifrasEnTexto(cifrasDelViaje(dos, personas), "Lisboa", "EUR")).toContain("2 de 5 gastos no fueron de todos");
+    expect(cifrasEnTexto(cifrasDelViaje(gastos, personas), "Lisboa", "EUR")).not.toContain("de todos");
   });
 
   it("lo que no hay, no sale", () => {

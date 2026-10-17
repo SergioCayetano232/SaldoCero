@@ -6,7 +6,7 @@ import { gastoPorCategoria } from "./categorias";
 import { porDias, enCorto } from "./fechas";
 import { conMoneda } from "./monedas";
 import { BOTE, esDelBote } from "./bote";
-import { normalizar } from "./filtros";
+import { normalizar, deAlgunos } from "./filtros";
 import { conceptoSinEscribir } from "./categorias";
 
 function resumenDeGasto(gasto, personas) {
@@ -85,6 +85,12 @@ function lasMonedas(gastos, monedaViaje) {
   return monedas.length > 1 ? monedas : null;
 }
 
+// Los que no fueron entre todos: la cena a la que no fue uno, el museo de dos...
+function losDeAlgunos(gastos, personas) {
+  const cuantos = gastos.filter((g) => deAlgunos(g, personas)).length;
+  return cuantos > 0 ? { deAlgunos: cuantos, gastos: gastos.length } : null;
+}
+
 // personas: los viajeros con lo que ha puesto cada uno (bote incluido).
 export function cifrasDelViaje(gastos, personas, monedaViaje) {
   if (gastos.length === 0) return null;
@@ -144,6 +150,7 @@ export function cifrasDelViaje(gastos, personas, monedaViaje) {
     delBote: loDelBote(gastos, total),
     tickets: losDelTicket(gastos),
     monedas: lasMonedas(gastos, monedaViaje),
+    deAlgunos: losDeAlgunos(gastos, personas),
     categoria: categoria
       ? { ...categoria, porcentaje: Math.round((categoria.total / total) * 100) }
       : null,
@@ -197,6 +204,10 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   }
   if (cifras.monedas) {
     lineas.push(`🌍 Pagasteis en ${cifras.monedas.length} monedas: ${cifras.monedas.join(", ")}`);
+  }
+  if (cifras.deAlgunos) {
+    const a = cifras.deAlgunos;
+    lineas.push(`👥 ${a.deAlgunos} de ${a.gastos} ${a.gastos === 1 ? "gasto" : "gastos"} no ${a.deAlgunos === 1 ? "fue" : "fueron"} de todos`);
   }
   if (cifras.tickets) {
     const t = cifras.tickets;
