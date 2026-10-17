@@ -6,6 +6,7 @@ import { supabase, usarCodigo } from "./supabase";
 import { BOTE } from "./bote";
 import { rutaDelTicket } from "./tickets";
 import { limpiarNota } from "./notas";
+import { limpiarNombre } from "./nombres";
 import { codigoDeTexto } from "./codigos";
 import { POR_DIAS } from "./ordenar";
 
@@ -172,7 +173,8 @@ export function guardarBorrador(codigo, borrador) {
 
 export async function crearViaje(nombre, moneda = "EUR") {
   const { data, error } = await supabase.rpc("crear_viaje", {
-    nombre_viaje: nombre,
+    // Sin nombre, la base de datos le pone "Mi viaje".
+    nombre_viaje: limpiarNombre(nombre),
     moneda_viaje: moneda,
   });
   if (error) throw fallo(error, "No hemos podido crear el viaje.");

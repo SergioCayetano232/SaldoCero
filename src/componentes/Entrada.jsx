@@ -2,6 +2,7 @@ import { useState } from "react";
 import * as datos from "../datos";
 import { MONEDAS } from "../monedas";
 import { haceCuanto } from "../fechas";
+import { LARGO_MAXIMO } from "../nombres";
 
 // Primera pantalla: o creas un viaje o entras en el de alguien con su código.
 function Entrada({ onCrear, onEntrar, cargando, error }) {
@@ -25,6 +26,7 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
           <input
             type="text"
             placeholder="Nombre del viaje (Lisboa, Fallas...)"
+            maxLength={LARGO_MAXIMO}
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             onKeyDown={(e) => {
