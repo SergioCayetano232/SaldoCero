@@ -81,6 +81,17 @@ describe("resumenEnTexto", () => {
     expect(texto).toContain("Todo pagado");
     expect(texto).not.toContain("Quién le paga a quién");
   });
+
+  it("sin cifras, no cambia nada", () => {
+    expect(resumenEnTexto({ ...viaje, cifras: "" })).toBe(resumenEnTexto(viaje));
+  });
+
+  it("las cifras van antes del pie", () => {
+    const texto = resumenEnTexto({ ...viaje, cifras: "*Lisboa* en cifras 📊" });
+
+    expect(texto).toContain("*Lisboa* en cifras 📊");
+    expect(texto.indexOf("en cifras")).toBeLessThan(texto.indexOf("Apuntado con SaldoCero"));
+  });
 });
 
 describe("enlaceDelViaje", () => {

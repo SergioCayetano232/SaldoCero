@@ -20,6 +20,7 @@ import { cobroDe, cobroComoTexto, cantidadParaPegar } from "../cobro";
 import { BOTE, sinBote } from "../bote";
 import { gastoPorCategoria } from "../categorias";
 import { importeDeGasto, parteDe } from "../calculos";
+import { cifrasDelViaje, cifrasEnTexto } from "../cifras";
 import Cifra from "./Cifra";
 import Confeti from "./Confeti";
 import Avatar from "./Avatar";
@@ -100,15 +101,20 @@ function Resumen({
   const tantoPuesto = porcentajes(personas.map((v) => v.puesto));
   const variosPusieron = personas.filter((v) => v.puesto > 0).length > 1;
 
-  function elResumen() {
+  function elResumen(conCifras = false) {
+    const nombre = viaje?.nombre ?? "El viaje";
+    const conBote = personas.map((v) => ({ ...v, puesto: v.puesto + (v.alBote ?? 0) }));
+    const cifras = conCifras && cerrado ? cifrasDelViaje(gastos, conBote) : null;
+
     return resumenEnTexto({
-      nombre: viaje?.nombre ?? "El viaje",
+      nombre,
       codigo: viaje?.codigo ?? "",
       total,
       // En "lo que puso cada uno" cuenta también lo que metió en el bote.
-      balances: personas.map((v) => ({ ...v, puesto: v.puesto + (v.alBote ?? 0) })),
+      balances: conBote,
       pagos,
       moneda: monedaViaje,
+      cifras: cifras ? cifrasEnTexto(cifras, nombre, monedaViaje) : "",
     });
   }
 
@@ -175,7 +181,7 @@ function Resumen({
 
           <button
             className="boton-compartir"
-            onClick={() => descargarResumen(elResumen(), viaje?.nombre ?? "viaje")}
+            onClick={() => descargarResumen(elResumen(true), viaje?.nombre ?? "viaje")}
             title="Bajarlo en un archivo"
           >
             Guardar

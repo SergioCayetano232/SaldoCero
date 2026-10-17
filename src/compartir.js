@@ -4,7 +4,7 @@ import { conMoneda } from "./monedas";
 
 // Un texto que se lea bien en WhatsApp: los asteriscos salen en negrita y
 // los emojis ayudan a separar las partes de un vistazo.
-export function resumenEnTexto({ nombre, codigo, total, balances, pagos, moneda }) {
+export function resumenEnTexto({ nombre, codigo, total, balances, pagos, moneda, cifras }) {
   const lineas = [`*${nombre}* 🧳`, ""];
 
   lineas.push(`💰 Total del viaje: *${conMoneda(total, moneda)}*`);
@@ -36,6 +36,12 @@ export function resumenEnTexto({ nombre, codigo, total, balances, pagos, moneda 
       lineas.push("");
       lineas.push(`_Ya pagado: ${hechos.map((p) => `${p.de} → ${p.a}`).join(", ")}_`);
     }
+  }
+
+  // Las cifras solo van en el txt del viaje cerrado; en el grupo ya se comparten aparte.
+  if (cifras) {
+    lineas.push("");
+    lineas.push(cifras);
   }
 
   lineas.push("");
