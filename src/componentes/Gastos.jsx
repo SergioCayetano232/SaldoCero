@@ -1272,7 +1272,7 @@ function Gastos({
           )}
 
           {gastos.length === 0 ? (
-            <p className="vacio">Todavía no hay gastos.</p>
+            <p className="vacio">Todavía no hay gastos. Apunta el primero aquí arriba.</p>
           ) : visibles.length === 0 ? (
             <p className="vacio">Ningún gasto encaja con eso.</p>
           ) : (
