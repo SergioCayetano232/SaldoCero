@@ -45,6 +45,23 @@ describe("resumenEnTexto", () => {
     expect(resumenEnTexto(viaje)).toContain("ABC12345");
   });
 
+  it("al lado de lo que puso, lo que le tocaba", () => {
+    const texto = resumenEnTexto(viaje);
+
+    expect(texto).toContain("Ana: 240.00 € (le tocaban 108.83 €)");
+    expect(texto).toContain("Marta: 0.00 € (le tocaban 108.83 €)");
+  });
+
+  it("si puso justo lo suyo, no lo repite", () => {
+    const texto = resumenEnTexto({
+      ...viaje,
+      balances: [{ id: "a", nombre: "Ana", puesto: 50, tocaPagar: 50.004, balance: 0 }],
+    });
+
+    expect(texto).toContain("Ana: 50.00 €\n");
+    expect(texto).not.toContain("le tocaban");
+  });
+
   it("respeta la moneda del viaje", () => {
     const texto = resumenEnTexto({ ...viaje, moneda: "GBP" });
     expect(texto).toContain("£326.50");

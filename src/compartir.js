@@ -10,10 +10,10 @@ export function resumenEnTexto({ nombre, codigo, total, balances, pagos, moneda,
   lineas.push(`💰 Total del viaje: *${conMoneda(total, moneda)}*`);
   lineas.push("");
 
-  // Lo que ha puesto cada uno.
+  // Lo que ha puesto cada uno, y al lado lo que le tocaba: así la deuda se entiende sola.
   lineas.push("*Lo que puso cada uno*");
   for (const viajero of balances) {
-    lineas.push(`· ${viajero.nombre}: ${conMoneda(viajero.puesto, moneda)}`);
+    lineas.push(`· ${viajero.nombre}: ${conMoneda(viajero.puesto, moneda)}${loQueLeTocaba(viajero, moneda)}`);
   }
   lineas.push("");
 
@@ -48,6 +48,12 @@ export function resumenEnTexto({ nombre, codigo, total, balances, pagos, moneda,
   lineas.push(`Apuntado con SaldoCero · código *${codigo}*`);
 
   return lineas.join("\n");
+}
+
+// Si puso justo lo suyo, no hace falta decirlo.
+function loQueLeTocaba({ puesto, tocaPagar }, moneda) {
+  if (tocaPagar === undefined || Math.abs(puesto - tocaPagar) < 0.01) return "";
+  return ` (le tocaban ${conMoneda(tocaPagar, moneda)})`;
 }
 
 // Copiar al portapapeles. Devuelve si ha podido.
