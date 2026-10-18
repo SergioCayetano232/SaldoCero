@@ -11,7 +11,7 @@ export function resumenEnTexto({ nombre, codigo, total, balances, pagos, moneda,
   if (cuando) lineas.push(`📅 ${cuando}`);
   lineas.push("");
 
-  lineas.push(`💰 Total del viaje: *${conMoneda(total, moneda)}*`);
+  lineas.push(`💰 Total del viaje: *${conMoneda(total, moneda)}*${porCabeza(total, balances, moneda)}`);
   lineas.push("");
 
   // Lo que ha puesto cada uno, y al lado lo que le tocaba: así la deuda se entiende sola.
@@ -52,6 +52,16 @@ export function resumenEnTexto({ nombre, codigo, total, balances, pagos, moneda,
   lineas.push(`Apuntado con SaldoCero · código *${codigo}*`);
 
   return lineas.join("\n");
+}
+
+// Con gastos que no son de todos, o repartidos a partes desiguales, a cada uno
+// le toca distinto: entonces es una media y hay que decirlo.
+function porCabeza(total, balances, moneda) {
+  if (balances.length < 2 || total <= 0) return "";
+
+  const partes = balances.map((v) => v.tocaPagar ?? 0);
+  const iguales = Math.max(...partes) - Math.min(...partes) < 0.01;
+  return ` · ${conMoneda(total / balances.length, moneda)} por cabeza${iguales ? "" : " de media"}`;
 }
 
 // Si puso justo lo suyo, no hace falta decirlo.

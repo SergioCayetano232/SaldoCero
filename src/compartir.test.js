@@ -73,6 +73,24 @@ describe("resumenEnTexto", () => {
     expect(resumenEnTexto({ ...viaje, gastos: [{}] })).not.toContain("📅");
   });
 
+  it("al lado del total, lo que sale por cabeza", () => {
+    expect(resumenEnTexto(viaje)).toContain("Total del viaje: *326.50 €* · 108.83 € por cabeza\n");
+  });
+
+  it("si no a todos les toca lo mismo, avisa de que es una media", () => {
+    const balances = [
+      { id: "a", nombre: "Ana", puesto: 90, tocaPagar: 60, balance: 30 },
+      { id: "b", nombre: "Luis", puesto: 0, tocaPagar: 30, balance: -30 },
+    ];
+
+    expect(resumenEnTexto({ ...viaje, total: 90, balances })).toContain("45.00 € por cabeza de media");
+  });
+
+  it("con uno solo o sin gastos, no lo pone", () => {
+    expect(resumenEnTexto({ ...viaje, balances: viaje.balances.slice(0, 1) })).not.toContain("por cabeza");
+    expect(resumenEnTexto({ ...viaje, total: 0 })).not.toContain("por cabeza");
+  });
+
   it("respeta la moneda del viaje", () => {
     const texto = resumenEnTexto({ ...viaje, moneda: "GBP" });
     expect(texto).toContain("£326.50");
