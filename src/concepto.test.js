@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { arreglarConcepto } from "./concepto";
+import { arreglarConcepto, LARGO_CONCEPTO } from "./concepto";
 
 describe("arreglarConcepto", () => {
   it("pone la primera en mayúscula y deja lo demás", () => {
@@ -21,6 +21,13 @@ describe("arreglarConcepto", () => {
   it("si la primera palabra ya lleva mayúsculas, no se toca", () => {
     expect(arreglarConcepto("iPhone funda")).toBe("iPhone funda");
     expect(arreglarConcepto("eBay")).toBe("eBay");
+  });
+
+  it("lo que se pasa de largo se corta, sin dejar un espacio al final", () => {
+    const largo = "a".repeat(LARGO_CONCEPTO - 1) + " bcd";
+
+    expect(arreglarConcepto(largo)).toBe("A" + "a".repeat(LARGO_CONCEPTO - 2));
+    expect(arreglarConcepto("x".repeat(200))).toHaveLength(LARGO_CONCEPTO);
   });
 
   it("vacío, vacío", () => {

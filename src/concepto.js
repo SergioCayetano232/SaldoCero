@@ -1,8 +1,12 @@
 // El concepto con la primera en mayúscula, que en la lista "cena" al lado de
 // "Taxi" queda desigual. Lo demás como lo escribiste: "Cena en KFC".
 
+// "Cena en el restaurante de la plaza con los de Bilbao" cabe de sobra. Más largo
+// ya descoloca la lista, el Excel y el mensaje de WhatsApp.
+export const LARGO_CONCEPTO = 60;
+
 export function arreglarConcepto(texto) {
-  const limpio = String(texto ?? "").replace(/\s+/g, " ").trim();
+  const limpio = String(texto ?? "").replace(/\s+/g, " ").trim().slice(0, LARGO_CONCEPTO).trim();
   const [primera] = limpio.split(" ");
 
   // "iPhone", "eBay": si ya lleva mayúsculas dentro, es a propósito.

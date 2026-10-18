@@ -18,7 +18,7 @@ import { LARGO_NOTA, quedanEnNota } from "../notas";
 import { cuentaDe, textoCuentaDe, textoParteDe } from "../loDeUno";
 import { posiblesRepetidos } from "../repetidos";
 import { leerSuma, esSuma, llevaSigno, ponerSigno, signoColgando } from "../sumas";
-import { arreglarConcepto } from "../concepto";
+import { arreglarConcepto, LARGO_CONCEPTO } from "../concepto";
 import { pagadorPorDefecto } from "../pagador";
 import { pareceRaro } from "../raros";
 import { teSacaDelPresupuesto } from "../presupuesto";
@@ -783,6 +783,7 @@ function Gastos({
                 // La lista del navegador taparía nuestras sugerencias.
                 autoComplete="off"
                 autoCapitalize="sentences"
+                maxLength={LARGO_CONCEPTO}
                 enterKeyHint="done"
                 value={concepto}
                 onChange={(e) => escribirConcepto(e.target.value)}
