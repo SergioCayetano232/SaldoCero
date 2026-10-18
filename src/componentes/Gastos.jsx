@@ -780,6 +780,8 @@ function Gastos({
               <input
                 type="text"
                 placeholder="Concepto (cena, hotel...)"
+                // La lista del navegador taparía nuestras sugerencias.
+                autoComplete="off"
                 autoCapitalize="sentences"
                 enterKeyHint="done"
                 value={concepto}
