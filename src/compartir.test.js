@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { resumenEnTexto, enlaceDelViaje, invitacion, invitar } from "./compartir";
+import { resumenEnTexto, enlaceDelViaje, invitacion, invitar, nombreDeArchivo } from "./compartir";
 
 // Un viaje de ejemplo, para no repetirlo en cada prueba.
 const viaje = {
@@ -208,5 +208,16 @@ describe("invitar", () => {
     const nav = { clipboard: { writeText: vi.fn().mockRejectedValue(new Error("x")) } };
 
     expect(await invitar(datos, nav)).toBe("fallo");
+  });
+});
+
+describe("nombreDeArchivo", () => {
+  it("lleva el día antes de la extensión", () => {
+    expect(nombreDeArchivo("Lisboa", "txt", "2026-09-14")).toBe("Lisboa 2026-09-14.txt");
+    expect(nombreDeArchivo("Lisboa - gastos", "csv", "2026-09-14")).toBe("Lisboa - gastos 2026-09-14.csv");
+  });
+
+  it("sin día, el de hoy", () => {
+    expect(nombreDeArchivo("Lisboa", "txt")).toMatch(/^Lisboa \d{4}-\d{2}-\d{2}\.txt$/);
   });
 });

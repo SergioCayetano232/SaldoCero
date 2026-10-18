@@ -1,7 +1,7 @@
 // El resumen del viaje en texto, para pegarlo en el grupo.
 
 import { conMoneda } from "./monedas";
-import { cuandoFue } from "./fechas";
+import { cuandoFue, hoy } from "./fechas";
 
 // Un texto que se lea bien en WhatsApp: los asteriscos salen en negrita y
 // los emojis ayudan a separar las partes de un vistazo.
@@ -103,14 +103,20 @@ function copiarALoAntiguo(texto) {
   }
 }
 
+// Con el día delante de la extensión: si te lo bajas otra vez a la vuelta, no
+// pisa al de antes ni acaba en "Lisboa (1).txt".
+export function nombreDeArchivo(nombre, extension, dia = hoy()) {
+  return `${nombre} ${dia}.${extension}`;
+}
+
 // Bajarse el resumen en un archivo de texto, por si quieres guardarlo.
 export function descargarResumen(texto, nombreViaje) {
-  descargar(texto, `${nombreViaje}.txt`, "text/plain;charset=utf-8");
+  descargar(texto, nombreDeArchivo(nombreViaje, "txt"), "text/plain;charset=utf-8");
 }
 
 // Y los gastos en CSV. El BOM del principio es para que Excel vea las tildes.
 export function descargarGastos(csv, nombreViaje) {
-  descargar(`\uFEFF${csv}`, `${nombreViaje} - gastos.csv`, "text/csv;charset=utf-8");
+  descargar(`\uFEFF${csv}`, nombreDeArchivo(`${nombreViaje} - gastos`, "csv"), "text/csv;charset=utf-8");
 }
 
 function descargar(texto, nombre, tipo) {
