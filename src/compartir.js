@@ -1,11 +1,15 @@
 // El resumen del viaje en texto, para pegarlo en el grupo.
 
 import { conMoneda } from "./monedas";
+import { cuandoFue } from "./fechas";
 
 // Un texto que se lea bien en WhatsApp: los asteriscos salen en negrita y
 // los emojis ayudan a separar las partes de un vistazo.
-export function resumenEnTexto({ nombre, codigo, total, balances, pagos, moneda, cifras }) {
-  const lineas = [`*${nombre}* 🧳`, ""];
+export function resumenEnTexto({ nombre, codigo, total, balances, pagos, moneda, cifras, gastos = [] }) {
+  const lineas = [`*${nombre}* 🧳`];
+  const cuando = cuandoFue(gastos.map((g) => g.fecha));
+  if (cuando) lineas.push(`📅 ${cuando}`);
+  lineas.push("");
 
   lineas.push(`💰 Total del viaje: *${conMoneda(total, moneda)}*`);
   lineas.push("");

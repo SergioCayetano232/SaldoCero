@@ -38,6 +38,28 @@ export function enCorto(fecha) {
   });
 }
 
+// Cuándo fue el viaje, sacado de los gastos: "Del 11 al 14 de septiembre de 2026".
+// Con el año siempre, que el resumen se guarda y se relee pasado el tiempo.
+export function cuandoFue(fechas) {
+  const dias = fechas.filter(Boolean).sort();
+  if (dias.length === 0) return null;
+
+  const [desde, hasta] = [dias[0], dias.at(-1)].map((f) => {
+    const [ano, mes, dia] = f.split("-");
+    const nombreMes = new Date(`${f}T12:00:00`).toLocaleDateString("es-ES", { month: "long" });
+    return { ano, mes, dia: Number(dia), nombreMes };
+  });
+
+  if (dias[0] === dias.at(-1)) return `El ${desde.dia} de ${desde.nombreMes} de ${desde.ano}`;
+  if (desde.ano !== hasta.ano) {
+    return `Del ${desde.dia} de ${desde.nombreMes} de ${desde.ano} al ${hasta.dia} de ${hasta.nombreMes} de ${hasta.ano}`;
+  }
+  if (desde.mes !== hasta.mes) {
+    return `Del ${desde.dia} de ${desde.nombreMes} al ${hasta.dia} de ${hasta.nombreMes} de ${hasta.ano}`;
+  }
+  return `Del ${desde.dia} al ${hasta.dia} de ${hasta.nombreMes} de ${hasta.ano}`;
+}
+
 // El título de cada grupo de la lista: "Hoy", "Ayer" o el día entero.
 // Si es de otro año, con el año: si no, un gasto del año pasado no se distingue.
 export function comoTitulo(fecha) {

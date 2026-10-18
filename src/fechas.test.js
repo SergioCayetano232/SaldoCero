@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { hoy, ayer, anteayer, diasRapidos, enCorto, comoTitulo, porDias, cuantosGastos, haceCuanto, apuntadoHace } from "./fechas";
+import { hoy, ayer, anteayer, diasRapidos, enCorto, comoTitulo, porDias, cuantosGastos, haceCuanto, apuntadoHace, cuandoFue } from "./fechas";
 
 describe("hoy", () => {
   it("da la fecha en el formato de la base de datos", () => {
@@ -214,5 +214,29 @@ describe("apuntadoHace", () => {
   it("con la fecha como la manda Supabase", () => {
     const deSupabase = "2026-10-11T17:29:59.900000+00:00";
     expect(apuntadoHace(deSupabase, ahora)).toBe("hace 30 min");
+  });
+});
+
+describe("cuandoFue", () => {
+  it("dentro del mismo mes, el mes una vez", () => {
+    expect(cuandoFue(["2026-09-14", "2026-09-11", "2026-09-12"])).toBe("Del 11 al 14 de septiembre de 2026");
+  });
+
+  it("entre dos meses, los dos", () => {
+    expect(cuandoFue(["2026-08-28", "2026-09-02"])).toBe("Del 28 de agosto al 2 de septiembre de 2026");
+  });
+
+  it("entre dos años, los dos años", () => {
+    expect(cuandoFue(["2025-12-30", "2026-01-02"])).toBe("Del 30 de diciembre de 2025 al 2 de enero de 2026");
+  });
+
+  it("un solo día", () => {
+    expect(cuandoFue(["2026-09-11", "2026-09-11"])).toBe("El 11 de septiembre de 2026");
+  });
+
+  it("los gastos de antes de las fechas no cuentan, y sin ninguna no hay nada que decir", () => {
+    expect(cuandoFue([undefined, "2026-09-11", null])).toBe("El 11 de septiembre de 2026");
+    expect(cuandoFue([undefined])).toBeNull();
+    expect(cuandoFue([])).toBeNull();
   });
 });

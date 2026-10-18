@@ -62,6 +62,17 @@ describe("resumenEnTexto", () => {
     expect(texto).not.toContain("le tocaban");
   });
 
+  it("debajo del nombre, cuándo fue", () => {
+    const gastos = [{ fecha: "2026-09-13" }, { fecha: "2026-09-11" }];
+    const texto = resumenEnTexto({ ...viaje, gastos });
+
+    expect(texto.startsWith("*Lisboa* 🧳\n📅 Del 11 al 13 de septiembre de 2026\n\n")).toBe(true);
+  });
+
+  it("sin gastos con fecha, no pone la línea", () => {
+    expect(resumenEnTexto({ ...viaje, gastos: [{}] })).not.toContain("📅");
+  });
+
   it("respeta la moneda del viaje", () => {
     const texto = resumenEnTexto({ ...viaje, moneda: "GBP" });
     expect(texto).toContain("£326.50");

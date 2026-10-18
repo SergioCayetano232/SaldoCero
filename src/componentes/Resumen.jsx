@@ -115,6 +115,7 @@ function Resumen({
       pagos,
       moneda: monedaViaje,
       cifras: cifras ? cifrasEnTexto(cifras, nombre, monedaViaje) : "",
+      gastos,
     });
   }
 
