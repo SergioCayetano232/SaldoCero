@@ -194,7 +194,7 @@ function Resumen({
             className="boton-compartir"
             onClick={() =>
               descargarGastos(
-                gastosEnCSV({ gastos, viajeros: personas, moneda: monedaViaje, nombre: viaje?.nombre }),
+                gastosEnCSV({ gastos, viajeros: personas, moneda: monedaViaje, nombre: viaje?.nombre, pagos }),
                 viaje?.nombre ?? "viaje"
               )
             }

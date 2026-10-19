@@ -39,7 +39,7 @@ export function celda(valor) {
   return texto;
 }
 
-export function gastosEnCSV({ gastos, viajeros, moneda, nombre }) {
+export function gastosEnCSV({ gastos, viajeros, moneda, nombre, pagos }) {
   const cabecera = [
     "Fecha",
     "Concepto",
@@ -88,7 +88,22 @@ export function gastosEnCSV({ gastos, viajeros, moneda, nombre }) {
     "",
     ...viajeros.map((v) => cifra(gastos.reduce((t, g) => t + parteDe(g, v.id, viajeros), 0))),
   ];
-  const alFinal = gastos.length > 0 ? [[], total] : [];
+  const alFinal = gastos.length > 0 ? [[], total, ...comoQuedan(pagos, moneda)] : [];
 
   return [...arriba(nombre, gastos), cabecera, ...filas, ...alFinal].map((fila) => fila.map(celda).join(SEPARADOR)).join("\r\n");
+}
+
+// Cómo quedan las cuentas, debajo de todo. Separado por dos filas, que es otra
+// tabla y si no el Excel la junta con la de arriba.
+function comoQuedan(pagos, moneda) {
+  if (!pagos) return [];
+  if (pagos.length === 0) return [[], [], ["Quién paga a quién"], ["Nadie debe nada"]];
+
+  return [
+    [],
+    [],
+    ["Quién paga a quién"],
+    ["Paga", "Cobra", `Cantidad en ${moneda}`, "Estado"],
+    ...pagos.map((p) => [p.de, p.a, cifra(p.cantidad), p.saldado ? "Pagado" : "Pendiente"]),
+  ];
 }

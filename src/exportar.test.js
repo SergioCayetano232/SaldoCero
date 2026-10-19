@@ -88,6 +88,32 @@ describe("gastosEnCSV", () => {
     expect(filas.at(-1)).toBe(";Total;;;;;61,25;;;;46,25;15,00");
   });
 
+  it("debajo del total, quién paga a quién y si ya está pagado", () => {
+    const pagos = [
+      { de: "Luis", a: "Ana", cantidad: 15, saldado: false },
+      { de: "Marta", a: "Ana", cantidad: 8.5, saldado: true },
+    ];
+    const filas = lineas(gastosEnCSV({ gastos: [cena], viajeros, moneda: "EUR", pagos }));
+    expect(filas.slice(-7)).toEqual([
+      ";Total;;;;;30,00;;;;15,00;15,00",
+      "",
+      "",
+      "Quién paga a quién",
+      "Paga;Cobra;Cantidad en EUR;Estado",
+      "Luis;Ana;15,00;Pendiente",
+      "Marta;Ana;8,50;Pagado",
+    ]);
+  });
+
+  it("si nadie debe nada, lo dice", () => {
+    const filas = lineas(gastosEnCSV({ gastos: [cena], viajeros, moneda: "EUR", pagos: [] }));
+    expect(filas.slice(-2)).toEqual(["Quién paga a quién", "Nadie debe nada"]);
+  });
+
+  it("sin gastos, tampoco hay cuentas", () => {
+    expect(lineas(gastosEnCSV({ gastos: [], viajeros, moneda: "EUR", pagos: [] }))).toHaveLength(1);
+  });
+
   it("arriba, el nombre del viaje y sus días", () => {
     const taxi = { ...cena, id: "g2", fecha: "2026-09-11" };
     const antiguo = { ...cena, id: "g3", fecha: undefined };
