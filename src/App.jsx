@@ -441,6 +441,7 @@ function App() {
         // Otro viaje, otro formulario: que no se cuele lo que escribías en el anterior.
         key={viaje.codigo}
         codigo={viaje.codigo}
+        nombreViaje={viaje.nombre}
         viajeros={viajeros}
         colores={colores}
         hayBote={hayBote(aportaciones, gastos)}

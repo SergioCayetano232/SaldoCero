@@ -616,7 +616,6 @@ button:active {
 /* Mejor que baje entera a que se quede el € colgando solo. */
 .filtro-cuenta {
   display: block;
-  white-space: nowrap;
   margin-top: 2px;
   color: var(--tinta-suave);
   font-variant-numeric: tabular-nums;

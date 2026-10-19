@@ -15,7 +15,7 @@ import { leerImporte, loQueFalta, cuadra, importesAPartes, partesAImportes } fro
 import { BOTE } from "../bote";
 import { esImagen } from "../tickets";
 import { LARGO_NOTA, quedanEnNota } from "../notas";
-import { cuentaDe, textoCuentaDe, textoParteDe } from "../loDeUno";
+import { cuentaDe, textoCuentaDe, textoParteDe, mensajeDeCuenta } from "../loDeUno";
 import { posiblesRepetidos } from "../repetidos";
 import { leerSuma, esSuma, llevaSigno, ponerSigno, signoColgando } from "../sumas";
 import { arreglarConcepto, LARGO_CONCEPTO, quedanEnConcepto } from "../concepto";
@@ -34,6 +34,7 @@ import Resaltado from "./Resaltado";
 
 function Gastos({
   codigo,
+  nombreViaje = "el viaje",
   viajeros,
   colores,
   hayBote = false,
@@ -1266,7 +1267,20 @@ function Gastos({
                     <strong>{conMoneda(calcularTotal(visibles), monedaViaje)}</strong>
                     {deQuien && (
                       <span className="filtro-cuenta">
-                        {textoCuentaDe(cuentaDe(visibles, deQuien.id, viajeros), deQuien.nombre, esYo, monedaViaje)}
+                        <span className="sin-partir">
+                          {textoCuentaDe(cuentaDe(visibles, deQuien.id, viajeros), deQuien.nombre, esYo, monedaViaje)}
+                        </span>{" "}
+                        {/* Lo que se ve, no todo: si has filtrado por un día, va ese día. */}
+                        <a
+                          className="enlace"
+                          href={enlaceWhatsApp(
+                            mensajeDeCuenta({ gastos: visibles, viajero: deQuien, viajeros, esYo, nombreViaje, moneda: monedaViaje, codigo })
+                          )}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {esYo ? "mandar" : "mandárselo"}
+                        </a>
                       </span>
                     )}
                   </span>

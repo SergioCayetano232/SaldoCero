@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { cuentaDe, textoCuentaDe, textoParteDe } from "./loDeUno";
+import { cuentaDe, textoCuentaDe, textoParteDe, mensajeDeCuenta } from "./loDeUno";
+import { enCorto } from "./fechas";
 import { BOTE } from "./bote";
 
 const viajeros = [{ id: "a" }, { id: "b" }, { id: "c" }];
@@ -60,5 +61,48 @@ describe("textoParteDe", () => {
   it("si lo pagó sin ir, lo dice", () => {
     expect(textoParteDe(gastos[1], "a", viajeros, true, "EUR")).toBe("lo pagaste, no ibas");
     expect(textoParteDe(gastos[1], "a", viajeros, false, "EUR")).toBe("lo pagó, no iba");
+  });
+});
+
+describe("mensajeDeCuenta", () => {
+  const gente = [{ id: "a", nombre: "Ana" }, { id: "b", nombre: "Luis" }, { id: "c", nombre: "Marta" }];
+  const delViaje = [
+    { pagadorId: "a", importe: 90, concepto: "Cena", fecha: "2026-10-17", participantes: ["a", "b", "c"] },
+    { pagadorId: "a", importe: 40, concepto: "Taxi", fecha: "2026-10-18", participantes: ["b", "c"] },
+    { pagadorId: "c", importe: 20, concepto: "Helados", fecha: "2026-10-18", participantes: ["c"] },
+  ];
+  const datos = { gastos: delViaje, viajeros: gente, nombreViaje: "Lisboa", moneda: "EUR", codigo: "ABC12345", base: "https://saldocero.app/" };
+
+  it("a otro, en segunda persona y con cada gasto suyo", () => {
+    const texto = mensajeDeCuenta({ ...datos, viajero: gente[1], esYo: false });
+    expect(texto).toContain("Hola Luis! Tus cuentas de *Lisboa*");
+    expect(texto).toContain(`· Cena, ${enCorto("2026-10-17")} (90.00 €): te tocan 30.00 €`);
+    expect(texto).toContain(`· Taxi, ${enCorto("2026-10-18")} (40.00 €): te tocan 20.00 €`);
+    expect(texto).toContain("En total pagaste *0.00 €* y te tocan *50.00 €*");
+  });
+
+  it("los gastos que no van con él no salen", () => {
+    expect(mensajeDeCuenta({ ...datos, viajero: gente[1], esYo: false })).not.toContain("Helados");
+  });
+
+  it("lo que pagó sin ir, y lo que pagó yendo", () => {
+    const texto = mensajeDeCuenta({ ...datos, viajero: gente[0], esYo: false });
+    expect(texto).toContain("(40.00 €): lo pagaste, no ibas");
+    expect(texto).toContain("(90.00 €): lo pagaste, te tocan 30.00 €");
+    expect(texto).toContain("En total pagaste *130.00 €* y te tocan *30.00 €*");
+  });
+
+  it("si eres tú, en primera persona", () => {
+    const texto = mensajeDeCuenta({ ...datos, viajero: gente[0], esYo: true });
+    expect(texto).toContain("Mis cuentas de *Lisboa*");
+    expect(texto).toContain("lo pagué, no iba");
+    expect(texto).toContain("En total pagué *130.00 €* y me tocan *30.00 €*");
+  });
+
+  it("con el enlace al final, y sin fecha si no la tiene", () => {
+    const sinFecha = [{ ...delViaje[0], fecha: null }];
+    const texto = mensajeDeCuenta({ ...datos, gastos: sinFecha, viajero: gente[1], esYo: false });
+    expect(texto).toContain("· Cena (90.00 €): te tocan 30.00 €");
+    expect(texto.split("\n").at(-1)).toBe("Las cuentas, aquí: https://saldocero.app/#ABC12345");
   });
 });
