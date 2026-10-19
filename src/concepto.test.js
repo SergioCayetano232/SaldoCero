@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { arreglarConcepto, LARGO_CONCEPTO } from "./concepto";
+import { arreglarConcepto, LARGO_CONCEPTO, quedanEnConcepto } from "./concepto";
 
 describe("arreglarConcepto", () => {
   it("pone la primera en mayúscula y deja lo demás", () => {
@@ -33,5 +33,18 @@ describe("arreglarConcepto", () => {
   it("vacío, vacío", () => {
     expect(arreglarConcepto("")).toBe("");
     expect(arreglarConcepto(undefined)).toBe("");
+  });
+});
+
+describe("quedanEnConcepto", () => {
+  it("lejos del tope no dice nada", () => {
+    expect(quedanEnConcepto("Cena")).toBeNull();
+    expect(quedanEnConcepto("")).toBeNull();
+    expect(quedanEnConcepto(null)).toBeNull();
+  });
+
+  it("cerca del tope dice cuántas quedan", () => {
+    expect(quedanEnConcepto("a".repeat(45))).toBe(15);
+    expect(quedanEnConcepto("a".repeat(LARGO_CONCEPTO))).toBe(0);
   });
 });

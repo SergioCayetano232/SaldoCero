@@ -14,3 +14,9 @@ export function arreglarConcepto(texto) {
 
   return limpio.charAt(0).toLocaleUpperCase("es-ES") + limpio.slice(1);
 }
+
+// Como en la nota, solo al final. Con 60 de tope, a las 15 ya conviene saberlo.
+export function quedanEnConcepto(texto) {
+  const quedan = LARGO_CONCEPTO - String(texto ?? "").length;
+  return quedan <= 15 ? quedan : null;
+}

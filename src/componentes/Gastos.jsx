@@ -18,7 +18,7 @@ import { LARGO_NOTA, quedanEnNota } from "../notas";
 import { cuentaDe, textoCuentaDe, textoParteDe } from "../loDeUno";
 import { posiblesRepetidos } from "../repetidos";
 import { leerSuma, esSuma, llevaSigno, ponerSigno, signoColgando } from "../sumas";
-import { arreglarConcepto, LARGO_CONCEPTO } from "../concepto";
+import { arreglarConcepto, LARGO_CONCEPTO, quedanEnConcepto } from "../concepto";
 import { pagadorPorDefecto } from "../pagador";
 import { pareceRaro } from "../raros";
 import { teSacaDelPresupuesto } from "../presupuesto";
@@ -791,6 +791,11 @@ function Gastos({
                   if (e.key === "Enter") guardar();
                 }}
               />
+              {quedanEnConcepto(concepto) !== null && (
+                <small className={`nota-quedan ${quedanEnConcepto(concepto) === 0 ? "tope" : ""}`} aria-live="polite">
+                  {quedanEnConcepto(concepto) === 0 ? "No cabe más" : `Quedan ${quedanEnConcepto(concepto)} letras`}
+                </small>
+              )}
 
               <div className="fila-ticket">
                 {foto ? (
