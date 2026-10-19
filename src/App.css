@@ -530,6 +530,12 @@ button:active {
   .lista-deslizable .acciones {
     margin-left: auto;
   }
+
+  /* Un concepto largo, o con la etiqueta de "el más caro", se dejaba el icono
+     solo en una línea. Así cabe a su lado y lo que sobre baja. */
+  .lista-deslizable .gasto-texto {
+    max-width: calc(100% - 36px);
+  }
 }
 
 /* El gasto que estás tocando, resaltado para no perderlo de vista. */
@@ -3348,6 +3354,22 @@ button.pago-cantidad:hover {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   vertical-align: middle;
+}
+
+/* Como la de "tú", pero en naranja, que es el color de los avisos de dinero. */
+.etiqueta-mas-caro {
+  display: inline-block;
+  margin-left: 7px;
+  padding: 1px 7px;
+  border-radius: var(--radio-pastilla);
+  background-color: var(--naranja-100);
+  color: var(--naranja-500);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
 /* El botón de "este soy yo", discreto hasta que lo buscas. */

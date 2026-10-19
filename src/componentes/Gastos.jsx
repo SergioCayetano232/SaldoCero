@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { calcularTotal, importeDeGasto, participantesDeGasto } from "../calculos";
+import { calcularTotal, gastoMasCaro, importeDeGasto, participantesDeGasto } from "../calculos";
 import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, tasaComoTexto } from "../monedas";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
 import { filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
@@ -240,6 +240,8 @@ function Gastos({
 
   // Filtrando por alguien, cada gasto dice lo que le toca a esa persona.
   const deQuien = filtrando ? viajeros.find((v) => v.id === filtros.viajeroId) : null;
+  // De todos, no de lo filtrado: si no, al buscar "café" el más caro sería un café.
+  const masCaro = gastoMasCaro(gastos);
   const esYo = Boolean(deQuien) && deQuien.id === soy;
   const puedoVerLoMio = viajeros.some((v) => v.id === soy);
 
@@ -1320,10 +1322,11 @@ function Gastos({
                         {categoriaDe(gasto.categoria).emoji}
                       </span>
 
-                      <span>
+                      <span className="gasto-texto">
                         <span className="gasto-concepto">
                           <Resaltado texto={gasto.concepto} buscado={buscado} />
                         </span>
+                        {gasto.id === masCaro?.id && <span className="etiqueta-mas-caro">el más caro</span>}
                         {gasto.ticket && (
                           <button
                             className="boton-ticket"
