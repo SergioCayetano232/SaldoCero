@@ -5,7 +5,7 @@ import { cuandoFue, hoy } from "./fechas";
 
 // Un texto que se lea bien en WhatsApp: los asteriscos salen en negrita y
 // los emojis ayudan a separar las partes de un vistazo.
-export function resumenEnTexto({ nombre, codigo, total, balances, pagos, moneda, cifras, gastos = [] }) {
+export function resumenEnTexto({ nombre, codigo, total, balances, pagos, moneda, cifras, gastos = [], enlace }) {
   const lineas = [`*${nombre}* 🧳`];
   const cuando = cuandoFue(gastos.map((g) => g.fecha));
   if (cuando) lineas.push(`📅 ${cuando}`);
@@ -50,6 +50,8 @@ export function resumenEnTexto({ nombre, codigo, total, balances, pagos, moneda,
 
   lineas.push("");
   lineas.push(`Apuntado con SaldoCero · código *${codigo}*`);
+  // Al final y solo, que WhatsApp lo vuelve tocable y abre el viaje sin teclear nada.
+  if (enlace) lineas.push(enlace);
 
   return lineas.join("\n");
 }

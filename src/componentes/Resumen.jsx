@@ -13,7 +13,7 @@ import {
   hayCentimos,
 } from "../calculos";
 import { conMoneda } from "../monedas";
-import { resumenEnTexto, copiarAlPortapapeles, descargarResumen, descargarGastos, invitar } from "../compartir";
+import { resumenEnTexto, copiarAlPortapapeles, descargarResumen, descargarGastos, invitar, enlaceDelViaje } from "../compartir";
 import { gastosEnCSV } from "../exportar";
 import { mensajeDeCobro, enlaceWhatsApp } from "../cobrar";
 import { cobroDe, cobroComoTexto, cantidadParaPegar } from "../cobro";
@@ -116,6 +116,7 @@ function Resumen({
       moneda: monedaViaje,
       cifras: cifras ? cifrasEnTexto(cifras, nombre, monedaViaje) : "",
       gastos,
+      enlace: viaje?.codigo ? enlaceDelViaje(viaje.codigo) : null,
     });
   }
 

@@ -45,6 +45,15 @@ describe("resumenEnTexto", () => {
     expect(resumenEnTexto(viaje)).toContain("ABC12345");
   });
 
+  it("y el enlace, en la última línea", () => {
+    const texto = resumenEnTexto({ ...viaje, enlace: "https://saldocero.app/#ABC12345" });
+    expect(texto.split("\n").at(-1)).toBe("https://saldocero.app/#ABC12345");
+  });
+
+  it("sin enlace, acaba en el código", () => {
+    expect(resumenEnTexto(viaje).split("\n").at(-1)).toContain("código *ABC12345*");
+  });
+
   it("al lado de lo que puso, lo que le tocaba", () => {
     const texto = resumenEnTexto(viaje);
 
