@@ -17,6 +17,26 @@ describe("leerSuma", () => {
     expect(leerSuma("0.1+0.2")).toBe(0.3);
   });
 
+  it("con el símbolo de la moneda pegado, delante o detrás", () => {
+    expect(leerSuma("25€")).toBe(25);
+    expect(leerSuma("25 €")).toBe(25);
+    expect(leerSuma("€25")).toBe(25);
+    expect(leerSuma("12,50 €")).toBe(12.5);
+    expect(leerSuma("$12.99")).toBe(12.99);
+    expect(leerSuma("£8")).toBe(8);
+    expect(leerSuma("¥3000")).toBe(3000);
+  });
+
+  it("y en las sumas también", () => {
+    expect(leerSuma("25 € + 10 €")).toBe(35);
+    expect(leerSuma("3×4,50€")).toBe(13.5);
+  });
+
+  it("el símbolo solo no es un importe", () => {
+    expect(leerSuma("€")).toBeNull();
+    expect(leerSuma("€+")).toBeNull();
+  });
+
   it("el + del final no cuenta, que vas a escribir otro", () => {
     expect(leerSuma("12+")).toBe(12);
   });
@@ -105,6 +125,7 @@ describe("esSuma", () => {
 
   it("un número solo, o con el + colgando, no", () => {
     expect(esSuma("12")).toBe(false);
+    expect(esSuma("25 €")).toBe(false);
     expect(esSuma("12+")).toBe(false);
     expect(esSuma("")).toBe(false);
   });

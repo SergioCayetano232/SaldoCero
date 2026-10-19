@@ -13,9 +13,13 @@ const ENTRE = /[÷/]/;
 const SIGNO = /[+\-×xX*÷/]/;
 const SIGNO_AL_FINAL = /[+\-×xX*÷/]$/;
 
-// Sin espacios y sin el signo del final, que es que vas a escribir el siguiente.
+// Lo que se pega del banco o de la app del restaurante viene con símbolo: "25 €".
+// La moneda la dice el desplegable de al lado; las letras no, que la x es multiplicar.
+const SIMBOLOS = /[€$£¥]/g;
+
+// Sin espacios, sin símbolos y sin el signo del final, que es que vas a escribir el siguiente.
 function sinColgar(texto) {
-  return String(texto ?? "").replace(/\s/g, "").replace(SIGNO_AL_FINAL, "");
+  return String(texto ?? "").replace(/\s/g, "").replace(SIMBOLOS, "").replace(SIGNO_AL_FINAL, "");
 }
 
 // "3×4,5" → 13,5 y "120÷4" → 30, de izquierda a derecha. null si algún trozo
