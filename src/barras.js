@@ -53,3 +53,15 @@ export function diasConEtiqueta(cuantos, maximo = 6) {
   elegidos.push(cuantos - 1);
   return elegidos;
 }
+
+// Las mismas, pero con hoy siempre, que es lo primero que buscas a mitad de
+// viaje. Las de al lado se quitan, que si no se montan encima.
+export function etiquetasConHoy(dias, dia, maximo = 6) {
+  const elegidos = diasConEtiqueta(dias.length, maximo);
+  const iHoy = dias.findIndex((d) => d.fecha === dia);
+  if (iHoy === -1) return { elegidos, iHoy };
+
+  const salto = dias.length <= maximo ? 1 : Math.ceil((dias.length - 1) / (maximo - 1));
+  const lejos = elegidos.filter((i) => Math.abs(i - iHoy) >= salto);
+  return { elegidos: [...lejos, iHoy].sort((a, b) => a - b), iHoy };
+}

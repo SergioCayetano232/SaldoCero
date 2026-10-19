@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { gastoPorDia, topeRedondo, diasConEtiqueta } from "./barras";
+import { gastoPorDia, topeRedondo, diasConEtiqueta, etiquetasConHoy } from "./barras";
 
 const gastos = [
   { importe: 40, fecha: "2026-09-10" },
@@ -75,5 +75,30 @@ describe("diasConEtiqueta", () => {
       const [penultimo, ultimo] = elegidos.slice(-2);
       expect(ultimo - penultimo).toBeGreaterThan(1);
     }
+  });
+});
+
+describe("etiquetasConHoy", () => {
+  const delMes = (cuantos) =>
+    Array.from({ length: cuantos }, (_, i) => ({ fecha: `2026-10-${String(i + 1).padStart(2, "0")}` }));
+
+  it("si hoy no está en la gráfica, como siempre", () => {
+    expect(etiquetasConHoy(delMes(4), "2026-11-20")).toEqual({ elegidos: [0, 1, 2, 3], iHoy: -1 });
+  });
+
+  it("con pocos días, todos y se sabe cuál es hoy", () => {
+    expect(etiquetasConHoy(delMes(4), "2026-10-03")).toEqual({ elegidos: [0, 1, 2, 3], iHoy: 2 });
+  });
+
+  it("con muchos, hoy entra aunque no tocara, y se van las que tiene pegadas", () => {
+    // Sin hoy serían 0, 6, 12, 18 y 29: el 12 y el 18 le quedan pegados.
+    const { elegidos, iHoy } = etiquetasConHoy(delMes(30), "2026-10-14");
+    expect(iHoy).toBe(13);
+    expect(elegidos).toEqual([0, 6, 13, 29]);
+  });
+
+  it("si hoy es el último, se queda en su sitio", () => {
+    const { elegidos } = etiquetasConHoy(delMes(30), "2026-10-30");
+    expect(elegidos).toEqual([0, 6, 12, 18, 29]);
   });
 });

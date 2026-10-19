@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
-import { gastoPorDia, topeRedondo, diasConEtiqueta } from "../barras";
+import { gastoPorDia, topeRedondo, etiquetasConHoy } from "../barras";
 import { ritmoDeGasto } from "../presupuesto";
 import { conMoneda } from "../monedas";
-import { enCorto } from "../fechas";
+import { enCorto, hoy } from "../fechas";
 
 // Lo que se gastó cada día, en barras, con la media del viaje de referencia.
 function PorDias({ gastos, moneda, onVerDia }) {
@@ -20,7 +20,8 @@ function PorDias({ gastos, moneda, onVerDia }) {
   const ritmo = ritmoDeGasto(gastos);
   const mayor = Math.max(...dias.map((d) => d.total));
   const tope = topeRedondo(mayor);
-  const conEtiqueta = new Set(diasConEtiqueta(dias.length));
+  const { elegidos, iHoy } = etiquetasConHoy(dias, hoy());
+  const conEtiqueta = new Set(elegidos);
   const iMayor = dias.findIndex((d) => d.total === mayor);
   const alto = (cantidad) => `${(cantidad / tope) * 100}%`;
   // Las cifras del eje sin decimales, que ahí sobran.
@@ -91,11 +92,11 @@ function PorDias({ gastos, moneda, onVerDia }) {
             {dias.map((d, i) => (
               <div
                 key={d.fecha}
-                className={`por-dias-columna ${i === elegido ? "elegida" : ""} ${
+                className={`por-dias-columna ${i === elegido ? "elegida" : ""} ${i === iHoy ? "es-hoy" : ""} ${
                   sePuedeVer(i) ? "se-puede-ver" : ""
                 }`}
                 tabIndex={0}
-                aria-label={`${enCorto(d.fecha)}: ${conMoneda(d.total, moneda)}`}
+                aria-label={`${i === iHoy ? "Hoy" : enCorto(d.fecha)}: ${conMoneda(d.total, moneda)}`}
                 style={{ "--orden": i }}
                 {...mirar(i)}
               >
@@ -142,7 +143,9 @@ function PorDias({ gastos, moneda, onVerDia }) {
 
       <div className="por-dias-fechas" aria-hidden="true">
         {dias.map((d, i) => (
-          <span key={d.fecha}>{conEtiqueta.has(i) ? enCorto(d.fecha).replace(/^\S+ /, "") : ""}</span>
+          <span key={d.fecha} className={i === iHoy ? "por-dias-hoy" : undefined}>
+            {i === iHoy ? "hoy" : conEtiqueta.has(i) ? enCorto(d.fecha).replace(/^\S+ /, "") : ""}
+          </span>
         ))}
       </div>
     </div>
