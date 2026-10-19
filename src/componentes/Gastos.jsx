@@ -50,6 +50,7 @@ function Gastos({
   soy = null,
   verDe = null,
   verDia = null,
+  verGasto = null,
 }) {
   // Lo que dejaste a medias la última vez, si lo hay.
   const [borrador] = useState(() => borradorQueVale(datos.leerBorrador(codigo), Date.now(), viajeros));
@@ -222,6 +223,16 @@ function Gastos({
     setVerDiaAntes(verDia);
     if (verDia) setFiltros(soloDelDia(verDia.fecha));
   }
+  // El que te han mandado a ver: sin filtros, que si no puede no estar en la lista.
+  const [senalado, setSenalado] = useState(null);
+  const [verGastoAntes, setVerGastoAntes] = useState(verGasto);
+  if (verGasto !== verGastoAntes) {
+    setVerGastoAntes(verGasto);
+    if (verGasto) {
+      setFiltros(SIN_FILTROS);
+      setSenalado(verGasto.id);
+    }
+  }
   const barraFiltros = useRef(null);
 
   useEffect(() => {
@@ -229,6 +240,15 @@ function Gastos({
     const quieto = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     barraFiltros.current?.scrollIntoView({ behavior: quieto ? "auto" : "smooth", block: "start" });
   }, [verDe, verDia]);
+  useEffect(() => {
+    if (!senalado) return;
+    const quieto = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    document.querySelector(".lista li.senalado")?.scrollIntoView({ behavior: quieto ? "auto" : "smooth", block: "center" });
+    // Lo que dura el brillo, y luego fuera para que otro toque lo vuelva a encender.
+    const apagar = setTimeout(() => setSenalado(null), 2600);
+    return () => clearTimeout(apagar);
+  }, [senalado, verGasto]);
+
   // Si quedan pocos gastos la barra se esconde, y con ella lo que hubiera filtrado.
   const puedeFiltrar = gastos.length >= MINIMO_PARA_FILTRAR;
   const filtrando = puedeFiltrar && hayFiltros(filtros);
@@ -1324,7 +1344,7 @@ function Gastos({
                       key={gasto.id}
                       className={`${gasto.id === editando ? "editandose" : ""} ${
                         recienLlegados?.has(gasto.id) ? "recien-llegado" : ""
-                      }`}
+                      } ${gasto.id === senalado ? "senalado" : ""}`}
                       onEditar={() => editar(gasto)}
                       onQuitar={() => onQuitar(gasto.id, gasto.concepto, gasto.ticket)}
                       quieto={cerrado}

@@ -1984,7 +1984,16 @@ button:active {
 }
 
 .total-mas-caro {
+  padding: 0;
+  font: inherit;
   font-weight: 600;
+  text-align: left;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+.total-mas-caro:hover {
+  text-decoration-style: solid;
 }
 
 /* Lo tuyo, en una pastilla sobre el degradado. El punto dice si es a favor o en contra. */
@@ -3621,6 +3630,19 @@ button.pago-cantidad:hover {
 /* La fila que acaba de llegar se ilumina un momento y se apaga. */
 .lista li.recien-llegado {
   animation: aparecer-creciendo var(--medio) var(--curva-suave), resaltar-nuevo 2.6s var(--curva-suave);
+}
+
+/* El que has ido a ver desde el resumen brilla igual. */
+.lista li.senalado {
+  animation: resaltar-nuevo 2.6s var(--curva-suave);
+}
+
+/* Sin animaciones el brillo no se vería: se queda marcado lo que dura. */
+@media (prefers-reduced-motion: reduce) {
+  .lista li.senalado {
+    background-color: var(--naranja-100);
+    box-shadow: inset 3px 0 0 var(--naranja-400);
+  }
 }
 
 @keyframes resaltar-nuevo {

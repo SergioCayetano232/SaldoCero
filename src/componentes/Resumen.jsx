@@ -55,6 +55,7 @@ function Resumen({
   soy,
   onVerGastos,
   onVerDia,
+  onVerGasto,
 }) {
   // "" mientras no has copiado, y si no, lo que ha pasado.
   const [copiado, setCopiado] = useState("");
@@ -218,7 +219,11 @@ function Resumen({
         </div>
         {masCaro && (
           <div className="total-detalle">
-            El más caro: <span className="total-mas-caro">{masCaro.concepto}</span>,{" "}
+            El más caro:{" "}
+            <button className="total-mas-caro" onClick={() => onVerGasto?.(masCaro.id)} title="Verlo en la lista">
+              {masCaro.concepto}
+            </button>
+            ,{" "}
             <span className="sin-partir">{conMoneda(importeDeGasto(masCaro), monedaViaje)}</span>
           </div>
         )}

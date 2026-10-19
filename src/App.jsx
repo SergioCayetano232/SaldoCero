@@ -54,6 +54,8 @@ function App() {
   const [verDe, setVerDe] = useState(null);
   // Y el día que has tocado en la gráfica, igual.
   const [verDia, setVerDia] = useState(null);
+  // Y el gasto más caro, si lo has tocado en el resumen.
+  const [verGasto, setVerGasto] = useState(null);
 
   useEffect(() => {
     const codigo = codigoDeArranque();
@@ -453,6 +455,7 @@ function App() {
         soy={soy}
         verDe={verDe}
         verDia={verDia}
+        verGasto={verGasto}
         onAnadir={(gasto) =>
           hacer(async () => {
             // La foto se reduce antes de guardar nada: si no se puede leer, mejor
@@ -511,6 +514,7 @@ function App() {
               ? (id) => setVerDe((antes) => ({ id, vez: (antes?.vez ?? 0) + 1 }))
               : undefined
           }
+          onVerGasto={(id) => setVerGasto((antes) => ({ id, vez: (antes?.vez ?? 0) + 1 }))}
           onVerDia={
             gastos.length >= MINIMO_PARA_FILTRAR
               ? (fecha) => setVerDia((antes) => ({ fecha, vez: (antes?.vez ?? 0) + 1 }))
