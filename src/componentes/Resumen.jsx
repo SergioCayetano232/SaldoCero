@@ -13,7 +13,9 @@ import {
   hayCentimos,
 } from "../calculos";
 import { conMoneda } from "../monedas";
-import { resumenEnTexto, copiarAlPortapapeles, descargarResumen, descargarGastos, invitar, enlaceDelViaje } from "../compartir";
+import { resumenEnTexto, copiarAlPortapapeles, descargarResumen, descargarGastos, invitar, enlaceDelViaje, compartirImagen, nombreDeArchivo } from "../compartir";
+import { datosDeTarjeta } from "../tarjeta";
+import { tarjetaEnImagen } from "../pintarTarjeta";
 import { gastosEnCSV } from "../exportar";
 import { mensajeDeCobro, enlaceWhatsApp } from "../cobrar";
 import { cobroDe, cobroComoTexto, cantidadParaPegar } from "../cobro";
@@ -59,6 +61,8 @@ function Resumen({
 }) {
   // "" mientras no has copiado, y si no, lo que ha pasado.
   const [copiado, setCopiado] = useState("");
+  // "haciendo" mientras se pinta, que en un móvil lento tarda un momento.
+  const [imagen, setImagen] = useState("");
   // Qué fiesta va. Hace de key para que el confeti vuelva a caer si se repite.
   const [fiesta, setFiesta] = useState(null);
   const fiestas = useRef(0);
@@ -169,6 +173,21 @@ function Resumen({
     setTimeout(() => setCopiado(""), 2500);
   }
 
+  async function mandarImagen() {
+    setImagen("haciendo");
+    const nombre = viaje?.nombre ?? "El viaje";
+    try {
+      const datos = datosDeTarjeta({ nombre, total, personas, pagos, moneda: monedaViaje, gastos });
+      const png = await tarjetaEnImagen(datos, colores, `Apuntado con SaldoCero · ${window.location.host}`);
+      await compartirImagen(png, nombreDeArchivo(nombre, "png"));
+      setImagen("");
+    } catch (fallo) {
+      console.error("No hemos podido hacer la imagen.", fallo);
+      setImagen("mal");
+      setTimeout(() => setImagen(""), 2500);
+    }
+  }
+
   return (
     <section className="tarjeta">
       <h2>
@@ -180,6 +199,15 @@ function Resumen({
             title="Compartir el resumen"
           >
             {copiado === "bien" ? "¡Copiado!" : copiado === "mal" ? "No se pudo" : "Compartir"}
+          </button>
+
+          <button
+            className="boton-compartir"
+            onClick={mandarImagen}
+            disabled={imagen === "haciendo"}
+            title="Mandar quién paga a quién en una imagen"
+          >
+            {imagen === "haciendo" ? "Haciendo…" : imagen === "mal" ? "No se pudo" : "Imagen"}
           </button>
 
           <button

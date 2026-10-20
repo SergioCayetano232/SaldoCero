@@ -58,7 +58,7 @@ export function resumenEnTexto({ nombre, codigo, total, balances, pagos, moneda,
 
 // Con gastos que no son de todos, o repartidos a partes desiguales, a cada uno
 // le toca distinto: entonces es una media y hay que decirlo.
-function porCabeza(total, balances, moneda) {
+export function porCabeza(total, balances, moneda) {
   if (balances.length < 2 || total <= 0) return "";
 
   const partes = balances.map((v) => v.tocaPagar ?? 0);
@@ -121,6 +121,25 @@ export function descargarGastos(csv, nombreViaje) {
   descargar(`\uFEFF${csv}`, nombreDeArchivo(`${nombreViaje} - gastos`, "csv"), "text/csv;charset=utf-8");
 }
 
+// La imagen del resumen, con el menú del móvil si deja mandar archivos. Si no,
+// se baja y ya la mandas tú. Devuelve "compartido", "cancelado" o "descargado".
+export async function compartirImagen(imagen, nombre, nav = navigator) {
+  const archivo = new File([imagen], nombre, { type: "image/png" });
+
+  if (nav.canShare?.({ files: [archivo] })) {
+    try {
+      await nav.share({ files: [archivo] });
+      return "compartido";
+    } catch (e) {
+      if (e?.name === "AbortError") return "cancelado";
+    }
+  }
+
+  descargar(imagen, nombre, "image/png");
+  return "descargado";
+}
+
+// Vale con texto o con una imagen ya hecha: el Blob se traga los dos.
 function descargar(texto, nombre, tipo) {
   const url = URL.createObjectURL(new Blob([texto], { type: tipo }));
 

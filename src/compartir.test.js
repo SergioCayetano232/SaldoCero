@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { resumenEnTexto, enlaceDelViaje, invitacion, invitar, nombreDeArchivo } from "./compartir";
+import { resumenEnTexto, enlaceDelViaje, invitacion, invitar, nombreDeArchivo, compartirImagen } from "./compartir";
 
 // Un viaje de ejemplo, para no repetirlo en cada prueba.
 const viaje = {
@@ -228,5 +228,27 @@ describe("nombreDeArchivo", () => {
 
   it("sin día, el de hoy", () => {
     expect(nombreDeArchivo("Lisboa", "txt")).toMatch(/^Lisboa \d{4}-\d{2}-\d{2}\.txt$/);
+  });
+});
+
+describe("compartirImagen", () => {
+  const imagen = new Blob(["png"], { type: "image/png" });
+
+  it("con el menú del móvil, manda el archivo", async () => {
+    let mandado;
+    const nav = { canShare: () => true, share: async (d) => (mandado = d) };
+    expect(await compartirImagen(imagen, "Lisboa.png", nav)).toBe("compartido");
+    expect(mandado.files[0].name).toBe("Lisboa.png");
+    expect(mandado.files[0].type).toBe("image/png");
+  });
+
+  it("si cierras el menú, nada más", async () => {
+    const nav = {
+      canShare: () => true,
+      share: async () => {
+        throw Object.assign(new Error(), { name: "AbortError" });
+      },
+    };
+    expect(await compartirImagen(imagen, "Lisboa.png", nav)).toBe("cancelado");
   });
 });
