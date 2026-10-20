@@ -4083,3 +4083,275 @@ kbd {
     opacity: 0.6;
   }
 }
+
+/* ===== El viaje en historias ===== */
+.boton-historias {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 18px;
+  padding: 12px 16px;
+  border-radius: var(--radio-sm);
+  background: linear-gradient(120deg, var(--teal-500), var(--naranja-500));
+  color: white;
+  font-family: var(--fuente-titulo);
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: var(--sombra-md);
+  transition: transform var(--rapido) var(--curva-muelle), box-shadow var(--rapido);
+}
+
+.boton-historias:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-lg);
+}
+
+.boton-historias:active {
+  transform: scale(0.98);
+}
+
+/* Van siempre en oscuro, tengas el tema que tengas: es como ver una peli. */
+.historias {
+  --historia-base: #062d2c;
+  --historia-luz-1: rgba(14, 124, 123, 0.75);
+  --historia-luz-2: rgba(244, 162, 89, 0.55);
+  --historia-texto: #f4fbfa;
+  --historia-suave: rgba(244, 251, 250, 0.72);
+
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--historia-texto);
+  background-color: var(--historia-base);
+  background-image:
+    radial-gradient(circle at 85% 12%, var(--historia-luz-2), transparent 45%),
+    radial-gradient(circle at 10% 80%, var(--historia-luz-1), transparent 55%);
+  transition: background-color var(--lento) var(--curva-suave);
+  animation: historias-entrar var(--medio) var(--curva-suave);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* El mismo grano que el fondo de la app. */
+.historias::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23r)'/%3E%3C/svg%3E");
+}
+
+.historia-tono-1 {
+  --historia-base: #2a1530;
+  --historia-luz-1: rgba(214, 122, 158, 0.7);
+  --historia-luz-2: rgba(244, 162, 89, 0.5);
+}
+
+.historia-tono-2 {
+  --historia-base: #101d3a;
+  --historia-luz-1: rgba(53, 105, 176, 0.75);
+  --historia-luz-2: rgba(43, 163, 161, 0.55);
+}
+
+.historia-tono-3 {
+  --historia-base: #2e1a0a;
+  --historia-luz-1: rgba(232, 134, 46, 0.7);
+  --historia-luz-2: rgba(214, 122, 158, 0.45);
+}
+
+.historia-tono-4 {
+  --historia-base: #1a1436;
+  --historia-luz-1: rgba(124, 92, 196, 0.75);
+  --historia-luz-2: rgba(43, 163, 161, 0.5);
+}
+
+.historias-barras {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  padding: max(14px, env(safe-area-inset-top)) 14px 0;
+}
+
+.historias-barra {
+  flex: 1;
+  height: 3px;
+  overflow: hidden;
+  border-radius: var(--radio-pastilla);
+  background-color: rgba(255, 255, 255, 0.28);
+}
+
+.historias-barra > span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background-color: var(--historia-texto);
+}
+
+.historias-barra > span.llena {
+  width: 100%;
+}
+
+.historias-barra > span.corriendo {
+  animation-name: historias-barra;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.historias-cerrar {
+  position: absolute;
+  top: max(26px, calc(env(safe-area-inset-top) + 12px));
+  right: 10px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--historia-texto);
+}
+
+.historias-cerrar:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.historias-toque {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 28px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.historia {
+  width: 100%;
+  max-width: 520px;
+  text-align: center;
+}
+
+/* Cada cosa entra un poco después de la anterior. */
+.historia > * {
+  animation: historia-subir var(--lento) var(--curva-suave) both;
+}
+
+.historia-emoji {
+  display: inline-block;
+  font-size: 64px;
+  line-height: 1;
+  margin-bottom: 22px;
+  animation-name: historia-rebote;
+  animation-timing-function: var(--curva-muelle);
+}
+
+.historia-antes {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--historia-suave);
+  animation-delay: 0.12s;
+}
+
+.historia-cifra {
+  margin: 10px 0 12px;
+  font-family: var(--fuente-titulo);
+  font-size: clamp(40px, 13vw, 76px);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  animation-delay: 0.24s;
+  animation-name: historia-latido;
+  animation-timing-function: var(--curva-muelle);
+}
+
+.historia-despues {
+  font-size: 19px;
+  color: var(--historia-suave);
+  animation-delay: 0.4s;
+}
+
+.historias-final {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 20px 18px;
+  animation: historia-subir var(--lento) var(--curva-suave) 0.5s both;
+}
+
+.historias-final > button {
+  padding: 11px 22px;
+  border-radius: var(--radio-pastilla);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: var(--historia-texto);
+  font-weight: 600;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.historias-final > .historias-salir {
+  background-color: var(--historia-texto);
+  border-color: var(--historia-texto);
+  color: var(--historia-base);
+}
+
+.historias-ayuda {
+  position: relative;
+  padding: 0 16px max(18px, env(safe-area-inset-bottom));
+  text-align: center;
+  font-size: 12px;
+  color: var(--historia-suave);
+}
+
+@keyframes historias-entrar {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+@keyframes historias-barra {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes historia-subir {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+@keyframes historia-rebote {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-12deg);
+  }
+}
+
+@keyframes historia-latido {
+  0% {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+}
+
+/* Sin movimiento, la barra de la que estás sale llena y no pasa sola. */
+@media (prefers-reduced-motion: reduce) {
+  .historias-barra > span.corriendo {
+    animation: none;
+    width: 100%;
+  }
+}

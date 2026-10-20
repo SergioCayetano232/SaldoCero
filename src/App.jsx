@@ -56,6 +56,8 @@ function App() {
   const [verDia, setVerDia] = useState(null);
   // Y el gasto más caro, si lo has tocado en el resumen.
   const [verGasto, setVerGasto] = useState(null);
+  // Las historias del viaje, que salen solas al cerrarlo.
+  const [verHistorias, setVerHistorias] = useState(false);
 
   useEffect(() => {
     const codigo = codigoDeArranque();
@@ -277,6 +279,7 @@ function App() {
     setViaje(null);
     setSoy(null);
     setRecienCreado(null);
+    setVerHistorias(false);
     setError("");
   }
 
@@ -301,7 +304,7 @@ function App() {
     const confirmado = window.confirm(avisoAlCerrar(viaje.nombre, pagos, viaje.moneda ?? "EUR"));
     if (!confirmado) return;
 
-    hacer(() => datos.cerrarViaje(viaje.id));
+    hacer(() => datos.cerrarViaje(viaje.id)).then((bien) => bien && setVerHistorias(true));
   }
 
   async function repetirViaje(gente) {
@@ -486,6 +489,9 @@ function App() {
           balances={balances}
           nombre={viaje.nombre}
           moneda={viaje.moneda ?? "EUR"}
+          pendientes={pagosDelViaje(balances, viaje).filter((p) => !p.saldado).length}
+          verHistorias={verHistorias}
+          onHistorias={setVerHistorias}
         />
       )}
 

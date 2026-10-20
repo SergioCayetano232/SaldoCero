@@ -4,10 +4,12 @@ import { sinBote } from "../bote";
 import { copiarAlPortapapeles } from "../compartir";
 import { conMoneda } from "../monedas";
 import { enCorto } from "../fechas";
+import { historiasDelViaje } from "../historias";
 import Cifra from "./Cifra";
+import Historias from "./Historias";
 
 // Al cerrar el viaje, lo que dio de sí. Para enseñarlo en el grupo.
-function CifrasViaje({ gastos, balances, nombre, moneda }) {
+function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHistorias = false, onHistorias }) {
   const [copiado, setCopiado] = useState("");
 
   // En lo que puso cada uno también cuenta lo que metió en el bote.
@@ -31,6 +33,17 @@ function CifrasViaje({ gastos, balances, nombre, moneda }) {
           {copiado === "bien" ? "✓ Copiado" : copiado === "mal" ? "No se ha podido" : "Compartir"}
         </button>
       </h2>
+
+      <button className="boton-historias" onClick={() => onHistorias?.(true)}>
+        <span aria-hidden="true">▶</span> Verlo en historias
+      </button>
+
+      {verHistorias && (
+        <Historias
+          historias={historiasDelViaje(cifras, { nombre, moneda, gastos, pendientes })}
+          onCerrar={() => onHistorias?.(false)}
+        />
+      )}
 
       <div className="cifras-total">
         <span className="cifras-numero">
