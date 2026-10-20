@@ -1130,6 +1130,20 @@ button:active {
   border-radius: var(--radio-pastilla);
   font-size: 13px;
   color: var(--tinta-suave);
+  white-space: nowrap;
+}
+
+/* Con tres pestañas, en un móvil estrecho no caben con tanto aire. */
+@media (max-width: 400px) {
+  .modo-reparto {
+    display: flex;
+  }
+
+  .modo-reparto > button {
+    flex: 1;
+    padding: 5px 4px;
+    font-size: 12px;
+  }
 }
 
 .modo-reparto > button.activo {
@@ -1199,6 +1213,76 @@ button:active {
   font-weight: 600;
   color: var(--teal-600);
   font-variant-numeric: tabular-nums;
+}
+
+/* La cuenta plato a plato. */
+.platos {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.plato {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  animation: aparecer-creciendo var(--medio) var(--curva-muelle);
+}
+
+.plato > .parte-campo {
+  flex-shrink: 0;
+}
+
+.plato-gente {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding-top: 3px;
+}
+
+.plato-persona {
+  padding: 4px 10px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-pastilla);
+  background-color: var(--papel);
+  font-size: 13px;
+  color: var(--tinta-suave);
+  transition: background-color var(--rapido), border-color var(--rapido),
+    color var(--rapido), transform var(--rapido) var(--curva-muelle);
+}
+
+.plato-persona:active {
+  transform: scale(0.94);
+}
+
+/* Igual que las casillas de arriba: con el color de su avatar. */
+.plato-persona.elegida {
+  background-color: color-mix(in srgb, var(--color-viajero, var(--teal-500)) 12%, var(--papel));
+  border-color: color-mix(in srgb, var(--color-viajero, var(--teal-500)) 55%, transparent);
+  color: color-mix(in srgb, var(--color-viajero, var(--teal-500)) 65%, var(--tinta));
+  font-weight: 600;
+}
+
+.plato-quitar {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  margin-top: 2px;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--tinta-tenue);
+}
+
+.plato-quitar:hover {
+  color: var(--rojo);
+}
+
+.platos > .enlace {
+  align-self: flex-start;
 }
 
 /* ===== Categorías ===== */

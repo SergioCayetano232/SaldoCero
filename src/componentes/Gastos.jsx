@@ -12,6 +12,7 @@ import { borradorQueVale, hayAlgoEscrito, hayAlgoQueBorrar } from "../borrador";
 import * as datos from "../datos";
 import { gastoAlFormulario, repetirGasto } from "../repetir";
 import { leerImporte, loQueFalta, cuadra, importesAPartes, partesAImportes } from "../importes";
+import { platoNuevo, repartoPorPlatos, alternarEnPlato } from "../platos";
 import { BOTE } from "../bote";
 import { esImagen } from "../tickets";
 import { LARGO_NOTA, quedanEnNota } from "../notas";
@@ -80,6 +81,9 @@ function Gastos({
   // O lo que pone cada uno, tal cual se escribe, en la moneda en que se pagó.
   const [porImportes, setPorImportes] = useState(false);
   const [importes, setImportes] = useState({});
+  // O la cuenta plato a plato. No se guarda: al editar sale ya en importes.
+  const [porPlatos, setPorPlatos] = useState(false);
+  const [platos, setPlatos] = useState(() => [platoNuevo()]);
   // Por defecto hoy, que es cuando se apunta casi todo.
   const [fecha, setFecha] = useState(() => borrador?.fecha || hoy());
   // El cambio que nos ha dado la API, con la moneda a la que corresponde.
@@ -364,6 +368,8 @@ function Gastos({
     setRepartoAbierto(false);
     setPorImportes(false);
     setImportes({});
+    setPorPlatos(false);
+    setPlatos([platoNuevo()]);
     setFecha(hoy());
     setParticipantes(null);
     setEditando(null);
@@ -390,6 +396,8 @@ function Gastos({
     setPartes(f.partes);
     setPorImportes(f.porImportes);
     setImportes(f.importes);
+    setPorPlatos(false);
+    setPlatos([platoNuevo()]);
     setRepartoAbierto(f.repartoAbierto);
 
     // En el móvil el formulario suele quedar arriba, fuera de la vista.
@@ -435,14 +443,27 @@ function Gastos({
 
   // Para no empezar de cero: lo que les salía con las partes de ahora.
   function pasarAImportes() {
-    setImportes(partesAImportes(partesDeLosMarcados(), marcados, importeLeido));
+    // Desde los platos, lo que salía con ellos, para retocarlo a mano.
+    setImportes(
+      conPlatos && deLosPlatos?.importes
+        ? deLosPlatos.importes
+        : partesAImportes(partesDeLosMarcados(), marcados, importeLeido)
+    );
     setPorImportes(true);
+    setPorPlatos(false);
+  }
+
+  function cambiarPlato(i, plato) {
+    setPlatos(platos.map((p, j) => (j === i ? plato : p)));
   }
 
   const importeEscrito = importeLeido;
-  const conImportes = repartoAbierto && porImportes;
+  const conImportes = repartoAbierto && porImportes && !porPlatos;
   const falta = conImportes && importeEscrito > 0 ? loQueFalta(importes, marcados, importeEscrito) : null;
-  const descuadrado = conImportes && !cuadra(importes, marcados, importeEscrito);
+  const conPlatos = repartoAbierto && porPlatos;
+  const deLosPlatos = conPlatos ? repartoPorPlatos(platos, marcados, importeEscrito) : null;
+  const descuadrado =
+    (conImportes && !cuadra(importes, marcados, importeEscrito)) || (conPlatos && !deLosPlatos?.importes);
 
   // Cuánto sale para cada uno con las partes de ahora, para irlo viendo.
   function loQueLeToca(id) {
@@ -450,6 +471,7 @@ function Gastos({
     if (isNaN(total) || total <= 0 || typeof tasa !== "number") return null;
     // Por importes ya se ve, solo hace falta si hay que pasarlo de moneda.
     if (conImportes) return leerImporte(importes[id]) * tasa;
+    if (conPlatos) return deLosPlatos?.importes ? leerImporte(deLosPlatos.importes[id]) * tasa : null;
 
     const suyas = partesDeLosMarcados();
     const suma = Object.values(suyas).reduce((t, p) => t + p, 0);
@@ -499,7 +521,9 @@ function Gastos({
         ? null
         : conImportes
           ? importesAPartes(importes, marcados)
-          : partesDeLosMarcados(),
+          : conPlatos
+            ? importesAPartes(deLosPlatos.importes, marcados)
+            : partesDeLosMarcados(),
       foto,
       quitarFoto: quitarFoto && !foto,
       ticketAnterior: ticketActual,
@@ -968,24 +992,84 @@ function Gastos({
                   <div className="partes">
                     <div className="modo-reparto">
                       <button
-                        className={porImportes ? "" : "activo"}
-                        onClick={() => setPorImportes(false)}
+                        className={porImportes || porPlatos ? "" : "activo"}
+                        onClick={() => {
+                          setPorImportes(false);
+                          setPorPlatos(false);
+                        }}
                       >
                         Por partes
                       </button>
                       <button
-                        className={porImportes ? "activo" : ""}
+                        className={porImportes && !porPlatos ? "activo" : ""}
                         onClick={() => !porImportes && pasarAImportes()}
                       >
                         Por importe
                       </button>
+                      <button
+                        className={porPlatos ? "activo" : ""}
+                        onClick={() => {
+                          setPorPlatos(true);
+                          setPorImportes(false);
+                        }}
+                      >
+                        Por platos
+                      </button>
                     </div>
 
                     <p className="partes-ayuda">
-                      {porImportes
-                        ? `Lo que pone cada uno, en ${moneda}. Tiene que sumar el importe.`
-                        : "Cuántas partes paga cada uno. Con 2 y 1, el primero paga el doble."}
+                      {porPlatos
+                        ? `Cada plato, en ${moneda}, y de quién es. Lo que no pongas, como el pan o la propina, va entre todos.`
+                        : porImportes
+                          ? `Lo que pone cada uno, en ${moneda}. Tiene que sumar el importe.`
+                          : "Cuántas partes paga cada uno. Con 2 y 1, el primero paga el doble."}
                     </p>
+
+                    {porPlatos && (
+                      <div className="platos">
+                        {platos.map((plato, i) => (
+                          <div className="plato" key={i}>
+                            <input
+                              type="text"
+                              inputMode="decimal"
+                              className="parte-campo campo-importe"
+                              placeholder="0"
+                              aria-label={`Lo que costó el plato ${i + 1}`}
+                              value={plato.importe}
+                              onChange={(e) => cambiarPlato(i, { ...plato, importe: e.target.value })}
+                            />
+                            <div className="plato-gente">
+                              {viajeros
+                                .filter((v) => marcados.includes(v.id))
+                                .map((viajero) => (
+                                  <button
+                                    key={viajero.id}
+                                    className={`plato-persona ${plato.de.includes(viajero.id) ? "elegida" : ""}`}
+                                    style={{ "--color-viajero": colores?.get(viajero.nombre) }}
+                                    aria-pressed={plato.de.includes(viajero.id)}
+                                    onClick={() => cambiarPlato(i, alternarEnPlato(plato, viajero.id))}
+                                  >
+                                    {viajero.nombre}
+                                  </button>
+                                ))}
+                            </div>
+                            {platos.length > 1 && (
+                              <button
+                                className="plato-quitar"
+                                aria-label="Quitar el plato"
+                                title="Quitar el plato"
+                                onClick={() => setPlatos(platos.filter((_, j) => j !== i))}
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        <button className="enlace" onClick={() => setPlatos([...platos, platoNuevo()])}>
+                          + otro plato
+                        </button>
+                      </div>
+                    )}
 
                     {viajeros
                       .filter((v) => marcados.includes(v.id))
@@ -996,7 +1080,7 @@ function Gastos({
                           <div className="fila-parte" key={viajero.id}>
                             <span className="parte-nombre">{viajero.nombre}</span>
 
-                            {porImportes ? (
+                            {porPlatos ? null : porImportes ? (
                               <input
                                 type="number"
                                 className="parte-campo campo-importe"
@@ -1028,6 +1112,20 @@ function Gastos({
                           </div>
                         );
                       })}
+
+                    {deLosPlatos && (
+                      <p
+                        className={`cuadre ${
+                          deLosPlatos.entreTodos < 0 ? "cuadre-mal" : deLosPlatos.entreTodos === 0 ? "cuadre-bien" : ""
+                        }`}
+                      >
+                        {deLosPlatos.entreTodos < 0
+                          ? `Los platos se pasan en ${conMoneda(-deLosPlatos.entreTodos, moneda)}`
+                          : deLosPlatos.entreTodos === 0
+                            ? "✓ Cuadra con el importe"
+                            : `${conMoneda(deLosPlatos.entreTodos, moneda)} van entre todos`}
+                      </p>
+                    )}
 
                     {falta !== null && (
                       <p className={`cuadre ${falta === 0 ? "cuadre-bien" : "cuadre-mal"}`}>
