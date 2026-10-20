@@ -30,6 +30,7 @@ import Confeti from "./Confeti";
 import Avatar from "./Avatar";
 import Desglose from "./Desglose";
 import PorDias from "./PorDias";
+import Evolucion from "./Evolucion";
 import PagosACuenta from "./PagosACuenta";
 import Presupuesto from "./Presupuesto";
 import { porCabezaYDia } from "../presupuesto";
@@ -47,6 +48,7 @@ function Resumen({
   monedaViaje = "EUR",
   saldados = [],
   parciales = [],
+  aportaciones = [],
   onSaldar,
   onSaldarVarios,
   onDesaldar,
@@ -325,6 +327,15 @@ function Resumen({
       )}
 
       <PorDias gastos={gastos} moneda={monedaViaje} onVerDia={onVerDia} />
+
+      <Evolucion
+        viajeros={personas}
+        gastos={gastos}
+        aportaciones={aportaciones}
+        colores={colores}
+        moneda={monedaViaje}
+        soy={soy}
+      />
 
       {/* Cerrado ya no hay "próxima" que pagar. */}
       {leTocaPagar && !cerrado && (

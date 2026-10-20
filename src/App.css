@@ -4530,3 +4530,192 @@ kbd {
     transform: scale(1.25);
   }
 }
+
+/* ===== Cómo han ido las cuentas ===== */
+.evolucion {
+  margin-bottom: 20px;
+}
+
+.evolucion-cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.evolucion-titulo {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.evolucion-dia {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tinta-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.evolucion-ayuda {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0 10px;
+  font-size: 12px;
+  color: var(--tinta-tenue);
+}
+
+.evolucion-clave {
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+.evolucion-clave + .evolucion-clave,
+.evolucion-ayuda .evolucion-clave.debe {
+  margin-left: 8px;
+}
+
+.evolucion-clave.le-deben {
+  background-color: var(--verde);
+}
+
+.evolucion-clave.debe {
+  background-color: var(--rojo);
+}
+
+.evolucion-filas {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.evolucion-fila {
+  display: grid;
+  grid-template-columns: minmax(70px, 28%) 1fr 78px;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  animation: aparecer-creciendo var(--medio) var(--curva-suave) both;
+}
+
+.evolucion-fila + .evolucion-fila {
+  border-top: 1px solid var(--linea);
+}
+
+.evolucion-quien {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.evolucion-nombre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.evolucion-fila.es-mio .evolucion-nombre {
+  font-weight: 600;
+}
+
+.evolucion-linea {
+  display: block;
+  width: 100%;
+  height: 44px;
+  overflow: visible;
+  cursor: crosshair;
+  touch-action: pan-y;
+}
+
+.evolucion-cero {
+  stroke: var(--linea);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.evolucion-trazo {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.evolucion-area {
+  stroke: none;
+  opacity: 0.12;
+}
+
+.le-deben > .evolucion-trazo {
+  stroke: var(--verde);
+}
+
+.le-deben > .evolucion-area {
+  fill: var(--verde);
+}
+
+.debe > .evolucion-trazo {
+  stroke: var(--rojo);
+}
+
+.debe > .evolucion-area {
+  fill: var(--rojo);
+}
+
+.evolucion-cruz {
+  stroke: var(--tinta-tenue);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.evolucion-cifra {
+  text-align: right;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tinta-tenue);
+  font-variant-numeric: tabular-nums;
+}
+
+.evolucion-cifra.le-deben {
+  color: var(--verde);
+}
+
+.evolucion-cifra.debe {
+  color: var(--rojo);
+}
+
+.evolucion-ver-tabla {
+  margin-top: 6px;
+}
+
+.evolucion-tabla {
+  margin-top: 8px;
+  overflow-x: auto;
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
+}
+
+.evolucion-tabla table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.evolucion-tabla th,
+.evolucion-tabla td {
+  padding: 5px 8px;
+  text-align: right;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--linea);
+}
+
+.evolucion-tabla th:first-child {
+  text-align: left;
+}
+
+.evolucion-tabla thead th {
+  color: var(--tinta-tenue);
+  font-weight: 600;
+}
