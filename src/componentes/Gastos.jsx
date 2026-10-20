@@ -52,6 +52,8 @@ function Gastos({
   verDe = null,
   verDia = null,
   verGasto = null,
+  llegada = null,
+  onLlegadaUsada,
 }) {
   // Lo que dejaste a medias la última vez, si lo hay.
   const [borrador] = useState(() => borradorQueVale(datos.leerBorrador(codigo), Date.now(), viajeros));
@@ -150,6 +152,12 @@ function Gastos({
 
   // La foto nueva que has elegido, la que ya tenía el gasto que editas, y si la quitas.
   const [foto, setFoto] = useState(null);
+  // La foto que llega compartida desde la galería, al formulario.
+  const [llegadaAntes, setLlegadaAntes] = useState(null);
+  if (llegada !== llegadaAntes) {
+    setLlegadaAntes(llegada);
+    if (llegada?.foto && !cerrado) setFoto(llegada.foto);
+  }
   const [ticketActual, setTicketActual] = useState(null);
   const [quitarFoto, setQuitarFoto] = useState(false);
   // El gasto cuyo ticket estás mirando.
@@ -308,6 +316,19 @@ function Gastos({
     window.addEventListener("keydown", alPulsar);
     return () => window.removeEventListener("keydown", alPulsar);
   }, [cerrado, pagadorId]);
+
+  // Venga del atajo del icono o con un ticket, lo siguiente es escribir el importe.
+  useEffect(() => {
+    if (!llegada) return;
+    if (!cerrado) {
+      const campo = pagadorId ? campoImporte.current : campoPagador.current;
+      campo?.focus({ preventScroll: true });
+      formulario.current?.scrollIntoView({ block: "start" });
+    }
+    onLlegadaUsada?.();
+    // Solo cuando llega algo nuevo, no cada vez que cambias el pagador.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [llegada]);
 
   function filtrar(cambio) {
     setFiltros({ ...filtros, ...cambio });

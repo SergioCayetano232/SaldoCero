@@ -1832,6 +1832,19 @@ button:active {
   animation: aparecer-creciendo var(--medio) var(--curva-suave);
 }
 
+/* Una foto compartida desde la galería, a la espera de que entres en un viaje. */
+.aviso-ticket {
+  background-color: var(--teal-50);
+  border: 1px solid var(--teal-300);
+  color: var(--teal-700);
+  padding: 11px 16px;
+  border-radius: var(--radio-sm);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
+}
+
 .error {
   background-color: var(--rojo-fondo);
   border: 1px solid rgba(200, 68, 63, 0.25);

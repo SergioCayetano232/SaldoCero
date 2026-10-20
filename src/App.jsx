@@ -17,6 +17,7 @@ import { tituloDePestana } from "./titulo";
 import { temaGuardado, siguienteTema, temaDe, temaQueToca } from "./tema";
 import { hayQueSubir } from "./arriba";
 import { esAtajoDeshacer } from "./teclado";
+import { queTrae, sinLoQueTrae, recogerTicket } from "./llegada";
 import { MINIMO_PARA_FILTRAR } from "./filtros";
 import { nombreDeLaRepeticion, genteParaRepetir, quienEresEnElNuevo } from "./repetirViaje";
 import Entrada from "./componentes/Entrada";
@@ -58,6 +59,24 @@ function App() {
   const [verGasto, setVerGasto] = useState(null);
   // Las historias del viaje, que salen solas al cerrarlo.
   const [verHistorias, setVerHistorias] = useState(false);
+  // Si se abre desde el atajo del icono o con un ticket compartido.
+  const [llegada, setLlegada] = useState(() => {
+    const que = queTrae(window.location.search);
+    return que === "apuntar" ? { que } : null;
+  });
+
+  useEffect(() => {
+    if (queTrae(window.location.search) !== "ticket") return;
+    window.history.replaceState(null, "", sinLoQueTrae(window.location.href));
+    // Hasta que no entras en un viaje, la foto espera aquí.
+    recogerTicket()
+      .then((foto) => foto && setLlegada({ que: "ticket", foto }))
+      .catch(() => setError("No hemos podido coger la foto que has compartido."));
+  }, []);
+
+  useEffect(() => {
+    if (llegada?.que === "apuntar") window.history.replaceState(null, "", sinLoQueTrae(window.location.href));
+  }, [llegada]);
 
   useEffect(() => {
     const codigo = codigoDeArranque();
@@ -367,6 +386,11 @@ function App() {
     return (
       <div className="app">
         <Cabecera />
+        {llegada?.foto && (
+          <p className="aviso-ticket" role="status">
+            📷 Tienes la foto de un ticket esperando. Entra en el viaje y la ponemos en el gasto.
+          </p>
+        )}
         <Entrada
           onCrear={crearViaje}
           onEntrar={entrarEnViaje}
@@ -459,6 +483,8 @@ function App() {
         verDe={verDe}
         verDia={verDia}
         verGasto={verGasto}
+        llegada={llegada}
+        onLlegadaUsada={() => setLlegada(null)}
         onAnadir={(gasto) =>
           hacer(async () => {
             // La foto se reduce antes de guardar nada: si no se puede leer, mejor

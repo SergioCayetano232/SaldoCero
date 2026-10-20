@@ -28,8 +28,19 @@ self.addEventListener("activate", (evento) => {
   );
 });
 
+// La foto de un ticket compartida desde la galería. El móvil la manda por POST
+// y aquí no hay servidor que la reciba: la dejamos en una caché aparte y la app
+// la recoge al abrirse. Los nombres van igual en src/llegada.js.
+const CACHE_COMPARTIDO = "saldocero-compartido";
+const RUTA_TICKET = "/ticket-compartido";
+
 self.addEventListener("fetch", (evento) => {
   const peticion = evento.request;
+
+  if (peticion.method === "POST" && new URL(peticion.url).pathname === "/compartir-ticket") {
+    evento.respondWith(recibirTicket(peticion));
+    return;
+  }
 
   // Solo nos metemos en lo nuestro y en lecturas.
   if (peticion.method !== "GET") return;
@@ -63,6 +74,19 @@ self.addEventListener("fetch", (evento) => {
     })
   );
 });
+
+async function recibirTicket(peticion) {
+  try {
+    const foto = (await peticion.formData()).get("ticket");
+    if (foto && foto.type.startsWith("image/")) {
+      const cache = await caches.open(CACHE_COMPARTIDO);
+      await cache.put(RUTA_TICKET, new Response(foto, { headers: { "Content-Type": foto.type } }));
+    }
+  } catch {
+    // Si no se puede leer, la app se abre igual, solo que sin la foto.
+  }
+  return Response.redirect("/?ticket", 303);
+}
 
 function guardar(peticion, respuesta) {
   if (!respuesta || respuesta.status !== 200) return;
