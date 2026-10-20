@@ -4465,3 +4465,68 @@ kbd {
     opacity: 1;
   }
 }
+
+/* ===== Dictar el gasto ===== */
+.dictado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-bottom: 12px;
+}
+
+.boton-dictar {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: var(--radio-pastilla);
+  border: 1px dashed var(--teal-300);
+  background-color: var(--teal-50);
+  color: var(--teal-700);
+  font-size: 13px;
+  font-weight: 600;
+  transition: background-color var(--rapido), border-color var(--rapido), transform var(--rapido) var(--curva-muelle);
+}
+
+.boton-dictar:hover {
+  border-style: solid;
+  transform: translateY(-1px);
+}
+
+/* Escuchando, en rojo y latiendo, que se vea que el micro está abierto. */
+.boton-dictar.escuchando {
+  border-style: solid;
+  border-color: var(--rojo);
+  background-color: var(--rojo-fondo);
+  color: var(--rojo);
+}
+
+.boton-dictar.escuchando .dictar-icono {
+  animation: dictado-latido 1s var(--curva-suave) infinite;
+}
+
+.dictado-ayuda,
+.dictado-oido {
+  font-size: 12px;
+  color: var(--tinta-tenue);
+}
+
+.dictado-oido {
+  font-style: italic;
+  color: var(--tinta-suave);
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
+}
+
+.dictado-fallo {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--rojo);
+  animation: temblor 0.4s var(--curva-suave);
+}
+
+@keyframes dictado-latido {
+  50% {
+    transform: scale(1.25);
+  }
+}

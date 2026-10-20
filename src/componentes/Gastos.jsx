@@ -32,6 +32,8 @@ import { esAtajoBuscar, esAtajoNuevo, esOrdenador } from "../teclado";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 import Resaltado from "./Resaltado";
+import Dictado from "./Dictado";
+import { entenderDictado } from "../dictado";
 
 function Gastos({
   codigo,
@@ -329,6 +331,15 @@ function Gastos({
     // Solo cuando llega algo nuevo, no cada vez que cambias el pagador.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [llegada]);
+
+  // Lo que se entiende se pone; lo que no, se queda como estaba.
+  function alDictar(texto) {
+    const dicho = entenderDictado(texto, viajeros, soy);
+    if (dicho.importe) escribirImporte(dicho.importe);
+    if (dicho.concepto) escribirConcepto(dicho.concepto.slice(0, LARGO_CONCEPTO));
+    if (dicho.pagadorId) setPagadorId(dicho.pagadorId);
+    if (dicho.participantes) setParticipantes(dicho.participantes);
+  }
 
   function filtrar(cambio) {
     setFiltros({ ...filtros, ...cambio });
@@ -641,6 +652,8 @@ function Gastos({
                   </button>
                 </p>
               )}
+
+              {!editando && <Dictado onDictado={alDictar} />}
 
               <select
                 ref={campoPagador}

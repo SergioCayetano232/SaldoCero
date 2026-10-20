@@ -1,0 +1,82 @@
+import { useEffect, useRef, useState } from "react";
+import { reconocedorDeVoz } from "../dictado";
+
+// Los fallos del reconocedor, dichos para alguien que no sabe qué es un "not-allowed".
+const FALLOS = {
+  "not-allowed": "No hay permiso para el micro. Dáselo en los ajustes del navegador.",
+  "service-not-allowed": "No hay permiso para el micro. Dáselo en los ajustes del navegador.",
+  "no-speech": "No te he oído. Prueba otra vez.",
+  "audio-capture": "No encuentro el micro.",
+  network: "Para dictar hace falta conexión.",
+};
+
+function Dictado({ onDictado }) {
+  const [Reconocedor] = useState(() => reconocedorDeVoz(window));
+  const [estado, setEstado] = useState("quieto");
+  const [oido, setOido] = useState("");
+  const [fallo, setFallo] = useState("");
+  const reconocedor = useRef(null);
+
+  // Si te vas a otra pantalla escuchando, que no se quede el micro abierto.
+  useEffect(() => () => reconocedor.current?.abort(), []);
+
+  if (!Reconocedor) return null;
+
+  function empezar() {
+    if (estado === "escuchando") {
+      reconocedor.current?.stop();
+      return;
+    }
+
+    const r = new Reconocedor();
+    r.lang = "es-ES";
+    r.interimResults = true;
+    r.maxAlternatives = 1;
+    reconocedor.current = r;
+    setOido("");
+    setFallo("");
+    setEstado("escuchando");
+
+    r.onresult = (e) => {
+      const texto = Array.from(e.results, (resultado) => resultado[0].transcript).join(" ");
+      setOido(texto);
+      if (e.results[e.results.length - 1].isFinal) onDictado(texto);
+    };
+    r.onerror = (e) => {
+      // Al pararlo tú también salta un "aborted": eso no es un fallo.
+      if (e.error !== "aborted") setFallo(FALLOS[e.error] ?? "No he podido escucharte.");
+    };
+    r.onend = () => setEstado("quieto");
+    r.start();
+  }
+
+  const escuchando = estado === "escuchando";
+
+  return (
+    <div className="dictado">
+      <button
+        className={`boton-dictar ${escuchando ? "escuchando" : ""}`}
+        onClick={empezar}
+        aria-pressed={escuchando}
+      >
+        <span className="dictar-icono" aria-hidden="true">
+          🎙️
+        </span>
+        {escuchando ? "Te escucho… (toca para parar)" : "Dictar el gasto"}
+      </button>
+      {fallo ? (
+        <p className="dictado-fallo" role="alert">
+          {fallo}
+        </p>
+      ) : oido ? (
+        <p className="dictado-oido" aria-live="polite">
+          “{oido}”
+        </p>
+      ) : (
+        !escuchando && <p className="dictado-ayuda">Por ejemplo: “cena 45 euros, pagó Ana”</p>
+      )}
+    </div>
+  );
+}
+
+export default Dictado;
