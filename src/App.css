@@ -4355,3 +4355,100 @@ kbd {
     width: 100%;
   }
 }
+
+/* ===== Diagrama de deudas ===== */
+.diagrama-deudas {
+  max-width: 420px;
+  margin: 4px auto 16px;
+  padding: 10px 6px 2px;
+  border-radius: var(--radio);
+  background-color: var(--papel-hundido);
+  border: 1px solid var(--linea);
+}
+
+.diagrama-deudas svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* La flecha se dibuja sola, de quien debe a quien cobra. */
+.diagrama-flecha > path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0.85;
+  animation: diagrama-dibujar 0.7s var(--curva-suave) var(--retraso) forwards;
+}
+
+.diagrama-punta {
+  opacity: 0;
+  animation: diagrama-aparecer var(--rapido) ease-out calc(var(--retraso) + 0.6s) forwards;
+}
+
+.diagrama-cifra {
+  animation: diagrama-aparecer var(--medio) var(--curva-suave) 0.5s both;
+}
+
+.diagrama-cifra rect {
+  fill: var(--papel);
+  stroke: var(--linea);
+}
+
+.diagrama-cifra text {
+  font-family: var(--fuente);
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--tinta);
+  font-variant-numeric: tabular-nums;
+}
+
+.diagrama-persona {
+  animation: diagrama-aparecer var(--medio) var(--curva-muelle) both;
+}
+
+.diagrama-inicial {
+  font-family: var(--fuente-titulo);
+  font-size: 15px;
+  font-weight: 600;
+  fill: white;
+}
+
+.diagrama-nombre {
+  font-family: var(--fuente);
+  font-size: 11px;
+  font-weight: 500;
+  fill: var(--tinta-suave);
+}
+
+.diagrama-yo {
+  fill: none;
+  stroke: var(--naranja-400);
+  stroke-width: 2.5;
+}
+
+@keyframes diagrama-dibujar {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes diagrama-aparecer {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Sin movimiento, todo pintado desde el principio. */
+@media (prefers-reduced-motion: reduce) {
+  .diagrama-flecha > path {
+    stroke-dashoffset: 0;
+  }
+
+  .diagrama-punta {
+    opacity: 1;
+  }
+}

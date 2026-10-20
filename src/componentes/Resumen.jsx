@@ -16,6 +16,8 @@ import { conMoneda } from "../monedas";
 import { resumenEnTexto, copiarAlPortapapeles, descargarResumen, descargarGastos, invitar, enlaceDelViaje, compartirImagen, nombreDeArchivo } from "../compartir";
 import { datosDeTarjeta } from "../tarjeta";
 import { tarjetaEnImagen } from "../pintarTarjeta";
+import { hayDiagrama } from "../diagrama";
+import DiagramaDeudas from "./DiagramaDeudas";
 import { gastosEnCSV } from "../exportar";
 import { mensajeDeCobro, enlaceWhatsApp } from "../cobrar";
 import { cobroDe, cobroComoTexto, cantidadParaPegar } from "../cobro";
@@ -427,6 +429,10 @@ function Resumen({
           <>
             {todoPagado && (
               <p className="saldadas">🎉 Todo pagado. Ya estáis a cero.</p>
+            )}
+
+            {hayDiagrama(pagos) && (
+              <DiagramaDeudas pagos={pagos} colores={colores} moneda={monedaViaje} soy={soy} />
             )}
 
             {pagos.map((pago) => {
