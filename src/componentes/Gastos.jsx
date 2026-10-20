@@ -33,6 +33,7 @@ import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 import Resaltado from "./Resaltado";
 import Dictado from "./Dictado";
+import LeerTotal from "./LeerTotal";
 import { entenderDictado } from "../dictado";
 
 function Gastos({
@@ -912,6 +913,16 @@ function Gastos({
                   </button>
                 )}
               </div>
+
+              {foto && (
+                <LeerTotal
+                  // Otra foto, otra lectura: que no se quede el resultado de la de antes.
+                  key={`${foto.name}-${foto.size}-${foto.lastModified}`}
+                  foto={foto}
+                  moneda={moneda}
+                  onTotal={escribirImporte}
+                />
+              )}
 
               {notaAbierta && (
                 <>

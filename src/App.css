@@ -4719,3 +4719,47 @@ kbd {
   color: var(--tinta-tenue);
   font-weight: 600;
 }
+
+/* ===== Leer el total del ticket ===== */
+.leer-total {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-top: 8px;
+  font-size: 13px;
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
+}
+
+.leer-total.leyendo {
+  flex-direction: column;
+  align-items: stretch;
+  color: var(--tinta-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.leer-total-barra {
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--radio-pastilla);
+  background-color: var(--teal-50);
+}
+
+.leer-total-barra > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal-500), var(--naranja-400));
+  transform-origin: left;
+  transition: transform var(--medio) var(--curva-suave);
+}
+
+.leer-total-bien {
+  font-weight: 600;
+  color: var(--verde);
+  font-variant-numeric: tabular-nums;
+}
+
+.leer-total-mal {
+  color: var(--rojo);
+  animation: temblor 0.4s var(--curva-suave);
+}
