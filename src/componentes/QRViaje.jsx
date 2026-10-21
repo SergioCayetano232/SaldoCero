@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import { qrDelEnlace } from "../qr";
+import { mantenerEncendida } from "../pantalla";
 
 // El margen blanco alrededor. Sin él, muchas cámaras no lo encuentran.
 const MARGEN = 4;
@@ -19,6 +20,31 @@ function QRViaje({ enlace, codigo, nombre, onCerrar }) {
     document.addEventListener("keydown", alPulsar);
     return () => document.removeEventListener("keydown", alPulsar);
   }, [onCerrar]);
+
+  useEffect(() => {
+    let soltar = () => {};
+    let cerrado = false;
+
+    async function encender() {
+      const suelta = await mantenerEncendida();
+      if (cerrado) return suelta();
+      soltar();
+      soltar = suelta;
+    }
+
+    // Al salir de la app el navegador la suelta él solo: al volver, otra vez.
+    function alVolver() {
+      if (document.visibilityState === "visible") encender();
+    }
+
+    encender();
+    document.addEventListener("visibilitychange", alVolver);
+    return () => {
+      cerrado = true;
+      soltar();
+      document.removeEventListener("visibilitychange", alVolver);
+    };
+  }, []);
 
   const lado = qr.tamano + MARGEN * 2;
 
