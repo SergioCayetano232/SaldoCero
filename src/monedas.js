@@ -114,3 +114,17 @@ export function tasaComoTexto(tasa) {
 export function monedaDelSiguiente(antes, guardada, editando) {
   return editando ? antes : { moneda: guardada.moneda, tasaAMano: guardada.tasaAMano };
 }
+
+// Para el selector del gasto: la del viaje, luego las que ya se han usado, y
+// detrás todas las demás. En Marruecos no tienes que bajar hasta el dírham.
+export function monedasEnOrden(gastos, monedaViaje) {
+  const veces = new Map();
+  for (const gasto of gastos) {
+    const codigo = gasto.moneda ?? monedaViaje;
+    veces.set(codigo, (veces.get(codigo) ?? 0) + 1);
+  }
+
+  const peso = (m) => (m.codigo === monedaViaje ? Infinity : veces.get(m.codigo) ?? 0);
+  // sort es estable: con las mismas veces se quedan en el orden de la lista.
+  return [...MONEDAS].sort((a, b) => peso(b) - peso(a));
+}

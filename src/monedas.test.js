@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { cambio, esAMano, leerTasa, leerImporte, tasaDeGasto, tasaComoTexto, conMoneda, monedaDelSiguiente } from "./monedas";
+import { MONEDAS, cambio, esAMano, leerTasa, leerImporte, tasaDeGasto, tasaComoTexto, conMoneda, monedaDelSiguiente, monedasEnOrden } from "./monedas";
 
 describe("leerTasa", () => {
   it("vale con coma o con punto", () => {
@@ -106,5 +106,35 @@ describe("monedaDelSiguiente", () => {
       moneda: "MAD",
       tasaAMano: "0,092",
     });
+  });
+});
+
+describe("monedasEnOrden", () => {
+  const codigos = (lista) => lista.map((m) => m.codigo);
+  const pagado = (moneda) => ({ moneda });
+
+  it("sin gastos, la del viaje primero y luego como siempre", () => {
+    const orden = codigos(monedasEnOrden([], "GBP"));
+    expect(orden.slice(0, 3)).toEqual(["GBP", "EUR", "USD"]);
+    expect(orden).toHaveLength(MONEDAS.length);
+  });
+
+  it("las usadas suben, la más usada antes", () => {
+    const gastos = [pagado("EUR"), pagado("MAD"), pagado("USD"), pagado("MAD")];
+    expect(codigos(monedasEnOrden(gastos, "EUR")).slice(0, 4)).toEqual(["EUR", "MAD", "USD", "GBP"]);
+  });
+
+  it("la del viaje va primera aunque se haya usado menos", () => {
+    const gastos = [pagado("MAD"), pagado("MAD"), pagado("EUR")];
+    expect(codigos(monedasEnOrden(gastos, "EUR"))[0]).toBe("EUR");
+  });
+
+  it("los gastos de antes sin moneda cuentan como de la del viaje", () => {
+    expect(codigos(monedasEnOrden([{}, pagado("USD")], "EUR")).slice(0, 2)).toEqual(["EUR", "USD"]);
+  });
+
+  it("no pierde ni repite ninguna", () => {
+    const orden = codigos(monedasEnOrden([pagado("VND"), pagado("JPY")], "EUR"));
+    expect(new Set(orden).size).toBe(MONEDAS.length);
   });
 });

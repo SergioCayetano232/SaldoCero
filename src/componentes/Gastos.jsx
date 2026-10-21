@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { calcularTotal, gastoMasCaro, importeDeGasto, participantesDeGasto } from "../calculos";
-import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, tasaComoTexto } from "../monedas";
+import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, monedasEnOrden, tasaComoTexto } from "../monedas";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
 import { filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
 import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
@@ -750,7 +750,7 @@ function Gastos({
                   }}
                   title="¿En qué moneda se pagó?"
                 >
-                  {MONEDAS.map((m) => (
+                  {monedasEnOrden(gastos, monedaViaje).map((m) => (
                     <option key={m.codigo} value={m.codigo}>
                       {m.codigo}
                     </option>
