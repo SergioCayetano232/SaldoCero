@@ -13,20 +13,24 @@ Pruébala aquí: https://saldo-cero-eight.vercel.app/
 ## Qué hace
 
 - Creas un viaje y te da un código; con ese código entran los demás.
-- O los invitas con un enlace o un QR, y entran directos.
+- O los invitas con un enlace o un QR, y entran directos. Si te llega el
+  código por WhatsApp, le das a "Pegar" y dentro.
 - Todos apuntáis gastos a la vez, cada uno desde su móvil, y te avisa de lo
   que apuntan los demás.
 - Cada gasto lleva quién pagó, cuánto, en qué día y en concepto de qué.
+- O lo dictas: "cena 45 euros, pagó Ana", y se rellena solo.
 - Marcas cuál de los viajeros eres tú y te resalta tus cuentas.
 - ¿Nombre mal escrito? Lo tocas y lo cambias.
 - Cada gasto va en una categoría, y el resumen te dice en qué se va el dinero,
   del grupo o de cada uno.
 - Si un gasto no es de todos, marcas solo a los que van.
 - Y si uno come el doble que los demás, lo repartes en partes desiguales, o
-  pones lo que paga cada uno.
+  pones lo que paga cada uno. O la cuenta del restaurante plato a plato.
 - Si te equivocas, editas el gasto y ya está. En el móvil, deslizándolo.
-- Le haces una foto al ticket y se queda guardada con el gasto. Y si hace
-  falta, una nota: "incluye la propina".
+- Le haces una foto al ticket y se queda guardada con el gasto. Te lee el
+  total para no tener que escribirlo, y si hace falta le pones una nota:
+  "incluye la propina".
+- También le puedes compartir la foto desde la galería, y te abre el gasto.
 - En el importe puedes sumar, restar, multiplicar y dividir, "12,5+8", "60-10",
   "3×4,5" o "120÷4", sin sacar la calculadora.
 - Si alguien ya apuntó lo mismo ese día, te pregunta antes de duplicarlo.
@@ -42,25 +46,29 @@ Pruébala aquí: https://saldo-cero-eight.vercel.app/
 - Puedes pagar en otra moneda y te lo convertimos a la del viaje.
 - Si hacéis bote, apuntas lo que pone cada uno y pagáis desde ahí.
 - Te dice a quién le toca pagar la próxima: al que menos ha puesto.
-- Y al final, la lista de quién paga a quién para quedar todos a cero.
+- Y al final, la lista de quién paga a quién para quedar todos a cero, con un
+  diagrama para verlo de un vistazo.
 - Vas marcando las deudas que ya se han pagado, aunque sea solo una parte.
 - Y al que se hace el loco le mandas un WhatsApp con la cifra ya puesta, y tu
   Bizum o tu IBAN para que no tenga excusa.
 - Le pones un presupuesto al viaje y ves cuánto os queda y para cuántos días
   os llega. Y te avisa si un gasto os hace pasaros.
 - Una gráfica te enseña lo que se gastó cada día, y el resumen lo que lleváis hoy.
+  Otra, cómo ha ido el saldo de cada uno día a día.
 - Al volver, cierras el viaje y ya nadie toca los gastos. Y te sale el viaje
   en cifras: el día más caro, el más movido, quién puso más y quién menos, lo
-  más caro por cabeza, lo que más se repitió ("Café, 7 veces")...
-- El resumen lo compartes por donde quieras o te lo descargas en un txt. Los
-  gastos, en un Excel con los totales al final.
+  más caro por cabeza, lo que más se repitió ("Café, 7 veces")... Y te lo
+  cuenta en historias, como las de Instagram.
+- El resumen lo compartes por donde quieras, en texto o en una imagen, o te lo
+  descargas en un txt. Los gastos, en un Excel con los totales al final.
 - Guarda los viajes en los que has estado, para volver sin buscar el código.
 
 
 ## Se instala en el móvil
 
 Es una PWA, así que puedes añadirla a la pantalla de inicio y se abre como una
-app más, sin barra del navegador.
+app más, sin barra del navegador. Si mantienes pulsado el icono tienes dos
+atajos: apuntar un gasto y ver quién paga a quién.
 
 Sin internet abre igual, pero solo la app: los gastos no los guardamos en el
 móvil a propósito. Un viaje lo van tocando varios a la vez, y enseñarte unas
@@ -83,10 +91,12 @@ el cambio. También puedes cambiar el del día si el banco te cobró otro.
 
 ## Con qué está hecho
 
-React, Vite, y JavaScript y CSS, sin librerías de estilos. La única librería
-aparte es `qrcode`, para el QR. Los viajes se
-guardan en Supabase, y un service worker de treinta líneas es todo lo que hace
-falta para lo de instalarla.
+React, Vite, y JavaScript y CSS, sin librerías de estilos. Aparte solo hay dos
+librerías: `qrcode`, para el QR, y `tesseract.js`, para leer el total del
+ticket. Esa pesa unos megas, así que solo se baja la primera vez que le das a
+leer uno, y la foto se lee en el propio móvil. Los viajes se guardan en
+Supabase, y un service worker de treinta líneas es todo lo que hace falta para
+lo de instalarla.
 
 No hay usuarios ni contraseñas. La llave es el código del viaje: el navegador lo
 manda en cada petición y la base de datos solo te deja tocar el viaje al que
