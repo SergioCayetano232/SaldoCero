@@ -27,6 +27,9 @@
     <meta property="og:image:height" content="512" />
     <meta name="twitter:card" content="summary" />
 
+    <!-- Que vaya abriendo la conexión con Supabase mientras carga lo demás. El
+         crossorigin hace falta: sin él abre una conexión que luego no usa. -->
+    <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
