@@ -3092,12 +3092,18 @@ button.pago-cantidad:hover {
   margin: 0 auto;
   border-radius: var(--radio-sm);
   object-fit: contain;
+  animation: aparecer var(--rapido) var(--curva-suave);
 }
 
 .visor-cargando {
   padding: 40px 0;
   text-align: center;
   color: var(--tinta-tenue);
+}
+
+/* Se baja escondida y sale de golpe, en vez de ir pintándose a trozos. */
+.visor-caja img.sin-cargar {
+  display: none;
 }
 
 /* ===== Bote común ===== */

@@ -7,6 +7,8 @@ import { createPortal } from "react-dom";
 function VisorTicket({ ruta, concepto, cargar, onCerrar }) {
   const [url, setUrl] = useState(null);
   const [error, setError] = useState("");
+  // La dirección llega antes que la foto: hasta que no está entera, el aviso.
+  const [cargada, setCargada] = useState(false);
 
   useEffect(() => {
     let vigente = true;
@@ -41,10 +43,20 @@ function VisorTicket({ ruta, concepto, cargar, onCerrar }) {
 
         {error ? (
           <p className="error">{error}</p>
-        ) : url ? (
-          <img src={url} alt={`Ticket de ${concepto}`} />
         ) : (
-          <p className="visor-cargando">Cargando la foto…</p>
+          <>
+            {!cargada && <p className="visor-cargando">Cargando la foto…</p>}
+            {url && (
+              <img
+                src={url}
+                alt={`Ticket de ${concepto}`}
+                decoding="async"
+                className={cargada ? "" : "sin-cargar"}
+                onLoad={() => setCargada(true)}
+                onError={() => setError("No hemos podido bajar la foto. Revisa tu conexión.")}
+              />
+            )}
+          </>
         )}
       </div>
     </div>,
