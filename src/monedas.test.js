@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { MONEDAS, cambio, esAMano, leerTasa, leerImporte, tasaDeGasto, tasaComoTexto, conMoneda, monedaDelSiguiente, monedasEnOrden } from "./monedas";
+import { MONEDAS, cambio, esAMano, leerTasa, leerImporte, tasaDeGasto, tasaComoTexto, conMoneda, monedaDelSiguiente, monedasEnOrden, monedaDeCasa } from "./monedas";
 
 describe("leerTasa", () => {
   it("vale con coma o con punto", () => {
@@ -136,5 +136,35 @@ describe("monedasEnOrden", () => {
   it("no pierde ni repite ninguna", () => {
     const orden = codigos(monedasEnOrden([pagado("VND"), pagado("JPY")], "EUR"));
     expect(new Set(orden).size).toBe(MONEDAS.length);
+  });
+});
+
+describe("monedaDeCasa", () => {
+  it("la del país del navegador", () => {
+    expect(monedaDeCasa(["es-MX"])).toBe("MXN");
+    expect(monedaDeCasa(["es-AR", "es"])).toBe("ARS");
+    expect(monedaDeCasa(["en-GB"])).toBe("GBP");
+  });
+
+  it("en España y el resto del euro, euros", () => {
+    expect(monedaDeCasa(["es-ES"])).toBe("EUR");
+    expect(monedaDeCasa(["fr-FR", "en-US"])).toBe("EUR");
+  });
+
+  it("sin país, mira el siguiente idioma", () => {
+    expect(monedaDeCasa(["es", "es-CO"])).toBe("COP");
+  });
+
+  it("sin nada que valga, euros", () => {
+    expect(monedaDeCasa([])).toBe("EUR");
+    expect(monedaDeCasa(["es"])).toBe("EUR");
+    expect(monedaDeCasa(["es-419"])).toBe("EUR");
+    expect(monedaDeCasa(["no es un idioma"])).toBe("EUR");
+  });
+
+  it("todas las que da están en la lista", () => {
+    for (const pais of ["US", "MX", "VN", "MA", "PE"]) {
+      expect(MONEDAS.some((m) => m.codigo === monedaDeCasa([`es-${pais}`]))).toBe(true);
+    }
   });
 });

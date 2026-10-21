@@ -1,6 +1,6 @@
 import { useState } from "react";
 import * as datos from "../datos";
-import { MONEDAS } from "../monedas";
+import { MONEDAS, monedaDeCasa } from "../monedas";
 import { haceCuanto } from "../fechas";
 import { LARGO_MAXIMO } from "../nombres";
 import { codigoDelPortapapeles } from "../codigos";
@@ -8,7 +8,7 @@ import { codigoDelPortapapeles } from "../codigos";
 // Primera pantalla: o creas un viaje o entras en el de alguien con su código.
 function Entrada({ onCrear, onEntrar, cargando, error }) {
   const [nombre, setNombre] = useState("");
-  const [moneda, setMoneda] = useState("EUR");
+  const [moneda, setMoneda] = useState(monedaDeCasa);
   const [codigo, setCodigo] = useState("");
   // Los viajes por los que ya has pasado, guardados en este navegador.
   const [pasados, setPasados] = useState(() => datos.historial());

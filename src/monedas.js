@@ -128,3 +128,25 @@ export function monedasEnOrden(gastos, monedaViaje) {
   // sort es estable: con las mismas veces se quedan en el orden de la lista.
   return [...MONEDAS].sort((a, b) => peso(b) - peso(a));
 }
+
+// La moneda del viaje nuevo, sacada del país del navegador: "es-MX" es México.
+// Casi todos los findes son en casa. Si no se sabe, euros, como siempre.
+const DE_CADA_PAIS = {
+  US: "USD", GB: "GBP", CH: "CHF", JP: "JPY", SE: "SEK", NO: "NOK", DK: "DKK",
+  PL: "PLN", CZ: "CZK", HU: "HUF", TR: "TRY", MX: "MXN", BR: "BRL", TH: "THB",
+  MA: "MAD", EG: "EGP", CO: "COP", AR: "ARS", CL: "CLP", PE: "PEN", VN: "VND",
+};
+
+export function monedaDeCasa(idiomas = typeof navigator === "undefined" ? [] : navigator.languages ?? []) {
+  for (const idioma of idiomas) {
+    let pais;
+    try {
+      pais = new Intl.Locale(idioma).region;
+    } catch {
+      // Una etiqueta rara no tiene por qué romper la pantalla de entrada.
+    }
+    // Manda el primero que diga país. Si no está en la tabla, es del euro.
+    if (pais) return DE_CADA_PAIS[pais] ?? "EUR";
+  }
+  return "EUR";
+}
