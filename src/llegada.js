@@ -1,12 +1,13 @@
 // A qué viene la app cuando no la abres tú a mano: con la foto de un ticket
-// compartida desde la galería, o desde el atajo de "Apuntar un gasto" del icono.
+// compartida desde la galería, o desde los atajos del icono: "Apuntar un gasto"
+// y "Quién paga a quién".
 
 // Donde deja el service worker la foto compartida. Va repetido en sw.js, que
 // no puede importar nada.
 export const CACHE_COMPARTIDO = "saldocero-compartido";
 export const RUTA_TICKET = "/ticket-compartido";
 
-const QUE_TRAE = ["ticket", "apuntar"];
+const QUE_TRAE = ["ticket", "apuntar", "cuentas"];
 
 export function queTrae(busqueda) {
   const parametros = new URLSearchParams(busqueda);

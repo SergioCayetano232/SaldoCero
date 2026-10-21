@@ -2756,6 +2756,8 @@ button:active {
   margin-top: 22px;
   padding-top: 20px;
   border-top: 1px solid var(--linea);
+  /* Al llegar desde el atajo, que el título no quede pegado al borde. */
+  scroll-margin-top: 16px;
 }
 
 .saldar h3 {

@@ -8,6 +8,10 @@ describe("queTrae", () => {
     expect(queTrae("?apuntar=1&otra=2")).toBe("apuntar");
   });
 
+  it("y el de ver quién paga a quién", () => {
+    expect(queTrae("?cuentas")).toBe("cuentas");
+  });
+
   it("si no trae nada, null", () => {
     expect(queTrae("")).toBeNull();
     expect(queTrae("?otra=1")).toBeNull();
@@ -18,6 +22,7 @@ describe("sinLoQueTrae", () => {
   it("lo quita y deja el viaje", () => {
     expect(sinLoQueTrae("https://saldo.app/?ticket#ABC123")).toBe("/#ABC123");
     expect(sinLoQueTrae("https://saldo.app/?apuntar&x=1")).toBe("/?x=1");
+    expect(sinLoQueTrae("https://saldo.app/?cuentas#ABC123")).toBe("/#ABC123");
   });
 });
 

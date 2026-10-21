@@ -61,6 +61,18 @@
           "type": "image/png"
         }
       ]
+    },
+    {
+      "name": "Quién paga a quién",
+      "short_name": "Cuentas",
+      "url": "/?cuentas",
+      "icons": [
+        {
+          "src": "/icono-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }

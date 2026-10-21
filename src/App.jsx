@@ -78,6 +78,20 @@ function App() {
     if (llegada?.que === "apuntar") window.history.replaceState(null, "", sinLoQueTrae(window.location.href));
   }, [llegada]);
 
+  // El otro atajo del icono. No va con la llegada: esa te lleva al formulario.
+  const aLasCuentas = useRef(queTrae(window.location.search) === "cuentas");
+
+  useEffect(() => {
+    if (!aLasCuentas.current) return;
+    window.history.replaceState(null, "", sinLoQueTrae(window.location.href));
+  }, []);
+
+  useEffect(() => {
+    if (!viaje || !aLasCuentas.current) return;
+    aLasCuentas.current = false;
+    document.querySelector(".saldar")?.scrollIntoView({ block: "start" });
+  }, [viaje]);
+
   useEffect(() => {
     const codigo = codigoDeArranque();
     if (!codigo) return;
