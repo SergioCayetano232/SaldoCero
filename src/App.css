@@ -2027,6 +2027,27 @@ button:active {
   text-transform: uppercase;
 }
 
+/* Un enlace más que un botón: lo normal es que te llegue por WhatsApp. */
+.boton-pegar {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 0;
+  font-size: inherit;
+  font-weight: 500;
+  color: var(--teal-600);
+  text-decoration: underline;
+  text-decoration-color: var(--teal-300);
+  text-underline-offset: 3px;
+}
+
+.boton-pegar:hover {
+  color: var(--teal-700);
+}
+
+.boton-pegar:disabled {
+  opacity: 0.5;
+}
+
 /* ===== Resumen ===== */
 /* El total es lo primero que quieres ver al abrir la app. */
 .total-destacado {

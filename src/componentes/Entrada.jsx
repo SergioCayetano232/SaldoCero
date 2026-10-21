@@ -3,6 +3,7 @@ import * as datos from "../datos";
 import { MONEDAS } from "../monedas";
 import { haceCuanto } from "../fechas";
 import { LARGO_MAXIMO } from "../nombres";
+import { codigoDelPortapapeles } from "../codigos";
 
 // Primera pantalla: o creas un viaje o entras en el de alguien con su código.
 function Entrada({ onCrear, onEntrar, cargando, error }) {
@@ -11,6 +12,16 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
   const [codigo, setCodigo] = useState("");
   // Los viajes por los que ya has pasado, guardados en este navegador.
   const [pasados, setPasados] = useState(() => datos.historial());
+  const [nadaCopiado, setNadaCopiado] = useState(false);
+  const sePuedePegar = typeof navigator !== "undefined" && Boolean(navigator.clipboard?.readText);
+
+  async function pegar() {
+    const pegado = await codigoDelPortapapeles();
+    setNadaCopiado(!pegado);
+    if (!pegado) return;
+    setCodigo(pegado);
+    onEntrar(pegado);
+  }
 
   function olvidar(codigoViaje) {
     datos.olvidarDelHistorial(codigoViaje);
@@ -73,7 +84,10 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
             spellCheck={false}
             enterKeyHint="go"
             value={codigo}
-            onChange={(e) => setCodigo(e.target.value.toUpperCase())}
+            onChange={(e) => {
+              setCodigo(e.target.value.toUpperCase());
+              setNadaCopiado(false);
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && codigo.trim()) onEntrar(codigo);
             }}
@@ -84,7 +98,14 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
           </button>
         </div>
 
-        <p className="vacio">El que te haya pasado quien creó el viaje.</p>
+        <p className="vacio">
+          {nadaCopiado ? "No hay ningún código copiado. " : "El que te haya pasado quien creó el viaje. "}
+          {sePuedePegar && !codigo && (
+            <button className="boton-pegar" onClick={pegar} disabled={cargando}>
+              📋 Pegar el que te han mandado
+            </button>
+          )}
+        </p>
       </section>
 
       {error && <p className="error">{error}</p>}
