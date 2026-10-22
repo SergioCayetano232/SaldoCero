@@ -9,6 +9,20 @@ export function limpiarNombre(texto) {
   return limpio === "" ? null : limpio;
 }
 
+const MINUSCULAS = ["de", "del", "la", "las", "los", "y"];
+
+// "luis de la fuente" pasa a "Luis de la Fuente". Si ya lleva alguna mayúscula
+// lo dejo como está: "McGregor" o "JJ" los ha escrito así a propósito.
+export function conMayuscula(nombre) {
+  if (nombre !== nombre.toLocaleLowerCase("es")) return nombre;
+
+  return nombre.replace(/[^\s-]+/g, (palabra, donde) =>
+    donde > 0 && MINUSCULAS.includes(palabra)
+      ? palabra
+      : palabra[0].toLocaleUpperCase("es") + palabra.slice(1)
+  );
+}
+
 // El nombre nuevo si hay que guardarlo, o null si no hay nada que hacer:
 // vacío (no se deja a nadie sin nombre) o igual que el que tenía.
 export function nombreNuevo(texto, actual) {
@@ -38,8 +52,9 @@ export function separarNombres(texto, viajeros) {
   const repetidos = [];
 
   for (const trozo of String(texto ?? "").split(",")) {
-    const nombre = limpiarNombre(trozo);
-    if (!nombre) continue;
+    const limpio = limpiarNombre(trozo);
+    if (!limpio) continue;
+    const nombre = conMayuscula(limpio);
 
     const yaEsta = nombreRepetido(nombre, [...viajeros, ...nuevos.map((n) => ({ nombre: n }))]);
     if (yaEsta) repetidos.push({ nombre, yaEsta });

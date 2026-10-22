@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { limpiarNombre, nombreNuevo, nombreRepetido, separarNombres, avisoDeRepetidos, LARGO_MAXIMO } from "./nombres";
+import { limpiarNombre, conMayuscula, nombreNuevo, nombreRepetido, separarNombres, avisoDeRepetidos, LARGO_MAXIMO } from "./nombres";
 
 describe("limpiarNombre", () => {
   it("quita espacios de sobra", () => {
@@ -19,6 +19,39 @@ describe("limpiarNombre", () => {
   it("al cortar no deja un espacio al final", () => {
     const nombre = "a".repeat(LARGO_MAXIMO - 1) + " b";
     expect(limpiarNombre(nombre)).toBe("a".repeat(LARGO_MAXIMO - 1));
+  });
+});
+
+describe("conMayuscula", () => {
+  it("la inicial de cada palabra", () => {
+    expect(conMayuscula("javier lópez")).toBe("Javier López");
+  });
+
+  it("con tildes y eñes", () => {
+    expect(conMayuscula("ángel ñúñez")).toBe("Ángel Ñúñez");
+  });
+
+  it("de, del, la... se quedan en minúscula", () => {
+    expect(conMayuscula("luis de la fuente")).toBe("Luis de la Fuente");
+    expect(conMayuscula("ana del río y gil")).toBe("Ana del Río y Gil");
+  });
+
+  it("aunque el nombre empiece por una de esas", () => {
+    expect(conMayuscula("la mari")).toBe("La Mari");
+  });
+
+  it("los compuestos con guion, las dos", () => {
+    expect(conMayuscula("ana-maría")).toBe("Ana-María");
+  });
+
+  it("si ya lleva alguna mayúscula, no lo toca", () => {
+    expect(conMayuscula("McGregor")).toBe("McGregor");
+    expect(conMayuscula("JJ")).toBe("JJ");
+    expect(conMayuscula("luis B")).toBe("luis B");
+  });
+
+  it("los números, tal cual", () => {
+    expect(conMayuscula("luis 2")).toBe("Luis 2");
   });
 });
 
@@ -89,7 +122,7 @@ describe("separarNombres", () => {
   it("aparta los que ya están en el viaje", () => {
     expect(separarNombres("Luis, ana", viajeros)).toEqual({
       nuevos: ["Luis"],
-      repetidos: [{ nombre: "ana", yaEsta: "Ana" }],
+      repetidos: [{ nombre: "Ana", yaEsta: "Ana" }],
     });
   });
 
@@ -98,6 +131,10 @@ describe("separarNombres", () => {
       nuevos: ["Luis", "Marta"],
       repetidos: [{ nombre: "Luís", yaEsta: "Luis" }],
     });
+  });
+
+  it("les pone la mayúscula que no les pusiste", () => {
+    expect(separarNombres("luis, marta garcía", viajeros).nuevos).toEqual(["Luis", "Marta García"]);
   });
 
   it("vacío, nada", () => {
