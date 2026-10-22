@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { estaCerrado, textoCerrado, avisoAlCerrar } from "./cerrar";
+import { estaCerrado, textoCerrado, avisoAlCerrar, ultimoApunte, sugerirCerrar } from "./cerrar";
 import { enCorto } from "./fechas";
 
 describe("estaCerrado", () => {
@@ -45,5 +45,57 @@ describe("avisoAlCerrar", () => {
 
   it("uno solo, en singular y en la moneda del viaje", () => {
     expect(avisoAlCerrar("Londres", [pago(20)], "GBP")).toContain("aún queda 1 pago sin hacer (£20.00)");
+  });
+});
+
+describe("ultimoApunte", () => {
+  it("el que se apuntó más tarde, aunque sea de un día anterior", () => {
+    const gastos = [
+      { fecha: "2026-10-10", creadoEn: "2026-10-10T20:00:00Z" },
+      { fecha: "2026-10-09", creadoEn: "2026-10-13T09:00:00Z" },
+    ];
+    expect(ultimoApunte(gastos)).toBe("2026-10-13T09:00:00Z");
+  });
+
+  it("los de antes sin creadoEn, por su fecha", () => {
+    expect(ultimoApunte([{ fecha: "2026-10-10" }])).toBe("2026-10-10");
+  });
+
+  it("sin gastos, nada", () => {
+    expect(ultimoApunte([])).toBeNull();
+  });
+});
+
+describe("sugerirCerrar", () => {
+  const ahora = new Date("2026-10-20T12:00:00Z").getTime();
+  const gastos = [{ creadoEn: "2026-10-16T10:00:00Z" }];
+
+  it("los días que lleva sin apuntarse nada", () => {
+    expect(sugerirCerrar({ gastos, cerrado: false, ahora })).toBe(4);
+  });
+
+  it("con menos de tres días, aún no", () => {
+    expect(sugerirCerrar({ gastos: [{ creadoEn: "2026-10-18T10:00:00Z" }], cerrado: false, ahora })).toBeNull();
+  });
+
+  it("justo tres días, sí", () => {
+    expect(sugerirCerrar({ gastos: [{ creadoEn: "2026-10-17T12:00:00Z" }], cerrado: false, ahora })).toBe(3);
+  });
+
+  it("cerrado ya, nada", () => {
+    expect(sugerirCerrar({ gastos, cerrado: true, ahora })).toBeNull();
+  });
+
+  it("sin gastos, nada", () => {
+    expect(sugerirCerrar({ gastos: [], cerrado: false, ahora })).toBeNull();
+  });
+
+  it("si dijiste que aún no, no insiste", () => {
+    expect(sugerirCerrar({ gastos, cerrado: false, descartado: "2026-10-16T10:00:00Z", ahora })).toBeNull();
+  });
+
+  it("pero si luego se apunta algo y vuelve a pararse, sí", () => {
+    const mas = [...gastos, { creadoEn: "2026-10-16T22:00:00Z" }];
+    expect(sugerirCerrar({ gastos: mas, cerrado: false, descartado: "2026-10-16T10:00:00Z", ahora })).toBe(3);
   });
 });

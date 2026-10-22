@@ -121,6 +121,33 @@ export function guardarOrden(codigo, orden) {
   }
 }
 
+// A qué último apunte de cada viaje le dijiste "aún no" al sugerirte cerrarlo.
+const CLAVE_AUN_NO = "saldocero-aun-no-cerrar";
+
+function aunNoDe() {
+  try {
+    const guardado = JSON.parse(localStorage.getItem(CLAVE_AUN_NO) ?? "{}");
+    return typeof guardado === "object" && guardado !== null ? guardado : {};
+  } catch {
+    return {};
+  }
+}
+
+export function leerAunNoCerrar(codigo) {
+  return aunNoDe()[codigo] ?? null;
+}
+
+export function guardarAunNoCerrar(codigo, ultimo) {
+  const todos = aunNoDe();
+  todos[codigo] = ultimo;
+
+  try {
+    localStorage.setItem(CLAVE_AUN_NO, JSON.stringify(todos));
+  } catch {
+    // Sin guardar, te lo volverá a sugerir. Nada grave.
+  }
+}
+
 // Claro, oscuro o automático. Lo lee también index.html, así que va en texto tal cual.
 const CLAVE_TEMA = "saldocero-tema";
 

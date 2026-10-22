@@ -8,7 +8,7 @@ import { borradoConEspera, queSeVaConViajero } from "./deshacer";
 import { novedades, textoDeNovedades } from "./novedades";
 import { turnos } from "./turnos";
 import { vibrar } from "./vibrar";
-import { avisoAlCerrar, estaCerrado } from "./cerrar";
+import { avisoAlCerrar, estaCerrado, sugerirCerrar, ultimoApunte } from "./cerrar";
 import { pagosDelViaje } from "./calculos";
 import { cuantosMios, ponerGlobito } from "./globito";
 import { reducirFoto } from "./tickets";
@@ -369,6 +369,8 @@ function App() {
 
   function reabrirViaje() {
     if (!window.confirm(`¿Reabrir "${viaje.nombre}"? Se podrán volver a tocar los gastos.`)) return;
+    // Si lo reabres es para tocar algo: que no te sugiera cerrarlo nada más abrirlo.
+    datos.guardarAunNoCerrar(viaje.codigo, ultimoApunte(viaje.gastos));
     hacer(() => datos.cerrarViaje(viaje.id, false));
   }
 
@@ -442,6 +444,7 @@ function App() {
 
       <AvisoSinConexion />
       {error && <p className="error">{error}</p>}
+      <SugerirCerrar key={`cerrar-${viaje.codigo}-${cerrado}`} codigo={viaje.codigo} gastos={gastos} cerrado={cerrado} onCerrar={cerrarViaje} />
 
       <Viajeros
         viajeros={viajeros}
@@ -651,6 +654,38 @@ function BotonInstalar() {
       <span className="instalar-icono">⬇</span>
       Instalar en el móvil
     </button>
+  );
+}
+
+function SugerirCerrar({ codigo, gastos, cerrado, onCerrar }) {
+  const [descartado, setDescartado] = useState(() => datos.leerAunNoCerrar(codigo));
+  const dias = sugerirCerrar({ gastos, cerrado, descartado });
+  if (!dias) return null;
+
+  function aunNo() {
+    const ultimo = ultimoApunte(gastos);
+    datos.guardarAunNoCerrar(codigo, ultimo);
+    setDescartado(ultimo);
+  }
+
+  return (
+    <div className="sugerir-cerrar" role="status">
+      <span className="viaje-cerrado-icono" aria-hidden="true">
+        🏁
+      </span>
+      <p>
+        <strong>¿Habéis vuelto ya?</strong> Hace {dias} días que nadie apunta nada. Cerrado, los gastos
+        ya no cambian.
+      </p>
+      <div className="sugerir-cerrar-botones">
+        <button className="enlace" onClick={onCerrar}>
+          Cerrar
+        </button>
+        <button className="enlace aun-no" onClick={aunNo}>
+          Aún no
+        </button>
+      </div>
+    </div>
   );
 }
 

@@ -3431,7 +3431,8 @@ button.pago-cantidad:hover {
   cursor: progress;
 }
 
-.viaje-cerrado {
+.viaje-cerrado,
+.sugerir-cerrar {
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -3445,18 +3446,34 @@ button.pago-cantidad:hover {
   animation: aparecer-creciendo var(--medio) var(--curva-suave);
 }
 
-.viaje-cerrado p {
+.viaje-cerrado p,
+.sugerir-cerrar p {
   flex: 1;
   min-width: 0;
 }
 
-.viaje-cerrado strong {
+.viaje-cerrado strong,
+.sugerir-cerrar strong {
   color: var(--tinta);
 }
 
 .viaje-cerrado-icono {
   font-size: 16px;
   line-height: 1.2;
+}
+
+/* Lo de sugerir cerrar: los dos botones uno encima del otro, a la derecha. */
+.sugerir-cerrar-botones {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+  line-height: 1.5;
+}
+
+.sugerir-cerrar .aun-no {
+  color: var(--tinta-suave);
 }
 
 .viaje-cerrado .enlace {
