@@ -255,6 +255,17 @@ function App() {
     };
   }, []);
 
+  // Cerrar con un gasto (o su foto) a medio subir lo pierde. El texto del aviso
+  // lo pone el navegador.
+  useEffect(() => {
+    function avisar(evento) {
+      if (enMarcha.current > 0) evento.preventDefault();
+    }
+
+    window.addEventListener("beforeunload", avisar);
+    return () => window.removeEventListener("beforeunload", avisar);
+  }, []);
+
   function deshacerBorrado() {
     // Como todavía no se había tocado nada, basta con dejar de ocultarlo.
     borrado?.espera.cancelar();
