@@ -94,7 +94,9 @@ function Bote({ viajeros, aportaciones, gastos, colores, moneda, cerrado, onPone
                 type="text"
                 inputMode="decimal"
                 placeholder="Cuánto"
+                enterKeyHint="done"
                 value={importe}
+                onFocus={(e) => e.target.select()}
                 onChange={(e) => setImporte(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && poner()}
                 aria-label="Cuánto pone"

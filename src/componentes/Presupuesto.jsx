@@ -30,7 +30,10 @@ function Presupuesto({ total, gastos = [], presupuesto, moneda, fijo = false, on
             type="text"
             inputMode="decimal"
             placeholder="1000"
+            enterKeyHint="done"
             value={texto}
+            // Para cambiarlo escribes encima, sin borrar antes.
+            onFocus={(e) => e.target.select()}
             onChange={(e) => setTexto(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && cantidad) guardar(cantidad);

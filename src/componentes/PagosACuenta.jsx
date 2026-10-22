@@ -93,7 +93,9 @@ function PagosACuenta({ viajeros, pagos, parciales, colores, moneda, onAnadir, o
               type="text"
               inputMode="decimal"
               placeholder={deuda ? `De ${conMoneda(deuda.cantidad, moneda)}` : "Cuánto"}
+              enterKeyHint="done"
               value={importe}
+              onFocus={(e) => e.target.select()}
               onChange={(e) => setImporte(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && apuntar()}
               aria-label="Cuánto ha pagado"
