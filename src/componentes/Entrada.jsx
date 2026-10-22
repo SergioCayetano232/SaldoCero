@@ -38,6 +38,8 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
             type="text"
             placeholder="Nombre del viaje (Lisboa, Fallas...)"
             maxLength={LARGO_MAXIMO}
+            autoCapitalize="sentences"
+            enterKeyHint="go"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             onKeyDown={(e) => {
