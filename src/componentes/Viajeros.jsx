@@ -148,6 +148,7 @@ function Viajeros({
                 <button
                   className="boton-quitar"
                   onClick={() => onQuitar(viajero.id, viajero.nombre)}
+                  title={`Quitar a ${viajero.nombre}`}
                 >
                   ✕
                 </button>

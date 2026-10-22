@@ -1582,6 +1582,7 @@ function Gastos({
                           <button
                             className="boton-quitar"
                             onClick={() => onQuitar(gasto.id, gasto.concepto, gasto.ticket)}
+                            title={`Borrar ${gasto.concepto}`}
                           >
                             ✕
                           </button>
