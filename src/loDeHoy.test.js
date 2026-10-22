@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { gastadoHoy, frenteAAyer, textoFrenteAAyer } from "./loDeHoy";
+import { gastadoHoy, frenteAAyer, miParteDeHoy, textoFrenteAAyer } from "./loDeHoy";
 
 const dia = "2026-10-14";
 
@@ -85,5 +85,46 @@ describe("textoFrenteAAyer", () => {
 
   it("sin ayer, nada", () => {
     expect(textoFrenteAAyer(null, "EUR")).toBeNull();
+  });
+});
+
+describe("miParteDeHoy", () => {
+  const viajeros = [{ id: "ana" }, { id: "luis" }, { id: "marta" }];
+
+  it("lo que te toca de cada gasto de hoy", () => {
+    const gastos = [
+      { fecha: dia, importe: 30, pagadorId: "luis" },
+      { fecha: dia, importe: 12, pagadorId: "ana" },
+    ];
+    expect(miParteDeHoy(gastos, "ana", viajeros, dia)).toBe(14);
+  });
+
+  it("lo de otros días no cuenta", () => {
+    const gastos = [
+      { fecha: "2026-10-13", importe: 90 },
+      { fecha: dia, importe: 30 },
+    ];
+    expect(miParteDeHoy(gastos, "ana", viajeros, dia)).toBe(10);
+  });
+
+  it("solo en los que vas, y con tus partes", () => {
+    const gastos = [
+      { fecha: dia, importe: 20, participantes: ["luis", "marta"] },
+      { fecha: dia, importe: 30, participantes: ["ana", "luis"], partes: { ana: 2, luis: 1 } },
+    ];
+    expect(miParteDeHoy(gastos, "ana", viajeros, dia)).toBe(20);
+  });
+
+  it("sin restos de decimales", () => {
+    expect(miParteDeHoy([{ fecha: dia, importe: 10 }], "ana", viajeros, dia)).toBe(3.33);
+  });
+
+  it("si no ibas en nada de hoy, nada", () => {
+    const gastos = [{ fecha: dia, importe: 20, participantes: ["luis"] }];
+    expect(miParteDeHoy(gastos, "ana", viajeros, dia)).toBeNull();
+  });
+
+  it("si no has dicho quién eres, nada", () => {
+    expect(miParteDeHoy([{ fecha: dia, importe: 30 }], null, viajeros, dia)).toBeNull();
   });
 });

@@ -1,6 +1,6 @@
 // Lo que se lleva gastado hoy, para saber cómo va el día sin bajar a la lista.
 
-import { calcularTotal } from "./calculos";
+import { calcularTotal, parteDe } from "./calculos";
 import { hoy } from "./fechas";
 import { conMoneda } from "./monedas";
 
@@ -19,6 +19,16 @@ export function frenteAAyer(gastos, dia = hoy()) {
 
   const deHoy = gastos.filter((g) => g.fecha === dia);
   return Math.round((calcularTotal(deHoy) - calcularTotal(deAyer)) * 100) / 100;
+}
+
+// Lo que te toca a ti de lo de hoy. null si no has dicho quién eres o si hoy no ibas en nada.
+export function miParteDeHoy(gastos, soy, viajeros, dia = hoy()) {
+  if (!soy) return null;
+
+  const parte = gastos
+    .filter((g) => g.fecha === dia)
+    .reduce((suma, g) => suma + parteDe(g, soy, viajeros), 0);
+  return parte > 0 ? Math.round(parte * 100) / 100 : null;
 }
 
 export function textoFrenteAAyer(diferencia, moneda) {
