@@ -34,7 +34,7 @@ import Evolucion from "./Evolucion";
 import PagosACuenta from "./PagosACuenta";
 import Presupuesto from "./Presupuesto";
 import { porCabezaYDia } from "../presupuesto";
-import { gastadoHoy } from "../loDeHoy";
+import { gastadoHoy, frenteAAyer, textoFrenteAAyer } from "../loDeHoy";
 import { esElUltimo, sonLosUltimos } from "../confeti";
 import { deudoresConVarias } from "../deGolpe";
 import { porcentajes } from "../donut";
@@ -84,6 +84,7 @@ function Resumen({
   const personas = sinBote(balances);
   const alDia = porCabezaYDia(gastos, personas.length);
   const deHoy = gastadoHoy(gastos);
+  const comoAyer = textoFrenteAAyer(frenteAAyer(gastos), monedaViaje);
   const exactos = calcularPagos(balances);
   const redondear = viaje?.redondear === true;
   const pagos = marcarSaldados(redondear ? redondearPagos(exactos) : exactos, saldados);
@@ -265,7 +266,8 @@ function Resumen({
         {deHoy && (
           <div className="total-detalle">
             Hoy lleváis <span className="sin-partir">{conMoneda(deHoy.total, monedaViaje)}</span> en{" "}
-            {deHoy.gastos} {deHoy.gastos === 1 ? "gasto" : "gastos"}
+            <span className="sin-partir">{deHoy.gastos} {deHoy.gastos === 1 ? "gasto" : "gastos"}</span>
+            {comoAyer && <span className="sin-partir">, {comoAyer}</span>}
           </div>
         )}
         {loMio && gastos.length > 0 && (
