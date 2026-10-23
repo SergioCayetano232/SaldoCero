@@ -22,7 +22,9 @@ export function temaDe(id) {
 
 // El que se pinta de verdad. Esto mismo va repetido en index.html, para
 // ponerlo antes de que cargue nada.
-export function temaQueToca(id, sistemaOscuro) {
+// Al imprimir, claro siempre: un folio negro gasta tinta y no se lee.
+export function temaQueToca(id, sistemaOscuro, imprimiendo = false) {
+  if (imprimiendo) return "claro";
   if (id === "claro" || id === "oscuro") return id;
   return sistemaOscuro ? "oscuro" : "claro";
 }

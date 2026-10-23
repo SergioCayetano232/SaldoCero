@@ -788,9 +788,10 @@ function BotonTema() {
 
   useEffect(() => {
     const sistema = matchMedia("(prefers-color-scheme: dark)");
+    const papel = matchMedia("print");
 
     function pintar() {
-      const toca = temaQueToca(tema, sistema.matches);
+      const toca = temaQueToca(tema, sistema.matches, papel.matches);
       document.documentElement.dataset.tema = toca;
       for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
         meta.content = COLOR_BARRA[toca];
@@ -800,7 +801,11 @@ function BotonTema() {
     pintar();
     // En automático, si el móvil cambia a oscuro al anochecer, la app también.
     sistema.addEventListener("change", pintar);
-    return () => sistema.removeEventListener("change", pintar);
+    papel.addEventListener("change", pintar);
+    return () => {
+      sistema.removeEventListener("change", pintar);
+      papel.removeEventListener("change", pintar);
+    };
   }, [tema]);
 
   function cambiar() {

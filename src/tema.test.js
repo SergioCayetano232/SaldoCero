@@ -45,4 +45,9 @@ describe("temaQueToca", () => {
     expect(temaQueToca("auto", true)).toBe("oscuro");
     expect(temaQueToca("auto", false)).toBe("claro");
   });
+
+  it("al imprimir, claro aunque vayas en oscuro", () => {
+    expect(temaQueToca("oscuro", false, true)).toBe("claro");
+    expect(temaQueToca("auto", true, true)).toBe("claro");
+  });
 });

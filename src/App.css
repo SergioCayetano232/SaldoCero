@@ -4809,3 +4809,84 @@ kbd {
   color: var(--rojo);
   animation: temblor 0.4s var(--curva-suave);
 }
+
+/* ===== Al imprimir ===== */
+/* Solo las cuentas, en blanco y sin botones. Lo del cristal hay que quitarlo:
+   con backdrop-filter Chrome deja las tarjetas en blanco en el papel. */
+@media print {
+  body {
+    background: none;
+    padding: 0;
+  }
+
+  body::after {
+    display: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .tarjeta,
+  .tarjeta:hover {
+    transform: none;
+    background: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+    border-color: var(--linea);
+    padding: 16px 0 0;
+    border-width: 1px 0 0;
+    border-radius: 0;
+  }
+
+  .tarjeta::before {
+    display: none;
+  }
+
+  /* Fuera los botones, menos los que llevan un nombre o una cifra dentro. */
+  button:not(.boton-nombre, .total-mas-caro, .pago-cantidad),
+  .tarjeta a,
+  input,
+  select,
+  textarea,
+  .lapiz,
+  .fila-formulario,
+  .formulario-gasto,
+  .desglose-quien,
+  .aviso-codigo,
+  .aviso-quien-soy,
+  .bote:has(.bote-explica),
+  .botones-final,
+  .pie {
+    display: none !important;
+  }
+
+  .boton-nombre,
+  .total-mas-caro,
+  .pago-cantidad {
+    all: unset;
+  }
+
+  .pago-cantidad {
+    font-weight: 700;
+  }
+
+  /* El total y las iniciales van en blanco sobre color. Sin el fondo no se
+     vería nada. */
+  .total-destacado,
+  .avatar {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    box-shadow: none;
+  }
+
+  .lista li,
+  .pago,
+  .dia-cabecera {
+    break-inside: avoid;
+  }
+}
