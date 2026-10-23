@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { calcularTotal, gastoMasCaro, importeDeGasto, participantesDeGasto } from "../calculos";
 import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, monedasEnOrden, tasaComoTexto } from "../monedas";
+import { enLista } from "../nombres";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
 import { filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
 import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
@@ -628,7 +629,7 @@ function Gastos({
 
     if (suyos.length === viajeros.length) return `entre todos${comoSeParte}`;
 
-    return `entre ${suyos.map((v) => v.nombre).join(", ")}${comoSeParte}`;
+    return `entre ${enLista(suyos.map((v) => v.nombre))}${comoSeParte}`;
   }
 
   return (

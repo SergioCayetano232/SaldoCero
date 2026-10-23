@@ -5,6 +5,7 @@ import { porCabeza } from "./porCabeza";
 import { gastoPorCategoria } from "./categorias";
 import { porDias, enCorto } from "./fechas";
 import { conMoneda } from "./monedas";
+import { enLista } from "./nombres";
 import { BOTE, esDelBote } from "./bote";
 import { normalizar, deAlgunos } from "./filtros";
 import { conceptoSinEscribir } from "./categorias";
@@ -203,7 +204,7 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
     lineas.push(`🫙 Del bote salieron ${conMoneda(b.total, moneda)} en ${b.gastos} ${b.gastos === 1 ? "gasto" : "gastos"}, el ${b.porcentaje} %`);
   }
   if (cifras.monedas) {
-    lineas.push(`🌍 Pagasteis en ${cifras.monedas.length} monedas: ${cifras.monedas.join(", ")}`);
+    lineas.push(`🌍 Pagasteis en ${cifras.monedas.length} monedas: ${enLista(cifras.monedas)}`);
   }
   if (cifras.deAlgunos) {
     const a = cifras.deAlgunos;

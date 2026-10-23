@@ -29,6 +29,7 @@ import Resumen from "./componentes/Resumen";
 import CargandoViaje from "./componentes/CargandoViaje";
 import CifrasViaje from "./componentes/CifrasViaje";
 import Atajos from "./componentes/Atajos";
+import { enLista } from "./nombres";
 
 // El viaje que hay que abrir al arrancar: el del enlace compartido (#ABC123),
 // o el último en el que estuviste. Vacío si no hay ninguno.
@@ -353,7 +354,7 @@ function App() {
 
   async function repetirViaje(gente) {
     const nombre = nombreDeLaRepeticion(viaje.nombre);
-    const quienes = gente.map((v) => v.nombre).join(", ");
+    const quienes = enLista(gente.map((v) => v.nombre));
     if (!window.confirm(`¿Crear "${nombre}" con ${quienes}? Empieza sin gastos.`)) return;
 
     setRepitiendo(true);

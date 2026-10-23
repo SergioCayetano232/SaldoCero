@@ -354,7 +354,7 @@ describe("cifrasEnTexto", () => {
   it("las monedas, si hubo más de una", () => {
     const fuera = gastos.map((g, i) => (i === 0 ? { ...g, moneda: "MAD" } : g));
     expect(cifrasEnTexto(cifrasDelViaje(fuera, personas, "EUR"), "Lisboa", "EUR")).toContain(
-      "Pagasteis en 2 monedas: EUR, MAD",
+      "Pagasteis en 2 monedas: EUR y MAD",
     );
     expect(cifrasEnTexto(cifrasDelViaje(gastos, personas, "EUR"), "Lisboa", "EUR")).not.toContain("monedas");
   });

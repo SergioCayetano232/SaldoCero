@@ -7,6 +7,7 @@ import { conMoneda } from "./monedas";
 import { porCabeza } from "./porCabeza";
 import { BOTE } from "./bote";
 import { enlaceDelViaje } from "./compartir";
+import { enLista } from "./nombres";
 
 export function mensajeDeGasto({ gasto, viajeros, moneda, codigo, base }) {
   const pagador =
@@ -26,7 +27,7 @@ export function mensajeDeGasto({ gasto, viajeros, moneda, codigo, base }) {
   const cadaUno = porCabeza(gasto, viajeros);
 
   if (cadaUno !== null) {
-    const entre = suyos.length === viajeros.length ? "entre todos" : `entre ${listaDeNombres(suyos)}`;
+    const entre = suyos.length === viajeros.length ? "entre todos" : `entre ${enLista(suyos.map((v) => v.nombre))}`;
     lineas.push(`Sale a *${conMoneda(cadaUno, moneda)}* cada uno, ${entre}`);
   } else if (suyos.length > 1) {
     // A partes distintas no hay una cifra para todos: la de cada uno.
@@ -38,11 +39,4 @@ export function mensajeDeGasto({ gasto, viajeros, moneda, codigo, base }) {
   if (codigo) lineas.push("", `Las cuentas, aquí: ${enlaceDelViaje(codigo, base)}`);
 
   return lineas.join("\n");
-}
-
-// "Ana, Luis y Marta"
-function listaDeNombres(viajeros) {
-  const nombres = viajeros.map((v) => v.nombre);
-  if (nombres.length < 2) return nombres.join("");
-  return `${nombres.slice(0, -1).join(", ")} y ${nombres.at(-1)}`;
 }

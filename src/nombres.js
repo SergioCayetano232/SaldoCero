@@ -64,13 +64,21 @@ export function separarNombres(texto, viajeros) {
   return { nuevos, repetidos };
 }
 
+// "Ana, Luis y Marta". Antes de sonido "i" va "e": "Luis e Inés", pero
+// "Ana y Hierro", que ahí la "hi" suena "ye".
+export function enLista(cosas) {
+  if (cosas.length < 2) return cosas.join("");
+  const ultima = cosas.at(-1);
+  const y = /^h?[iíIÍ](?![aeouáéóú])/i.test(ultima) ? "e" : "y";
+  return `${cosas.slice(0, -1).join(", ")} ${y} ${ultima}`;
+}
+
 // "Luis ya está en el viaje", o "Luis y Pedro ya están" si eran varios.
 export function avisoDeRepetidos(nombres) {
   const unicos = [...new Set(nombres)];
   if (unicos.length === 0) return null;
 
-  const quienes =
-    unicos.length === 1 ? unicos[0] : `${unicos.slice(0, -1).join(", ")} y ${unicos.at(-1)}`;
+  const quienes = enLista(unicos);
   const verbo = unicos.length === 1 ? "ya está" : "ya están";
   return `${quienes} ${verbo} en el viaje. Ponle la inicial del apellido para no liaros.`;
 }

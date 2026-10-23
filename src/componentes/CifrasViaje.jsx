@@ -3,6 +3,7 @@ import { cifrasDelViaje, cifrasEnTexto } from "../cifras";
 import { sinBote } from "../bote";
 import { copiarAlPortapapeles } from "../compartir";
 import { conMoneda } from "../monedas";
+import { enLista } from "../nombres";
 import { enCorto } from "../fechas";
 import { historiasDelViaje } from "../historias";
 import Cifra from "./Cifra";
@@ -156,7 +157,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
           <li>
             <span className="cifras-emoji">🌍</span>
             <strong>{monedas.length} monedas</strong>
-            <span>en las que pagasteis: {monedas.join(", ")}</span>
+            <span>en las que pagasteis: {enLista(monedas)}</span>
           </li>
         )}
         {deAlgunos && (

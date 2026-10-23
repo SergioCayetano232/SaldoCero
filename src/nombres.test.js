@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { limpiarNombre, conMayuscula, nombreNuevo, nombreRepetido, separarNombres, avisoDeRepetidos, LARGO_MAXIMO } from "./nombres";
+import { limpiarNombre, conMayuscula, nombreNuevo, nombreRepetido, separarNombres, avisoDeRepetidos, enLista, LARGO_MAXIMO } from "./nombres";
 
 describe("limpiarNombre", () => {
   it("quita espacios de sobra", () => {
@@ -157,5 +157,34 @@ describe("avisoDeRepetidos", () => {
 
   it("sin nadie, nada", () => {
     expect(avisoDeRepetidos([])).toBeNull();
+  });
+});
+
+describe("enLista", () => {
+  it("comas y una y al final", () => {
+    expect(enLista(["Ana", "Luis", "Marta"])).toBe("Ana, Luis y Marta");
+    expect(enLista(["Ana", "Luis"])).toBe("Ana y Luis");
+  });
+
+  it("uno solo o ninguno, sin y", () => {
+    expect(enLista(["Ana"])).toBe("Ana");
+    expect(enLista([])).toBe("");
+  });
+
+  it("e delante de sonido i", () => {
+    expect(enLista(["Luis", "Inés"])).toBe("Luis e Inés");
+    expect(enLista(["Ana", "Íñigo"])).toBe("Ana e Íñigo");
+    expect(enLista(["Ana", "Hilario"])).toBe("Ana e Hilario");
+    expect(enLista(["Ana", "irene"])).toBe("Ana e irene");
+  });
+
+  it("y cuando la hi suena ye", () => {
+    expect(enLista(["Ana", "Hierro"])).toBe("Ana y Hierro");
+    expect(enLista(["Ana", "Iolanda"])).toBe("Ana y Iolanda");
+  });
+
+  it("no se lía con las monedas", () => {
+    expect(enLista(["EUR", "MAD", "USD"])).toBe("EUR, MAD y USD");
+    expect(enLista(["EUR", "INR"])).toBe("EUR e INR");
   });
 });
