@@ -178,6 +178,16 @@ h3 {
   letter-spacing: -0.02em;
 }
 
+/* Para el lector de pantalla y nadie más. */
+.solo-lector {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Que se vea bien por dónde vas al ir con el teclado. */
 :focus-visible {
   outline: 2px solid var(--teal-500);

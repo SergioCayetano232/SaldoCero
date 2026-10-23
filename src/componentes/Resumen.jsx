@@ -241,8 +241,15 @@ function Resumen({
 
       <div className="total-destacado">
         <div className="total-etiqueta">Total del viaje</div>
+        {/* La que cuenta no se anuncia: el lector iría cantando cada número
+            de la cuenta. Se lee la de al lado, que ya es la final. */}
         <div className="total-cifra">
-          <Cifra valor={total} moneda={monedaViaje} />
+          <span aria-hidden="true">
+            <Cifra valor={total} moneda={monedaViaje} />
+          </span>
+          <span className="solo-lector" aria-live="polite">
+            {conMoneda(total, monedaViaje)}
+          </span>
         </div>
         <div className="total-detalle">
           {gastos.length} {gastos.length === 1 ? "gasto" : "gastos"} · {personas.length}{" "}
@@ -273,7 +280,7 @@ function Resumen({
           </div>
         )}
         {loMio && gastos.length > 0 && (
-          <div className={`mi-saldo ${estadoMiSaldo(loMio)}`}>{textoMiSaldo(loMio, monedaViaje)}</div>
+          <div className={`mi-saldo ${estadoMiSaldo(loMio)}`} aria-live="polite">{textoMiSaldo(loMio, monedaViaje)}</div>
         )}
         <Presupuesto
           total={total}
