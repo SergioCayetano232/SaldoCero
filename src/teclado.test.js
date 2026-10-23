@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoAyuda, esMac, listaDeAtajos } from "./teclado";
+import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoAyuda, esAtajoGuardar, esMac, listaDeAtajos } from "./teclado";
 
 const con = (matches) => ({ matchMedia: () => ({ matches }) });
 
@@ -139,6 +139,28 @@ describe("esMac", () => {
   });
 });
 
+describe("esAtajoGuardar", () => {
+  const tecla = (key, extra = {}) => ({ key, target: { tagName: "SELECT" }, ...extra });
+
+  it("Ctrl+Enter o Cmd+Enter, sí, también desde un campo", () => {
+    expect(esAtajoGuardar(tecla("Enter", { ctrlKey: true }))).toBe(true);
+    expect(esAtajoGuardar(tecla("Enter", { metaKey: true }))).toBe(true);
+  });
+
+  it("Enter solo, no", () => {
+    expect(esAtajoGuardar(tecla("Enter"))).toBe(false);
+  });
+
+  it("con Mayúsculas o Alt, no", () => {
+    expect(esAtajoGuardar(tecla("Enter", { ctrlKey: true, shiftKey: true }))).toBe(false);
+    expect(esAtajoGuardar(tecla("Enter", { ctrlKey: true, altKey: true }))).toBe(false);
+  });
+
+  it("otra tecla con Ctrl, no", () => {
+    expect(esAtajoGuardar(tecla("s", { ctrlKey: true }))).toBe(false);
+  });
+});
+
 describe("listaDeAtajos", () => {
   it("en Mac, deshacer va con ⌘", () => {
     const deshacer = listaDeAtajos(true).find((a) => a.teclas.includes("Z"));
@@ -152,6 +174,6 @@ describe("listaDeAtajos", () => {
 
   it("están todos los que hay", () => {
     const teclas = listaDeAtajos().map((a) => a.teclas.at(-1));
-    expect(teclas).toEqual(["N", "/", "Z", "Esc", "?"]);
+    expect(teclas).toEqual(["N", "/", "Enter", "Z", "Esc", "?"]);
   });
 });

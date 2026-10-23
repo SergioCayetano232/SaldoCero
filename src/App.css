@@ -4026,16 +4026,19 @@ button.pago-cantidad:hover {
   text-align: left;
 }
 
+/* La columna de las teclas, tan ancha como la más larga: "Ctrl Enter" no
+   cabía en un ancho fijo y se montaba encima del texto. */
 .atajos {
   display: grid;
-  gap: 10px;
+  grid-template-columns: max-content 1fr;
+  gap: 10px 12px;
 }
 
 .atajo {
   display: grid;
-  grid-template-columns: 58px 1fr;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
   align-items: center;
-  gap: 12px;
 }
 
 .atajo dt {

@@ -29,6 +29,12 @@ export function esAtajoNuevo(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// Ctrl+Enter (Cmd+Enter en Mac) guarda el gasto desde cualquier campo, también
+// desde los que con Enter solo no guardan, como la fecha o quién pagó.
+export function esAtajoGuardar(e) {
+  return e.key === "Enter" && Boolean(e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey;
+}
+
 // La "?" enseña todos estos. Con Mayúsculas, que es como sale la "?".
 export function esAtajoAyuda(e, hayVentana = false) {
   if (e.key !== "?" || e.ctrlKey || e.metaKey || e.altKey) return false;
@@ -44,6 +50,7 @@ export function listaDeAtajos(mac = false) {
   return [
     { teclas: ["N"], que: "Apuntar un gasto nuevo" },
     { teclas: ["/"], que: "Buscar un gasto" },
+    { teclas: [mac ? "⌘" : "Ctrl", "Enter"], que: "Guardar el gasto desde cualquier campo" },
     { teclas: [mac ? "⌘" : "Ctrl", "Z"], que: "Recuperar lo último que has quitado" },
     { teclas: ["Esc"], que: "Dejar de editar un gasto o cerrar una ventana" },
     { teclas: ["?"], que: "Ver estos atajos" },

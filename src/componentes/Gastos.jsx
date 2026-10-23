@@ -29,7 +29,7 @@ import { porCabeza, porCabezaDelDia } from "../porCabeza";
 import { mensajeDeGasto } from "../avisarGasto";
 import { enlaceWhatsApp } from "../cobrar";
 import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
-import { esAtajoBuscar, esAtajoNuevo, esOrdenador } from "../teclado";
+import { esAtajoBuscar, esAtajoGuardar, esAtajoNuevo, esMac, esOrdenador } from "../teclado";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 import Resaltado from "./Resaltado";
@@ -645,7 +645,17 @@ function Gastos({
         <>
           {/* Cerrado, ya no se apuntan gastos. */}
           {!cerrado && (
-            <div className="formulario-gasto" ref={formulario}>
+            <div
+              className="formulario-gasto"
+              ref={formulario}
+              // Si el campo ya ha guardado con su Enter, viene marcado y no se repite.
+              onKeyDown={(e) => {
+                if (esAtajoGuardar(e) && !e.defaultPrevented) {
+                  e.preventDefault();
+                  guardar();
+                }
+              }}
+            >
               {recuperado && (
                 <p className="borrador-recuperado" role="status">
                   ✍️ Lo dejaste a medias.
@@ -691,7 +701,10 @@ function Gastos({
                     onFocus={(e) => e.target.select()}
                     onChange={(e) => escribirImporte(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") guardar();
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        guardar();
+                      }
                     }}
                   />
                   {/* El teclado del móvil no trae ni "+" ni "-" ni "×" ni "÷": van aquí. */}
@@ -871,7 +884,10 @@ function Gastos({
                 value={concepto}
                 onChange={(e) => escribirConcepto(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") guardar();
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    guardar();
+                  }
                 }}
               />
               {quedanEnConcepto(concepto) !== null && (
@@ -938,7 +954,10 @@ function Gastos({
                     autoFocus={!editando}
                     onChange={(e) => setNota(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") guardar();
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        guardar();
+                      }
                     }}
                   />
                   {quedanEnNota(nota) !== null && (
@@ -1276,6 +1295,8 @@ function Gastos({
                     key={hecho ?? "nada"}
                     className={hecho ? "hecho" : ""}
                     onClick={() => guardar()}
+                    aria-keyshortcuts="Control+Enter Meta+Enter"
+                    title={esOrdenador() ? `También con ${esMac() ? "⌘" : "Ctrl"}+Enter` : undefined}
                     disabled={marcados.length === 0 || typeof tasa !== "number" || descuadrado || Boolean(avisoRepetido) || Boolean(avisoRaro) || Boolean(avisoFecha)}
                   >
                     {textoAlGuardar(hecho)}
