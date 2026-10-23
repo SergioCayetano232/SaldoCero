@@ -1,6 +1,6 @@
 import { useState } from "react";
 import * as datos from "../datos";
-import { MONEDAS, monedaDeCasa } from "../monedas";
+import { MONEDAS, monedaConBandera, monedaDeCasa } from "../monedas";
 import { haceCuanto } from "../fechas";
 import { LARGO_MAXIMO } from "../nombres";
 import { codigoDelPortapapeles } from "../codigos";
@@ -56,7 +56,7 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
           >
             {MONEDAS.map((m) => (
               <option key={m.codigo} value={m.codigo}>
-                {m.codigo}
+                {monedaConBandera(m.codigo)}
               </option>
             ))}
           </select>

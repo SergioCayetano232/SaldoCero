@@ -28,6 +28,19 @@ export const MONEDAS = [
   { codigo: "VND", simbolo: "₫", nombre: "Dong", aMano: true },
 ];
 
+// Las dos primeras letras del código son las del país ("US" de USD, y "EU",
+// que también tiene bandera), así que sale sola sin apuntarla en la lista.
+export function banderaDe(codigo) {
+  if (!/^[A-Z]{3}$/.test(codigo ?? "")) return "";
+  return String.fromCodePoint(...[...codigo.slice(0, 2)].map((l) => 0x1f1a5 + l.charCodeAt(0)));
+}
+
+// "🇺🇸 USD", para los selectores.
+export function monedaConBandera(codigo) {
+  const bandera = banderaDe(codigo);
+  return bandera ? `${bandera} ${codigo}` : codigo;
+}
+
 export function simboloDe(codigo) {
   return MONEDAS.find((m) => m.codigo === codigo)?.simbolo ?? codigo;
 }

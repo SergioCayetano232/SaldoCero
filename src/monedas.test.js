@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { MONEDAS, cambio, esAMano, leerTasa, leerImporte, tasaDeGasto, tasaComoTexto, conMoneda, monedaDelSiguiente, monedasEnOrden, monedaDeCasa } from "./monedas";
+import { MONEDAS, cambio, esAMano, leerTasa, leerImporte, tasaDeGasto, tasaComoTexto, conMoneda, monedaDelSiguiente, monedasEnOrden, monedaDeCasa, banderaDe, monedaConBandera } from "./monedas";
 
 describe("leerTasa", () => {
   it("vale con coma o con punto", () => {
@@ -166,5 +166,37 @@ describe("monedaDeCasa", () => {
     for (const pais of ["US", "MX", "VN", "MA", "PE"]) {
       expect(MONEDAS.some((m) => m.codigo === monedaDeCasa([`es-${pais}`]))).toBe(true);
     }
+  });
+});
+
+describe("banderaDe", () => {
+  it("la del país del código", () => {
+    expect(banderaDe("USD")).toBe("🇺🇸");
+    expect(banderaDe("GBP")).toBe("🇬🇧");
+    expect(banderaDe("MAD")).toBe("🇲🇦");
+  });
+
+  it("el euro, la de Europa", () => {
+    expect(banderaDe("EUR")).toBe("🇪🇺");
+  });
+
+  it("todas las de la lista tienen una", () => {
+    for (const m of MONEDAS) expect(banderaDe(m.codigo)).toHaveLength(4);
+  });
+
+  it("algo raro, sin bandera", () => {
+    expect(banderaDe("")).toBe("");
+    expect(banderaDe(undefined)).toBe("");
+    expect(banderaDe("usd")).toBe("");
+  });
+});
+
+describe("monedaConBandera", () => {
+  it("bandera y código", () => {
+    expect(monedaConBandera("JPY")).toBe("🇯🇵 JPY");
+  });
+
+  it("sin bandera, solo el código", () => {
+    expect(monedaConBandera("xx")).toBe("xx");
   });
 });
