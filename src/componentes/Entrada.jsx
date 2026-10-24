@@ -116,6 +116,7 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
         <section className="tarjeta">
           <h2>
             <span className="icono">🕘</span> Tus viajes
+            <span className="titulo-cuantos">{pasados.length}</span>
           </h2>
 
           <ul className="lista">
