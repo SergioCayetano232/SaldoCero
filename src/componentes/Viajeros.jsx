@@ -94,7 +94,9 @@ function Viajeros({
               if (e.key === "Enter") anadir();
             }}
           />
-          <button onClick={anadir}>Añadir</button>
+          <button onClick={anadir} disabled={!nombre.trim()}>
+            Añadir
+          </button>
         </div>
       )}
 
