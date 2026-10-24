@@ -2,6 +2,7 @@
 
 import { conMoneda } from "./monedas";
 import { cuandoFue, hoy } from "./fechas";
+import { vibrar } from "./vibrar";
 
 // Un texto que se lea bien en WhatsApp: los asteriscos salen en negrita y
 // los emojis ayudan a separar las partes de un vistazo.
@@ -72,17 +73,22 @@ function loQueLeTocaba({ puesto, tocaPagar }, moneda) {
   return ` (le tocaban ${conMoneda(tocaPagar, moneda)})`;
 }
 
-// Copiar al portapapeles. Devuelve si ha podido.
+// Copiar al portapapeles. Devuelve si ha podido, y en el móvil vibra para que
+// lo sepas sin mirar.
 //
 // El navegador solo deja usar el portapapeles en páginas seguras, así que si
 // falla probamos con el truco de toda la vida: un textarea y un execCommand.
 export async function copiarAlPortapapeles(texto, nav = navigator) {
+  let hecho;
   try {
     await nav.clipboard.writeText(texto);
-    return true;
+    hecho = true;
   } catch {
-    return copiarALoAntiguo(texto);
+    hecho = copiarALoAntiguo(texto);
   }
+
+  if (hecho) vibrar("toque", nav);
+  return hecho;
 }
 
 function copiarALoAntiguo(texto) {

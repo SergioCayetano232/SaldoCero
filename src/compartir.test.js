@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { resumenEnTexto, enlaceDelViaje, invitacion, invitar, nombreDeArchivo, compartirImagen } from "./compartir";
+import { resumenEnTexto, enlaceDelViaje, invitacion, invitar, nombreDeArchivo, compartirImagen, copiarAlPortapapeles } from "./compartir";
+import { PATRONES } from "./vibrar";
 
 // Un viaje de ejemplo, para no repetirlo en cada prueba.
 const viaje = {
@@ -167,6 +168,30 @@ describe("invitacion", () => {
   it("y el código en el texto, por si hay que escribirlo", () => {
     expect(datos.text).toContain("Lisboa");
     expect(datos.text).toContain("ABC12345");
+  });
+});
+
+describe("copiarAlPortapapeles", () => {
+  it("si copia, vibra un toque", async () => {
+    const nav = { clipboard: { writeText: vi.fn().mockResolvedValue() }, vibrate: vi.fn() };
+
+    expect(await copiarAlPortapapeles("ABC123", nav)).toBe(true);
+    expect(nav.clipboard.writeText).toHaveBeenCalledWith("ABC123");
+    expect(nav.vibrate).toHaveBeenCalledWith(PATRONES.toque);
+  });
+
+  it("si no ha podido, no vibra", async () => {
+    const nav = { clipboard: { writeText: vi.fn().mockRejectedValue(new Error("x")) }, vibrate: vi.fn() };
+
+    expect(await copiarAlPortapapeles("ABC123", nav)).toBe(false);
+    expect(nav.vibrate).not.toHaveBeenCalled();
+  });
+
+  // En el iPhone no hay vibrate, y copiar tiene que ir igual.
+  it("sin vibración, copia igual", async () => {
+    const nav = { clipboard: { writeText: vi.fn().mockResolvedValue() } };
+
+    expect(await copiarAlPortapapeles("ABC123", nav)).toBe(true);
   });
 });
 
