@@ -80,7 +80,8 @@ function Bote({ viajeros, aportaciones, gastos, colores, moneda, cerrado, onPone
 
       {!cerrado &&
         (abierto ? (
-          <div className="formulario-parcial">
+          // En el div y no en el campo, para que también valga desde el desplegable.
+          <div className="formulario-parcial" onKeyDown={(e) => e.key === "Escape" && setAbierto(false)}>
             <div className="fila-formulario">
               <select value={quien} onChange={(e) => setQuien(e.target.value)} aria-label="Quién pone">
                 <option value="todos">Cada uno</option>
