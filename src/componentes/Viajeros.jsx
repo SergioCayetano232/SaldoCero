@@ -93,6 +93,10 @@ function Viajeros({
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter") anadir();
+              if (e.key === "Escape") {
+                setNombre("");
+                setRepetido(null);
+              }
             }}
           />
           <button onClick={anadir} disabled={!nombre.trim()}>
