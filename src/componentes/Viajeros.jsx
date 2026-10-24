@@ -81,6 +81,7 @@ function Viajeros({
             type="text"
             placeholder="Nombre, o varios: Ana, Luis…"
             autoCapitalize="words"
+            autoComplete="off"
             enterKeyHint="done"
             maxLength={LARGO_VARIOS}
             autoFocus={enfocar}
