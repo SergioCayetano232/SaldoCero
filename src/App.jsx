@@ -774,15 +774,17 @@ function Pie({ enViaje = false }) {
       <span>Sin cuentas ni contraseñas</span>
       <span className="pie-punto">·</span>
       <span>Solo entra quien tiene el código</span>
-      <span className="pie-punto">·</span>
-      <a
-        className="pie-enlace"
-        href="https://github.com/SergioCayetano232/SaldoCero"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Código en GitHub
-      </a>
+      <span className="pie-firma">
+        Hecho por Sergio Cayetano ·{" "}
+        <a
+          className="pie-enlace"
+          href="https://github.com/SergioCayetano232/SaldoCero"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Código en GitHub
+        </a>
+      </span>
       <BotonTema />
       {enViaje && <Atajos />}
     </footer>

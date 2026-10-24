@@ -4001,6 +4001,12 @@ button.pago-cantidad:hover {
   opacity: 0.4;
 }
 
+/* En su línea: detrás de lo demás no cabía y el enlace se quedaba solo abajo. */
+.pie-firma {
+  flex-basis: 100%;
+  text-align: center;
+}
+
 .pie-enlace {
   color: var(--tinta-suave);
   text-underline-offset: 3px;
