@@ -4001,6 +4001,15 @@ button.pago-cantidad:hover {
   opacity: 0.4;
 }
 
+.pie-enlace {
+  color: var(--tinta-suave);
+  text-underline-offset: 3px;
+}
+
+.pie-enlace:hover {
+  color: var(--teal-600);
+}
+
 .pie-tema {
   flex-basis: 100%;
   margin-top: 6px;
