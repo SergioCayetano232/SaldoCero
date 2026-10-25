@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoAyuda, esAtajoGuardar, esMac, listaDeAtajos } from "./teclado";
+import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoAyuda, esAtajoGuardar, esMac, listaDeAtajos } from "./teclado";
 
 const con = (matches) => ({ matchMedia: () => ({ matches }) });
 
@@ -94,6 +94,29 @@ describe("esAtajoNuevo", () => {
   });
 });
 
+describe("esAtajoCuentas", () => {
+  const tecla = (key, extra = {}, tagName = "BODY") => ({ key, target: { tagName }, ...extra });
+
+  it("la c, en minúscula o mayúscula, sí", () => {
+    expect(esAtajoCuentas(tecla("c"))).toBe(true);
+    expect(esAtajoCuentas(tecla("C", { shiftKey: true }))).toBe(true);
+  });
+
+  it("Ctrl+C o Cmd+C es copiar, no", () => {
+    expect(esAtajoCuentas(tecla("c", { ctrlKey: true }))).toBe(false);
+    expect(esAtajoCuentas(tecla("c", { metaKey: true }))).toBe(false);
+  });
+
+  it("escribiendo, la c es una c", () => {
+    expect(esAtajoCuentas(tecla("c", {}, "INPUT"))).toBe(false);
+    expect(esAtajoCuentas(tecla("c", {}, "TEXTAREA"))).toBe(false);
+  });
+
+  it("con una ventana abierta, no", () => {
+    expect(esAtajoCuentas(tecla("c"), true)).toBe(false);
+  });
+});
+
 describe("esAtajoAyuda", () => {
   const tecla = (key, tagName = "BODY", extra = {}) => ({ key, target: { tagName }, ...extra });
 
@@ -174,6 +197,6 @@ describe("listaDeAtajos", () => {
 
   it("están todos los que hay", () => {
     const teclas = listaDeAtajos().map((a) => a.teclas.at(-1));
-    expect(teclas).toEqual(["N", "/", "Enter", "Z", "Esc", "?"]);
+    expect(teclas).toEqual(["N", "/", "C", "Enter", "Z", "Esc", "?"]);
   });
 });

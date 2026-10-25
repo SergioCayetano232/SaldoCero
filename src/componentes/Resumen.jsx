@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   balancesTrasPagos,
   calcularLeTocaPagar,
@@ -40,6 +40,7 @@ import { deudoresConVarias } from "../deGolpe";
 import { porcentajes } from "../donut";
 import { vibrar } from "../vibrar";
 import { miSaldo, textoMiSaldo, estadoMiSaldo } from "../miSaldo";
+import { esAtajoCuentas } from "../teclado";
 
 function Resumen({
   balances,
@@ -70,6 +71,7 @@ function Resumen({
   // Qué fiesta va. Hace de key para que el confeti vuelva a caer si se repite.
   const [fiesta, setFiesta] = useState(null);
   const fiestas = useRef(0);
+  const zonaSaldar = useRef(null);
   // De qué pago acabas de copiar el Bizum, para decírtelo un momento.
   const [cobroCopiado, setCobroCopiado] = useState(null);
   // Y lo mismo con la cifra, que es lo otro que hay que escribir en el Bizum.
@@ -111,6 +113,17 @@ function Resumen({
   // Si solo ha pagado uno, su 100 % no cuenta nada que no se vea ya.
   const tantoPuesto = porcentajes(personas.map((v) => v.puesto));
   const variosPusieron = personas.filter((v) => v.puesto > 0).length > 1;
+
+  useEffect(() => {
+    function alPulsar(e) {
+      if (!esAtajoCuentas(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      zonaSaldar.current?.scrollIntoView({ block: "start" });
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, []);
 
   function elResumen(conCifras = false) {
     const nombre = viaje?.nombre ?? "El viaje";
@@ -435,7 +448,7 @@ function Resumen({
         })}
       </ul>
 
-      <div className="saldar">
+      <div className="saldar" ref={zonaSaldar}>
         <h3>
           Cómo saldar cuentas
           {pendiente > 0 && (

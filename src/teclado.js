@@ -29,6 +29,12 @@ export function esAtajoNuevo(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// La "C" baja a quién paga a quién, como el atajo del icono en el móvil.
+export function esAtajoCuentas(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "c" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // Ctrl+Enter (Cmd+Enter en Mac) guarda el gasto desde cualquier campo, también
 // desde los que con Enter solo no guardan, como la fecha o quién pagó.
 export function esAtajoGuardar(e) {
@@ -50,6 +56,7 @@ export function listaDeAtajos(mac = false) {
   return [
     { teclas: ["N"], que: "Apuntar un gasto nuevo" },
     { teclas: ["/"], que: "Buscar un gasto" },
+    { teclas: ["C"], que: "Ir a quién paga a quién" },
     { teclas: [mac ? "⌘" : "Ctrl", "Enter"], que: "Guardar el gasto desde cualquier campo" },
     { teclas: [mac ? "⌘" : "Ctrl", "Z"], que: "Recuperar lo último que has quitado" },
     { teclas: ["Esc"], que: "Dejar de editar un gasto o cerrar una ventana" },
