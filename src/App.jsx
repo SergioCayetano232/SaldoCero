@@ -13,7 +13,7 @@ import { pagosDelViaje } from "./calculos";
 import { cuantosMios, ponerGlobito } from "./globito";
 import { reducirFoto } from "./tickets";
 import { avisoDeArranque, codigoQueAbrir, hayQueOlvidar } from "./arranque";
-import { tituloDePestana } from "./titulo";
+import { tituloDelViaje } from "./titulo";
 import { temaGuardado, siguienteTema, temaDe, temaQueToca } from "./tema";
 import { hayQueSubir } from "./arriba";
 import { esAtajoDeshacer } from "./teclado";
@@ -147,11 +147,9 @@ function App() {
     return () => window.removeEventListener("hashchange", alCambiarEnlace);
   }, []);
 
-  const nombreDelViaje = viaje?.nombre;
-
   useEffect(() => {
-    document.title = tituloDePestana(nombreDelViaje);
-  }, [nombreDelViaje]);
+    document.title = tituloDelViaje(viaje, soy);
+  }, [viaje, soy]);
 
   // Lo que han apuntado los demás, mientras dura el aviso.
   const [novedad, setNovedad] = useState(null);
