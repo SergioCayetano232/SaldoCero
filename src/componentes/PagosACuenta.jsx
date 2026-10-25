@@ -65,7 +65,7 @@ function PagosACuenta({ viajeros, pagos, parciales, colores, moneda, onAnadir, o
       )}
 
       {abierto ? (
-        <div className="formulario-parcial">
+        <div className="formulario-parcial" onKeyDown={(e) => e.key === "Escape" && setAbierto(false)}>
           <div className="fila-parcial">
             <select value={deId} onChange={(e) => setDeId(e.target.value)} aria-label="Quién paga">
               <option value="">¿Quién paga?</option>
