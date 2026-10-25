@@ -41,6 +41,12 @@ export function esAtajoTema(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// La "I" saca el QR para invitar: en el ordenador, lo cómodo es que lo escaneen.
+export function esAtajoInvitar(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "i" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // Ctrl+Enter (Cmd+Enter en Mac) guarda el gasto desde cualquier campo, también
 // desde los que con Enter solo no guardan, como la fecha o quién pagó.
 export function esAtajoGuardar(e) {
@@ -63,6 +69,7 @@ export function listaDeAtajos(mac = false) {
     { teclas: ["N"], que: "Apuntar un gasto nuevo" },
     { teclas: ["/"], que: "Buscar un gasto" },
     { teclas: ["C"], que: "Ir a quién paga a quién" },
+    { teclas: ["I"], que: "Enseñar el QR para invitar" },
     { teclas: ["T"], que: "Cambiar el tema" },
     { teclas: [mac ? "⌘" : "Ctrl", "Enter"], que: "Guardar el gasto desde cualquier campo" },
     { teclas: [mac ? "⌘" : "Ctrl", "Z"], que: "Recuperar lo último que has quitado" },

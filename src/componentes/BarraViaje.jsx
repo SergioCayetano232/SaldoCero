@@ -1,9 +1,10 @@
-import { lazy, Suspense, useCallback, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { copiarAlPortapapeles, enlaceDelViaje, invitacion, invitar } from "../compartir";
 import NombreEditable from "./NombreEditable";
 import { textoCerrado } from "../cerrar";
 import { textoDuracion } from "../duracion";
 import { hoy } from "../fechas";
+import { esAtajoInvitar } from "../teclado";
 
 // La librería del QR pesa, y casi nadie lo abre: se baja solo al pulsar.
 const QRViaje = lazy(() => import("./QRViaje"));
@@ -22,6 +23,17 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir }) {
   // Siempre la misma: si cambiara, la ventana robaría el foco en cada refresco.
   const cerrarQR = useCallback(() => setConQR(false), []);
   const duracion = textoDuracion(viaje.gastos ?? [], hoy(), cerrado);
+
+  useEffect(() => {
+    function alPulsar(e) {
+      if (!esAtajoInvitar(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      setConQR(true);
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, []);
 
   async function copiarCodigo() {
     const hecho = await copiarAlPortapapeles(viaje.codigo);
@@ -91,7 +103,7 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir }) {
           </span>
           {TEXTO_INVITAR[invitado] ?? "Invitar"}
         </button>
-        <button className="boton-qr" onClick={() => setConQR(true)} title="Enseñar el QR">
+        <button className="boton-qr" onClick={() => setConQR(true)} title="Enseñar el QR" aria-keyshortcuts="i">
           <span aria-hidden="true">▦</span> QR
         </button>
       </div>

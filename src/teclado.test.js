@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoTema, esAtajoAyuda, esAtajoGuardar, esMac, listaDeAtajos } from "./teclado";
+import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esMac, listaDeAtajos } from "./teclado";
 
 const con = (matches) => ({ matchMedia: () => ({ matches }) });
 
@@ -139,6 +139,28 @@ describe("esAtajoTema", () => {
   });
 });
 
+describe("esAtajoInvitar", () => {
+  const tecla = (key, extra = {}, tagName = "BODY") => ({ key, target: { tagName }, ...extra });
+
+  it("la i, en minúscula o mayúscula, sí", () => {
+    expect(esAtajoInvitar(tecla("i"))).toBe(true);
+    expect(esAtajoInvitar(tecla("I", { shiftKey: true }))).toBe(true);
+  });
+
+  it("Cmd+I o Ctrl+I son otra cosa, no", () => {
+    expect(esAtajoInvitar(tecla("i", { ctrlKey: true }))).toBe(false);
+    expect(esAtajoInvitar(tecla("i", { metaKey: true }))).toBe(false);
+  });
+
+  it("escribiendo, la i es una i", () => {
+    expect(esAtajoInvitar(tecla("i", {}, "INPUT"))).toBe(false);
+  });
+
+  it("con una ventana abierta, no", () => {
+    expect(esAtajoInvitar(tecla("i"), true)).toBe(false);
+  });
+});
+
 describe("esAtajoAyuda", () => {
   const tecla = (key, tagName = "BODY", extra = {}) => ({ key, target: { tagName }, ...extra });
 
@@ -219,6 +241,6 @@ describe("listaDeAtajos", () => {
 
   it("están todos los que hay", () => {
     const teclas = listaDeAtajos().map((a) => a.teclas.at(-1));
-    expect(teclas).toEqual(["N", "/", "C", "T", "Enter", "Z", "Esc", "?"]);
+    expect(teclas).toEqual(["N", "/", "C", "I", "T", "Enter", "Z", "Esc", "?"]);
   });
 });
