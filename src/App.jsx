@@ -16,7 +16,7 @@ import { avisoDeArranque, codigoQueAbrir, hayQueOlvidar } from "./arranque";
 import { tituloDelViaje } from "./titulo";
 import { temaGuardado, siguienteTema, temaDe, temaQueToca } from "./tema";
 import { hayQueSubir } from "./arriba";
-import { esAtajoDeshacer } from "./teclado";
+import { esAtajoDeshacer, esAtajoTema } from "./teclado";
 import { queTrae, sinLoQueTrae, recogerTicket } from "./llegada";
 import { MINIMO_PARA_FILTRAR } from "./filtros";
 import { nombreDeLaRepeticion, genteParaRepetir, quienEresEnElNuevo } from "./repetirViaje";
@@ -823,10 +823,23 @@ function BotonTema() {
     datos.guardarTema(nuevo);
   }
 
+  useEffect(() => {
+    function alPulsar(e) {
+      if (!esAtajoTema(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      const nuevo = siguienteTema(tema);
+      setTema(nuevo);
+      datos.guardarTema(nuevo);
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [tema]);
+
   const { icono, nombre } = temaDe(tema);
 
   return (
-    <button className="pie-tema" onClick={cambiar} title="Cambiar el tema">
+    <button className="pie-tema" onClick={cambiar} title="Cambiar el tema" aria-keyshortcuts="t">
       <span aria-hidden="true">{icono}</span> Tema: {nombre.toLowerCase()}
     </button>
   );

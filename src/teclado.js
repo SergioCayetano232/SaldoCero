@@ -35,6 +35,12 @@ export function esAtajoCuentas(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// La "T" cambia el tema, igual que el botón del pie: automático, claro, oscuro.
+export function esAtajoTema(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "t" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // Ctrl+Enter (Cmd+Enter en Mac) guarda el gasto desde cualquier campo, también
 // desde los que con Enter solo no guardan, como la fecha o quién pagó.
 export function esAtajoGuardar(e) {
@@ -57,6 +63,7 @@ export function listaDeAtajos(mac = false) {
     { teclas: ["N"], que: "Apuntar un gasto nuevo" },
     { teclas: ["/"], que: "Buscar un gasto" },
     { teclas: ["C"], que: "Ir a quién paga a quién" },
+    { teclas: ["T"], que: "Cambiar el tema" },
     { teclas: [mac ? "⌘" : "Ctrl", "Enter"], que: "Guardar el gasto desde cualquier campo" },
     { teclas: [mac ? "⌘" : "Ctrl", "Z"], que: "Recuperar lo último que has quitado" },
     { teclas: ["Esc"], que: "Dejar de editar un gasto o cerrar una ventana" },
