@@ -20,6 +20,23 @@ function Dictado({ onDictado }) {
   // Si te vas a otra pantalla escuchando, que no se quede el micro abierto.
   useEffect(() => () => reconocedor.current?.abort(), []);
 
+  const escuchando = estado === "escuchando";
+
+  // Escape lo corta sin rellenar nada, que para eso te has equivocado. Tocar el
+  // botón, en cambio, se queda con lo dicho.
+  useEffect(() => {
+    if (!escuchando) return;
+
+    function alPulsar(e) {
+      if (e.key !== "Escape" || document.querySelector('[aria-modal="true"]')) return;
+      reconocedor.current?.abort();
+      setOido("");
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [escuchando]);
+
   if (!Reconocedor) return null;
 
   function empezar() {
@@ -49,8 +66,6 @@ function Dictado({ onDictado }) {
     r.onend = () => setEstado("quieto");
     r.start();
   }
-
-  const escuchando = estado === "escuchando";
 
   return (
     <div className="dictado">
