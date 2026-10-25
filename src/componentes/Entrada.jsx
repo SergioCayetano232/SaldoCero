@@ -92,6 +92,10 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && codigo.trim()) onEntrar(codigo);
+              if (e.key === "Escape") {
+                setCodigo("");
+                setNadaCopiado(false);
+              }
             }}
             disabled={cargando}
           />
