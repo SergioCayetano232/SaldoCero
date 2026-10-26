@@ -40,6 +40,11 @@ export function alternarLoMio(filtros, soy) {
   return { ...filtros, viajeroId: filtros.viajeroId === soy ? "" : soy };
 }
 
+// "Hoy" igual: pone o quita el día de hoy, y lo demás se queda.
+export function alternarHoy(filtros, dia = hoy()) {
+  return { ...filtros, fecha: filtros.fecha === dia ? "" : dia };
+}
+
 // Lo mismo al tocar un día en la gráfica.
 export function soloDelDia(fecha) {
   return { ...SIN_FILTROS, fecha };

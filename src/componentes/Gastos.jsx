@@ -3,7 +3,7 @@ import { calcularTotal, gastoMasCaro, importeDeGasto, participantesDeGasto } fro
 import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, monedasEnOrden, tasaComoTexto } from "../monedas";
 import { enLista } from "../nombres";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
-import { alternarLoMio, filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
+import { alternarHoy, alternarLoMio, filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
 import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
 import { sugerirConceptos, importeSugerido } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
@@ -29,7 +29,7 @@ import { porCabeza, porCabezaDelDia } from "../porCabeza";
 import { mensajeDeGasto } from "../avisarGasto";
 import { enlaceWhatsApp } from "../cobrar";
 import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
-import { esAtajoBuscar, esAtajoGuardar, esAtajoLoMio, esAtajoNuevo, esMac, esOrdenador } from "../teclado";
+import { esAtajoBuscar, esAtajoGuardar, esAtajoHoy, esAtajoLoMio, esAtajoNuevo, esMac, esOrdenador } from "../teclado";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 import Resaltado from "./Resaltado";
@@ -318,6 +318,21 @@ function Gastos({
     window.addEventListener("keydown", alPulsar);
     return () => window.removeEventListener("keydown", alPulsar);
   }, [puedeFiltrar, puedoVerLoMio, soy]);
+
+  const hayHoy = puedeFiltrar && hayGastosDeHoy(gastos);
+  useEffect(() => {
+    if (!hayHoy) return;
+
+    function alPulsar(e) {
+      if (!esAtajoHoy(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      setFiltros((f) => alternarHoy(f));
+      barraFiltros.current?.scrollIntoView({ block: "start" });
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [hayHoy]);
 
   useEffect(() => {
     if (cerrado) return;
@@ -1358,6 +1373,8 @@ function Gastos({
                     onClick={() => filtrar({ fecha: filtros.fecha === hoy() ? "" : hoy() })}
                     aria-pressed={filtros.fecha === hoy()}
                     aria-label="Solo lo de hoy"
+                    aria-keyshortcuts="h"
+                    title={esOrdenador() ? "Solo lo de hoy (también con la H)" : undefined}
                   >
                     Hoy
                   </button>

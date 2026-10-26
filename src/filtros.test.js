@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, alternarLoMio, soloDelDia, SIN_FILTROS, hayTickets, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayGastosDeHoy } from "./filtros";
+import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, alternarLoMio, alternarHoy, soloDelDia, SIN_FILTROS, hayTickets, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayGastosDeHoy } from "./filtros";
 
 const ana = { id: "a", nombre: "Ana" };
 const luis = { id: "b", nombre: "Luis" };
@@ -59,6 +59,25 @@ describe("alternarLoMio", () => {
   it("lo demás que hubiera se queda", () => {
     const antes = { ...SIN_FILTROS, texto: "cena", conTicket: true };
     expect(alternarLoMio(antes, "a")).toEqual({ ...antes, viajeroId: "a" });
+  });
+});
+
+describe("alternarHoy", () => {
+  it("sin día, pone hoy", () => {
+    expect(alternarHoy(SIN_FILTROS, "2026-10-26").fecha).toBe("2026-10-26");
+  });
+
+  it("si ya era hoy, lo quita", () => {
+    expect(alternarHoy(soloDelDia("2026-10-26"), "2026-10-26").fecha).toBe("");
+  });
+
+  it("si mirabas otro día, pasa a hoy", () => {
+    expect(alternarHoy(soloDelDia("2026-10-20"), "2026-10-26").fecha).toBe("2026-10-26");
+  });
+
+  it("lo demás que hubiera se queda", () => {
+    const antes = { ...SIN_FILTROS, viajeroId: "a", texto: "café" };
+    expect(alternarHoy(antes, "2026-10-26")).toEqual({ ...antes, fecha: "2026-10-26" });
   });
 });
 

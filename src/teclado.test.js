@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoLoMio, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esMac, listaDeAtajos } from "./teclado";
+import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoLoMio, esAtajoHoy, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esMac, listaDeAtajos } from "./teclado";
 
 const con = (matches) => ({ matchMedia: () => ({ matches }) });
 
@@ -136,6 +136,28 @@ describe("esAtajoLoMio", () => {
 
   it("con una ventana abierta, no", () => {
     expect(esAtajoLoMio(tecla("m"), true)).toBe(false);
+  });
+});
+
+describe("esAtajoHoy", () => {
+  const tecla = (key, extra = {}, tagName = "BODY") => ({ key, target: { tagName }, ...extra });
+
+  it("la h, en minúscula o mayúscula, sí", () => {
+    expect(esAtajoHoy(tecla("h"))).toBe(true);
+    expect(esAtajoHoy(tecla("H", { shiftKey: true }))).toBe(true);
+  });
+
+  it("Cmd+H o Ctrl+H son del sistema y del historial, no", () => {
+    expect(esAtajoHoy(tecla("h", { metaKey: true }))).toBe(false);
+    expect(esAtajoHoy(tecla("h", { ctrlKey: true }))).toBe(false);
+  });
+
+  it("escribiendo, la h es una h", () => {
+    expect(esAtajoHoy(tecla("h", {}, "INPUT"))).toBe(false);
+  });
+
+  it("con una ventana abierta, no", () => {
+    expect(esAtajoHoy(tecla("h"), true)).toBe(false);
   });
 });
 
@@ -311,7 +333,7 @@ describe("listaDeAtajos", () => {
 
   it("están todos los que hay", () => {
     const teclas = listaDeAtajos().map((a) => a.teclas.at(-1));
-    expect(teclas).toEqual(["N", "/", "M", "C", "I", "T", "Enter", "Z", "Esc", "?"]);
-    expect(listaDeAtajos(false, true).map((a) => a.teclas.at(-1))).toEqual(["N", "D", "/", "M", "C", "I", "T", "Enter", "Z", "Esc", "?"]);
+    expect(teclas).toEqual(["N", "/", "M", "H", "C", "I", "T", "Enter", "Z", "Esc", "?"]);
+    expect(listaDeAtajos(false, true).map((a) => a.teclas.at(-1))).toEqual(["N", "D", "/", "M", "H", "C", "I", "T", "Enter", "Z", "Esc", "?"]);
   });
 });

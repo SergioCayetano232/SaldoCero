@@ -41,6 +41,12 @@ export function esAtajoLoMio(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// La "H" pone o quita "Hoy".
+export function esAtajoHoy(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "h" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // La "C" baja a quién paga a quién, como el atajo del icono en el móvil.
 export function esAtajoCuentas(e, hayVentana = false) {
   if (e.key?.toLowerCase() !== "c" || e.ctrlKey || e.metaKey || e.altKey) return false;
@@ -88,6 +94,7 @@ export function listaDeAtajos(mac = false, conDictado = false) {
     ...(conDictado ? [{ teclas: ["D"], que: "Dictar un gasto" }] : []),
     { teclas: ["/"], que: "Buscar un gasto" },
     { teclas: ["M"], que: "Ver solo lo tuyo" },
+    { teclas: ["H"], que: "Ver solo lo de hoy" },
     { teclas: ["C"], que: "Ir a quién paga a quién" },
     { teclas: ["I"], que: "Enseñar el QR para invitar" },
     { teclas: ["T"], que: "Cambiar el tema" },
