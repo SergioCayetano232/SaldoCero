@@ -29,6 +29,12 @@ export function esAtajoNuevo(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// La "D" empieza a dictar un gasto, y si ya estás dictando, lo para.
+export function esAtajoDictar(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "d" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // La "C" baja a quién paga a quién, como el atajo del icono en el móvil.
 export function esAtajoCuentas(e, hayVentana = false) {
   if (e.key?.toLowerCase() !== "c" || e.ctrlKey || e.metaKey || e.altKey) return false;
@@ -69,9 +75,11 @@ export function esMac(navegador = typeof navigator === "undefined" ? undefined :
 }
 
 // Lo que sale en la ventana de la "?". En Mac se dice ⌘, que Ctrl allí no es.
-export function listaDeAtajos(mac = false) {
+// La D, solo si el navegador sabe dictar: Firefox no.
+export function listaDeAtajos(mac = false, conDictado = false) {
   return [
     { teclas: ["N"], que: "Apuntar un gasto nuevo" },
+    ...(conDictado ? [{ teclas: ["D"], que: "Dictar un gasto" }] : []),
     { teclas: ["/"], que: "Buscar un gasto" },
     { teclas: ["C"], que: "Ir a quién paga a quién" },
     { teclas: ["I"], que: "Enseñar el QR para invitar" },

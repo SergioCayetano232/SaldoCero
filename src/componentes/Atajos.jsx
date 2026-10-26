@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { esAtajoAyuda, esMac, esOrdenador, listaDeAtajos } from "../teclado";
+import { reconocedorDeVoz } from "../dictado";
 
 // El enlace del pie y la ventana con los atajos. Solo en el ordenador: en el
 // móvil no hay teclado con el que usarlos.
@@ -61,7 +62,7 @@ function VentanaAtajos({ onCerrar }) {
         <h3 className="ventana-titulo">Atajos de teclado</h3>
 
         <dl className="atajos">
-          {listaDeAtajos(esMac()).map((atajo) => (
+          {listaDeAtajos(esMac(), Boolean(reconocedorDeVoz(window))).map((atajo) => (
             <div className="atajo" key={atajo.que}>
               <dt>
                 {atajo.teclas.map((t) => (

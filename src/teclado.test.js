@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esMac, listaDeAtajos } from "./teclado";
+import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esMac, listaDeAtajos } from "./teclado";
 
 const con = (matches) => ({ matchMedia: () => ({ matches }) });
 
@@ -91,6 +91,29 @@ describe("esAtajoNuevo", () => {
 
   it("con una ventana abierta, no", () => {
     expect(esAtajoNuevo(tecla("n"), true)).toBe(false);
+  });
+});
+
+describe("esAtajoDictar", () => {
+  const tecla = (key, extra = {}, tagName = "BODY") => ({ key, target: { tagName }, ...extra });
+
+  it("la d, en minúscula o mayúscula, sí", () => {
+    expect(esAtajoDictar(tecla("d"))).toBe(true);
+    expect(esAtajoDictar(tecla("D", { shiftKey: true }))).toBe(true);
+  });
+
+  it("Cmd+D o Ctrl+D son del navegador, no", () => {
+    expect(esAtajoDictar(tecla("d", { ctrlKey: true }))).toBe(false);
+    expect(esAtajoDictar(tecla("d", { metaKey: true }))).toBe(false);
+  });
+
+  it("escribiendo, la d es una d", () => {
+    expect(esAtajoDictar(tecla("d", {}, "INPUT"))).toBe(false);
+    expect(esAtajoDictar(tecla("d", {}, "TEXTAREA"))).toBe(false);
+  });
+
+  it("con una ventana abierta, no", () => {
+    expect(esAtajoDictar(tecla("d"), true)).toBe(false);
   });
 });
 
@@ -249,6 +272,11 @@ describe("esAtajoParar", () => {
 });
 
 describe("listaDeAtajos", () => {
+  it("la D solo si se puede dictar", () => {
+    expect(listaDeAtajos(false, true).some((a) => a.teclas.includes("D"))).toBe(true);
+    expect(listaDeAtajos(false, false).some((a) => a.teclas.includes("D"))).toBe(false);
+  });
+
   it("en Mac, deshacer va con ⌘", () => {
     const deshacer = listaDeAtajos(true).find((a) => a.teclas.includes("Z"));
     expect(deshacer.teclas).toEqual(["⌘", "Z"]);

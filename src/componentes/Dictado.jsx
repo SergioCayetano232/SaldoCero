@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { reconocedorDeVoz } from "../dictado";
+import { esAtajoDictar, esOrdenador } from "../teclado";
 
 // Los fallos del reconocedor, dichos para alguien que no sabe qué es un "not-allowed".
 const FALLOS = {
@@ -16,6 +17,7 @@ function Dictado({ onDictado }) {
   const [oido, setOido] = useState("");
   const [fallo, setFallo] = useState("");
   const reconocedor = useRef(null);
+  const boton = useRef(null);
 
   // Si te vas a otra pantalla escuchando, que no se quede el micro abierto.
   useEffect(() => () => reconocedor.current?.abort(), []);
@@ -36,6 +38,20 @@ function Dictado({ onDictado }) {
     window.addEventListener("keydown", alPulsar);
     return () => window.removeEventListener("keydown", alPulsar);
   }, [escuchando]);
+
+  useEffect(() => {
+    if (!Reconocedor) return;
+
+    function alPulsar(e) {
+      if (!esAtajoDictar(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      boton.current?.scrollIntoView({ block: "center" });
+      boton.current?.click();
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [Reconocedor]);
 
   if (!Reconocedor) return null;
 
@@ -71,8 +87,11 @@ function Dictado({ onDictado }) {
     <div className="dictado">
       <button
         className={`boton-dictar ${escuchando ? "escuchando" : ""}`}
+        ref={boton}
         onClick={empezar}
         aria-pressed={escuchando}
+        aria-keyshortcuts="d"
+        title={esOrdenador() ? "También con la D" : undefined}
       >
         <span className="dictar-icono" aria-hidden="true">
           🎙️
