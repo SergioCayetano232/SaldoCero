@@ -53,6 +53,11 @@ export function esAtajoGuardar(e) {
   return e.key === "Enter" && Boolean(e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey;
 }
 
+// El espacio para y sigue las historias, como mantener pulsado con el dedo.
+export function esAtajoParar(e) {
+  return e.key === " " && !e.ctrlKey && !e.metaKey && !e.altKey;
+}
+
 // La "?" enseña todos estos. Con Mayúsculas, que es como sale la "?".
 export function esAtajoAyuda(e, hayVentana = false) {
   if (e.key !== "?" || e.ctrlKey || e.metaKey || e.altKey) return false;

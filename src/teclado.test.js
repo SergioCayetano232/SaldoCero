@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esMac, listaDeAtajos } from "./teclado";
+import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esMac, listaDeAtajos } from "./teclado";
 
 const con = (matches) => ({ matchMedia: () => ({ matches }) });
 
@@ -225,6 +225,26 @@ describe("esAtajoGuardar", () => {
 
   it("otra tecla con Ctrl, no", () => {
     expect(esAtajoGuardar(tecla("s", { ctrlKey: true }))).toBe(false);
+  });
+});
+
+describe("esAtajoParar", () => {
+  const tecla = (key, extra = {}) => ({ key, target: { tagName: "BUTTON" }, ...extra });
+
+  it("el espacio, sí", () => {
+    expect(esAtajoParar(tecla(" "))).toBe(true);
+    expect(esAtajoParar(tecla(" ", { shiftKey: true }))).toBe(true);
+  });
+
+  it("con Ctrl, Cmd o Alt es otra cosa", () => {
+    expect(esAtajoParar(tecla(" ", { ctrlKey: true }))).toBe(false);
+    expect(esAtajoParar(tecla(" ", { metaKey: true }))).toBe(false);
+    expect(esAtajoParar(tecla(" ", { altKey: true }))).toBe(false);
+  });
+
+  it("otras teclas, no", () => {
+    expect(esAtajoParar(tecla("Enter"))).toBe(false);
+    expect(esAtajoParar(tecla("p"))).toBe(false);
   });
 });
 

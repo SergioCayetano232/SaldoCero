@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { DURA_CADA_UNA, siguienteHistoria } from "../historias";
+import { esAtajoParar, esOrdenador } from "../teclado";
 
 // Más de esto pulsado es para pararla y leer con calma, no un toque.
 const ES_PARAR = 250;
@@ -37,6 +38,11 @@ function Historias({ historias, onCerrar }) {
       if (e.key === "Escape") onCerrar();
       else if (e.key === "ArrowRight") setActual((i) => siguienteHistoria(i, historias.length, false) ?? i);
       else if (e.key === "ArrowLeft") setActual((i) => siguienteHistoria(i, historias.length, true));
+      else if (esAtajoParar(e)) {
+        // Si no, el espacio pulsa el botón que tenga el foco, y el primero es cerrar.
+        e.preventDefault();
+        setParada((p) => !p);
+      }
     }
 
     window.addEventListener("keydown", alPulsar);
@@ -111,7 +117,7 @@ function Historias({ historias, onCerrar }) {
       )}
 
       <p className="historias-ayuda" aria-hidden="true">
-        Toca a los lados para pasar · mantén para parar
+        {esOrdenador() ? "Flechas para pasar · espacio para parar" : "Toca a los lados para pasar · mantén para parar"}
       </p>
     </div>,
     document.body
