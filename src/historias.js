@@ -128,3 +128,10 @@ export function siguienteHistoria(actual, total, haciaAtras) {
   if (haciaAtras) return Math.max(0, actual - 1);
   return actual + 1 < total ? actual + 1 : null;
 }
+
+// Inicio y Fin, como en una lista: a la primera o a la última. Otra tecla, null.
+export function historiaDelExtremo(tecla, total) {
+  if (tecla === "Home") return 0;
+  if (tecla === "End") return total - 1;
+  return null;
+}

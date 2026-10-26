@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { historiasDelViaje, siguienteHistoria } from "./historias";
+import { historiasDelViaje, siguienteHistoria, historiaDelExtremo } from "./historias";
 import { cifrasDelViaje } from "./cifras";
 
 const personas = [
@@ -85,5 +85,17 @@ describe("siguienteHistoria", () => {
   it("hacia atrás, sin pasar de la primera", () => {
     expect(siguienteHistoria(2, 3, true)).toBe(1);
     expect(siguienteHistoria(0, 3, true)).toBe(0);
+  });
+});
+
+describe("historiaDelExtremo", () => {
+  it("Inicio va a la primera y Fin a la última", () => {
+    expect(historiaDelExtremo("Home", 5)).toBe(0);
+    expect(historiaDelExtremo("End", 5)).toBe(4);
+  });
+
+  it("otras teclas, nada", () => {
+    expect(historiaDelExtremo("ArrowRight", 5)).toBeNull();
+    expect(historiaDelExtremo("h", 5)).toBeNull();
   });
 });

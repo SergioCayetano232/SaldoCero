@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { DURA_CADA_UNA, siguienteHistoria } from "../historias";
+import { DURA_CADA_UNA, historiaDelExtremo, siguienteHistoria } from "../historias";
 import { esAtajoParar, esOrdenador } from "../teclado";
 
 // Más de esto pulsado es para pararla y leer con calma, no un toque.
@@ -38,7 +38,10 @@ function Historias({ historias, onCerrar }) {
       if (e.key === "Escape") onCerrar();
       else if (e.key === "ArrowRight") setActual((i) => siguienteHistoria(i, historias.length, false) ?? i);
       else if (e.key === "ArrowLeft") setActual((i) => siguienteHistoria(i, historias.length, true));
-      else if (esAtajoParar(e)) {
+      else if (historiaDelExtremo(e.key, historias.length) !== null) {
+        e.preventDefault();
+        setActual(historiaDelExtremo(e.key, historias.length));
+      } else if (esAtajoParar(e)) {
         // Si no, el espacio pulsa el botón que tenga el foco, y el primero es cerrar.
         e.preventDefault();
         setParada((p) => !p);
