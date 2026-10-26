@@ -82,6 +82,12 @@ export function esAtajoParar(e) {
   return e.key === " " && !e.ctrlKey && !e.metaKey && !e.altKey;
 }
 
+// Escape en el buscador: si hay algo escrito lo vacía, y si ya está vacío te
+// saca de él, que si no los atajos no responden hasta que haces clic fuera.
+export function escapeEnBuscador(texto) {
+  return texto ? "vaciar" : "salir";
+}
+
 // La "?" enseña todos estos. Con Mayúsculas, que es como sale la "?".
 export function esAtajoAyuda(e, hayVentana = false) {
   if (e.key !== "?" || e.ctrlKey || e.metaKey || e.altKey) return false;

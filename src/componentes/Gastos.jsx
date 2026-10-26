@@ -29,7 +29,7 @@ import { porCabeza, porCabezaDelDia } from "../porCabeza";
 import { mensajeDeGasto } from "../avisarGasto";
 import { enlaceWhatsApp } from "../cobrar";
 import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
-import { esAtajoBuscar, esAtajoGuardar, esAtajoHoy, esAtajoLoMio, esAtajoNuevo, esMac, esOrdenador } from "../teclado";
+import { esAtajoBuscar, esAtajoGuardar, esAtajoHoy, esAtajoLoMio, esAtajoNuevo, escapeEnBuscador, esMac, esOrdenador } from "../teclado";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 import Resaltado from "./Resaltado";
@@ -1352,6 +1352,12 @@ function Gastos({
                   // En el móvil, el teclado tapa justo los resultados.
                   onKeyDown={(e) => {
                     if (e.key === "Enter") e.target.blur();
+                    if (e.key === "Escape") {
+                      // El navegador también lo vacía a su manera; así hacemos todos lo mismo.
+                      e.preventDefault();
+                      if (escapeEnBuscador(filtros.texto) === "vaciar") filtrar({ texto: "" });
+                      else e.target.blur();
+                    }
                   }}
                 />
 

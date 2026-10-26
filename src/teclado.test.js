@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoLoMio, esAtajoHoy, esAtajoPresupuesto, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esMac, listaDeAtajos } from "./teclado";
+import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoLoMio, esAtajoHoy, esAtajoPresupuesto, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, escapeEnBuscador, esMac, listaDeAtajos } from "./teclado";
 
 const con = (matches) => ({ matchMedia: () => ({ matches }) });
 
@@ -334,6 +334,16 @@ describe("esAtajoParar", () => {
   it("otras teclas, no", () => {
     expect(esAtajoParar(tecla("Enter"))).toBe(false);
     expect(esAtajoParar(tecla("p"))).toBe(false);
+  });
+});
+
+describe("escapeEnBuscador", () => {
+  it("con algo escrito, lo vacía", () => {
+    expect(escapeEnBuscador("cena")).toBe("vaciar");
+  });
+
+  it("vacío, te saca del campo", () => {
+    expect(escapeEnBuscador("")).toBe("salir");
   });
 });
 
