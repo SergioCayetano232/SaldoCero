@@ -35,6 +35,12 @@ export function esAtajoDictar(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// La "M" pone o quita "Solo lo mío".
+export function esAtajoLoMio(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "m" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // La "C" baja a quién paga a quién, como el atajo del icono en el móvil.
 export function esAtajoCuentas(e, hayVentana = false) {
   if (e.key?.toLowerCase() !== "c" || e.ctrlKey || e.metaKey || e.altKey) return false;
@@ -81,6 +87,7 @@ export function listaDeAtajos(mac = false, conDictado = false) {
     { teclas: ["N"], que: "Apuntar un gasto nuevo" },
     ...(conDictado ? [{ teclas: ["D"], que: "Dictar un gasto" }] : []),
     { teclas: ["/"], que: "Buscar un gasto" },
+    { teclas: ["M"], que: "Ver solo lo tuyo" },
     { teclas: ["C"], que: "Ir a quién paga a quién" },
     { teclas: ["I"], que: "Enseñar el QR para invitar" },
     { teclas: ["T"], que: "Cambiar el tema" },

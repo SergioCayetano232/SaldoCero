@@ -3,7 +3,7 @@ import { calcularTotal, gastoMasCaro, importeDeGasto, participantesDeGasto } fro
 import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, monedasEnOrden, tasaComoTexto } from "../monedas";
 import { enLista } from "../nombres";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
-import { filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
+import { alternarLoMio, filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
 import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
 import { sugerirConceptos, importeSugerido } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
@@ -29,7 +29,7 @@ import { porCabeza, porCabezaDelDia } from "../porCabeza";
 import { mensajeDeGasto } from "../avisarGasto";
 import { enlaceWhatsApp } from "../cobrar";
 import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
-import { esAtajoBuscar, esAtajoGuardar, esAtajoNuevo, esMac, esOrdenador } from "../teclado";
+import { esAtajoBuscar, esAtajoGuardar, esAtajoLoMio, esAtajoNuevo, esMac, esOrdenador } from "../teclado";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 import Resaltado from "./Resaltado";
@@ -304,6 +304,20 @@ function Gastos({
     window.addEventListener("keydown", alPulsar);
     return () => window.removeEventListener("keydown", alPulsar);
   }, [puedeFiltrar]);
+
+  useEffect(() => {
+    if (!puedeFiltrar || !puedoVerLoMio) return;
+
+    function alPulsar(e) {
+      if (!esAtajoLoMio(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      setFiltros((f) => alternarLoMio(f, soy));
+      barraFiltros.current?.scrollIntoView({ block: "start" });
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [puedeFiltrar, puedoVerLoMio, soy]);
 
   useEffect(() => {
     if (cerrado) return;
@@ -1331,6 +1345,8 @@ function Gastos({
                     className={`filtro-mio ${esYo ? "activo" : ""}`}
                     onClick={() => filtrar({ viajeroId: esYo ? "" : soy })}
                     aria-pressed={esYo}
+                    aria-keyshortcuts="m"
+                    title={esOrdenador() ? "También con la M" : undefined}
                   >
                     Solo lo mío
                   </button>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, soloDelDia, SIN_FILTROS, hayTickets, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayGastosDeHoy } from "./filtros";
+import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, alternarLoMio, soloDelDia, SIN_FILTROS, hayTickets, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayGastosDeHoy } from "./filtros";
 
 const ana = { id: "a", nombre: "Ana" };
 const luis = { id: "b", nombre: "Luis" };
@@ -40,6 +40,25 @@ describe("hayFiltros", () => {
     expect(hayFiltros(con({ texto: "taxi" }))).toBe(true);
     expect(hayFiltros(con({ viajeroId: "a" }))).toBe(true);
     expect(hayFiltros(con({ categoria: "ocio" }))).toBe(true);
+  });
+});
+
+describe("alternarLoMio", () => {
+  it("sin nadie, te pone a ti", () => {
+    expect(alternarLoMio(SIN_FILTROS, "a").viajeroId).toBe("a");
+  });
+
+  it("si ya eras tú, te quita", () => {
+    expect(alternarLoMio(soloDe("a"), "a").viajeroId).toBe("");
+  });
+
+  it("si estabas viendo a otro, pasa a ti", () => {
+    expect(alternarLoMio(soloDe("b"), "a").viajeroId).toBe("a");
+  });
+
+  it("lo demás que hubiera se queda", () => {
+    const antes = { ...SIN_FILTROS, texto: "cena", conTicket: true };
+    expect(alternarLoMio(antes, "a")).toEqual({ ...antes, viajeroId: "a" });
   });
 });
 

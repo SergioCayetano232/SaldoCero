@@ -35,6 +35,11 @@ export function soloDe(viajeroId) {
   return { ...SIN_FILTROS, viajeroId };
 }
 
+// "Solo lo mío" pone o quita lo tuyo. Lo demás se queda: aquí ya estás filtrando tú.
+export function alternarLoMio(filtros, soy) {
+  return { ...filtros, viajeroId: filtros.viajeroId === soy ? "" : soy };
+}
+
 // Lo mismo al tocar un día en la gráfica.
 export function soloDelDia(fecha) {
   return { ...SIN_FILTROS, fecha };

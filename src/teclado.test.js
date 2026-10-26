@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esMac, listaDeAtajos } from "./teclado";
+import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoLoMio, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esMac, listaDeAtajos } from "./teclado";
 
 const con = (matches) => ({ matchMedia: () => ({ matches }) });
 
@@ -114,6 +114,28 @@ describe("esAtajoDictar", () => {
 
   it("con una ventana abierta, no", () => {
     expect(esAtajoDictar(tecla("d"), true)).toBe(false);
+  });
+});
+
+describe("esAtajoLoMio", () => {
+  const tecla = (key, extra = {}, tagName = "BODY") => ({ key, target: { tagName }, ...extra });
+
+  it("la m, en minúscula o mayúscula, sí", () => {
+    expect(esAtajoLoMio(tecla("m"))).toBe(true);
+    expect(esAtajoLoMio(tecla("M", { shiftKey: true }))).toBe(true);
+  });
+
+  it("Cmd+M minimiza la ventana, no", () => {
+    expect(esAtajoLoMio(tecla("m", { metaKey: true }))).toBe(false);
+    expect(esAtajoLoMio(tecla("m", { ctrlKey: true }))).toBe(false);
+  });
+
+  it("escribiendo, la m es una m", () => {
+    expect(esAtajoLoMio(tecla("m", {}, "INPUT"))).toBe(false);
+  });
+
+  it("con una ventana abierta, no", () => {
+    expect(esAtajoLoMio(tecla("m"), true)).toBe(false);
   });
 });
 
@@ -289,6 +311,7 @@ describe("listaDeAtajos", () => {
 
   it("están todos los que hay", () => {
     const teclas = listaDeAtajos().map((a) => a.teclas.at(-1));
-    expect(teclas).toEqual(["N", "/", "C", "I", "T", "Enter", "Z", "Esc", "?"]);
+    expect(teclas).toEqual(["N", "/", "M", "C", "I", "T", "Enter", "Z", "Esc", "?"]);
+    expect(listaDeAtajos(false, true).map((a) => a.teclas.at(-1))).toEqual(["N", "D", "/", "M", "C", "I", "T", "Enter", "Z", "Esc", "?"]);
   });
 });
