@@ -53,6 +53,12 @@ export function esAtajoPresupuesto(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// La "S" comparte el resumen, como el botón de arriba.
+export function esAtajoCompartir(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "s" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // La "C" baja a quién paga a quién, como el atajo del icono en el móvil.
 export function esAtajoCuentas(e, hayVentana = false) {
   if (e.key?.toLowerCase() !== "c" || e.ctrlKey || e.metaKey || e.altKey) return false;
@@ -109,6 +115,7 @@ export function listaDeAtajos(mac = false, conDictado = false) {
     { teclas: ["H"], que: "Ver solo lo de hoy" },
     { teclas: ["C"], que: "Ir a quién paga a quién" },
     { teclas: ["P"], que: "Poner o cambiar el presupuesto" },
+    { teclas: ["S"], que: "Compartir el resumen" },
     { teclas: ["I"], que: "Enseñar el QR para invitar" },
     { teclas: ["T"], que: "Cambiar el tema" },
     { teclas: [mac ? "⌘" : "Ctrl", "Enter"], que: "Guardar el gasto desde cualquier campo" },

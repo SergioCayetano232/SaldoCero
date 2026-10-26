@@ -40,7 +40,7 @@ import { deudoresConVarias } from "../deGolpe";
 import { porcentajes } from "../donut";
 import { vibrar } from "../vibrar";
 import { miSaldo, textoMiSaldo, estadoMiSaldo } from "../miSaldo";
-import { esAtajoCuentas } from "../teclado";
+import { esAtajoCompartir, esAtajoCuentas, esOrdenador } from "../teclado";
 
 function Resumen({
   balances,
@@ -119,6 +119,18 @@ function Resumen({
       if (!esAtajoCuentas(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
       e.preventDefault();
       zonaSaldar.current?.scrollIntoView({ block: "start" });
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, []);
+
+  const botonCompartir = useRef(null);
+  useEffect(() => {
+    function alPulsar(e) {
+      if (!esAtajoCompartir(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      botonCompartir.current?.click();
     }
 
     window.addEventListener("keydown", alPulsar);
@@ -214,8 +226,10 @@ function Resumen({
         <span className="acciones-resumen">
           <button
             className="boton-compartir"
+            ref={botonCompartir}
             onClick={compartir}
-            title="Compartir el resumen"
+            title={esOrdenador() ? "Compartir el resumen (también con la S)" : "Compartir el resumen"}
+            aria-keyshortcuts="s"
           >
             {copiado === "bien" ? "¡Copiado!" : copiado === "mal" ? "No se pudo" : "Compartir"}
           </button>
