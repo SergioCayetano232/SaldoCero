@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoLoMio, esAtajoHoy, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esMac, listaDeAtajos } from "./teclado";
+import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoLoMio, esAtajoHoy, esAtajoPresupuesto, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esMac, listaDeAtajos } from "./teclado";
 
 const con = (matches) => ({ matchMedia: () => ({ matches }) });
 
@@ -158,6 +158,28 @@ describe("esAtajoHoy", () => {
 
   it("con una ventana abierta, no", () => {
     expect(esAtajoHoy(tecla("h"), true)).toBe(false);
+  });
+});
+
+describe("esAtajoPresupuesto", () => {
+  const tecla = (key, extra = {}, tagName = "BODY") => ({ key, target: { tagName }, ...extra });
+
+  it("la p, en minúscula o mayúscula, sí", () => {
+    expect(esAtajoPresupuesto(tecla("p"))).toBe(true);
+    expect(esAtajoPresupuesto(tecla("P", { shiftKey: true }))).toBe(true);
+  });
+
+  it("Cmd+P o Ctrl+P es imprimir, no", () => {
+    expect(esAtajoPresupuesto(tecla("p", { metaKey: true }))).toBe(false);
+    expect(esAtajoPresupuesto(tecla("p", { ctrlKey: true }))).toBe(false);
+  });
+
+  it("escribiendo, la p es una p", () => {
+    expect(esAtajoPresupuesto(tecla("p", {}, "INPUT"))).toBe(false);
+  });
+
+  it("con una ventana abierta, no", () => {
+    expect(esAtajoPresupuesto(tecla("p"), true)).toBe(false);
   });
 });
 
@@ -333,7 +355,7 @@ describe("listaDeAtajos", () => {
 
   it("están todos los que hay", () => {
     const teclas = listaDeAtajos().map((a) => a.teclas.at(-1));
-    expect(teclas).toEqual(["N", "/", "M", "H", "C", "I", "T", "Enter", "Z", "Esc", "?"]);
-    expect(listaDeAtajos(false, true).map((a) => a.teclas.at(-1))).toEqual(["N", "D", "/", "M", "H", "C", "I", "T", "Enter", "Z", "Esc", "?"]);
+    expect(teclas).toEqual(["N", "/", "M", "H", "C", "P", "I", "T", "Enter", "Z", "Esc", "?"]);
+    expect(listaDeAtajos(false, true).map((a) => a.teclas.at(-1))).toEqual(["N", "D", "/", "M", "H", "C", "P", "I", "T", "Enter", "Z", "Esc", "?"]);
   });
 });

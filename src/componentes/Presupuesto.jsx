@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { leerImporte, simboloDe } from "../monedas";
 import { estadoPresupuesto, textoPresupuesto, ritmoDeGasto, textoRitmo } from "../presupuesto";
+import { esAtajoPresupuesto, esOrdenador } from "../teclado";
 
 // La barra del presupuesto, dentro del recuadro del total.
 // Fijo, se ve pero no se cambia: es lo que queda de un viaje cerrado.
@@ -16,6 +17,21 @@ function Presupuesto({ total, gastos = [], presupuesto, moneda, fijo = false, on
     setTexto(presupuesto ? String(presupuesto).replace(".", ",") : "");
     setEditando(true);
   }
+
+  useEffect(() => {
+    if (fijo || editando) return;
+
+    function alPulsar(e) {
+      if (!esAtajoPresupuesto(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      // Si no, la "p" se escribe en el campo al abrirse.
+      e.preventDefault();
+      setTexto(presupuesto ? String(presupuesto).replace(".", ",") : "");
+      setEditando(true);
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [fijo, editando, presupuesto]);
 
   async function guardar(valor) {
     if (await onGuardar(valor)) setEditando(false);
@@ -57,7 +73,12 @@ function Presupuesto({ total, gastos = [], presupuesto, moneda, fijo = false, on
   if (!estado) {
     if (fijo) return null;
     return (
-      <button className="presupuesto-poner" onClick={abrir}>
+      <button
+        className="presupuesto-poner"
+        onClick={abrir}
+        aria-keyshortcuts="p"
+        title={esOrdenador() ? "También con la P" : undefined}
+      >
         + Poner un presupuesto
       </button>
     );
@@ -79,7 +100,12 @@ function Presupuesto({ total, gastos = [], presupuesto, moneda, fijo = false, on
         <span>{textoPresupuesto(estado, presupuesto, moneda)}</span>
         <span className="presupuesto-tanto">{estado.porcentaje}%</span>
         {!fijo && (
-          <button className="presupuesto-cambiar" onClick={abrir} title="Cambiar el presupuesto">
+          <button
+            className="presupuesto-cambiar"
+            onClick={abrir}
+            title={esOrdenador() ? "Cambiar el presupuesto (también con la P)" : "Cambiar el presupuesto"}
+            aria-keyshortcuts="p"
+          >
             ✎
           </button>
         )}
