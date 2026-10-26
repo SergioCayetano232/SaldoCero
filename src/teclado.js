@@ -120,7 +120,7 @@ export function listaDeAtajos(mac = false, conDictado = false) {
     { teclas: ["T"], que: "Cambiar el tema" },
     { teclas: [mac ? "⌘" : "Ctrl", "Enter"], que: "Guardar el gasto desde cualquier campo" },
     { teclas: [mac ? "⌘" : "Ctrl", "Z"], que: "Recuperar lo último que has quitado" },
-    { teclas: ["Esc"], que: "Dejar de editar un gasto o cerrar una ventana" },
+    { teclas: ["Esc"], que: "Dejar de editar, salir del buscador o cerrar una ventana" },
     { teclas: ["?"], que: "Ver estos atajos" },
   ];
 }
