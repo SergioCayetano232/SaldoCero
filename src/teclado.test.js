@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoLoMio, esAtajoHoy, esAtajoPresupuesto, esAtajoCompartir, esAtajoViajero, esAtajoHistorias, esAtajoBote, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, escapeEnBuscador, esMac, listaDeAtajos } from "./teclado";
+import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoLoMio, esAtajoHoy, esAtajoPresupuesto, esAtajoCompartir, esAtajoViajero, esAtajoHistorias, esAtajoBote, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esAtajoOtraVez, escapeEnBuscador, esMac, listaDeAtajos } from "./teclado";
 
 const con = (matches) => ({ matchMedia: () => ({ matches }) });
 
@@ -422,6 +422,24 @@ describe("esAtajoParar", () => {
   it("otras teclas, no", () => {
     expect(esAtajoParar(tecla("Enter"))).toBe(false);
     expect(esAtajoParar(tecla("p"))).toBe(false);
+  });
+});
+
+describe("esAtajoOtraVez", () => {
+  const tecla = (key, extra = {}) => ({ key, target: { tagName: "BUTTON" }, ...extra });
+
+  it("la r, en minúscula o mayúscula, sí", () => {
+    expect(esAtajoOtraVez(tecla("r"))).toBe(true);
+    expect(esAtajoOtraVez(tecla("R", { shiftKey: true }))).toBe(true);
+  });
+
+  it("Cmd+R o Ctrl+R es recargar, no", () => {
+    expect(esAtajoOtraVez(tecla("r", { metaKey: true }))).toBe(false);
+    expect(esAtajoOtraVez(tecla("r", { ctrlKey: true }))).toBe(false);
+  });
+
+  it("otras teclas, no", () => {
+    expect(esAtajoOtraVez(tecla("t"))).toBe(false);
   });
 });
 

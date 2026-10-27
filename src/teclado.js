@@ -112,6 +112,12 @@ export function escapeEnBuscador(texto) {
   return texto ? "vaciar" : "salir";
 }
 
+// La "R" vuelve a poner las historias desde el principio, como "Otra vez".
+// Con Cmd o Ctrl es recargar la página, eso no se toca.
+export function esAtajoOtraVez(e) {
+  return e.key?.toLowerCase() === "r" && !e.ctrlKey && !e.metaKey && !e.altKey;
+}
+
 // La "?" enseña todos estos. Con Mayúsculas, que es como sale la "?".
 export function esAtajoAyuda(e, hayVentana = false) {
   if (e.key !== "?" || e.ctrlKey || e.metaKey || e.altKey) return false;

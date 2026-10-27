@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { DURA_CADA_UNA, historiaDelExtremo, siguienteHistoria } from "../historias";
-import { esAtajoParar, esOrdenador } from "../teclado";
+import { esAtajoOtraVez, esAtajoParar, esOrdenador } from "../teclado";
 
 // Más de esto pulsado es para pararla y leer con calma, no un toque.
 const ES_PARAR = 250;
@@ -41,6 +41,9 @@ function Historias({ historias, onCerrar }) {
       else if (historiaDelExtremo(e.key, historias.length) !== null) {
         e.preventDefault();
         setActual(historiaDelExtremo(e.key, historias.length));
+      } else if (esAtajoOtraVez(e)) {
+        setActual(0);
+        setParada(false);
       } else if (esAtajoParar(e)) {
         // Si no, el espacio pulsa el botón que tenga el foco, y el primero es cerrar.
         e.preventDefault();
@@ -112,7 +115,9 @@ function Historias({ historias, onCerrar }) {
 
       {ultima && (
         <div className="historias-final">
-          <button onClick={() => setActual(0)}>↺ Otra vez</button>
+          <button onClick={() => setActual(0)} aria-keyshortcuts="r" title={esOrdenador() ? "También con la R" : undefined}>
+            ↺ Otra vez
+          </button>
           <button className="historias-salir" onClick={onCerrar}>
             Cerrar
           </button>
