@@ -71,6 +71,12 @@ export function esAtajoHistorias(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// La "B" abre el bote para poner dinero.
+export function esAtajoBote(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "b" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // La "C" baja a quién paga a quién, como el atajo del icono en el móvil.
 export function esAtajoCuentas(e, hayVentana = false) {
   if (e.key?.toLowerCase() !== "c" || e.ctrlKey || e.metaKey || e.altKey) return false;
@@ -128,6 +134,7 @@ export function listaDeAtajos(mac = false, conDictado = false) {
     { teclas: ["H"], que: "Ver solo lo de hoy" },
     { teclas: ["C"], que: "Ir a quién paga a quién" },
     { teclas: ["P"], que: "Poner o cambiar el presupuesto" },
+    { teclas: ["B"], que: "Poner dinero en el bote" },
     { teclas: ["S"], que: "Compartir el resumen" },
     { teclas: ["I"], que: "Enseñar el QR para invitar" },
     { teclas: ["V"], que: "Ver el viaje en historias, ya cerrado" },

@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { conMoneda, leerImporte } from "../monedas";
 import { enElBote, hayBote } from "../bote";
+import { esAtajoBote, esOrdenador } from "../teclado";
 import Avatar from "./Avatar";
 
 // Lo que pone cada uno en el bote, y lo que queda dentro.
@@ -30,6 +31,20 @@ function Bote({ viajeros, aportaciones, gastos, colores, moneda, cerrado, onPone
       setAbierto(false);
     }
   }
+
+  useEffect(() => {
+    if (cerrado || abierto) return;
+
+    function alPulsar(e) {
+      if (!esAtajoBote(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      // Si no, la "b" se escribe en el importe al abrirse.
+      e.preventDefault();
+      setAbierto(true);
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [cerrado, abierto]);
 
   if (!hay && cerrado) return null;
 
@@ -116,7 +131,12 @@ function Bote({ viajeros, aportaciones, gastos, colores, moneda, cerrado, onPone
             </div>
           </div>
         ) : (
-          <button className="enlace" onClick={() => setAbierto(true)}>
+          <button
+            className="enlace"
+            onClick={() => setAbierto(true)}
+            aria-keyshortcuts="b"
+            title={esOrdenador() ? "También con la B" : undefined}
+          >
             {hay ? "Poner más en el bote" : "Hacer un bote"}
           </button>
         ))}
