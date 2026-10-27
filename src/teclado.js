@@ -83,6 +83,12 @@ export function esAtajoBajarResumen(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// La "E" baja los gastos en el Excel.
+export function esAtajoExcel(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "e" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // La "C" baja a quién paga a quién, como el atajo del icono en el móvil.
 export function esAtajoCuentas(e, hayVentana = false) {
   if (e.key?.toLowerCase() !== "c" || e.ctrlKey || e.metaKey || e.altKey) return false;
@@ -149,6 +155,7 @@ export function listaDeAtajos(mac = false, conDictado = false) {
     { teclas: ["B"], que: "Poner dinero en el bote" },
     { teclas: ["S"], que: "Compartir el resumen" },
     { teclas: ["G"], que: "Guardar el resumen en un archivo" },
+    { teclas: ["E"], que: "Bajar los gastos en un Excel" },
     { teclas: ["I"], que: "Enseñar el QR para invitar" },
     { teclas: ["V"], que: "Ver el viaje en historias, ya cerrado" },
     { teclas: ["T"], que: "Cambiar el tema" },

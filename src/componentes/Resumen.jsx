@@ -40,7 +40,7 @@ import { deudoresConVarias } from "../deGolpe";
 import { porcentajes } from "../donut";
 import { vibrar } from "../vibrar";
 import { miSaldo, textoMiSaldo, estadoMiSaldo } from "../miSaldo";
-import { esAtajoBajarResumen, esAtajoCompartir, esAtajoCuentas, esOrdenador } from "../teclado";
+import { esAtajoBajarResumen, esAtajoCompartir, esAtajoExcel, esAtajoCuentas, esOrdenador } from "../teclado";
 
 function Resumen({
   balances,
@@ -143,6 +143,18 @@ function Resumen({
       if (!esAtajoBajarResumen(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
       e.preventDefault();
       botonGuardar.current?.click();
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, []);
+
+  const botonExcel = useRef(null);
+  useEffect(() => {
+    function alPulsar(e) {
+      if (!esAtajoExcel(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      botonExcel.current?.click();
     }
 
     window.addEventListener("keydown", alPulsar);
@@ -273,7 +285,9 @@ function Resumen({
                 viaje?.nombre ?? "viaje"
               )
             }
-            title="Bajar los gastos en una hoja de cálculo"
+            ref={botonExcel}
+            title={esOrdenador() ? "Bajar los gastos en una hoja de cálculo (también con la E)" : "Bajar los gastos en una hoja de cálculo"}
+            aria-keyshortcuts="e"
           >
             Excel
           </button>
