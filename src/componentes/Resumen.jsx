@@ -40,7 +40,7 @@ import { deudoresConVarias } from "../deGolpe";
 import { porcentajes } from "../donut";
 import { vibrar } from "../vibrar";
 import { miSaldo, textoMiSaldo, estadoMiSaldo } from "../miSaldo";
-import { esAtajoCompartir, esAtajoCuentas, esOrdenador } from "../teclado";
+import { esAtajoBajarResumen, esAtajoCompartir, esAtajoCuentas, esOrdenador } from "../teclado";
 
 function Resumen({
   balances,
@@ -131,6 +131,18 @@ function Resumen({
       if (!esAtajoCompartir(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
       e.preventDefault();
       botonCompartir.current?.click();
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, []);
+
+  const botonGuardar = useRef(null);
+  useEffect(() => {
+    function alPulsar(e) {
+      if (!esAtajoBajarResumen(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      botonGuardar.current?.click();
     }
 
     window.addEventListener("keydown", alPulsar);
@@ -245,8 +257,10 @@ function Resumen({
 
           <button
             className="boton-compartir"
+            ref={botonGuardar}
             onClick={() => descargarResumen(elResumen(true), viaje?.nombre ?? "viaje")}
-            title="Bajarlo en un archivo"
+            title={esOrdenador() ? "Bajarlo en un archivo (también con la G)" : "Bajarlo en un archivo"}
+            aria-keyshortcuts="g"
           >
             Guardar
           </button>

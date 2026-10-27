@@ -77,6 +77,12 @@ export function esAtajoBote(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// La "G" guarda el resumen en un archivo, como el botón "Guardar".
+export function esAtajoBajarResumen(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "g" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // La "C" baja a quién paga a quién, como el atajo del icono en el móvil.
 export function esAtajoCuentas(e, hayVentana = false) {
   if (e.key?.toLowerCase() !== "c" || e.ctrlKey || e.metaKey || e.altKey) return false;
@@ -142,6 +148,7 @@ export function listaDeAtajos(mac = false, conDictado = false) {
     { teclas: ["P"], que: "Poner o cambiar el presupuesto" },
     { teclas: ["B"], que: "Poner dinero en el bote" },
     { teclas: ["S"], que: "Compartir el resumen" },
+    { teclas: ["G"], que: "Guardar el resumen en un archivo" },
     { teclas: ["I"], que: "Enseñar el QR para invitar" },
     { teclas: ["V"], que: "Ver el viaje en historias, ya cerrado" },
     { teclas: ["T"], que: "Cambiar el tema" },
