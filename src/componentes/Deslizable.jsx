@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { esHorizontal, conResistencia, queHacer, HOLGURA } from "../deslizar";
+import { esHorizontal, conResistencia, queHacer, dobleClicEdita, HOLGURA } from "../deslizar";
 import { vibrar } from "../vibrar";
 
 // Una fila de la lista que se puede arrastrar de lado con el dedo.
@@ -69,6 +69,13 @@ function Deslizable({ className = "", onEditar, onQuitar, quieto = false, childr
     setDx(0);
   }
 
+  function alDobleClic(e) {
+    if (!dobleClicEdita(e.target, quieto)) return;
+    // El doble clic también selecciona la palabra, y queda feo marcada.
+    window.getSelection()?.removeAllRanges();
+    onEditar();
+  }
+
   const lista = queHacer(dx, ancho);
 
   return (
@@ -79,6 +86,7 @@ function Deslizable({ className = "", onEditar, onQuitar, quieto = false, childr
       onPointerMove={alMover}
       onPointerUp={alSoltar}
       onPointerCancel={alCancelar}
+      onDoubleClick={alDobleClic}
     >
       {children}
     </li>

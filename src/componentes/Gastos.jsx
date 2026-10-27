@@ -1636,7 +1636,7 @@ function Gastos({
                           <button
                             className="boton-editar"
                             onClick={() => editar(gasto)}
-                            title="Editar gasto"
+                            title={esOrdenador() ? "Editar gasto (o doble clic en él)" : "Editar gasto"}
                           >
                             ✏️
                           </button>

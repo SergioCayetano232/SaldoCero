@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { umbral, esHorizontal, conResistencia, queHacer } from "./deslizar";
+import { umbral, esHorizontal, conResistencia, queHacer, dobleClicEdita } from "./deslizar";
 
 describe("umbral", () => {
   it("en un móvil es un tercio largo de la fila", () => {
@@ -72,5 +72,22 @@ describe("queHacer", () => {
   // Lo que devuelve conResistencia tiene que seguir valiendo.
   it("con la goma puesta, sigue valiendo", () => {
     expect(queHacer(conResistencia(-200, 300), 300)).toBe("quitar");
+  });
+});
+
+describe("dobleClicEdita", () => {
+  // Lo justo de un elemento: dice si está dentro de un botón o no.
+  const en = (dentroDeBoton) => ({ closest: () => (dentroDeBoton ? {} : null) });
+
+  it("en la fila, sí", () => {
+    expect(dobleClicEdita(en(false))).toBe(true);
+  });
+
+  it("en un botón de la fila, no", () => {
+    expect(dobleClicEdita(en(true))).toBe(false);
+  });
+
+  it("con el viaje cerrado, no", () => {
+    expect(dobleClicEdita(en(false), true)).toBe(false);
   });
 });

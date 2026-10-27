@@ -32,3 +32,10 @@ export function queHacer(dx, ancho) {
   if (dx >= tope) return "editar";
   return null;
 }
+
+// Con ratón, doble clic en la fila también edita. Pero no si caes en un botón o
+// un enlace de dentro: dos clics seguidos en borrar no son para editar.
+export function dobleClicEdita(objetivo, quieto = false) {
+  if (quieto) return false;
+  return !objetivo?.closest?.("button, a, input, select, textarea, label");
+}
