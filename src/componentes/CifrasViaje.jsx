@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cifrasDelViaje, cifrasEnTexto } from "../cifras";
 import { sinBote } from "../bote";
 import { copiarAlPortapapeles } from "../compartir";
@@ -6,6 +6,7 @@ import { conMoneda } from "../monedas";
 import { enLista } from "../nombres";
 import { enCorto } from "../fechas";
 import { historiasDelViaje } from "../historias";
+import { esAtajoHistorias, esOrdenador } from "../teclado";
 import Cifra from "./Cifra";
 import Historias from "./Historias";
 
@@ -16,6 +17,21 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
   // En lo que puso cada uno también cuenta lo que metió en el bote.
   const personas = sinBote(balances).map((v) => ({ ...v, puesto: v.puesto + (v.alBote ?? 0) }));
   const cifras = cifrasDelViaje(gastos, personas, moneda);
+  const hayCifras = Boolean(cifras);
+
+  useEffect(() => {
+    if (!hayCifras) return;
+
+    function alPulsar(e) {
+      if (!esAtajoHistorias(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      onHistorias?.(true);
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [hayCifras, onHistorias]);
+
   if (!cifras) return null;
 
   async function compartir() {
@@ -35,7 +51,12 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
         </button>
       </h2>
 
-      <button className="boton-historias" onClick={() => onHistorias?.(true)}>
+      <button
+        className="boton-historias"
+        onClick={() => onHistorias?.(true)}
+        aria-keyshortcuts="v"
+        title={esOrdenador() ? "También con la V" : undefined}
+      >
         <span aria-hidden="true">▶</span> Verlo en historias
       </button>
 

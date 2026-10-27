@@ -65,6 +65,12 @@ export function esAtajoViajero(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// La "V" pone las historias del viaje, cuando ya está cerrado.
+export function esAtajoHistorias(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "v" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // La "C" baja a quién paga a quién, como el atajo del icono en el móvil.
 export function esAtajoCuentas(e, hayVentana = false) {
   if (e.key?.toLowerCase() !== "c" || e.ctrlKey || e.metaKey || e.altKey) return false;
@@ -124,6 +130,7 @@ export function listaDeAtajos(mac = false, conDictado = false) {
     { teclas: ["P"], que: "Poner o cambiar el presupuesto" },
     { teclas: ["S"], que: "Compartir el resumen" },
     { teclas: ["I"], que: "Enseñar el QR para invitar" },
+    { teclas: ["V"], que: "Ver el viaje en historias, ya cerrado" },
     { teclas: ["T"], que: "Cambiar el tema" },
     { teclas: [mac ? "⌘" : "Ctrl", "Enter"], que: "Guardar el gasto desde cualquier campo" },
     { teclas: [mac ? "⌘" : "Ctrl", "Z"], que: "Recuperar lo último que has quitado" },
