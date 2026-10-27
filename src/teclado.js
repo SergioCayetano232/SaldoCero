@@ -59,6 +59,12 @@ export function esAtajoCompartir(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// La "A" lleva al campo de añadir viajeros.
+export function esAtajoViajero(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "a" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // La "C" baja a quién paga a quién, como el atajo del icono en el móvil.
 export function esAtajoCuentas(e, hayVentana = false) {
   if (e.key?.toLowerCase() !== "c" || e.ctrlKey || e.metaKey || e.altKey) return false;
@@ -108,6 +114,7 @@ export function esMac(navegador = typeof navigator === "undefined" ? undefined :
 // La D, solo si el navegador sabe dictar: Firefox no.
 export function listaDeAtajos(mac = false, conDictado = false) {
   return [
+    { teclas: ["A"], que: "Añadir un viajero" },
     { teclas: ["N"], que: "Apuntar un gasto nuevo" },
     ...(conDictado ? [{ teclas: ["D"], que: "Dictar un gasto" }] : []),
     { teclas: ["/"], que: "Buscar un gasto" },

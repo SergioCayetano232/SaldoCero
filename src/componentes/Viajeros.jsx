@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Avatar from "./Avatar";
 import NombreEditable from "./NombreEditable";
 import { nombreRepetido, separarNombres, avisoDeRepetidos, LARGO_VARIOS } from "../nombres";
 import { leerCobro, cobroDe, cobroComoTexto } from "../cobro";
+import { esAtajoViajero, esOrdenador } from "../teclado";
 
 function Viajeros({
   viajeros,
@@ -26,6 +27,22 @@ function Viajeros({
   const [cobrando, setCobrando] = useState(null);
   const [textoCobro, setTextoCobro] = useState("");
   const [cobroMal, setCobroMal] = useState(false);
+  const campo = useRef(null);
+
+  useEffect(() => {
+    if (cerrado) return;
+
+    function alPulsar(e) {
+      if (!esAtajoViajero(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      // Si no, la "a" se escribe en el campo al coger el foco.
+      e.preventDefault();
+      campo.current?.focus();
+      campo.current?.scrollIntoView({ block: "center" });
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [cerrado]);
 
   function abrirCobro(viajero) {
     if (cobrando === viajero.id) return setCobrando(null);
@@ -78,8 +95,11 @@ function Viajeros({
       {!cerrado && (
         <div className="fila-formulario">
           <input
+            ref={campo}
             type="text"
             placeholder="Nombre, o varios: Ana, Luis…"
+            aria-keyshortcuts="a"
+            title={esOrdenador() ? "También con la A" : undefined}
             autoCapitalize="words"
             autoComplete="off"
             enterKeyHint="done"
