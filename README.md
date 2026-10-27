@@ -74,6 +74,33 @@ Sin internet abre igual, pero solo la app: los gastos no los guardamos en el
 móvil a propósito. Un viaje lo van tocando varios a la vez, y enseñarte unas
 cuentas viejas sin avisar sería peor que decirte que no hay conexión.
 
+## Con teclado
+
+En el ordenador casi todo tiene su tecla, y con la `?` te salen todas. Las que
+más se usan:
+
+| Tecla | Qué hace |
+|---|---|
+| `N` | Apuntar un gasto nuevo |
+| `D` | Dictarlo |
+| `A` | Añadir un viajero |
+| `/` | Buscar un gasto |
+| `M` / `H` | Ver solo lo tuyo / solo lo de hoy |
+| `C` | Ir a quién paga a quién |
+| `P` / `B` | El presupuesto / el bote |
+| `S` / `G` / `E` | Compartir el resumen / guardarlo en un txt / bajar el Excel |
+| `I` | Enseñar el QR para invitar |
+| `T` | Cambiar el tema |
+| `Ctrl+Enter` | Guardar el gasto desde cualquier campo (`⌘+Enter` en Mac) |
+| `Ctrl+Z` | Recuperar lo último que has quitado (`⌘+Z` en Mac) |
+| `Esc` | Dejar de editar, salir del buscador o cerrar lo que tengas abierto |
+
+Un gasto también se edita con doble clic. Y con el viaje cerrado, la `V` lo pone
+en historias: ahí pasas con las flechas, paras con el espacio, vas a la primera o
+a la última con `Inicio` y `Fin`, y la `R` vuelve a empezar.
+
+Mientras escribes en un campo las letras son letras, no atajos.
+
 ## Lo de las monedas
 
 Cada viaje tiene la suya, y es en la que se hacen todas las cuentas. Si pagas en
