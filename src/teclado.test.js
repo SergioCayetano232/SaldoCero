@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoLoMio, esAtajoHoy, esAtajoQuitarFiltros, esAtajoOrden, viajeDeLaTecla, esAtajoPresupuesto, esAtajoCompartir, esAtajoViajero, esAtajoHistorias, esAtajoBote, esAtajoBajarResumen, esAtajoExcel, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esAtajoOtraVez, escapeEnBuscador, esMac, listaDeAtajos } from "./teclado";
+import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoLoMio, esAtajoHoy, esAtajoQuitarFiltros, esAtajoOrden, viajeDeLaTecla, esAtajoSalir, esAtajoPresupuesto, esAtajoCompartir, esAtajoViajero, esAtajoHistorias, esAtajoBote, esAtajoBajarResumen, esAtajoExcel, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esAtajoOtraVez, escapeEnBuscador, esMac, listaDeAtajos } from "./teclado";
 
 const con = (matches) => ({ matchMedia: () => ({ matches }) });
 
@@ -238,6 +238,29 @@ describe("viajeDeLaTecla", () => {
 
   it("con una ventana abierta, no", () => {
     expect(viajeDeLaTecla(tecla("1"), 3, true)).toBe(-1);
+  });
+});
+
+describe("esAtajoSalir", () => {
+  const tecla = (key, extra = {}, tagName = "BODY") => ({ key, target: { tagName }, ...extra });
+
+  it("la q, en minúscula o mayúscula, sí", () => {
+    expect(esAtajoSalir(tecla("q"))).toBe(true);
+    expect(esAtajoSalir(tecla("Q", { shiftKey: true }))).toBe(true);
+  });
+
+  it("Cmd+Q o Ctrl+Q son del sistema, no", () => {
+    expect(esAtajoSalir(tecla("q", { metaKey: true }))).toBe(false);
+    expect(esAtajoSalir(tecla("q", { ctrlKey: true }))).toBe(false);
+  });
+
+  it("escribiendo, la q es una q", () => {
+    expect(esAtajoSalir(tecla("q", {}, "INPUT"))).toBe(false);
+    expect(esAtajoSalir(tecla("q", {}, "TEXTAREA"))).toBe(false);
+  });
+
+  it("con una ventana abierta, no", () => {
+    expect(esAtajoSalir(tecla("q"), true)).toBe(false);
   });
 });
 
@@ -595,7 +618,7 @@ describe("listaDeAtajos", () => {
 
   it("están todos los que hay", () => {
     const teclas = listaDeAtajos().map((a) => a.teclas.at(-1));
-    expect(teclas).toEqual(["A", "N", "/", "M", "H", "X", "O", "C", "P", "B", "S", "G", "E", "I", "V", "T", "Enter", "Z", "Esc", "?"]);
-    expect(listaDeAtajos(false, true).map((a) => a.teclas.at(-1))).toEqual(["A", "N", "D", "/", "M", "H", "X", "O", "C", "P", "B", "S", "G", "E", "I", "V", "T", "Enter", "Z", "Esc", "?"]);
+    expect(teclas).toEqual(["A", "N", "/", "M", "H", "X", "O", "C", "P", "B", "S", "G", "E", "I", "V", "T", "Q", "Enter", "Z", "Esc", "?"]);
+    expect(listaDeAtajos(false, true).map((a) => a.teclas.at(-1))).toEqual(["A", "N", "D", "/", "M", "H", "X", "O", "C", "P", "B", "S", "G", "E", "I", "V", "T", "Q", "Enter", "Z", "Esc", "?"]);
   });
 });

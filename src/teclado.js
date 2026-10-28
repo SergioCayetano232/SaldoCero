@@ -69,6 +69,13 @@ export function viajeDeLaTecla(e, cuantos, hayVentana = false) {
   return cual < cuantos ? cual : -1;
 }
 
+// La "Q" te saca del viaje, como la ✕ de arriba. Salir no borra nada, así
+// que no se pregunta. Cmd+Q es cerrar el navegador, eso no.
+export function esAtajoSalir(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "q" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // La "P" abre el presupuesto para ponerlo o cambiarlo.
 export function esAtajoPresupuesto(e, hayVentana = false) {
   if (e.key?.toLowerCase() !== "p" || e.ctrlKey || e.metaKey || e.altKey) return false;
@@ -183,6 +190,7 @@ export function listaDeAtajos(mac = false, conDictado = false) {
     { teclas: ["I"], que: "Enseñar el QR para invitar" },
     { teclas: ["V"], que: "Ver el viaje en historias, ya cerrado" },
     { teclas: ["T"], que: "Cambiar el tema" },
+    { teclas: ["Q"], que: "Salir del viaje" },
     { teclas: [mac ? "⌘" : "Ctrl", "Enter"], que: "Guardar el gasto desde cualquier campo" },
     { teclas: [mac ? "⌘" : "Ctrl", "Z"], que: "Recuperar lo último que has quitado" },
     { teclas: ["Esc"], que: "Dejar de editar, salir del buscador o cerrar una ventana" },

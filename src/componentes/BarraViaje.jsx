@@ -4,7 +4,7 @@ import NombreEditable from "./NombreEditable";
 import { textoCerrado } from "../cerrar";
 import { textoDuracion } from "../duracion";
 import { hoy } from "../fechas";
-import { esAtajoInvitar } from "../teclado";
+import { esAtajoInvitar, esAtajoSalir, esOrdenador } from "../teclado";
 
 // La librería del QR pesa, y casi nadie lo abre: se baja solo al pulsar.
 const QRViaje = lazy(() => import("./QRViaje"));
@@ -34,6 +34,17 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir }) {
     window.addEventListener("keydown", alPulsar);
     return () => window.removeEventListener("keydown", alPulsar);
   }, []);
+
+  useEffect(() => {
+    function alPulsar(e) {
+      if (!esAtajoSalir(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      onSalir();
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [onSalir]);
 
   async function copiarCodigo() {
     const hecho = await copiarAlPortapapeles(viaje.codigo);
@@ -69,7 +80,12 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir }) {
         )}
         {duracion && <span className="viaje-dia">{duracion}</span>}
         <span className="viaje-moneda">{viaje.moneda ?? "EUR"}</span>
-        <button className="boton-salir" onClick={onSalir} title="Salir del viaje">
+        <button
+          className="boton-salir"
+          onClick={onSalir}
+          title={esOrdenador() ? "Salir del viaje (también con la Q)" : "Salir del viaje"}
+          aria-keyshortcuts="q"
+        >
           ✕
         </button>
       </div>
