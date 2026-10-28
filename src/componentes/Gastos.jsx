@@ -7,7 +7,7 @@ import { alternarHoy, alternarLoMio, filtrarGastos, hayFiltros, hayGastosDeHoy, 
 import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
 import { sugerirConceptos, importeSugerido } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
-import { ordenarGastos, ordenGuardado, ordenesPara, POR_DIAS } from "../ordenar";
+import { ordenarGastos, ordenGuardado, ordenesPara, POR_DIAS, siguienteOrden } from "../ordenar";
 import { conPropina, PROPINAS } from "../propina";
 import { borradorQueVale, hayAlgoEscrito, hayAlgoQueBorrar } from "../borrador";
 import * as datos from "../datos";
@@ -29,7 +29,7 @@ import { porCabeza, porCabezaDelDia } from "../porCabeza";
 import { mensajeDeGasto } from "../avisarGasto";
 import { enlaceWhatsApp } from "../cobrar";
 import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
-import { esAtajoBuscar, esAtajoGuardar, esAtajoHoy, esAtajoLoMio, esAtajoNuevo, esAtajoQuitarFiltros, escapeEnBuscador, esMac, esOrdenador } from "../teclado";
+import { esAtajoBuscar, esAtajoGuardar, esAtajoHoy, esAtajoLoMio, esAtajoNuevo, esAtajoOrden, esAtajoQuitarFiltros, escapeEnBuscador, esMac, esOrdenador } from "../teclado";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 import Resaltado from "./Resaltado";
@@ -416,6 +416,22 @@ function Gastos({
     ordenVigente === POR_DIAS
       ? porDias(visibles)
       : [{ fecha: "", gastos: ordenarGastos(visibles, ordenVigente, viajeros, soy) }];
+
+  useEffect(() => {
+    if (!puedeFiltrar) return;
+
+    function alPulsar(e) {
+      if (!esAtajoOrden(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      const nuevo = siguienteOrden(ordenVigente, puedoVerLoMio);
+      setOrden(nuevo);
+      datos.guardarOrden(codigo, nuevo);
+      barraFiltros.current?.scrollIntoView({ block: "start" });
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [puedeFiltrar, ordenVigente, puedoVerLoMio, codigo]);
 
   const todosLosIds = viajeros.map((v) => v.id);
   // Mientras no toques las casillas, el gasto va entre todos.
@@ -1483,6 +1499,8 @@ function Gastos({
                     datos.guardarOrden(codigo, e.target.value);
                   }}
                   aria-label="Ordenar gastos"
+                  aria-keyshortcuts="o"
+                  title={esOrdenador() ? "Ordenar gastos (también con la O)" : undefined}
                 >
                   {ordenesPara(puedoVerLoMio).map((o) => (
                     <option key={o.id} value={o.id}>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { ordenarGastos, ordenGuardado, ordenesPara, ORDENES, POR_DIAS } from "./ordenar";
+import { ordenarGastos, ordenGuardado, ordenesPara, siguienteOrden, ORDENES, POR_DIAS } from "./ordenar";
 import { BOTE } from "./bote";
 
 const viajeros = [
@@ -107,6 +107,37 @@ describe("ordenarGastos", () => {
   it("los órdenes tienen nombre y el primero es por días", () => {
     expect(ORDENES[0].id).toBe(POR_DIAS);
     for (const o of ORDENES) expect(o.nombre).toBeTruthy();
+  });
+});
+
+describe("siguienteOrden", () => {
+  it("pasa al de debajo", () => {
+    expect(siguienteOrden(POR_DIAS, false)).toBe("importe");
+    expect(siguienteOrden("importe", false)).toBe("baratos");
+  });
+
+  it("del último vuelve a por días", () => {
+    expect(siguienteOrden("antiguos", false)).toBe(POR_DIAS);
+    expect(siguienteOrden("mio", true)).toBe(POR_DIAS);
+  });
+
+  it("lo que más me toca solo entra si has dicho quién eres", () => {
+    expect(siguienteOrden("antiguos", true)).toBe("mio");
+  });
+
+  it("con uno que no está en la lista, empieza por el principio", () => {
+    expect(siguienteOrden("mio", false)).toBe(POR_DIAS);
+  });
+
+  it("da la vuelta entera sin saltarse ninguno", () => {
+    let orden = POR_DIAS;
+    const vistos = [];
+    for (let i = 0; i < ORDENES.length; i++) {
+      vistos.push(orden);
+      orden = siguienteOrden(orden, true);
+    }
+    expect(vistos).toEqual(ORDENES.map((o) => o.id));
+    expect(orden).toBe(POR_DIAS);
   });
 });
 

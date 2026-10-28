@@ -54,6 +54,12 @@ export function esAtajoQuitarFiltros(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// La "O" pasa al siguiente orden de la lista, como ir bajando por el desplegable.
+export function esAtajoOrden(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "o" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // La "P" abre el presupuesto para ponerlo o cambiarlo.
 export function esAtajoPresupuesto(e, hayVentana = false) {
   if (e.key?.toLowerCase() !== "p" || e.ctrlKey || e.metaKey || e.altKey) return false;
@@ -158,6 +164,7 @@ export function listaDeAtajos(mac = false, conDictado = false) {
     { teclas: ["M"], que: "Ver solo lo tuyo" },
     { teclas: ["H"], que: "Ver solo lo de hoy" },
     { teclas: ["X"], que: "Quitar todos los filtros" },
+    { teclas: ["O"], que: "Cambiar el orden de los gastos" },
     { teclas: ["C"], que: "Ir a quién paga a quién" },
     { teclas: ["P"], que: "Poner o cambiar el presupuesto" },
     { teclas: ["B"], que: "Poner dinero en el bote" },

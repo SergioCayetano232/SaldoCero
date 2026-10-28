@@ -23,6 +23,13 @@ export function ordenesPara(hayYo) {
 
 export const POR_DIAS = "dias";
 
+// El que va detrás en el desplegable, y del último se vuelve al primero.
+export function siguienteOrden(actual, hayYo) {
+  const ordenes = ordenesPara(hayYo);
+  const donde = ordenes.findIndex((o) => o.id === actual);
+  return ordenes[(donde + 1) % ordenes.length].id;
+}
+
 // Por días no se toca: eso ya lo agrupa la lista.
 export function ordenarGastos(gastos, orden, viajeros, soy = null) {
   const masCaro = (a, b) => importeDeGasto(b) - importeDeGasto(a);
