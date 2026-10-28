@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { conCerrado } from "./pasados";
+import { conCerrado, monedaEnLista } from "./pasados";
 
 const lista = [
   { codigo: "AAA111", nombre: "Lisboa", visto: 1 },
@@ -31,5 +31,24 @@ describe("conCerrado", () => {
 
   it("un viaje que no está en la lista no se añade", () => {
     expect(conCerrado(lista, "ZZZ999", true)).toBeNull();
+  });
+});
+
+describe("monedaEnLista", () => {
+  it("la de fuera, con su bandera", () => {
+    expect(monedaEnLista("GBP", "EUR")).toBe("🇬🇧 GBP");
+  });
+
+  it("la de casa no sale", () => {
+    expect(monedaEnLista("EUR", "EUR")).toBe("");
+    expect(monedaEnLista("MXN", "MXN")).toBe("");
+  });
+
+  it("para uno de México, el euro sí es de fuera", () => {
+    expect(monedaEnLista("EUR", "MXN")).toBe("🇪🇺 EUR");
+  });
+
+  it("los guardados sin moneda, nada", () => {
+    expect(monedaEnLista(undefined, "EUR")).toBe("");
   });
 });

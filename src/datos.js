@@ -52,7 +52,7 @@ function apuntarEnHistorial(viaje) {
   const antes = historial().find((v) => v.codigo === viaje.codigo);
   const resto = historial().filter((v) => v.codigo !== viaje.codigo);
   // El candado se queda como estaba hasta que el viaje acabe de cargar.
-  const lista = [{ codigo: viaje.codigo, nombre: viaje.nombre, visto: Date.now(), cerrado: Boolean(antes?.cerrado) }, ...resto];
+  const lista = [{ codigo: viaje.codigo, nombre: viaje.nombre, moneda: viaje.moneda, visto: Date.now(), cerrado: Boolean(antes?.cerrado) }, ...resto];
 
   localStorage.setItem(CLAVE_HISTORICO, JSON.stringify(lista.slice(0, CUANTOS_GUARDAMOS)));
 }

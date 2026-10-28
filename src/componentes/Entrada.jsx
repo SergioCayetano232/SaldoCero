@@ -4,11 +4,13 @@ import { MONEDAS, monedaConBandera, monedaDeCasa } from "../monedas";
 import { haceCuanto } from "../fechas";
 import { LARGO_MAXIMO } from "../nombres";
 import { codigoDelPortapapeles } from "../codigos";
+import { monedaEnLista } from "../pasados";
 
 // Primera pantalla: o creas un viaje o entras en el de alguien con su código.
 function Entrada({ onCrear, onEntrar, cargando, error }) {
   const [nombre, setNombre] = useState("");
   const [moneda, setMoneda] = useState(monedaDeCasa);
+  const [deCasa] = useState(monedaDeCasa);
   const [codigo, setCodigo] = useState("");
   // Los viajes por los que ya has pasado, guardados en este navegador.
   const [pasados, setPasados] = useState(() => datos.historial());
@@ -134,8 +136,11 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
                   <span className="viaje-pasado-nombre">{viaje.nombre}</span>
                   <small className="reparto">
                     {viaje.codigo}
-                    {viaje.visto && <span className="viaje-pasado-cuando"> · {haceCuanto(viaje.visto)}</span>}
-                    {viaje.cerrado && <span className="viaje-pasado-cuando viaje-pasado-cerrado"> · 🔒 cerrado</span>}
+                    {monedaEnLista(viaje.moneda, deCasa) && (
+                      <span className="viaje-pasado-cuando">· {monedaEnLista(viaje.moneda, deCasa)}</span>
+                    )}
+                    {viaje.visto && <span className="viaje-pasado-cuando">· {haceCuanto(viaje.visto)}</span>}
+                    {viaje.cerrado && <span className="viaje-pasado-cuando">· 🔒 cerrado</span>}
                   </small>
                 </button>
                 <button

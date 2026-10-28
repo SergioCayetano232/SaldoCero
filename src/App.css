@@ -1721,10 +1721,10 @@ button:active {
 .viaje-pasado-cuando {
   font-family: var(--fuente);
   letter-spacing: normal;
-}
-
-/* Que en el móvil no se quede el candado en una línea y "cerrado" en otra. */
-.viaje-pasado-cerrado {
+  /* En el móvil, si no cabe, baja el trozo entero: nada de "hace 5" arriba y
+     "días" abajo. */
+  display: inline-block;
+  margin-left: 0.3em;
   white-space: nowrap;
 }
 
