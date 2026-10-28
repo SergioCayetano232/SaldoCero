@@ -1723,6 +1723,11 @@ button:active {
   letter-spacing: normal;
 }
 
+/* Que en el móvil no se quede el candado en una línea y "cerrado" en otra. */
+.viaje-pasado-cerrado {
+  white-space: nowrap;
+}
+
 .viaje-pasado:disabled {
   opacity: 0.5;
   cursor: default;

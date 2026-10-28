@@ -151,6 +151,14 @@ function App() {
     document.title = tituloDelViaje(viaje, soy);
   }, [viaje, soy]);
 
+  // Lo cierre quien lo cierre, aquí o desde otro móvil, en "Tus viajes" sale el candado.
+  const codigoAbierto = viaje?.codigo;
+  const estaCerradoYa = estaCerrado(viaje);
+
+  useEffect(() => {
+    if (codigoAbierto) datos.cerradoEnHistorial(codigoAbierto, estaCerradoYa);
+  }, [codigoAbierto, estaCerradoYa]);
+
   // Lo que han apuntado los demás, mientras dura el aviso.
   const [novedad, setNovedad] = useState(null);
   // Lo que has creado tú desde aquí, para no avisarte de ello como si fuera de otro.

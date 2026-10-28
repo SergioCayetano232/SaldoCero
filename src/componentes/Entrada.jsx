@@ -135,6 +135,7 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
                   <small className="reparto">
                     {viaje.codigo}
                     {viaje.visto && <span className="viaje-pasado-cuando"> · {haceCuanto(viaje.visto)}</span>}
+                    {viaje.cerrado && <span className="viaje-pasado-cuando viaje-pasado-cerrado"> · 🔒 cerrado</span>}
                   </small>
                 </button>
                 <button
