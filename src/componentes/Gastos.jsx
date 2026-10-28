@@ -29,7 +29,7 @@ import { porCabeza, porCabezaDelDia } from "../porCabeza";
 import { mensajeDeGasto } from "../avisarGasto";
 import { enlaceWhatsApp } from "../cobrar";
 import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
-import { esAtajoBuscar, esAtajoGuardar, esAtajoHoy, esAtajoLoMio, esAtajoNuevo, escapeEnBuscador, esMac, esOrdenador } from "../teclado";
+import { esAtajoBuscar, esAtajoGuardar, esAtajoHoy, esAtajoLoMio, esAtajoNuevo, esAtajoQuitarFiltros, escapeEnBuscador, esMac, esOrdenador } from "../teclado";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 import Resaltado from "./Resaltado";
@@ -333,6 +333,19 @@ function Gastos({
     window.addEventListener("keydown", alPulsar);
     return () => window.removeEventListener("keydown", alPulsar);
   }, [hayHoy]);
+
+  useEffect(() => {
+    if (!filtrando) return;
+
+    function alPulsar(e) {
+      if (!esAtajoQuitarFiltros(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      setFiltros(SIN_FILTROS);
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [filtrando]);
 
   useEffect(() => {
     if (cerrado) return;
@@ -1508,7 +1521,12 @@ function Gastos({
                       </span>
                     )}
                   </span>
-                  <button className="enlace" onClick={() => setFiltros(SIN_FILTROS)}>
+                  <button
+                    className="enlace"
+                    onClick={() => setFiltros(SIN_FILTROS)}
+                    aria-keyshortcuts="x"
+                    title={esOrdenador() ? "También con la X" : undefined}
+                  >
                     quitar filtros
                   </button>
                 </p>

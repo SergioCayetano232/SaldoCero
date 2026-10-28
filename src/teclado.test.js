@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoLoMio, esAtajoHoy, esAtajoPresupuesto, esAtajoCompartir, esAtajoViajero, esAtajoHistorias, esAtajoBote, esAtajoBajarResumen, esAtajoExcel, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esAtajoOtraVez, escapeEnBuscador, esMac, listaDeAtajos } from "./teclado";
+import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoLoMio, esAtajoHoy, esAtajoQuitarFiltros, esAtajoPresupuesto, esAtajoCompartir, esAtajoViajero, esAtajoHistorias, esAtajoBote, esAtajoBajarResumen, esAtajoExcel, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esAtajoOtraVez, escapeEnBuscador, esMac, listaDeAtajos } from "./teclado";
 
 const con = (matches) => ({ matchMedia: () => ({ matches }) });
 
@@ -158,6 +158,28 @@ describe("esAtajoHoy", () => {
 
   it("con una ventana abierta, no", () => {
     expect(esAtajoHoy(tecla("h"), true)).toBe(false);
+  });
+});
+
+describe("esAtajoQuitarFiltros", () => {
+  const tecla = (key, extra = {}, tagName = "BODY") => ({ key, target: { tagName }, ...extra });
+
+  it("la x, en minúscula o mayúscula, sí", () => {
+    expect(esAtajoQuitarFiltros(tecla("x"))).toBe(true);
+    expect(esAtajoQuitarFiltros(tecla("X", { shiftKey: true }))).toBe(true);
+  });
+
+  it("Ctrl+X o Cmd+X es cortar, no", () => {
+    expect(esAtajoQuitarFiltros(tecla("x", { ctrlKey: true }))).toBe(false);
+    expect(esAtajoQuitarFiltros(tecla("x", { metaKey: true }))).toBe(false);
+  });
+
+  it("escribiendo en el buscador, la x es una x", () => {
+    expect(esAtajoQuitarFiltros(tecla("x", {}, "INPUT"))).toBe(false);
+  });
+
+  it("con una ventana abierta, no", () => {
+    expect(esAtajoQuitarFiltros(tecla("x"), true)).toBe(false);
   });
 });
 
@@ -515,7 +537,7 @@ describe("listaDeAtajos", () => {
 
   it("están todos los que hay", () => {
     const teclas = listaDeAtajos().map((a) => a.teclas.at(-1));
-    expect(teclas).toEqual(["A", "N", "/", "M", "H", "C", "P", "B", "S", "G", "E", "I", "V", "T", "Enter", "Z", "Esc", "?"]);
-    expect(listaDeAtajos(false, true).map((a) => a.teclas.at(-1))).toEqual(["A", "N", "D", "/", "M", "H", "C", "P", "B", "S", "G", "E", "I", "V", "T", "Enter", "Z", "Esc", "?"]);
+    expect(teclas).toEqual(["A", "N", "/", "M", "H", "X", "C", "P", "B", "S", "G", "E", "I", "V", "T", "Enter", "Z", "Esc", "?"]);
+    expect(listaDeAtajos(false, true).map((a) => a.teclas.at(-1))).toEqual(["A", "N", "D", "/", "M", "H", "X", "C", "P", "B", "S", "G", "E", "I", "V", "T", "Enter", "Z", "Esc", "?"]);
   });
 });
