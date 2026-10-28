@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoLoMio, esAtajoHoy, esAtajoQuitarFiltros, esAtajoOrden, esAtajoPresupuesto, esAtajoCompartir, esAtajoViajero, esAtajoHistorias, esAtajoBote, esAtajoBajarResumen, esAtajoExcel, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esAtajoOtraVez, escapeEnBuscador, esMac, listaDeAtajos } from "./teclado";
+import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoLoMio, esAtajoHoy, esAtajoQuitarFiltros, esAtajoOrden, viajeDeLaTecla, esAtajoPresupuesto, esAtajoCompartir, esAtajoViajero, esAtajoHistorias, esAtajoBote, esAtajoBajarResumen, esAtajoExcel, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esAtajoOtraVez, escapeEnBuscador, esMac, listaDeAtajos } from "./teclado";
 
 const con = (matches) => ({ matchMedia: () => ({ matches }) });
 
@@ -203,6 +203,41 @@ describe("esAtajoOrden", () => {
 
   it("con una ventana abierta, no", () => {
     expect(esAtajoOrden(tecla("o"), true)).toBe(false);
+  });
+});
+
+describe("viajeDeLaTecla", () => {
+  const tecla = (key, extra = {}, tagName = "BODY") => ({ key, target: { tagName }, ...extra });
+
+  it("el 1 es el de arriba", () => {
+    expect(viajeDeLaTecla(tecla("1"), 3)).toBe(0);
+    expect(viajeDeLaTecla(tecla("3"), 3)).toBe(2);
+  });
+
+  it("un número sin viaje detrás, nada", () => {
+    expect(viajeDeLaTecla(tecla("4"), 3)).toBe(-1);
+    expect(viajeDeLaTecla(tecla("1"), 0)).toBe(-1);
+  });
+
+  it("el 0 y las letras, nada", () => {
+    expect(viajeDeLaTecla(tecla("0"), 3)).toBe(-1);
+    expect(viajeDeLaTecla(tecla("a"), 3)).toBe(-1);
+    expect(viajeDeLaTecla(tecla("10"), 9)).toBe(-1);
+  });
+
+  it("con Ctrl, Cmd o Alt es del navegador, no", () => {
+    expect(viajeDeLaTecla(tecla("1", { ctrlKey: true }), 3)).toBe(-1);
+    expect(viajeDeLaTecla(tecla("1", { metaKey: true }), 3)).toBe(-1);
+    expect(viajeDeLaTecla(tecla("1", { altKey: true }), 3)).toBe(-1);
+  });
+
+  it("escribiendo el nombre o el código, el número es un número", () => {
+    expect(viajeDeLaTecla(tecla("1", {}, "INPUT"), 3)).toBe(-1);
+    expect(viajeDeLaTecla(tecla("1", {}, "SELECT"), 3)).toBe(-1);
+  });
+
+  it("con una ventana abierta, no", () => {
+    expect(viajeDeLaTecla(tecla("1"), 3, true)).toBe(-1);
   });
 });
 

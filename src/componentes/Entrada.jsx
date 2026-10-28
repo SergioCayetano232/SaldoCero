@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as datos from "../datos";
 import { MONEDAS, monedaConBandera, monedaDeCasa } from "../monedas";
 import { haceCuanto } from "../fechas";
 import { LARGO_MAXIMO } from "../nombres";
 import { codigoDelPortapapeles } from "../codigos";
 import { monedaEnLista } from "../pasados";
+import { esOrdenador, viajeDeLaTecla } from "../teclado";
 
 // Primera pantalla: o creas un viaje o entras en el de alguien con su código.
 function Entrada({ onCrear, onEntrar, cargando, error }) {
@@ -24,6 +25,20 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
     setCodigo(pegado);
     onEntrar(pegado);
   }
+
+  useEffect(() => {
+    if (cargando) return;
+
+    function alPulsar(e) {
+      const cual = viajeDeLaTecla(e, pasados.length, Boolean(document.querySelector('[aria-modal="true"]')));
+      if (cual < 0) return;
+      e.preventDefault();
+      onEntrar(pasados[cual].codigo);
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [cargando, pasados, onEntrar]);
 
   function olvidar(codigoViaje) {
     datos.olvidarDelHistorial(codigoViaje);
@@ -126,12 +141,14 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
           </h2>
 
           <ul className="lista">
-            {pasados.map((viaje) => (
+            {pasados.map((viaje, i) => (
               <li key={viaje.codigo}>
                 <button
                   className="viaje-pasado"
                   onClick={() => onEntrar(viaje.codigo)}
                   disabled={cargando}
+                  aria-keyshortcuts={i < 9 ? String(i + 1) : undefined}
+                  title={esOrdenador() && i < 9 ? `También con el ${i + 1}` : undefined}
                 >
                   <span className="viaje-pasado-nombre">{viaje.nombre}</span>
                   <small className="reparto">

@@ -60,6 +60,15 @@ export function esAtajoOrden(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// En la entrada, del 1 al 9 abren tus viajes por orden: el 1, el de arriba.
+// Devuelve cuál, o -1 si la tecla no es para eso.
+export function viajeDeLaTecla(e, cuantos, hayVentana = false) {
+  if (!/^[1-9]$/.test(e.key ?? "") || e.ctrlKey || e.metaKey || e.altKey) return -1;
+  if (hayVentana || escribiendo(e.target)) return -1;
+  const cual = Number(e.key) - 1;
+  return cual < cuantos ? cual : -1;
+}
+
 // La "P" abre el presupuesto para ponerlo o cambiarlo.
 export function esAtajoPresupuesto(e, hayVentana = false) {
   if (e.key?.toLowerCase() !== "p" || e.ctrlKey || e.metaKey || e.altKey) return false;
