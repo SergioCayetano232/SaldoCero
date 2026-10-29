@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { resumenEnTexto, enlaceDelViaje, invitacion, invitar, nombreDeArchivo, compartirImagen, copiarAlPortapapeles } from "./compartir";
+import { resumenEnTexto, enQueSeFue, enlaceDelViaje, invitacion, invitar, nombreDeArchivo, compartirImagen, copiarAlPortapapeles } from "./compartir";
 import { PATRONES } from "./vibrar";
 
 // Un viaje de ejemplo, para no repetirlo en cada prueba.
@@ -19,7 +19,54 @@ const viaje = {
   ],
 };
 
+describe("enQueSeFue", () => {
+  const gastos = [
+    { importe: 60, categoria: "comida" },
+    { importe: 30, categoria: "comida" },
+    { importe: 150, categoria: "alojamiento" },
+    // Pagado en dólares: cuenta lo que fue en euros.
+    { importe: 66, importeConvertido: 60, categoria: "transporte" },
+  ];
+
+  it("de más a menos, con lo que es del total", () => {
+    expect(enQueSeFue(gastos, "EUR")).toEqual([
+      "· 🛏️ Alojamiento: 150.00 € (50 %)",
+      "· 🍽️ Comida: 90.00 € (30 %)",
+      "· 🚌 Transporte: 60.00 € (20 %)",
+    ]);
+  });
+
+  it("los de antes sin categoría van a otros", () => {
+    expect(enQueSeFue([{ importe: 10, categoria: "ocio" }, { importe: 30 }], "EUR")).toEqual([
+      "· 📦 Otros: 30.00 € (75 %)",
+      "· 🎟️ Ocio: 10.00 € (25 %)",
+    ]);
+  });
+
+  it("con una sola categoría, o sin gastos, nada", () => {
+    expect(enQueSeFue([{ importe: 10, categoria: "comida" }, { importe: 5, categoria: "comida" }], "EUR")).toEqual([]);
+    expect(enQueSeFue([], "EUR")).toEqual([]);
+  });
+});
+
 describe("resumenEnTexto", () => {
+  it("dice en qué se fue el dinero, debajo del total", () => {
+    const gastos = [
+      { importe: 200, categoria: "alojamiento", fecha: "2026-10-01" },
+      { importe: 126.5, categoria: "comida", fecha: "2026-10-02" },
+    ];
+    const lineas = resumenEnTexto({ ...viaje, gastos }).split("\n");
+    const i = lineas.indexOf("*En qué se fue*");
+
+    expect(i).toBeGreaterThan(lineas.findIndex((l) => l.includes("Total del viaje")));
+    expect(lineas[i + 1]).toBe("· 🛏️ Alojamiento: 200.00 € (61 %)");
+    expect(lineas[i + 2]).toBe("· 🍽️ Comida: 126.50 € (39 %)");
+  });
+
+  it("sin gastos, sin ese apartado", () => {
+    expect(resumenEnTexto(viaje)).not.toContain("En qué se fue");
+  });
+
   it("lleva el nombre y el total", () => {
     const texto = resumenEnTexto(viaje);
 

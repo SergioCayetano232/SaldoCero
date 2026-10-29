@@ -3,6 +3,8 @@
 import { conMoneda } from "./monedas";
 import { cuandoFue, hoy } from "./fechas";
 import { vibrar } from "./vibrar";
+import { gastoPorCategoria } from "./categorias";
+import { importeDeGasto } from "./calculos";
 
 // Un texto que se lea bien en WhatsApp: los asteriscos salen en negrita y
 // los emojis ayudan a separar las partes de un vistazo.
@@ -14,6 +16,11 @@ export function resumenEnTexto({ nombre, codigo, total, balances, pagos, moneda,
 
   lineas.push(`💰 Total del viaje: *${conMoneda(total, moneda)}*${porCabeza(total, balances, moneda)}`);
   lineas.push("");
+
+  const enQue = enQueSeFue(gastos, moneda);
+  if (enQue.length > 0) {
+    lineas.push("*En qué se fue*", ...enQue, "");
+  }
 
   // Lo que ha puesto cada uno, y al lado lo que le tocaba: así la deuda se entiende sola.
   lineas.push("*Lo que puso cada uno*");
@@ -55,6 +62,17 @@ export function resumenEnTexto({ nombre, codigo, total, balances, pagos, moneda,
   if (enlace) lineas.push(enlace);
 
   return lineas.join("\n");
+}
+
+// Con todo en la misma categoría, "Otros: 100 %" no dice nada.
+export function enQueSeFue(gastos, moneda) {
+  const categorias = gastoPorCategoria(gastos, importeDeGasto);
+  if (categorias.length < 2) return [];
+
+  const suma = categorias.reduce((t, c) => t + c.total, 0);
+  return categorias.map(
+    (c) => `· ${c.emoji} ${c.nombre}: ${conMoneda(c.total, moneda)} (${Math.round((c.total / suma) * 100)} %)`
+  );
 }
 
 // Con gastos que no son de todos, o repartidos a partes desiguales, a cada uno
