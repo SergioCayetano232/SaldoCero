@@ -1738,6 +1738,14 @@ button:active {
   white-space: nowrap;
 }
 
+.viaje-pasado-saldo.le-deben {
+  color: var(--verde);
+}
+
+.viaje-pasado-saldo.debe {
+  color: var(--rojo);
+}
+
 .viaje-pasado:disabled {
   opacity: 0.5;
   cursor: default;

@@ -13,7 +13,7 @@ import { pagosDelViaje } from "./calculos";
 import { cuantosMios, ponerGlobito } from "./globito";
 import { reducirFoto } from "./tickets";
 import { avisoDeArranque, codigoQueAbrir, hayQueOlvidar } from "./arranque";
-import { tituloDelViaje } from "./titulo";
+import { tituloDelViaje, miNeto } from "./titulo";
 import { temaGuardado, siguienteTema, temaDe, temaQueToca } from "./tema";
 import { hayQueSubir } from "./arriba";
 import { esAtajoDeshacer, esAtajoTema } from "./teclado";
@@ -158,6 +158,13 @@ function App() {
   useEffect(() => {
     if (codigoAbierto) datos.cerradoEnHistorial(codigoAbierto, estaCerradoYa);
   }, [codigoAbierto, estaCerradoYa]);
+
+  // Y lo que debes o te deben, para verlo desde la lista sin entrar.
+  const neto = miNeto(viaje, soy);
+
+  useEffect(() => {
+    if (codigoAbierto) datos.netoEnHistorial(codigoAbierto, neto);
+  }, [codigoAbierto, neto]);
 
   // Lo que han apuntado los demás, mientras dura el aviso.
   const [novedad, setNovedad] = useState(null);

@@ -9,7 +9,7 @@ import { limpiarNota } from "./notas";
 import { limpiarNombre } from "./nombres";
 import { codigoDeTexto } from "./codigos";
 import { POR_DIAS } from "./ordenar";
-import { conCerrado } from "./pasados";
+import { conCerrado, conNeto } from "./pasados";
 
 // Al usuario le decimos algo que entienda, pero el fallo de verdad lo dejamos
 // en la consola, que si no no hay quien averigüe qué ha pasado.
@@ -52,7 +52,10 @@ function apuntarEnHistorial(viaje) {
   const antes = historial().find((v) => v.codigo === viaje.codigo);
   const resto = historial().filter((v) => v.codigo !== viaje.codigo);
   // El candado se queda como estaba hasta que el viaje acabe de cargar.
-  const lista = [{ codigo: viaje.codigo, nombre: viaje.nombre, moneda: viaje.moneda, visto: Date.now(), cerrado: Boolean(antes?.cerrado) }, ...resto];
+  const lista = [
+    { codigo: viaje.codigo, nombre: viaje.nombre, moneda: viaje.moneda, visto: Date.now(), cerrado: Boolean(antes?.cerrado), neto: antes?.neto ?? null },
+    ...resto,
+  ];
 
   localStorage.setItem(CLAVE_HISTORICO, JSON.stringify(lista.slice(0, CUANTOS_GUARDAMOS)));
 }
@@ -65,6 +68,11 @@ export function renombrarEnHistorial(codigo, nombre) {
 
 export function cerradoEnHistorial(codigo, cerrado) {
   const lista = conCerrado(historial(), codigo, cerrado);
+  if (lista) localStorage.setItem(CLAVE_HISTORICO, JSON.stringify(lista));
+}
+
+export function netoEnHistorial(codigo, neto) {
+  const lista = conNeto(historial(), codigo, neto);
   if (lista) localStorage.setItem(CLAVE_HISTORICO, JSON.stringify(lista));
 }
 

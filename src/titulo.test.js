@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { tituloDePestana, tituloDelViaje, cuentaEnTitulo, TITULO_SIN_VIAJE } from "./titulo";
+import { tituloDePestana, tituloDelViaje, cuentaEnTitulo, cuentaDeNeto, miNeto, TITULO_SIN_VIAJE } from "./titulo";
 
 describe("tituloDePestana", () => {
   it("con viaje, su nombre delante", () => {
@@ -72,5 +72,42 @@ describe("tituloDelViaje", () => {
   it("lo ya pagado no cuenta", () => {
     const pagado = { ...viaje, saldados: [{ deId: "luis", aId: "ana" }] };
     expect(tituloDelViaje(pagado, "luis")).toBe("Lisboa · SaldoCero");
+  });
+});
+
+describe("miNeto", () => {
+  const viaje = {
+    viajeros: [{ id: "ana" }, { id: "luis" }, { id: "eva" }],
+    gastos: [{ id: "g1", pagadorId: "ana", importe: 100 }],
+  };
+
+  it("en positivo si te deben, en negativo si debes, a céntimos", () => {
+    expect(miNeto(viaje, "ana")).toBe(66.67);
+    expect(miNeto(viaje, "luis")).toBe(-33.33);
+  });
+
+  it("sin saber quién eres, o si ya no estás, null", () => {
+    expect(miNeto(viaje, null)).toBeNull();
+    expect(miNeto(viaje, "pepe")).toBeNull();
+    expect(miNeto(null, "ana")).toBeNull();
+  });
+
+  it("lo ya pagado no cuenta", () => {
+    const pagado = { ...viaje, saldados: [{ deId: "luis", aId: "ana" }] };
+    expect(miNeto(pagado, "luis")).toBe(0);
+    expect(miNeto(pagado, "ana")).toBe(33.33);
+  });
+});
+
+describe("cuentaDeNeto", () => {
+  it("con su moneda", () => {
+    expect(cuentaDeNeto(23, "EUR")).toBe("te deben 23.00 €");
+    expect(cuentaDeNeto(-12.5, "USD")).toBe("debes $12.50");
+  });
+
+  it("a cero, o sin guardar todavía, nada", () => {
+    expect(cuentaDeNeto(0)).toBeNull();
+    expect(cuentaDeNeto(null)).toBeNull();
+    expect(cuentaDeNeto(undefined)).toBeNull();
   });
 });

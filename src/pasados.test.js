@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { conCerrado, monedaEnLista } from "./pasados";
+import { conCerrado, conNeto, monedaEnLista } from "./pasados";
 
 const lista = [
   { codigo: "AAA111", nombre: "Lisboa", visto: 1 },
@@ -50,5 +50,27 @@ describe("monedaEnLista", () => {
 
   it("los guardados sin moneda, nada", () => {
     expect(monedaEnLista(undefined, "EUR")).toBe("");
+  });
+});
+
+describe("conNeto", () => {
+  it("apunta lo tuyo en ese viaje sin tocar los demás", () => {
+    const nueva = conNeto(lista, "AAA111", -12.5);
+    expect(nueva[0].neto).toBe(-12.5);
+    expect(nueva[1]).toBe(lista[1]);
+  });
+
+  it("si no ha cambiado, no hay nada que guardar", () => {
+    const conAlgo = [{ ...lista[0], neto: 20 }];
+    expect(conNeto(conAlgo, "AAA111", 20)).toBeNull();
+  });
+
+  it("los guardados sin el campo cuentan como sin saber", () => {
+    expect(conNeto(lista, "AAA111", null)).toBeNull();
+    expect(conNeto(lista, "AAA111", 0)[0].neto).toBe(0);
+  });
+
+  it("un viaje que no está en la lista, nada", () => {
+    expect(conNeto(lista, "ZZZ999", 5)).toBeNull();
   });
 });

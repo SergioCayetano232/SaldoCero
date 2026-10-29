@@ -5,6 +5,7 @@ import { haceCuanto } from "../fechas";
 import { LARGO_MAXIMO } from "../nombres";
 import { codigoDelPortapapeles } from "../codigos";
 import { monedaEnLista } from "../pasados";
+import { cuentaDeNeto } from "../titulo";
 import { esOrdenador, viajeDeLaTecla } from "../teclado";
 
 // Primera pantalla: o creas un viaje o entras en el de alguien con su código.
@@ -158,6 +159,11 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
                     )}
                     {viaje.visto && <span className="viaje-pasado-cuando">· {haceCuanto(viaje.visto)}</span>}
                     {viaje.cerrado && <span className="viaje-pasado-cuando">· 🔒 cerrado</span>}
+                    {cuentaDeNeto(viaje.neto, viaje.moneda) && (
+                      <span className={`viaje-pasado-cuando viaje-pasado-saldo ${viaje.neto > 0 ? "le-deben" : "debe"}`}>
+                        · {cuentaDeNeto(viaje.neto, viaje.moneda)}
+                      </span>
+                    )}
                   </small>
                 </button>
                 <button
