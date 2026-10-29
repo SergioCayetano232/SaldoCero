@@ -852,6 +852,11 @@ button:active {
   padding-right: 146px;
 }
 
+/* Y con el % delante, uno más. */
+.campo-suma.con-porciento input {
+  padding-right: 182px;
+}
+
 /* El "+" y el "−" dentro del campo, a la derecha, para el teclado que no los tiene. */
 .botones-suma {
   position: absolute;
@@ -874,6 +879,11 @@ button:active {
   font-weight: 600;
   line-height: 1;
   animation: aparecer-creciendo var(--rapido) var(--curva-muelle);
+}
+
+/* El % es más ancho que los signos: a 18px se sale del círculo. */
+.boton-porciento {
+  font-size: 15px;
 }
 
 .boton-sumar:hover {

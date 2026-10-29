@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { leerSuma, esSuma, llevaSigno, ponerSigno, signoColgando } from "./sumas";
+import { leerSuma, esSuma, llevaSigno, ponerSigno, signoColgando, cabePorciento, ponerPorciento } from "./sumas";
 
 describe("leerSuma", () => {
   it("un número solo, como siempre", () => {
@@ -92,6 +92,30 @@ describe("leerSuma", () => {
     expect(leerSuma("10-20")).toBe(-10);
   });
 
+  it("porcentajes: el descuento y la propina", () => {
+    expect(leerSuma("120-10%")).toBe(108);
+    expect(leerSuma("45+10%")).toBe(49.5);
+    expect(leerSuma("80 - 12,5 %")).toBe(70);
+  });
+
+  it("el % va sobre lo que llevas hasta ahí", () => {
+    expect(leerSuma("60+5+10%")).toBe(71.5);
+    expect(leerSuma("60+10%+5")).toBe(71);
+    expect(leerSuma("2×30-10%")).toBe(54);
+  });
+
+  it("multiplicando, el 15% es 0,15", () => {
+    expect(leerSuma("200×15%")).toBe(30);
+    expect(leerSuma("15%×200")).toBe(30);
+  });
+
+  it("un % sin nada delante, o a medias, no se entiende", () => {
+    expect(leerSuma("10%")).toBeNull();
+    expect(leerSuma("50-%")).toBeNull();
+    expect(leerSuma("50-10%%")).toBeNull();
+    expect(leerSuma("50-10%5")).toBeNull();
+  });
+
   it("los que empiezan por coma", () => {
     expect(leerSuma(",5+1")).toBe(1.5);
   });
@@ -121,6 +145,11 @@ describe("esSuma", () => {
     expect(esSuma("3×")).toBe(false);
     expect(esSuma("120÷4")).toBe(true);
     expect(esSuma("120÷")).toBe(false);
+  });
+
+  it("con un %, también, para avisar si está mal", () => {
+    expect(esSuma("120-10%")).toBe(true);
+    expect(esSuma("10%")).toBe(true);
   });
 
   it("un número solo, o con el + colgando, no", () => {
@@ -170,5 +199,25 @@ describe("signoColgando", () => {
   it("si acaba en número, ninguno", () => {
     expect(signoColgando("60-10")).toBeNull();
     expect(signoColgando("")).toBeNull();
+  });
+});
+
+describe("cabePorciento", () => {
+  it("detrás del número de una cuenta", () => {
+    expect(cabePorciento("120-10")).toBe(true);
+    expect(cabePorciento("200×15")).toBe(true);
+  });
+
+  it("con un número solo, un signo colgando o ya puesto, no", () => {
+    expect(cabePorciento("120")).toBe(false);
+    expect(cabePorciento("120-")).toBe(false);
+    expect(cabePorciento("120-10%")).toBe(false);
+    expect(cabePorciento("")).toBe(false);
+  });
+});
+
+describe("ponerPorciento", () => {
+  it("lo pone al final", () => {
+    expect(ponerPorciento(" 120-10 ")).toBe("120-10%");
   });
 });

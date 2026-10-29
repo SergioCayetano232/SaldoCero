@@ -19,7 +19,7 @@ import { esImagen } from "../tickets";
 import { LARGO_NOTA, quedanEnNota } from "../notas";
 import { cuentaDe, textoCuentaDe, textoParteDe, mensajeDeCuenta } from "../loDeUno";
 import { posiblesRepetidos } from "../repetidos";
-import { leerSuma, esSuma, llevaSigno, ponerSigno, signoColgando } from "../sumas";
+import { leerSuma, esSuma, llevaSigno, ponerSigno, signoColgando, cabePorciento, ponerPorciento } from "../sumas";
 import { arreglarConcepto, LARGO_CONCEPTO, quedanEnConcepto } from "../concepto";
 import { pagadorPorDefecto } from "../pagador";
 import { pareceRaro } from "../raros";
@@ -145,6 +145,12 @@ function Gastos({
     campoImporte.current?.focus();
   }
 
+  function porciento() {
+    setPropina(null);
+    setImporte(ponerPorciento(importe));
+    campoImporte.current?.focus();
+  }
+
   // Estrecho solo cabe el +. Con un signo ya puesto el campo se ensancha y salen
   // también el ÷, el × y el −, menos el que ya esté colgando al final.
   const conSigno = llevaSigno(importe);
@@ -153,6 +159,7 @@ function Gastos({
   const verMenos = conSigno && !isNaN(importeLeido) && colgando !== "-";
   const verPor = conSigno && !isNaN(importeLeido) && colgando !== "×";
   const verEntre = conSigno && !isNaN(importeLeido) && colgando !== "÷";
+  const verPorciento = cabePorciento(importe) && !isNaN(importeLeido);
 
   // La foto nueva que has elegido, la que ya tenía el gasto que editas, y si la quitas.
   const [foto, setFoto] = useState(null);
@@ -743,7 +750,7 @@ function Gastos({
               <div className="fila-importe">
                 {/* De texto y no number, que si no el "+" no se deja escribir. El
                     teclado sigue siendo el de números. */}
-                <div className={`campo-suma ${conSigno ? "con-suma" : ""}`}>
+                <div className={`campo-suma ${conSigno ? "con-suma" : ""} ${verPorciento ? "con-porciento" : ""}`}>
                   <input
                     ref={campoImporte}
                     type="text"
@@ -767,6 +774,17 @@ function Gastos({
                   />
                   {/* El teclado del móvil no trae ni "+" ni "-" ni "×" ni "÷": van aquí. */}
                   <div className="botones-suma">
+                    {verPorciento && (
+                      <button
+                        className="boton-sumar boton-porciento"
+                        onPointerDown={(e) => e.preventDefault()}
+                        onClick={porciento}
+                        title="Que sea un porcentaje"
+                        aria-label="Que sea un porcentaje"
+                      >
+                        %
+                      </button>
+                    )}
                     {verEntre && (
                       <button
                         className="boton-sumar"
@@ -873,7 +891,7 @@ function Gastos({
               {esSuma(importe) && (
                 <p className={`resultado-suma ${!(importeLeido > 0) ? "suma-mal" : ""}`} role="status">
                   {isNaN(importeLeido)
-                    ? "Esa cuenta no se entiende: solo números, +, −, × y ÷"
+                    ? "Esa cuenta no se entiende: solo números, +, −, ×, ÷ y %"
                     : importeLeido > 0
                       ? `= ${conMoneda(importeLeido, moneda)}`
                       : "Así no queda nada que pagar"}
