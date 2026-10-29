@@ -3,6 +3,7 @@
 
 import { importeDeGasto, participantesDeGasto } from "./calculos";
 import { hoy } from "./fechas";
+import { BOTE } from "./bote";
 
 // Con menos gastos que estos, la barra de filtros estorba más que ayuda.
 export const MINIMO_PARA_FILTRAR = 4;
@@ -93,13 +94,19 @@ export function hayGastosDeHoy(gastos, dia = hoy()) {
   return gastos.some((gasto) => gasto.fecha === dia);
 }
 
+function quienPago(gasto, viajeros) {
+  if (gasto.pagadorId === BOTE) return "bote";
+  return viajeros?.find((v) => v.id === gasto.pagadorId)?.nombre ?? "";
+}
+
 // Por persona valen los que pagó y en los que está: es lo que miras al repasar lo tuyo.
 export function filtrarGastos(gastos, filtros, viajeros, monedaViaje) {
   const buscado = normalizar(filtros.texto);
 
   return gastos.filter((gasto) => {
-    // La nota también cuenta: "¿cuál era el de la propina?".
-    const dondeBuscar = normalizar(`${gasto.concepto} ${gasto.nota ?? ""}`);
+    // La nota también cuenta: "¿cuál era el de la propina?". Y quién pagó, que
+    // escribir "ana" es más rápido que ir al desplegable.
+    const dondeBuscar = normalizar(`${gasto.concepto} ${gasto.nota ?? ""} ${quienPago(gasto, viajeros)}`);
     if (buscado && !dondeBuscar.includes(buscado) && !cuadraElImporte(gasto, filtros.texto)) return false;
     if (filtros.categoria && (gasto.categoria ?? "otros") !== filtros.categoria) return false;
     if (filtros.fecha && gasto.fecha !== filtros.fecha) return false;

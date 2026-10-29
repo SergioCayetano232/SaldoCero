@@ -105,6 +105,21 @@ describe("filtrarGastos", () => {
     expect(ids(filtrarGastos(gastos, con({ texto: "propina" }), viajeros))).toEqual(["2"]);
   });
 
+  it("busca por quién pagó, aunque no esté en el gasto", () => {
+    expect(ids(filtrarGastos(gastos, con({ texto: "marta" }), viajeros))).toEqual(["3"]);
+    expect(ids(filtrarGastos(gastos, con({ texto: "Ana" }), viajeros))).toEqual(["1", "4"]);
+  });
+
+  it("y los del bote, con bote", () => {
+    const delBote = { id: "5", concepto: "Super", pagadorId: "bote" };
+    expect(ids(filtrarGastos([...gastos, delBote], con({ texto: "bote" }), viajeros))).toEqual(["5"]);
+  });
+
+  it("si el que pagó ya no está en el viaje, solo por el concepto", () => {
+    const deOtro = { id: "5", concepto: "Super", pagadorId: "zz" };
+    expect(ids(filtrarGastos([deOtro], con({ texto: "super" }), viajeros))).toEqual(["5"]);
+  });
+
   it("por categoría", () => {
     expect(ids(filtrarGastos(gastos, con({ categoria: "ocio" }), viajeros))).toEqual(["3"]);
   });

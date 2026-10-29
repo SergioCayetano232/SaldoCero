@@ -1657,11 +1657,12 @@ button:active {
 
 /* Lo buscado, subrayado con rotulador. */
 .gasto-concepto mark,
-.gasto-nota mark {
+.gasto-nota mark,
+.reparto mark {
   padding: 0 1px;
   border-radius: 3px;
   background-color: var(--resaltado);
-  /* En la nota, el gris tenue no se lee encima del amarillo. */
+  /* En la nota y en quién pagó, el gris tenue no se lee encima del amarillo. */
   color: var(--tinta);
 }
 

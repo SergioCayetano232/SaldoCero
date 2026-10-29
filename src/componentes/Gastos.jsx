@@ -1391,7 +1391,7 @@ function Gastos({
                   className="filtro-buscar"
                   ref={buscador}
                   // El atajo solo se cuenta donde hay teclado.
-                  placeholder={esOrdenador() ? "Concepto o importe (pulsa /)" : "Concepto o importe"}
+                  placeholder={esOrdenador() ? "Concepto, importe o quién pagó (pulsa /)" : "Concepto, importe o quién pagó"}
                   aria-keyshortcuts="/"
                   aria-label="Buscar un gasto"
                   enterKeyHint="search"
@@ -1632,7 +1632,7 @@ function Gastos({
                         )}
                         <br />
                         <small className="reparto">
-                          {nombrePagador(gasto.pagadorId)} · {textoReparto(gasto)}
+                          <Resaltado texto={nombrePagador(gasto.pagadorId)} buscado={buscado} /> · {textoReparto(gasto)}
                           {/* Sin los títulos de los días, la fecha va en cada uno. */}
                           {ordenVigente !== POR_DIAS && gasto.fecha && ` · ${comoTitulo(gasto.fecha)}`}
                           {apuntadoHace(gasto.creadoEn, ahora) && (
