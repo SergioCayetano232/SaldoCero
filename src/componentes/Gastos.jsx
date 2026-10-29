@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { calcularTotal, gastoMasCaro, importeDeGasto, participantesDeGasto } from "../calculos";
-import { MONEDAS, cambio, conMoneda, leerTasa, monedaDelSiguiente, monedasEnOrden, tasaComoTexto } from "../monedas";
+import { MONEDAS, cambio, cambioDelGasto, conMoneda, leerTasa, monedaDelSiguiente, monedasEnOrden, tasaComoTexto } from "../monedas";
 import { enLista } from "../nombres";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
 import { alternarHoy, alternarLoMio, filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
@@ -1672,6 +1672,7 @@ function Gastos({
                         {gasto.moneda && gasto.moneda !== monedaViaje && (
                           <small className="gasto-convertido">
                             {conMoneda(gasto.importeConvertido, monedaViaje)}
+                            <span className="gasto-cambio">{cambioDelGasto(gasto, monedaViaje)}</span>
                           </small>
                         )}
                         {/* Con "lo de uno" abierto ya sale lo suyo, y esto sobraría. */}

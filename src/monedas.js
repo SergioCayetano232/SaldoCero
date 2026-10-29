@@ -117,6 +117,19 @@ export function tasaDeGasto(gasto) {
   return gasto.importeConvertido / gasto.importe;
 }
 
+// El cambio que se le aplicó, para la lista: "1 USD = 0.92 EUR". Con las monedas
+// flojas, al revés: "1 EUR = 161 JPY" se entiende y "0.0062" no. El 0,1 deja
+// derechos el dólar o la libra y da la vuelta al dírham y al yen.
+export function cambioDelGasto(gasto, monedaViaje) {
+  if (!gasto.moneda || gasto.moneda === monedaViaje || !gasto.importeConvertido) return null;
+
+  const tasa = tasaDeGasto(gasto);
+  const corta = (n) => String(Number(n.toPrecision(3)));
+  return tasa >= 0.1
+    ? `1 ${gasto.moneda} = ${corta(tasa)} ${monedaViaje}`
+    : `1 ${monedaViaje} = ${corta(1 / tasa)} ${gasto.moneda}`;
+}
+
 // Para ponerlo en el campo: sin colas de decimales, pero sin perder precisión.
 export function tasaComoTexto(tasa) {
   return String(Number(tasa.toFixed(6))).replace(".", ",");

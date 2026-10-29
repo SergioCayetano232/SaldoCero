@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { MONEDAS, cambio, esAMano, leerTasa, leerImporte, tasaDeGasto, tasaComoTexto, conMoneda, monedaDelSiguiente, monedasEnOrden, monedaDeCasa, banderaDe, monedaConBandera } from "./monedas";
+import { MONEDAS, cambio, esAMano, leerTasa, leerImporte, tasaDeGasto, tasaComoTexto, conMoneda, monedaDelSiguiente, monedasEnOrden, monedaDeCasa, banderaDe, monedaConBandera, cambioDelGasto } from "./monedas";
 
 describe("leerTasa", () => {
   it("vale con coma o con punto", () => {
@@ -198,5 +198,26 @@ describe("monedaConBandera", () => {
 
   it("sin bandera, solo el código", () => {
     expect(monedaConBandera("xx")).toBe("xx");
+  });
+});
+
+describe("cambioDelGasto", () => {
+  it("el que se le aplicó, con la moneda del viaje", () => {
+    expect(cambioDelGasto({ moneda: "USD", importe: 50, importeConvertido: 46 }, "EUR")).toBe("1 USD = 0.92 EUR");
+    expect(cambioDelGasto({ moneda: "GBP", importe: 100, importeConvertido: 117 }, "EUR")).toBe("1 GBP = 1.17 EUR");
+  });
+
+  it("con las monedas flojas, al revés", () => {
+    expect(cambioDelGasto({ moneda: "JPY", importe: 5000, importeConvertido: 31.25 }, "EUR")).toBe("1 EUR = 160 JPY");
+    expect(cambioDelGasto({ moneda: "MAD", importe: 300, importeConvertido: 27.75 }, "EUR")).toBe("1 EUR = 10.8 MAD");
+  });
+
+  it("en un viaje en yenes, el euro va derecho", () => {
+    expect(cambioDelGasto({ moneda: "EUR", importe: 20, importeConvertido: 3240 }, "JPY")).toBe("1 EUR = 162 JPY");
+  });
+
+  it("en la moneda del viaje, o de los de antes sin moneda, nada", () => {
+    expect(cambioDelGasto({ moneda: "EUR", importe: 20, importeConvertido: 20 }, "EUR")).toBeNull();
+    expect(cambioDelGasto({ importe: 20 }, "EUR")).toBeNull();
   });
 });
