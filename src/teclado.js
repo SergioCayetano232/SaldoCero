@@ -29,6 +29,13 @@ export function esAtajoNuevo(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// La "R" sube al formulario el último gasto apuntado, como el ⧉ de su fila.
+// Cmd+R o Ctrl+R es recargar, eso no.
+export function esAtajoRepetir(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "r" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // La "D" empieza a dictar un gasto, y si ya estás dictando, lo para.
 export function esAtajoDictar(e, hayVentana = false) {
   if (e.key?.toLowerCase() !== "d" || e.ctrlKey || e.metaKey || e.altKey) return false;
@@ -175,6 +182,7 @@ export function listaDeAtajos(mac = false, conDictado = false) {
   return [
     { teclas: ["A"], que: "Añadir un viajero" },
     { teclas: ["N"], que: "Apuntar un gasto nuevo" },
+    { teclas: ["R"], que: "Repetir el último gasto apuntado" },
     ...(conDictado ? [{ teclas: ["D"], que: "Dictar un gasto" }] : []),
     { teclas: ["/"], que: "Buscar un gasto" },
     { teclas: ["M"], que: "Ver solo lo tuyo" },

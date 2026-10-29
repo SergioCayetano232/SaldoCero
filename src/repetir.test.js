@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { gastoAlFormulario, repetirGasto } from "./repetir";
+import { gastoAlFormulario, repetirGasto, ultimoApuntado } from "./repetir";
 
 const ana = { id: "a", nombre: "Ana" };
 const luis = { id: "b", nombre: "Luis" };
@@ -90,5 +90,27 @@ describe("repetirGasto", () => {
   it("no toca el gasto original", () => {
     repetirGasto(desayuno, viajeros, "EUR", "2026-10-01");
     expect(desayuno.fecha).toBe("2026-09-28");
+  });
+});
+
+describe("ultimoApuntado", () => {
+  it("el último que se apuntó, aunque sea de un día anterior", () => {
+    const cena = { id: "1", fecha: "2026-09-26", creadoEn: "2026-09-28T20:00:00Z" };
+    const cafe = { id: "2", fecha: "2026-09-28", creadoEn: "2026-09-28T09:00:00Z" };
+    expect(ultimoApuntado([cafe, cena]).id).toBe("1");
+  });
+
+  it("los de antes sin hora pierden con los que la tienen", () => {
+    const viejo = { id: "1", fecha: "2026-09-28" };
+    const nuevo = { id: "2", fecha: "2026-09-20", creadoEn: "2026-09-20T10:00:00Z" };
+    expect(ultimoApuntado([nuevo, viejo]).id).toBe("2");
+  });
+
+  it("si ninguno la tiene, el último de la lista", () => {
+    expect(ultimoApuntado([{ id: "1" }, { id: "2" }]).id).toBe("2");
+  });
+
+  it("sin gastos, nada", () => {
+    expect(ultimoApuntado([])).toBeNull();
   });
 });

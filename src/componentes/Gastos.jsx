@@ -11,7 +11,7 @@ import { ordenarGastos, ordenGuardado, ordenesPara, POR_DIAS, siguienteOrden } f
 import { conPropina, PROPINAS } from "../propina";
 import { borradorQueVale, hayAlgoEscrito, hayAlgoQueBorrar } from "../borrador";
 import * as datos from "../datos";
-import { gastoAlFormulario, repetirGasto } from "../repetir";
+import { gastoAlFormulario, repetirGasto, ultimoApuntado } from "../repetir";
 import { leerImporte, loQueFalta, cuadra, importesAPartes, partesAImportes } from "../importes";
 import { platoNuevo, repartoPorPlatos, alternarEnPlato } from "../platos";
 import { BOTE } from "../bote";
@@ -29,7 +29,7 @@ import { porCabeza, porCabezaDelDia } from "../porCabeza";
 import { mensajeDeGasto } from "../avisarGasto";
 import { enlaceWhatsApp } from "../cobrar";
 import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
-import { esAtajoBuscar, esAtajoGuardar, esAtajoHoy, esAtajoLoMio, esAtajoNuevo, esAtajoOrden, esAtajoQuitarFiltros, escapeEnBuscador, esMac, esOrdenador } from "../teclado";
+import { esAtajoBuscar, esAtajoGuardar, esAtajoHoy, esAtajoLoMio, esAtajoNuevo, esAtajoOrden, esAtajoQuitarFiltros, esAtajoRepetir, escapeEnBuscador, esMac, esOrdenador } from "../teclado";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 import Resaltado from "./Resaltado";
@@ -369,6 +369,22 @@ function Gastos({
     window.addEventListener("keydown", alPulsar);
     return () => window.removeEventListener("keydown", alPulsar);
   }, [cerrado, pagadorId]);
+
+  // Sin dependencias: repetir() es nueva en cada render y tiraría de un formulario viejo.
+  useEffect(() => {
+    if (cerrado || gastos.length === 0) return;
+
+    function alPulsar(e) {
+      if (!esAtajoRepetir(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      repetir(ultimoApuntado(gastos));
+      campoImporte.current?.focus();
+      campoImporte.current?.scrollIntoView({ block: "center" });
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  });
 
   // Venga del atajo del icono o con un ticket, lo siguiente es escribir el importe.
   useEffect(() => {

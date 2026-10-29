@@ -32,6 +32,17 @@ export function gastoAlFormulario(gasto, viajeros, monedaViaje) {
   };
 }
 
+// El último que se apuntó, no el de la fecha más nueva: la cena del viernes
+// metida el domingo es la que tienes en la cabeza. Los de antes no traen
+// cuándo se apuntaron; entre esos, el que va el último en la lista.
+export function ultimoApuntado(gastos) {
+  let ultimo = null;
+  for (const gasto of gastos) {
+    if (!ultimo || (gasto.creadoEn ?? "") >= (ultimo.creadoEn ?? "")) ultimo = gasto;
+  }
+  return ultimo;
+}
+
 // Lo mismo, pero es otro gasto: el de hoy, no el de aquel día.
 export function repetirGasto(gasto, viajeros, monedaViaje, dia) {
   // La nota era de aquel gasto: "Luis no tomó postre" no vale para el de hoy.
