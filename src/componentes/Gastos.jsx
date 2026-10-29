@@ -390,6 +390,7 @@ function Gastos({
     if (dicho.concepto) escribirConcepto(dicho.concepto.slice(0, LARGO_CONCEPTO));
     if (dicho.pagadorId) setPagadorId(dicho.pagadorId);
     if (dicho.participantes) setParticipantes(dicho.participantes);
+    if (dicho.fecha) setFecha(dicho.fecha);
   }
 
   function filtrar(cambio) {

@@ -3,6 +3,7 @@
 // como está en el formulario, y el concepto es lo que sobra.
 
 import { normalizar } from "./filtros";
+import { hoy, ayer, anteayer } from "./fechas";
 
 const DINERO = new Set(["euro", "euros", "eur", "€", "pavos", "pavo", "dolares", "dolar", "libras", "libra"]);
 const CENTIMOS = new Set(["centimos", "centimo", "centavos", "centavo"]);
@@ -131,6 +132,21 @@ function buscarEntre(p, viajeros) {
   return ids.length > 0 ? { ids, usadas } : null;
 }
 
+// "cena de ayer", "anoche", "antes de ayer". Lo de más atrás ya no se dice así,
+// eso se elige en el calendario.
+function buscarDia(p) {
+  for (let i = 0; i < p.length; i++) {
+    const n = p[i].norma;
+    if (n === "antes" && p[i + 1]?.norma === "de" && p[i + 2]?.norma === "ayer") {
+      return { fecha: anteayer(), usadas: [i, i + 1, i + 2] };
+    }
+    if (n === "anteayer") return { fecha: anteayer(), usadas: [i] };
+    if (n === "ayer" || n === "anoche") return { fecha: ayer(), usadas: [i] };
+    if (n === "hoy") return { fecha: hoy(), usadas: [i] };
+  }
+  return null;
+}
+
 // Con coma, como se escribe aquí, y sin ceros de más.
 const enTexto = (n) => String(n).replace(".", ",");
 
@@ -150,6 +166,8 @@ export function entenderDictado(texto, viajeros, soy = null) {
     viajeros
   );
   if (entre) marcar(entre.usadas);
+  const dia = buscarDia(p.map((t, i) => (usadas.has(i) ? { ...t, norma: "" } : t)));
+  if (dia) marcar(dia.usadas);
 
   const resto = p.filter((_, i) => !usadas.has(i) && !DINERO.has(p[i].norma));
   while (resto.length && RELLENO.has(resto[0].norma)) resto.shift();
@@ -160,6 +178,7 @@ export function entenderDictado(texto, viajeros, soy = null) {
     concepto: resto.map((t) => t.original).join(" "),
     pagadorId: pagador?.id ?? null,
     participantes: entre?.ids ?? null,
+    fecha: dia?.fecha ?? null,
   };
 }
 

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { entenderDictado, reconocedorDeVoz } from "./dictado";
+import { hoy, ayer, anteayer } from "./fechas";
 
 const viajeros = [
   { id: "ana", nombre: "Ana" },
@@ -17,6 +18,7 @@ describe("entenderDictado", () => {
       concepto: "cena",
       pagadorId: "ana",
       participantes: null,
+      fecha: null,
     });
   });
 
@@ -73,12 +75,36 @@ describe("entenderDictado", () => {
   });
 
   it("lo que no entiende, a null", () => {
-    expect(entender("algo raro")).toEqual({ importe: null, concepto: "algo raro", pagadorId: null, participantes: null });
-    expect(entender("")).toEqual({ importe: null, concepto: "", pagadorId: null, participantes: null });
+    expect(entender("algo raro")).toEqual({ importe: null, concepto: "algo raro", pagadorId: null, participantes: null, fecha: null });
+    expect(entender("")).toEqual({ importe: null, concepto: "", pagadorId: null, participantes: null, fecha: null });
   });
 
   it("un nombre que no es de nadie del viaje se queda en el concepto", () => {
     expect(entender("regalo para Pepe 20 pagó Ana")).toMatchObject({ concepto: "regalo para Pepe", pagadorId: "ana" });
+  });
+});
+
+describe("el día dicho", () => {
+  it("ayer, y no se queda en el concepto", () => {
+    expect(entender("cena de ayer 45 euros pagó Ana")).toMatchObject({ concepto: "cena", fecha: ayer(), importe: "45" });
+    expect(entender("ayer gasolina 60")).toMatchObject({ concepto: "gasolina", fecha: ayer() });
+  });
+
+  it("anoche también es ayer", () => {
+    expect(entender("cena anoche 80 pagué yo", "luis")).toMatchObject({ concepto: "cena", fecha: ayer(), pagadorId: "luis" });
+  });
+
+  it("anteayer, junto o como antes de ayer", () => {
+    expect(entender("museo anteayer 30")).toMatchObject({ concepto: "museo", fecha: anteayer() });
+    expect(entender("museo antes de ayer 30")).toMatchObject({ concepto: "museo", fecha: anteayer() });
+  });
+
+  it("hoy, con tilde o sin ella da igual", () => {
+    expect(entender("Hoy, desayuno 12")).toMatchObject({ concepto: "desayuno", fecha: hoy() });
+  });
+
+  it("sin decir día, se deja el que hubiera", () => {
+    expect(entender("cena 45 pagó Ana").fecha).toBeNull();
   });
 });
 

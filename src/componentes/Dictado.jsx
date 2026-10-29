@@ -107,7 +107,7 @@ function Dictado({ onDictado }) {
           “{oido}”
         </p>
       ) : (
-        !escuchando && <p className="dictado-ayuda">Por ejemplo: “cena 45 euros, pagó Ana”</p>
+        !escuchando && <p className="dictado-ayuda">Por ejemplo: “cena de ayer, 45 euros, pagó Ana”</p>
       )}
     </div>
   );
