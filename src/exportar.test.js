@@ -105,6 +105,32 @@ describe("gastosEnCSV", () => {
     ]);
   });
 
+  it("debajo del total, lo de cada categoría de más a menos", () => {
+    const hotel = { ...cena, id: "g2", concepto: "Hotel", categoria: "alojamiento", importe: 100, importeConvertido: 100 };
+    const taxi = { ...cena, id: "g3", concepto: "Taxi", categoria: "transporte", importe: 25, importeConvertido: 20, moneda: "USD" };
+    const filas = lineas(gastosEnCSV({ gastos: [cena, hotel, taxi], viajeros, moneda: "EUR" }));
+    expect(filas.slice(-8)).toEqual([
+      ";Total;;;;;150,00;;;;75,00;75,00",
+      "",
+      "",
+      "En qué se fue",
+      "Categoría;Importe en EUR;% del total",
+      "Alojamiento;100,00;67",
+      "Comida;30,00;20",
+      "Transporte;20,00;13",
+    ]);
+  });
+
+  it("y después, quién paga a quién", () => {
+    const hotel = { ...cena, id: "g2", categoria: "alojamiento" };
+    const filas = lineas(gastosEnCSV({ gastos: [cena, hotel], viajeros, moneda: "EUR", pagos: [] }));
+    expect(filas.indexOf("En qué se fue")).toBeLessThan(filas.indexOf("Quién paga a quién"));
+  });
+
+  it("con una sola categoría, no sale", () => {
+    expect(gastosEnCSV({ gastos: [cena], viajeros, moneda: "EUR" })).not.toContain("En qué se fue");
+  });
+
   it("si nadie debe nada, lo dice", () => {
     const filas = lineas(gastosEnCSV({ gastos: [cena], viajeros, moneda: "EUR", pagos: [] }));
     expect(filas.slice(-2)).toEqual(["Quién paga a quién", "Nadie debe nada"]);

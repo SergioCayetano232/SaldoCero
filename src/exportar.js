@@ -1,7 +1,7 @@
 // Los gastos en una hoja de cálculo, para quien quiera echar sus propias cuentas.
 
 import { importeDeGasto, parteDe, calcularTotal } from "./calculos";
-import { categoriaDe } from "./categorias";
+import { categoriaDe, gastoPorCategoria } from "./categorias";
 import { BOTE } from "./bote";
 
 // Punto y coma y coma decimal: así es como lo abre bien el Excel en español.
@@ -88,9 +88,25 @@ export function gastosEnCSV({ gastos, viajeros, moneda, nombre, pagos }) {
     "",
     ...viajeros.map((v) => cifra(gastos.reduce((t, g) => t + parteDe(g, v.id, viajeros), 0))),
   ];
-  const alFinal = gastos.length > 0 ? [[], total, ...comoQuedan(pagos, moneda)] : [];
+  const alFinal = gastos.length > 0 ? [[], total, ...porCategoria(gastos, moneda), ...comoQuedan(pagos, moneda)] : [];
 
   return [...arriba(nombre, gastos), cabecera, ...filas, ...alFinal].map((fila) => fila.map(celda).join(SEPARADOR)).join("\r\n");
+}
+
+// Lo de cada categoría, ya sumado, que es lo primero que se hace con la columna.
+// Con una sola no hace falta: es el total otra vez.
+function porCategoria(gastos, moneda) {
+  const categorias = gastoPorCategoria(gastos, importeDeGasto);
+  if (categorias.length < 2) return [];
+
+  const suma = categorias.reduce((t, c) => t + c.total, 0);
+  return [
+    [],
+    [],
+    ["En qué se fue"],
+    ["Categoría", `Importe en ${moneda}`, "% del total"],
+    ...categorias.map((c) => [c.nombre, cifra(c.total), Math.round((c.total / suma) * 100)]),
+  ];
 }
 
 // Cómo quedan las cuentas, debajo de todo. Separado por dos filas, que es otra
