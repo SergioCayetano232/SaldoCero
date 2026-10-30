@@ -1075,6 +1075,7 @@ function Gastos({
                     className="campo-nota"
                     aria-keyshortcuts="U"
                     placeholder="Nota (incluye la propina...)"
+                    autoCapitalize="sentences"
                     enterKeyHint="done"
                     maxLength={LARGO_NOTA}
                     value={nota}
