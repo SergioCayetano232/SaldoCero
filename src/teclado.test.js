@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoLoMio, esAtajoHoy, esAtajoQuitarFiltros, esAtajoOrden, esAtajoRepetir, esAtajoFoto, esAtajoCopiarCodigo, viajeDeLaTecla, esAtajoSalir, esAtajoPresupuesto, esAtajoCompartir, esAtajoViajero, esAtajoHistorias, esAtajoBote, esAtajoBajarResumen, esAtajoExcel, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esAtajoOtraVez, escapeEnBuscador, esMac, listaDeAtajos } from "./teclado";
+import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoLoMio, esAtajoHoy, esAtajoQuitarFiltros, esAtajoOrden, esAtajoRepetir, esAtajoFoto, esAtajoNota, esAtajoCopiarCodigo, viajeDeLaTecla, esAtajoSalir, esAtajoPresupuesto, esAtajoCompartir, esAtajoViajero, esAtajoHistorias, esAtajoBote, esAtajoBajarResumen, esAtajoExcel, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esAtajoOtraVez, escapeEnBuscador, esMac, listaDeAtajos } from "./teclado";
 
 const con = (matches) => ({ matchMedia: () => ({ matches }) });
 
@@ -248,6 +248,28 @@ describe("esAtajoFoto", () => {
 
   it("con una ventana abierta, no", () => {
     expect(esAtajoFoto(tecla("f"), true)).toBe(false);
+  });
+});
+
+describe("esAtajoNota", () => {
+  const tecla = (key, extra = {}, tagName = "BODY") => ({ key, target: { tagName }, ...extra });
+
+  it("la u, en minúscula o mayúscula, sí", () => {
+    expect(esAtajoNota(tecla("u"))).toBe(true);
+    expect(esAtajoNota(tecla("U", { shiftKey: true }))).toBe(true);
+  });
+
+  it("con Ctrl o Cmd, no", () => {
+    expect(esAtajoNota(tecla("u", { ctrlKey: true }))).toBe(false);
+    expect(esAtajoNota(tecla("u", { metaKey: true }))).toBe(false);
+  });
+
+  it("escribiendo, la u es una u", () => {
+    expect(esAtajoNota(tecla("u", {}, "INPUT"))).toBe(false);
+  });
+
+  it("con una ventana abierta, no", () => {
+    expect(esAtajoNota(tecla("u"), true)).toBe(false);
   });
 });
 
@@ -685,7 +707,7 @@ describe("listaDeAtajos", () => {
 
   it("están todos los que hay", () => {
     const teclas = listaDeAtajos().map((a) => a.teclas.at(-1));
-    expect(teclas).toEqual(["A", "N", "R", "F", "/", "M", "H", "X", "O", "C", "P", "B", "S", "G", "E", "I", "K", "V", "T", "Q", "Enter", "Z", "Esc", "?"]);
-    expect(listaDeAtajos(false, true).map((a) => a.teclas.at(-1))).toEqual(["A", "N", "R", "F", "D", "/", "M", "H", "X", "O", "C", "P", "B", "S", "G", "E", "I", "K", "V", "T", "Q", "Enter", "Z", "Esc", "?"]);
+    expect(teclas).toEqual(["A", "N", "R", "F", "U", "/", "M", "H", "X", "O", "C", "P", "B", "S", "G", "E", "I", "K", "V", "T", "Q", "Enter", "Z", "Esc", "?"]);
+    expect(listaDeAtajos(false, true).map((a) => a.teclas.at(-1))).toEqual(["A", "N", "R", "F", "U", "D", "/", "M", "H", "X", "O", "C", "P", "B", "S", "G", "E", "I", "K", "V", "T", "Q", "Enter", "Z", "Esc", "?"]);
   });
 });

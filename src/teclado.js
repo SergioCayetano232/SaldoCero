@@ -42,6 +42,12 @@ export function esAtajoFoto(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// La "U" abre la nota del gasto, o te lleva a ella si ya estaba abierta.
+export function esAtajoNota(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "u" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // La "D" empieza a dictar un gasto, y si ya estás dictando, lo para.
 export function esAtajoDictar(e, hayVentana = false) {
   if (e.key?.toLowerCase() !== "d" || e.ctrlKey || e.metaKey || e.altKey) return false;
@@ -196,6 +202,7 @@ export function listaDeAtajos(mac = false, conDictado = false) {
     { teclas: ["N"], que: "Apuntar un gasto nuevo" },
     { teclas: ["R"], que: "Repetir el último gasto apuntado" },
     { teclas: ["F"], que: "Poner la foto del ticket" },
+    { teclas: ["U"], que: "Ponerle una nota al gasto" },
     ...(conDictado ? [{ teclas: ["D"], que: "Dictar un gasto" }] : []),
     { teclas: ["/"], que: "Buscar un gasto" },
     { teclas: ["M"], que: "Ver solo lo tuyo" },

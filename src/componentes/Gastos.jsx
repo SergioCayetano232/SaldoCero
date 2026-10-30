@@ -29,7 +29,7 @@ import { porCabeza, porCabezaDelDia } from "../porCabeza";
 import { mensajeDeGasto } from "../avisarGasto";
 import { enlaceWhatsApp } from "../cobrar";
 import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
-import { esAtajoBuscar, esAtajoGuardar, esAtajoHoy, esAtajoLoMio, esAtajoNuevo, esAtajoOrden, esAtajoQuitarFiltros, esAtajoRepetir, esAtajoFoto, escapeEnBuscador, esMac, esOrdenador } from "../teclado";
+import { esAtajoBuscar, esAtajoGuardar, esAtajoHoy, esAtajoLoMio, esAtajoNuevo, esAtajoOrden, esAtajoQuitarFiltros, esAtajoRepetir, esAtajoFoto, esAtajoNota, escapeEnBuscador, esMac, esOrdenador } from "../teclado";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 import Resaltado from "./Resaltado";
@@ -119,6 +119,7 @@ function Gastos({
   const campoImporte = useRef(null);
   const campoPagador = useRef(null);
   const campoFoto = useRef(null);
+  const campoNota = useRef(null);
   // La propina puesta y el importe de antes, para quitarla o cambiarla sin que se acumulen.
   const [propina, setPropina] = useState(null);
 
@@ -394,6 +395,24 @@ function Gastos({
       if (!esAtajoFoto(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
       e.preventDefault();
       campoFoto.current?.click();
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [cerrado]);
+
+  useEffect(() => {
+    if (cerrado) return;
+
+    function alPulsar(e) {
+      if (!esAtajoNota(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      setNotaAbierta(true);
+      // Hay que esperar a que salga el campo. El autoFocus no vale: editando un gasto no salta.
+      requestAnimationFrame(() => {
+        campoNota.current?.focus();
+        campoNota.current?.scrollIntoView({ block: "center" });
+      });
     }
 
     window.addEventListener("keydown", alPulsar);
@@ -1032,7 +1051,7 @@ function Gastos({
                 )}
 
                 {!notaAbierta && (
-                  <button className="boton-foto" onClick={() => setNotaAbierta(true)}>
+                  <button className="boton-foto" onClick={() => setNotaAbierta(true)} title={esOrdenador() ? "También con la U" : undefined}>
                     📝 Nota
                   </button>
                 )}
@@ -1051,8 +1070,10 @@ function Gastos({
               {notaAbierta && (
                 <>
                   <input
+                    ref={campoNota}
                     type="text"
                     className="campo-nota"
+                    aria-keyshortcuts="U"
                     placeholder="Nota (incluye la propina...)"
                     enterKeyHint="done"
                     maxLength={LARGO_NOTA}
