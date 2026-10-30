@@ -102,6 +102,7 @@ function Viajeros({
             title={esOrdenador() ? "También con la A" : undefined}
             autoCapitalize="words"
             autoComplete="off"
+            spellCheck={false}
             enterKeyHint="done"
             maxLength={LARGO_VARIOS}
             autoFocus={enfocar}

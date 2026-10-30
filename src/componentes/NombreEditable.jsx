@@ -35,6 +35,7 @@ function NombreEditable({ nombre, onGuardar, como: Etiqueta = "span", className 
         className={`campo-nombre ${className}`}
         value={texto}
         maxLength={LARGO_MAXIMO}
+        spellCheck={false}
         onChange={(e) => setTexto(e.target.value)}
         onBlur={() => terminar(true)}
         onKeyDown={(e) => {
