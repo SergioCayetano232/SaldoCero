@@ -36,6 +36,12 @@ export function esAtajoRepetir(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// La "F" abre la foto del ticket. Cmd+F o Ctrl+F es buscar en la página, eso no.
+export function esAtajoFoto(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "f" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // La "D" empieza a dictar un gasto, y si ya estás dictando, lo para.
 export function esAtajoDictar(e, hayVentana = false) {
   if (e.key?.toLowerCase() !== "d" || e.ctrlKey || e.metaKey || e.altKey) return false;
@@ -183,6 +189,7 @@ export function listaDeAtajos(mac = false, conDictado = false) {
     { teclas: ["A"], que: "Añadir un viajero" },
     { teclas: ["N"], que: "Apuntar un gasto nuevo" },
     { teclas: ["R"], que: "Repetir el último gasto apuntado" },
+    { teclas: ["F"], que: "Poner la foto del ticket" },
     ...(conDictado ? [{ teclas: ["D"], que: "Dictar un gasto" }] : []),
     { teclas: ["/"], que: "Buscar un gasto" },
     { teclas: ["M"], que: "Ver solo lo tuyo" },

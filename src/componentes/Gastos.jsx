@@ -29,7 +29,7 @@ import { porCabeza, porCabezaDelDia } from "../porCabeza";
 import { mensajeDeGasto } from "../avisarGasto";
 import { enlaceWhatsApp } from "../cobrar";
 import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
-import { esAtajoBuscar, esAtajoGuardar, esAtajoHoy, esAtajoLoMio, esAtajoNuevo, esAtajoOrden, esAtajoQuitarFiltros, esAtajoRepetir, escapeEnBuscador, esMac, esOrdenador } from "../teclado";
+import { esAtajoBuscar, esAtajoGuardar, esAtajoHoy, esAtajoLoMio, esAtajoNuevo, esAtajoOrden, esAtajoQuitarFiltros, esAtajoRepetir, esAtajoFoto, escapeEnBuscador, esMac, esOrdenador } from "../teclado";
 import Deslizable from "./Deslizable";
 import VisorTicket from "./VisorTicket";
 import Resaltado from "./Resaltado";
@@ -118,6 +118,7 @@ function Gastos({
   const importeLeido = leerSuma(importe) ?? NaN;
   const campoImporte = useRef(null);
   const campoPagador = useRef(null);
+  const campoFoto = useRef(null);
   // La propina puesta y el importe de antes, para quitarla o cambiarla sin que se acumulen.
   const [propina, setPropina] = useState(null);
 
@@ -385,6 +386,19 @@ function Gastos({
     window.addEventListener("keydown", alPulsar);
     return () => window.removeEventListener("keydown", alPulsar);
   });
+
+  useEffect(() => {
+    if (cerrado) return;
+
+    function alPulsar(e) {
+      if (!esAtajoFoto(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      campoFoto.current?.click();
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [cerrado]);
 
   // Venga del atajo del icono o con un ticket, lo siguiente es escribir el importe.
   useEffect(() => {
@@ -1004,7 +1018,7 @@ function Gastos({
                     </button>
                     <label className="enlace">
                       Cambiar
-                      <input type="file" accept="image/*" onChange={elegirFoto} hidden />
+                      <input ref={campoFoto} type="file" accept="image/*" aria-keyshortcuts="F" onChange={elegirFoto} hidden />
                     </label>
                     <button className="enlace" onClick={() => setQuitarFoto(true)}>
                       Quitar
@@ -1013,7 +1027,7 @@ function Gastos({
                 ) : (
                   <label className="boton-foto">
                     📷 {quitarFoto ? "Se quitará la foto · poner otra" : "Foto del ticket"}
-                    <input type="file" accept="image/*" onChange={elegirFoto} hidden />
+                    <input ref={campoFoto} type="file" accept="image/*" aria-keyshortcuts="F" onChange={elegirFoto} hidden />
                   </label>
                 )}
 
