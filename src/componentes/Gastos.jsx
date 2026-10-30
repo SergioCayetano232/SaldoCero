@@ -3,7 +3,7 @@ import { calcularTotal, gastoMasCaro, importeDeGasto, participantesDeGasto } fro
 import { MONEDAS, cambio, cambioDelGasto, conMoneda, leerTasa, monedaDelSiguiente, monedasEnOrden, tasaComoTexto } from "../monedas";
 import { enLista } from "../nombres";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
-import { alternarHoy, alternarLoMio, filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia } from "../filtros";
+import { alternarHoy, alternarLoMio, filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayTickets, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia, textoSinResultados } from "../filtros";
 import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
 import { sugerirConceptos, importeSugerido } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
@@ -1628,7 +1628,7 @@ function Gastos({
           {gastos.length === 0 ? (
             <p className="vacio">Todavía no hay gastos. Apunta el primero aquí arriba.</p>
           ) : visibles.length === 0 ? (
-            <p className="vacio">Ningún gasto encaja con eso.</p>
+            <p className="vacio">{textoSinResultados(filtros)}</p>
           ) : (
             dias.map((dia) => (
               <div className="dia" key={dia.fecha || "sin-fecha"}>

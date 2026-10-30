@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, alternarLoMio, alternarHoy, soloDelDia, SIN_FILTROS, hayTickets, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayGastosDeHoy } from "./filtros";
+import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, alternarLoMio, alternarHoy, soloDelDia, SIN_FILTROS, hayTickets, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayGastosDeHoy, textoSinResultados } from "./filtros";
 
 const ana = { id: "a", nombre: "Ana" };
 const luis = { id: "b", nombre: "Luis" };
@@ -360,5 +360,25 @@ describe("hayGastosDeHoy", () => {
 
   it("los de antes de las fechas no cuentan", () => {
     expect(hayGastosDeHoy(gastos, "2026-10-15")).toBe(false);
+  });
+});
+
+describe("textoSinResultados", () => {
+  it("con algo buscado, lo dice", () => {
+    expect(textoSinResultados({ ...SIN_FILTROS, texto: "pizza" })).toBe("Nada con «pizza».");
+  });
+
+  it("sin los espacios de los lados", () => {
+    expect(textoSinResultados({ ...SIN_FILTROS, texto: "  pizza " })).toBe("Nada con «pizza».");
+  });
+
+  it("si además hay otros filtros, avisa, que a lo mejor es por ellos", () => {
+    expect(textoSinResultados({ ...SIN_FILTROS, texto: "pizza", viajeroId: "a" })).toBe("Nada con «pizza» con estos filtros.");
+    expect(textoSinResultados({ ...SIN_FILTROS, texto: "pizza", conTicket: true })).toBe("Nada con «pizza» con estos filtros.");
+  });
+
+  it("sin nada escrito, lo de siempre", () => {
+    expect(textoSinResultados({ ...SIN_FILTROS, categoria: "comida" })).toBe("Ningún gasto encaja con eso.");
+    expect(textoSinResultados({ ...SIN_FILTROS, texto: "   ", fecha: "2026-10-15" })).toBe("Ningún gasto encaja con eso.");
   });
 });

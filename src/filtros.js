@@ -57,6 +57,15 @@ export function hayFiltros(filtros) {
   );
 }
 
+// Lo que sale cuando no queda nada. Con lo buscado delante, que a veces es solo una errata.
+export function textoSinResultados(filtros) {
+  const texto = (filtros.texto ?? "").trim();
+  if (!texto) return "Ningún gasto encaja con eso.";
+
+  const conOtros = hayFiltros({ ...filtros, texto: "" });
+  return conOtros ? `Nada con «${texto}» con estos filtros.` : `Nada con «${texto}».`;
+}
+
 // Si no hay ni una foto, el botón de los tickets sobra.
 export function hayTickets(gastos) {
   return gastos.some((gasto) => Boolean(gasto.ticket));
