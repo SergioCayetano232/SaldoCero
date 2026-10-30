@@ -4,7 +4,7 @@ import NombreEditable from "./NombreEditable";
 import { textoCerrado } from "../cerrar";
 import { textoDuracion } from "../duracion";
 import { hoy } from "../fechas";
-import { esAtajoInvitar, esAtajoSalir, esOrdenador } from "../teclado";
+import { esAtajoCopiarCodigo, esAtajoInvitar, esAtajoSalir, esOrdenador } from "../teclado";
 
 // La librería del QR pesa, y casi nadie lo abre: se baja solo al pulsar.
 const QRViaje = lazy(() => import("./QRViaje"));
@@ -45,6 +45,18 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir }) {
     window.addEventListener("keydown", alPulsar);
     return () => window.removeEventListener("keydown", alPulsar);
   }, [onSalir]);
+
+  // Sin dependencias, como la R: copiarCodigo() es nueva en cada render.
+  useEffect(() => {
+    function alPulsar(e) {
+      if (!esAtajoCopiarCodigo(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      copiarCodigo();
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  });
 
   async function copiarCodigo() {
     const hecho = await copiarAlPortapapeles(viaje.codigo);
@@ -109,7 +121,8 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir }) {
         <button
           className={`codigo ${codigoCopiado ? "copiado" : ""}`}
           onClick={copiarCodigo}
-          title="Copiar el código"
+          title={esOrdenador() ? "Copiar el código (o pulsa K)" : "Copiar el código"}
+          aria-keyshortcuts="K"
         >
           {codigoCopiado ? "¡Copiado!" : viaje.codigo}
         </button>

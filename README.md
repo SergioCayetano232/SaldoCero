@@ -91,6 +91,7 @@ más se usan:
 | `P` / `B` | El presupuesto / el bote |
 | `S` / `G` / `E` | Compartir el resumen / guardarlo en un txt / bajar el Excel |
 | `I` | Enseñar el QR para invitar |
+| `K` | Copiar el código del viaje |
 | `T` | Cambiar el tema |
 | `Ctrl+Enter` | Guardar el gasto desde cualquier campo (`⌘+Enter` en Mac) |
 | `Ctrl+Z` | Recuperar lo último que has quitado (`⌘+Z` en Mac) |

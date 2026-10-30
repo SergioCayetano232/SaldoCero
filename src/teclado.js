@@ -89,6 +89,12 @@ export function esAtajoSalir(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// La "K" copia el código del viaje, como tocarlo. Ctrl+K o Cmd+K es del navegador.
+export function esAtajoCopiarCodigo(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "k" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // La "P" abre el presupuesto para ponerlo o cambiarlo.
 export function esAtajoPresupuesto(e, hayVentana = false) {
   if (e.key?.toLowerCase() !== "p" || e.ctrlKey || e.metaKey || e.altKey) return false;
@@ -203,6 +209,7 @@ export function listaDeAtajos(mac = false, conDictado = false) {
     { teclas: ["G"], que: "Guardar el resumen en un archivo" },
     { teclas: ["E"], que: "Bajar los gastos en un Excel" },
     { teclas: ["I"], que: "Enseñar el QR para invitar" },
+    { teclas: ["K"], que: "Copiar el código del viaje" },
     { teclas: ["V"], que: "Ver el viaje en historias, ya cerrado" },
     { teclas: ["T"], que: "Cambiar el tema" },
     { teclas: ["Q"], que: "Salir del viaje" },
