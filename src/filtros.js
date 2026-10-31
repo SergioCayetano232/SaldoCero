@@ -16,15 +16,23 @@ export function normalizar(texto) {
   return (texto ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().trim();
 }
 
-// "cena ana" son dos cosas a buscar, y tienen que estar las dos.
+// "cena ana" son dos cosas a buscar, y tienen que estar las dos. "> 50" es una sola.
 export function palabrasBuscadas(texto) {
-  return normalizar(texto).split(/\s+/).filter(Boolean);
+  return normalizar(texto).replace(/([<>])\s+/g, "$1").split(/\s+/).filter(Boolean);
 }
 
 // Buscar "12,50" para encontrar el gasto de 12,50. Sin decimales vale cualquiera
 // de ese euro, que no siempre te acuerdas de los céntimos.
 export function cuadraElImporte(gasto, texto) {
   const limpio = (texto ?? "").trim().replace(",", ".");
+
+  // ">50" o "<5". Aquí solo vale la moneda del viaje: 20 £ no son ni más ni menos que 21 €.
+  const rango = limpio.match(/^([<>])(\d+(\.\d{1,2})?)$/);
+  if (rango) {
+    const limite = Number(rango[2]);
+    return rango[1] === ">" ? importeDeGasto(gasto) > limite : importeDeGasto(gasto) < limite;
+  }
+
   if (!/^\d+(\.\d{1,2})?$/.test(limpio)) return false;
 
   const buscado = Number(limpio);

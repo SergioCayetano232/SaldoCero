@@ -126,6 +126,13 @@ describe("filtrarGastos", () => {
     expect(ids(filtrarGastos(gastos, con({ texto: "cena luis" }), viajeros))).toEqual([]);
   });
 
+  it("el > se puede escribir separado de la cifra", () => {
+    const conImporte = gastos.map((g, i) => ({ ...g, importe: [40, 12, 30, 40][i] }));
+    expect(ids(filtrarGastos(conImporte, con({ texto: "> 35" }), viajeros))).toEqual(["1", "4"]);
+    expect(ids(filtrarGastos(conImporte, con({ texto: "ana < 35" }), viajeros))).toEqual([]);
+    expect(ids(filtrarGastos(conImporte, con({ texto: "luis <35" }), viajeros))).toEqual(["2"]);
+  });
+
   it("y una de ellas puede ser el importe", () => {
     const conImporte = gastos.map((g, i) => ({ ...g, importe: [40, 12, 30, 40][i] }));
     expect(ids(filtrarGastos(conImporte, con({ texto: "ana 40" }), viajeros))).toEqual(["1", "4"]);
@@ -222,7 +229,25 @@ describe("cuadraElImporte", () => {
     expect(cuadraElImporte(pub, "23,40")).toBe(true);
   });
 
+  it("con > y <, más o menos de esa cifra", () => {
+    expect(cuadraElImporte(cena, ">10")).toBe(true);
+    expect(cuadraElImporte(cena, "<10")).toBe(false);
+    expect(cuadraElImporte(cena, "<12,6")).toBe(true);
+  });
+
+  it("justo en el límite no entra", () => {
+    expect(cuadraElImporte(cena, ">12,5")).toBe(false);
+    expect(cuadraElImporte(cena, "<12,5")).toBe(false);
+  });
+
+  it("con > y <, solo lo que sale en la moneda del viaje", () => {
+    expect(cuadraElImporte(pub, ">21")).toBe(true);
+    expect(cuadraElImporte(pub, "<21")).toBe(false);
+  });
+
   it("lo que no es un número, no", () => {
+    expect(cuadraElImporte(cena, ">")).toBe(false);
+    expect(cuadraElImporte(cena, ">cena")).toBe(false);
     expect(cuadraElImporte(cena, "cena")).toBe(false);
     expect(cuadraElImporte(cena, "")).toBe(false);
     expect(cuadraElImporte(cena, "12,505")).toBe(false);
