@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { totalDelTicket, totalComoTexto } from "../leerTicket";
 import { leerFoto } from "../ocr";
 import { conMoneda } from "../monedas";
+import { esAtajoLeer } from "../teclado";
 
 // El botón de leer el total de la foto, y lo que va saliendo. No guarda nada:
 // pone el importe en su campo y tú lo miras antes de apuntarlo.
@@ -18,6 +19,19 @@ function LeerTotal({ foto, moneda, onTotal }) {
       sigue.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (estado === "leyendo") return;
+
+    function alPulsar(e) {
+      if (!esAtajoLeer(e, Boolean(document.querySelector('[aria-modal="true"]')))) return;
+      e.preventDefault();
+      leer();
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  });
 
   async function leer() {
     setEstado("leyendo");
@@ -49,7 +63,7 @@ function LeerTotal({ foto, moneda, onTotal }) {
 
   return (
     <div className="leer-total">
-      <button className="boton-foto" onClick={leer}>
+      <button className="boton-foto" aria-keyshortcuts="L" onClick={leer}>
         🔍 {estado === "quieto" ? "Leer el total" : "Leer otra vez"}
       </button>
       {estado === "leido" && (

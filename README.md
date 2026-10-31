@@ -84,6 +84,7 @@ más se usan:
 | `N` | Apuntar un gasto nuevo |
 | `D` | Dictarlo |
 | `F` | Hacerle la foto al ticket |
+| `L` | Leerle el total |
 | `U` | Ponerle una nota |
 | `A` | Añadir un viajero |
 | `/` | Buscar un gasto |

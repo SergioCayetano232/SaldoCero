@@ -48,6 +48,12 @@ export function esAtajoNota(e, hayVentana = false) {
   return !hayVentana && !escribiendo(e.target);
 }
 
+// La "L" lee el total de la foto del ticket. Ctrl+L es la barra de direcciones.
+export function esAtajoLeer(e, hayVentana = false) {
+  if (e.key?.toLowerCase() !== "l" || e.ctrlKey || e.metaKey || e.altKey) return false;
+  return !hayVentana && !escribiendo(e.target);
+}
+
 // La "D" empieza a dictar un gasto, y si ya estás dictando, lo para.
 export function esAtajoDictar(e, hayVentana = false) {
   if (e.key?.toLowerCase() !== "d" || e.ctrlKey || e.metaKey || e.altKey) return false;
@@ -202,6 +208,7 @@ export function listaDeAtajos(mac = false, conDictado = false) {
     { teclas: ["N"], que: "Apuntar un gasto nuevo" },
     { teclas: ["R"], que: "Repetir el último gasto apuntado" },
     { teclas: ["F"], que: "Poner la foto del ticket" },
+    { teclas: ["L"], que: "Leer el total de la foto del ticket" },
     { teclas: ["U"], que: "Ponerle una nota al gasto" },
     ...(conDictado ? [{ teclas: ["D"], que: "Dictar un gasto" }] : []),
     { teclas: ["/"], que: "Buscar un gasto" },
