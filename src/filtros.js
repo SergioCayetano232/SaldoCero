@@ -16,6 +16,11 @@ export function normalizar(texto) {
   return (texto ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().trim();
 }
 
+// "cena ana" son dos cosas a buscar, y tienen que estar las dos.
+export function palabrasBuscadas(texto) {
+  return normalizar(texto).split(/\s+/).filter(Boolean);
+}
+
 // Buscar "12,50" para encontrar el gasto de 12,50. Sin decimales vale cualquiera
 // de ese euro, que no siempre te acuerdas de los céntimos.
 export function cuadraElImporte(gasto, texto) {
@@ -111,13 +116,13 @@ function quienPago(gasto, viajeros) {
 
 // Por persona valen los que pagó y en los que está: es lo que miras al repasar lo tuyo.
 export function filtrarGastos(gastos, filtros, viajeros, monedaViaje) {
-  const buscado = normalizar(filtros.texto);
+  const palabras = palabrasBuscadas(filtros.texto);
 
   return gastos.filter((gasto) => {
     // La nota también cuenta: "¿cuál era el de la propina?". Y quién pagó, que
     // escribir "ana" es más rápido que ir al desplegable. Con la categoría, igual.
     const dondeBuscar = normalizar(`${gasto.concepto} ${gasto.nota ?? ""} ${quienPago(gasto, viajeros)} ${categoriaDe(gasto.categoria).nombre}`);
-    if (buscado && !dondeBuscar.includes(buscado) && !cuadraElImporte(gasto, filtros.texto)) return false;
+    if (!palabras.every((p) => dondeBuscar.includes(p) || cuadraElImporte(gasto, p))) return false;
     if (filtros.categoria && (gasto.categoria ?? "otros") !== filtros.categoria) return false;
     if (filtros.fecha && gasto.fecha !== filtros.fecha) return false;
     // Para dar con el ticket que te pide alguien sin abrir gasto por gasto.

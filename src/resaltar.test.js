@@ -26,8 +26,14 @@ describe("trozosResaltados", () => {
     expect(marcado(trozosResaltados("Café y café", "cafe"))).toEqual(["Café", "café"]);
   });
 
-  it("con espacios dentro de lo buscado", () => {
-    expect(marcado(trozosResaltados("Cena en la plaza", "en la"))).toEqual(["en la"]);
+  it("con varias palabras, marca cada una aunque estén separadas", () => {
+    const trozos = trozosResaltados("Cena en la plaza", "plaza cena");
+    expect(marcado(trozos)).toEqual(["Cena", "plaza"]);
+    expect(entero(trozos)).toBe("Cena en la plaza");
+  });
+
+  it("si una palabra no está, las demás se marcan igual", () => {
+    expect(marcado(trozosResaltados("Cena", "cena ana"))).toEqual(["Cena"]);
   });
 
   it("con emojis delante no se descuadra", () => {

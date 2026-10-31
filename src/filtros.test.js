@@ -120,6 +120,18 @@ describe("filtrarGastos", () => {
     expect(ids(filtrarGastos(gastos, con({ texto: "Ocio" }), viajeros))).toEqual(["3"]);
   });
 
+  it("con varias palabras, tienen que estar todas aunque sea en sitios distintos", () => {
+    expect(ids(filtrarGastos(gastos, con({ texto: "cena ana" }), viajeros))).toEqual(["1"]);
+    expect(ids(filtrarGastos(gastos, con({ texto: "luis  propina" }), viajeros))).toEqual(["2"]);
+    expect(ids(filtrarGastos(gastos, con({ texto: "cena luis" }), viajeros))).toEqual([]);
+  });
+
+  it("y una de ellas puede ser el importe", () => {
+    const conImporte = gastos.map((g, i) => ({ ...g, importe: [40, 12, 30, 40][i] }));
+    expect(ids(filtrarGastos(conImporte, con({ texto: "ana 40" }), viajeros))).toEqual(["1", "4"]);
+    expect(ids(filtrarGastos(conImporte, con({ texto: "cena 12" }), viajeros))).toEqual([]);
+  });
+
   it("los que no tienen categoría salen buscando otros", () => {
     expect(ids(filtrarGastos(gastos, con({ texto: "otros" }), viajeros))).toEqual(["4"]);
   });
