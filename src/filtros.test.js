@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, alternarLoMio, alternarHoy, soloDelDia, SIN_FILTROS, hayTickets, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayGastosDeHoy, textoSinResultados } from "./filtros";
+import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, alternarLoMio, alternarHoy, soloDelDia, SIN_FILTROS, hayTickets, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayGastosDeHoy, textoSinResultados, hayGastosDelBote } from "./filtros";
 
 const ana = { id: "a", nombre: "Ana" };
 const luis = { id: "b", nombre: "Luis" };
@@ -283,6 +283,19 @@ describe("solo con ticket", () => {
 
   it("apagado no quita nada", () => {
     expect(filtrarGastos(gastos, SIN_FILTROS, viajeros)).toHaveLength(4);
+  });
+});
+
+describe("del bote", () => {
+  const delBote = { id: "5", concepto: "Super", pagadorId: "bote" };
+
+  it("solo hay opción si algo se pagó con el bote", () => {
+    expect(hayGastosDelBote(gastos)).toBe(false);
+    expect(hayGastosDelBote([...gastos, delBote])).toBe(true);
+  });
+
+  it("filtrando por el bote salen solo los suyos", () => {
+    expect(ids(filtrarGastos([...gastos, delBote], con({ viajeroId: "bote" }), viajeros))).toEqual(["5"]);
   });
 });
 

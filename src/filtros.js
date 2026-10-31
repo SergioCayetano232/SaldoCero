@@ -3,7 +3,7 @@
 
 import { importeDeGasto, participantesDeGasto } from "./calculos";
 import { hoy } from "./fechas";
-import { BOTE } from "./bote";
+import { BOTE, esDelBote } from "./bote";
 import { categoriaDe } from "./categorias";
 
 // Con menos gastos que estos, la barra de filtros estorba más que ayuda.
@@ -101,6 +101,11 @@ function enOtraMoneda(gasto, monedaViaje) {
 
 export function hayOtrasMonedas(gastos, monedaViaje) {
   return gastos.some((gasto) => enOtraMoneda(gasto, monedaViaje));
+}
+
+// "Del bote" en el filtro por persona, solo si algo se pagó con él.
+export function hayGastosDelBote(gastos) {
+  return gastos.some(esDelBote);
 }
 
 // Si alguien se apuntó al viaje después, lo de antes tampoco es suyo.
