@@ -4,6 +4,7 @@
 import { importeDeGasto, participantesDeGasto } from "./calculos";
 import { hoy } from "./fechas";
 import { BOTE } from "./bote";
+import { categoriaDe } from "./categorias";
 
 // Con menos gastos que estos, la barra de filtros estorba más que ayuda.
 export const MINIMO_PARA_FILTRAR = 4;
@@ -114,8 +115,8 @@ export function filtrarGastos(gastos, filtros, viajeros, monedaViaje) {
 
   return gastos.filter((gasto) => {
     // La nota también cuenta: "¿cuál era el de la propina?". Y quién pagó, que
-    // escribir "ana" es más rápido que ir al desplegable.
-    const dondeBuscar = normalizar(`${gasto.concepto} ${gasto.nota ?? ""} ${quienPago(gasto, viajeros)}`);
+    // escribir "ana" es más rápido que ir al desplegable. Con la categoría, igual.
+    const dondeBuscar = normalizar(`${gasto.concepto} ${gasto.nota ?? ""} ${quienPago(gasto, viajeros)} ${categoriaDe(gasto.categoria).nombre}`);
     if (buscado && !dondeBuscar.includes(buscado) && !cuadraElImporte(gasto, filtros.texto)) return false;
     if (filtros.categoria && (gasto.categoria ?? "otros") !== filtros.categoria) return false;
     if (filtros.fecha && gasto.fecha !== filtros.fecha) return false;
