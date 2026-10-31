@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { limpiarNombre, conMayuscula, nombreNuevo, nombreRepetido, separarNombres, avisoDeRepetidos, enLista, LARGO_MAXIMO } from "./nombres";
+import { limpiarNombre, conMayuscula, nombreNuevo, nombreRepetido, separarNombres, avisoDeRepetidos, enLista, enUnaLinea, LARGO_MAXIMO } from "./nombres";
 
 describe("limpiarNombre", () => {
   it("quita espacios de sobra", () => {
@@ -115,6 +115,20 @@ describe("separarNombres", () => {
     ]);
   });
 
+  it("con y o e al final, como se dice", () => {
+    expect(separarNombres("Luis, Marta y Javier", viajeros).nuevos).toEqual(["Luis", "Marta", "Javier"]);
+    expect(separarNombres("luis e inés", viajeros).nuevos).toEqual(["Luis", "Inés"]);
+    expect(separarNombres("Luis Y Marta", viajeros).nuevos).toEqual(["Luis", "Marta"]);
+  });
+
+  it("la y dentro de un nombre no corta nada", () => {
+    expect(separarNombres("Yolanda, Eyre", viajeros).nuevos).toEqual(["Yolanda", "Eyre"]);
+  });
+
+  it("también con punto y coma", () => {
+    expect(separarNombres("Luis; Marta", viajeros).nuevos).toEqual(["Luis", "Marta"]);
+  });
+
   it("se salta las comas sueltas", () => {
     expect(separarNombres("Luis,, ,Marta,", viajeros).nuevos).toEqual(["Luis", "Marta"]);
   });
@@ -186,5 +200,19 @@ describe("enLista", () => {
   it("no se lía con las monedas", () => {
     expect(enLista(["EUR", "MAD", "USD"])).toBe("EUR, MAD y USD");
     expect(enLista(["EUR", "INR"])).toBe("EUR e INR");
+  });
+});
+
+describe("enUnaLinea", () => {
+  it("un nombre por línea pasa a ir con comas", () => {
+    expect(enUnaLinea("Ana\nLuis\r\nMarta")).toBe("Ana, Luis, Marta");
+  });
+
+  it("quita los guiones y números de las listas", () => {
+    expect(enUnaLinea("- Ana\n• Luis\n3. Marta\n4) Eva")).toBe("Ana, Luis, Marta, Eva");
+  });
+
+  it("se salta las líneas vacías", () => {
+    expect(enUnaLinea("Ana\n\n  \nLuis\n")).toBe("Ana, Luis");
   });
 });

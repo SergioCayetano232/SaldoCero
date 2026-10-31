@@ -51,7 +51,8 @@ export function separarNombres(texto, viajeros) {
   const nuevos = [];
   const repetidos = [];
 
-  for (const trozo of String(texto ?? "").split(",")) {
+  // "Ana, Luis y Marta" y "Luis e Inés" también. Ojo, que "Ortega y Gasset" sale partido.
+  for (const trozo of String(texto ?? "").split(/,|;|\s+[ye]\s+/i)) {
     const limpio = limpiarNombre(trozo);
     if (!limpio) continue;
     const nombre = conMayuscula(limpio);
@@ -62,6 +63,17 @@ export function separarNombres(texto, viajeros) {
   }
 
   return { nuevos, repetidos };
+}
+
+// Una lista pegada de WhatsApp, un nombre por línea y a veces con guiones o
+// números delante, pasa a "Ana, Luis, Marta". El campo es de una línea y se
+// comería los saltos: "AnaLuisMarta".
+export function enUnaLinea(texto) {
+  return String(texto ?? "")
+    .split(/\r?\n/)
+    .map((linea) => linea.replace(/^\s*(?:[-•*]|\d+[.)])\s*/, "").trim())
+    .filter(Boolean)
+    .join(", ");
 }
 
 // "Ana, Luis y Marta". Antes de sonido "i" va "e": "Luis e Inés", pero

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Avatar from "./Avatar";
 import NombreEditable from "./NombreEditable";
-import { nombreRepetido, separarNombres, avisoDeRepetidos, LARGO_VARIOS } from "../nombres";
+import { nombreRepetido, separarNombres, avisoDeRepetidos, enUnaLinea, LARGO_VARIOS } from "../nombres";
 import { leerCobro, cobroDe, cobroComoTexto } from "../cobro";
 import { esAtajoViajero, esOrdenador } from "../teclado";
 
@@ -110,6 +110,14 @@ function Viajeros({
             value={nombre}
             onChange={(e) => {
               setNombre(e.target.value);
+              setRepetido(null);
+            }}
+            onPaste={(e) => {
+              const pegado = e.clipboardData.getData("text");
+              if (!pegado.includes("\n")) return;
+              e.preventDefault();
+              const { selectionStart: desde, selectionEnd: hasta } = e.target;
+              setNombre((nombre.slice(0, desde) + enUnaLinea(pegado) + nombre.slice(hasta)).slice(0, LARGO_VARIOS));
               setRepetido(null);
             }}
             onKeyDown={(e) => {
