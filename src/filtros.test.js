@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, alternarLoMio, alternarHoy, soloDelDia, SIN_FILTROS, hayTickets, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayGastosDeHoy, textoSinResultados, hayGastosDelBote } from "./filtros";
+import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, alternarLoMio, alternarHoy, soloDelDia, SIN_FILTROS, hayTickets, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayGastosDeHoy, textoSinResultados, hayGastosDelBote, cuantosDe } from "./filtros";
 
 const ana = { id: "a", nombre: "Ana" };
 const luis = { id: "b", nombre: "Luis" };
@@ -283,6 +283,24 @@ describe("solo con ticket", () => {
 
   it("apagado no quita nada", () => {
     expect(filtrarGastos(gastos, SIN_FILTROS, viajeros)).toHaveLength(4);
+  });
+});
+
+describe("cuantosDe", () => {
+  it("cuenta los que pagó y en los que está", () => {
+    // Ana pagó la cena y el peaje, y no está en nada más.
+    expect(cuantosDe(gastos, "a", viajeros)).toBe(2);
+    // Marta está en todos.
+    expect(cuantosDe(gastos, "c", viajeros)).toBe(4);
+  });
+
+  it("el bote, los que se pagaron con él", () => {
+    const delBote = { id: "5", concepto: "Super", pagadorId: "bote" };
+    expect(cuantosDe([...gastos, delBote], "bote", viajeros)).toBe(1);
+  });
+
+  it("sin gastos, cero", () => {
+    expect(cuantosDe([], "a", viajeros)).toBe(0);
   });
 });
 

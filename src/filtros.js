@@ -103,6 +103,11 @@ export function hayOtrasMonedas(gastos, monedaViaje) {
   return gastos.some((gasto) => enOtraMoneda(gasto, monedaViaje));
 }
 
+// "Ana (12)" en el filtro por persona: los mismos que salen al elegirla.
+export function cuantosDe(gastos, viajeroId, viajeros) {
+  return filtrarGastos(gastos, soloDe(viajeroId), viajeros).length;
+}
+
 // "Del bote" en el filtro por persona, solo si algo se pagó con él.
 export function hayGastosDelBote(gastos) {
   return gastos.some(esDelBote);

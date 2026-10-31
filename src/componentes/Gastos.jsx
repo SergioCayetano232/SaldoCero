@@ -3,7 +3,7 @@ import { calcularTotal, gastoMasCaro, importeDeGasto, participantesDeGasto } fro
 import { MONEDAS, cambio, cambioDelGasto, conMoneda, leerTasa, monedaDelSiguiente, monedasEnOrden, tasaComoTexto } from "../monedas";
 import { enLista } from "../nombres";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
-import { alternarHoy, alternarLoMio, filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayTickets, hayGastosDelBote, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia, textoSinResultados } from "../filtros";
+import { alternarHoy, alternarLoMio, filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayTickets, hayGastosDelBote, cuantosDe, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia, textoSinResultados } from "../filtros";
 import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
 import { sugerirConceptos, importeSugerido } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
@@ -1546,10 +1546,12 @@ function Gastos({
                   <option value="">Todos</option>
                   {viajeros.map((v) => (
                     <option key={v.id} value={v.id}>
-                      {v.nombre}
+                      {v.nombre} ({cuantosDe(gastos, v.id, viajeros)})
                     </option>
                   ))}
-                  {(hayGastosDelBote(gastos) || filtros.viajeroId === BOTE) && <option value={BOTE}>🫙 Del bote</option>}
+                  {(hayGastosDelBote(gastos) || filtros.viajeroId === BOTE) && (
+                    <option value={BOTE}>🫙 Del bote ({cuantosDe(gastos, BOTE, viajeros)})</option>
+                  )}
                 </select>
 
                 <select
