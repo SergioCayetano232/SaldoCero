@@ -5,6 +5,7 @@ import { cuandoFue, hoy } from "./fechas";
 import { vibrar } from "./vibrar";
 import { gastoPorCategoria } from "./categorias";
 import { importeDeGasto } from "./calculos";
+import { cobroDe, lineaDeCobro } from "./cobro";
 
 // Un texto que se lea bien en WhatsApp: los asteriscos salen en negrita y
 // los emojis ayudan a separar las partes de un vistazo.
@@ -42,6 +43,9 @@ export function resumenEnTexto({ nombre, codigo, total, balances, pagos, moneda,
       lineas.push(`· ${pago.de} → ${pago.a}: *${conMoneda(pago.cantidad, moneda)}*`);
     }
 
+    const donde = dondePagar(pendientes, balances);
+    if (donde.length > 0) lineas.push("", "*Dónde pagar*", ...donde);
+
     // Las que ya están hechas, al final y sin dar la lata.
     const hechos = pagos.filter((pago) => pago.saldado);
     if (hechos.length > 0) {
@@ -65,6 +69,17 @@ export function resumenEnTexto({ nombre, codigo, total, balances, pagos, moneda,
 }
 
 // Con todo en la misma categoría, "Otros: 100 %" no dice nada.
+// El Bizum o el IBAN de los que cobran, una vez cada uno aunque le paguen varios.
+// Así nadie tiene que ir a pedírselo por privado.
+function dondePagar(pendientes, balances) {
+  const quienes = [...new Set(pendientes.map((pago) => pago.aId ?? pago.a))];
+  return quienes.flatMap((quien) => {
+    const viajero = balances.find((v) => v.id === quien || v.nombre === quien);
+    const linea = lineaDeCobro(cobroDe(viajero), viajero?.nombre);
+    return linea ? [`· ${linea}`] : [];
+  });
+}
+
 export function enQueSeFue(gastos, moneda) {
   const categorias = gastoPorCategoria(gastos, importeDeGasto);
   if (categorias.length < 2) return [];

@@ -185,6 +185,40 @@ describe("resumenEnTexto", () => {
     expect(texto).not.toContain("Quién le paga a quién");
   });
 
+  it("dice dónde pagar a los que cobran, una vez cada uno", () => {
+    const balances = viaje.balances.map((v) => (v.id === "a" ? { ...v, cobro: "612345678" } : v));
+    const lineas = resumenEnTexto({ ...viaje, balances }).split("\n");
+    const i = lineas.indexOf("*Dónde pagar*");
+
+    expect(i).toBeGreaterThan(lineas.indexOf("*Quién le paga a quién*"));
+    expect(lineas[i + 1]).toBe("· Bizum a Ana: 612 345 678");
+    expect(lineas.filter((l) => l.includes("Bizum"))).toHaveLength(1);
+  });
+
+  it("va por id, que dos pueden llamarse igual", () => {
+    const balances = [
+      { id: "a", nombre: "Ana", puesto: 100, tocaPagar: 50, balance: 50, cobro: "ES9121000418450200051332" },
+      { id: "b", nombre: "Ana", puesto: 0, tocaPagar: 50, balance: -50, cobro: "699999999" },
+    ];
+    const pagos = [{ de: "Ana", a: "Ana", deId: "b", aId: "a", cantidad: 50, saldado: false }];
+    const texto = resumenEnTexto({ ...viaje, balances, pagos });
+
+    expect(texto).toContain("· IBAN de Ana: ES91 2100 0418 4502 0005 1332");
+    expect(texto).not.toContain("699");
+  });
+
+  it("sin Bizum ni IBAN de nadie que cobre, ese apartado no sale", () => {
+    // Marta lo tiene, pero ella paga y no cobra.
+    const balances = viaje.balances.map((v) => (v.id === "c" ? { ...v, cobro: "612345678" } : v));
+    expect(resumenEnTexto({ ...viaje, balances })).not.toContain("Dónde pagar");
+  });
+
+  it("si ya está todo pagado, tampoco", () => {
+    const balances = viaje.balances.map((v) => (v.id === "a" ? { ...v, cobro: "612345678" } : v));
+    const pagos = viaje.pagos.map((p) => ({ ...p, saldado: true }));
+    expect(resumenEnTexto({ ...viaje, balances, pagos })).not.toContain("Dónde pagar");
+  });
+
   it("sin cifras, no cambia nada", () => {
     expect(resumenEnTexto({ ...viaje, cifras: "" })).toBe(resumenEnTexto(viaje));
   });
