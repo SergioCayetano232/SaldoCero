@@ -3272,6 +3272,12 @@ button.pago-cantidad:hover {
   transform: none;
 }
 
+.trozos-deuda {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
 .formulario-parcial .aviso {
   font-size: 12px;
   margin-top: 8px;

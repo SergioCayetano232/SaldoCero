@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { conMoneda, leerImporte } from "../monedas";
+import { trozosDeDeuda } from "../aCuenta";
 import Avatar from "./Avatar";
 
 // Lo que se va pagando de las deudas a trozos: "Luis le ha dado 20 € a Ana".
@@ -107,6 +108,21 @@ function PagosACuenta({ viajeros, pagos, parciales, colores, moneda, onAnadir, o
               Cancelar
             </button>
           </div>
+
+          {deuda && (
+            <div className="trozos-deuda">
+              {trozosDeDeuda(deuda.cantidad).map((t) => (
+                <button
+                  key={t.nombre}
+                  className="pastilla-interruptor"
+                  onClick={() => setImporte(t.texto)}
+                  aria-pressed={cantidad === leerImporte(t.texto)}
+                >
+                  {t.nombre}
+                </button>
+              ))}
+            </div>
+          )}
 
           {deuda && cantidad > deuda.cantidad + 0.005 && (
             <p className="aviso">
