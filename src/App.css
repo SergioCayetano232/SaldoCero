@@ -3108,7 +3108,8 @@ button.pago-cantidad:hover {
   white-space: nowrap;
 }
 
-.visor-cerrar {
+.visor-cerrar,
+.visor-bajar {
   flex-shrink: 0;
   width: 30px;
   height: 30px;
@@ -3116,6 +3117,16 @@ button.pago-cantidad:hover {
   color: var(--tinta-suave);
 }
 
+/* Pegado a la X, no en medio de la cabecera. */
+.visor-bajar {
+  display: grid;
+  place-items: center;
+  margin-left: auto;
+  margin-right: -6px;
+  text-decoration: none;
+}
+
+.visor-bajar:hover,
 .visor-cerrar:hover {
   background-color: var(--papel-hundido);
 }

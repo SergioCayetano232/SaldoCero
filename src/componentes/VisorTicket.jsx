@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { urlParaBajar } from "../tickets";
 
 // La foto del ticket a pantalla completa. Se cierra con la X, con Escape o
 // tocando fuera. Va en el body: dentro de una tarjeta, su backdrop-filter hace
@@ -36,6 +37,11 @@ function VisorTicket({ ruta, concepto, cargar, onCerrar }) {
       <div className="visor-caja" onClick={(e) => e.stopPropagation()}>
         <div className="visor-cabecera">
           <span>🧾 {concepto}</span>
+          {cargada && (
+            <a className="visor-bajar" href={urlParaBajar(url, concepto)} title="Descargar la foto" aria-label="Descargar la foto">
+              ↓
+            </a>
+          )}
           <button className="visor-cerrar" onClick={onCerrar} aria-label="Cerrar" autoFocus>
             ✕
           </button>

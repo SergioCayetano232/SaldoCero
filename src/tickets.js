@@ -50,3 +50,11 @@ export async function reducirFoto(archivo) {
     )
   );
 }
+
+// La misma dirección firmada, pero con "download" Supabase la manda como archivo.
+// Un <a download> no vale: la foto está en otro dominio y el navegador lo ignora.
+export function urlParaBajar(url, concepto) {
+  // Una barra en el nombre del archivo lo metería en una carpeta.
+  const nombre = `Ticket ${String(concepto ?? "").replace(/[/\\]/g, "-").trim() || "del gasto"}.jpg`;
+  return `${url}&download=${encodeURIComponent(nombre)}`;
+}

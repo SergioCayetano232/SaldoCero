@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { medidaReducida, rutaDelTicket, esImagen, LADO_MAXIMO } from "./tickets";
+import { medidaReducida, rutaDelTicket, esImagen, LADO_MAXIMO, urlParaBajar } from "./tickets";
 
 describe("medidaReducida", () => {
   it("una foto vertical del móvil baja a 1600 de alto", () => {
@@ -39,5 +39,28 @@ describe("esImagen", () => {
   it("un pdf o nada, no", () => {
     expect(esImagen({ type: "application/pdf" })).toBe(false);
     expect(esImagen(null)).toBe(false);
+  });
+});
+
+describe("urlParaBajar", () => {
+  const firmada = "https://x.supabase.co/storage/v1/object/sign/tickets/v/g.jpg?token=abc";
+
+  it("le pide a Supabase que la mande como archivo, con el concepto", () => {
+    const url = new URL(urlParaBajar(firmada, "Cena"));
+    expect(url.searchParams.get("token")).toBe("abc");
+    expect(url.searchParams.get("download")).toBe("Ticket Cena.jpg");
+  });
+
+  it("las tildes y los espacios no rompen la dirección", () => {
+    const url = new URL(urlParaBajar(firmada, "Café & churros"));
+    expect(url.searchParams.get("download")).toBe("Ticket Café & churros.jpg");
+  });
+
+  it("sin barras en el nombre", () => {
+    expect(new URL(urlParaBajar(firmada, "ida/vuelta")).searchParams.get("download")).toBe("Ticket ida-vuelta.jpg");
+  });
+
+  it("sin concepto, un nombre igual", () => {
+    expect(new URL(urlParaBajar(firmada, "")).searchParams.get("download")).toBe("Ticket del gasto.jpg");
   });
 });
