@@ -23,7 +23,7 @@ import { mensajeDeCobro, enlaceWhatsApp } from "../cobrar";
 import { cobroDe, cobroComoTexto, cantidadParaPegar } from "../cobro";
 import { BOTE, sinBote } from "../bote";
 import { gastoPorCategoria } from "../categorias";
-import { importeDeGasto, parteDe } from "../calculos";
+import { importeDeGasto, parteDe, ordenarPorSaldo } from "../calculos";
 import { cifrasDelViaje, cifrasEnTexto } from "../cifras";
 import Cifra from "./Cifra";
 import Confeti from "./Confeti";
@@ -112,7 +112,9 @@ function Resumen({
   // Las barras se miden contra el que más ha puesto.
   const maxPuesto = Math.max(...personas.map((v) => v.puesto), 0);
   // Si solo ha pagado uno, su 100 % no cuenta nada que no se vea ya.
-  const tantoPuesto = porcentajes(personas.map((v) => v.puesto));
+  const enOrden = ordenarPorSaldo(personas);
+  // En el orden de la lista, que el porcentaje va por posición.
+  const tantoPuesto = porcentajes(enOrden.map((v) => v.puesto));
   const variosPusieron = personas.filter((v) => v.puesto > 0).length > 1;
 
   useEffect(() => {
@@ -420,7 +422,7 @@ function Resumen({
       )}
 
       <ul className="lista">
-        {personas.map((viajero, i) => {
+        {enOrden.map((viajero, i) => {
           const estado = estadoDeBalance(viajero.balance);
           const pagados = textoPagados(cuantosPago(gastos, viajero.id));
 

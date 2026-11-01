@@ -3,6 +3,7 @@ import {
   participantesDeGasto,
   importeDeGasto,
   calcularTotal,
+  ordenarPorSaldo,
   mediaPorGasto,
   gastoMasCaro,
   calcularBalances,
@@ -704,5 +705,28 @@ describe("pagosDelViaje", () => {
 
   it("de los de antes, sin saldados ni redondeo", () => {
     expect(pagosDelViaje(balances, {})[0]).toEqual(expect.objectContaining({ cantidad: 20.5, saldado: false }));
+  });
+});
+
+describe("ordenarPorSaldo", () => {
+  const ana = { id: "a", nombre: "Ana", balance: -20 };
+  const luis = { id: "b", nombre: "Luis", balance: 50 };
+  const marta = { id: "c", nombre: "Marta", balance: 0 };
+  const pepe = { id: "d", nombre: "Pepe", balance: -30 };
+
+  it("del que más le deben al que más debe", () => {
+    expect(ordenarPorSaldo([ana, luis, marta, pepe]).map((v) => v.nombre)).toEqual(["Luis", "Marta", "Ana", "Pepe"]);
+  });
+
+  it("en empate, como estaban", () => {
+    const eva = { id: "e", nombre: "Eva", balance: 0.001 };
+    expect(ordenarPorSaldo([marta, eva]).map((v) => v.nombre)).toEqual(["Marta", "Eva"]);
+    expect(ordenarPorSaldo([eva, marta]).map((v) => v.nombre)).toEqual(["Eva", "Marta"]);
+  });
+
+  it("no toca la lista de antes", () => {
+    const lista = [ana, luis];
+    ordenarPorSaldo(lista);
+    expect(lista.map((v) => v.nombre)).toEqual(["Ana", "Luis"]);
   });
 });

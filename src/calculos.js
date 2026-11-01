@@ -127,6 +127,13 @@ export function estadoDeBalance(balance) {
   return "en-paz";
 }
 
+// Primero a quien le deben, luego los que están en paz y al final los que deben.
+// Por céntimos, que dos en paz con restos de decimales no se crucen; en empate,
+// como estaban.
+export function ordenarPorSaldo(balances) {
+  return [...balances].sort((a, b) => Math.round(b.balance * 100) - Math.round(a.balance * 100));
+}
+
 // Le toca al que peor balance tiene, o sea al que menos ha puesto.
 export function calcularLeTocaPagar(balances) {
   if (balances.length === 0) return null;
