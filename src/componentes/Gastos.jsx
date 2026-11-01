@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { calcularTotal, gastoMasCaro, importeDeGasto, participantesDeGasto } from "../calculos";
+import { calcularTotal, gastoMasCaro, importeDeGasto, mediaPorGasto, participantesDeGasto } from "../calculos";
 import { MONEDAS, cambio, cambioDelGasto, conMoneda, leerTasa, monedaDelSiguiente, monedasEnOrden, tasaComoTexto } from "../monedas";
 import { enLista } from "../nombres";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
@@ -1596,6 +1596,9 @@ function Gastos({
                     {filtros.otraMoneda && " en otra moneda"}
                     {filtros.deAlgunos && " que no son de todos"} · suman{" "}
                     <strong>{conMoneda(calcularTotal(visibles), monedaViaje)}</strong>
+                    {mediaPorGasto(visibles) !== null && (
+                      <span className="sin-partir"> · {conMoneda(mediaPorGasto(visibles), monedaViaje)} de media</span>
+                    )}
                     {deQuien && (
                       <span className="filtro-cuenta">
                         <span className="sin-partir">
