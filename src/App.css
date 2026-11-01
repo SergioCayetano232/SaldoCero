@@ -1703,6 +1703,13 @@ button:active {
 }
 
 /* ===== Los viajes por los que ya has pasado ===== */
+/* Discreto: se usa poco y no debería parecer la acción principal. */
+.olvidar-todos {
+  display: block;
+  margin: 10px 0 0 auto;
+  color: var(--tinta-tenue);
+}
+
 .viaje-pasado {
   flex: 1;
   min-width: 0;

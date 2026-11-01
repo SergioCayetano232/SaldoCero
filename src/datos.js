@@ -81,6 +81,10 @@ export function olvidarDelHistorial(codigo) {
   localStorage.setItem(CLAVE_HISTORICO, JSON.stringify(lista));
 }
 
+export function olvidarHistorial() {
+  localStorage.removeItem(CLAVE_HISTORICO);
+}
+
 // Quién eres tú en cada viaje, para resaltarte en las listas.
 // Va por viaje y en este navegador: cada uno entra desde su móvil.
 const CLAVE_SOY = "saldocero-soy";

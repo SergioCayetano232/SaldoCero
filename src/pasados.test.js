@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { conCerrado, conNeto, monedaEnLista } from "./pasados";
+import { conCerrado, conNeto, monedaEnLista, seOlvidanTodos, avisoOlvidarTodos } from "./pasados";
 
 const lista = [
   { codigo: "AAA111", nombre: "Lisboa", visto: 1 },
@@ -72,5 +72,21 @@ describe("conNeto", () => {
 
   it("un viaje que no está en la lista, nada", () => {
     expect(conNeto(lista, "ZZZ999", 5)).toBeNull();
+  });
+});
+
+describe("seOlvidanTodos", () => {
+  it("solo con dos o más", () => {
+    expect(seOlvidanTodos([])).toBe(false);
+    expect(seOlvidanTodos([{ codigo: "A" }])).toBe(false);
+    expect(seOlvidanTodos([{ codigo: "A" }, { codigo: "B" }])).toBe(true);
+  });
+});
+
+describe("avisoOlvidarTodos", () => {
+  it("dice cuántos y que sin código no se vuelve", () => {
+    expect(avisoOlvidarTodos(5)).toBe(
+      "¿Quitar los 5? Los viajes siguen ahí, pero sin el código no podrás volver a entrar."
+    );
   });
 });

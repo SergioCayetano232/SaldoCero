@@ -4,7 +4,7 @@ import { MONEDAS, monedaConBandera, monedaDeCasa } from "../monedas";
 import { haceCuanto } from "../fechas";
 import { LARGO_MAXIMO } from "../nombres";
 import { codigoDelPortapapeles } from "../codigos";
-import { monedaEnLista } from "../pasados";
+import { monedaEnLista, seOlvidanTodos, avisoOlvidarTodos } from "../pasados";
 import { cuentaDeNeto } from "../titulo";
 import { esOrdenador, viajeDeLaTecla } from "../teclado";
 
@@ -17,6 +17,7 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
   // Los viajes por los que ya has pasado, guardados en este navegador.
   const [pasados, setPasados] = useState(() => datos.historial());
   const [nadaCopiado, setNadaCopiado] = useState(false);
+  const [olvidandoTodos, setOlvidandoTodos] = useState(false);
   const sePuedePegar = typeof navigator !== "undefined" && Boolean(navigator.clipboard?.readText);
 
   async function pegar() {
@@ -44,6 +45,12 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
   function olvidar(codigoViaje) {
     datos.olvidarDelHistorial(codigoViaje);
     setPasados(datos.historial());
+  }
+
+  function olvidarTodos() {
+    datos.olvidarHistorial();
+    setPasados([]);
+    setOlvidandoTodos(false);
   }
 
   return (
@@ -176,6 +183,25 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
               </li>
             ))}
           </ul>
+
+          {seOlvidanTodos(pasados) &&
+            (olvidandoTodos ? (
+              <div className="aviso-repetido" role="alert">
+                <p>{avisoOlvidarTodos(pasados.length)}</p>
+                <div className="aviso-repetido-botones">
+                  <button className="aviso-si" onClick={olvidarTodos}>
+                    Sí, quitarlos
+                  </button>
+                  <button className="aviso-no" onClick={() => setOlvidandoTodos(false)} autoFocus>
+                    No
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button className="enlace olvidar-todos" onClick={() => setOlvidandoTodos(true)}>
+                Quitarlos todos de la lista
+              </button>
+            ))}
 
           <p className="vacio">
             Solo se guardan en este móvil. Si borras los datos del navegador o

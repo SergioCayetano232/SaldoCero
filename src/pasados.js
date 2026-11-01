@@ -25,3 +25,13 @@ export function monedaEnLista(moneda, deCasa) {
   if (!moneda || moneda === deCasa) return "";
   return monedaConBandera(moneda);
 }
+
+// Con uno solo ya está su ✕; esto es para no ir quitándolos de uno en uno.
+export function seOlvidanTodos(lista) {
+  return lista.length >= 2;
+}
+
+// Se pide confirmar: sin el código no hay forma de volver a entrar.
+export function avisoOlvidarTodos(cuantos) {
+  return `¿Quitar los ${cuantos}? Los viajes siguen ahí, pero sin el código no podrás volver a entrar.`;
+}
