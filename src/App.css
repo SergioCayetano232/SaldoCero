@@ -2540,6 +2540,12 @@ button:active {
   opacity: 0.9;
 }
 
+.presupuesto-cabeza {
+  display: block;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
 /* Un texto de color sobre el verde no se lee en los dos temas: mejor una pastilla. */
 .presupuesto.pasado .presupuesto-pie > span:first-child {
   flex: 0 1 auto;

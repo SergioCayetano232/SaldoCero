@@ -342,6 +342,7 @@ function Resumen({
           gastos={gastos}
           presupuesto={viaje?.presupuesto ?? null}
           moneda={monedaViaje}
+          cuantos={personas.length}
           fijo={cerrado}
           onGuardar={onPresupuesto}
         />

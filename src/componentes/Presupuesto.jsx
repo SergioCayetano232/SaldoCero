@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
-import { leerImporte, simboloDe } from "../monedas";
-import { estadoPresupuesto, textoPresupuesto, ritmoDeGasto, textoRitmo } from "../presupuesto";
+import { conMoneda, leerImporte, simboloDe } from "../monedas";
+import { estadoPresupuesto, textoPresupuesto, ritmoDeGasto, textoRitmo, quedaPorCabeza } from "../presupuesto";
 import { esAtajoPresupuesto, esOrdenador } from "../teclado";
 
 // La barra del presupuesto, dentro del recuadro del total.
 // Fijo, se ve pero no se cambia: es lo que queda de un viaje cerrado.
-function Presupuesto({ total, gastos = [], presupuesto, moneda, fijo = false, onGuardar }) {
+function Presupuesto({ total, gastos = [], presupuesto, moneda, cuantos = 0, fijo = false, onGuardar }) {
   const [editando, setEditando] = useState(false);
   const [texto, setTexto] = useState("");
 
   const cantidad = leerImporte(texto);
   const estado = estadoPresupuesto(total, presupuesto);
   const ritmo = ritmoDeGasto(gastos);
+  const cabeza = quedaPorCabeza(estado, cuantos);
 
   function abrir() {
     setTexto(presupuesto ? String(presupuesto).replace(".", ",") : "");
@@ -97,7 +98,10 @@ function Presupuesto({ total, gastos = [], presupuesto, moneda, fijo = false, on
         <div className="presupuesto-relleno" style={{ width: `${estado.relleno * 100}%` }} />
       </div>
       <div className="presupuesto-pie">
-        <span>{textoPresupuesto(estado, presupuesto, moneda)}</span>
+        <span>
+          {textoPresupuesto(estado, presupuesto, moneda)}
+          {cabeza !== null && <span className="presupuesto-cabeza">{conMoneda(cabeza, moneda)} cada uno</span>}
+        </span>
         <span className="presupuesto-tanto">{estado.porcentaje}%</span>
         {!fijo && (
           <button

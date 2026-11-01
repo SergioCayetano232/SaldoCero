@@ -28,6 +28,13 @@ export function textoPresupuesto(estado, presupuesto, moneda) {
   return `Quedan ${conMoneda(Math.max(estado.queda, 0), moneda)} de ${conMoneda(presupuesto, moneda)}`;
 }
 
+// Lo que queda entre los que sois, que se entiende mejor que el total.
+// Solo o sin nada que repartir, sobra.
+export function quedaPorCabeza(estado, cuantos) {
+  if (!estado || cuantos < 2 || estado.queda <= 0.005) return null;
+  return estado.queda / cuantos;
+}
+
 // Lo que os pasaríais con el gasto que estás apuntando. Solo si es este el que
 // os saca: si ya ibais pasados, eso ya lo dice la barra. null si no.
 export function teSacaDelPresupuesto(gastado, importe, presupuesto) {

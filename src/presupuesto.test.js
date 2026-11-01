@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { estadoPresupuesto, textoPresupuesto, ritmoDeGasto, textoRitmo, porCabezaYDia, teSacaDelPresupuesto } from "./presupuesto";
+import { estadoPresupuesto, textoPresupuesto, ritmoDeGasto, textoRitmo, porCabezaYDia, teSacaDelPresupuesto, quedaPorCabeza } from "./presupuesto";
 
 describe("estadoPresupuesto", () => {
   it("sin presupuesto, nada", () => {
@@ -174,5 +174,21 @@ describe("teSacaDelPresupuesto", () => {
     expect(teSacaDelPresupuesto(480, 50, 0)).toBeNull();
     expect(teSacaDelPresupuesto(480, 0, 500)).toBeNull();
     expect(teSacaDelPresupuesto(480, NaN, 500)).toBeNull();
+  });
+});
+
+describe("quedaPorCabeza", () => {
+  it("reparte lo que queda entre todos", () => {
+    expect(quedaPorCabeza(estadoPresupuesto(700, 1000), 4)).toBe(75);
+  });
+
+  it("solo, o sin presupuesto, nada", () => {
+    expect(quedaPorCabeza(estadoPresupuesto(700, 1000), 1)).toBeNull();
+    expect(quedaPorCabeza(null, 4)).toBeNull();
+  });
+
+  it("si no queda nada o os habéis pasado, nada", () => {
+    expect(quedaPorCabeza(estadoPresupuesto(1000, 1000), 4)).toBeNull();
+    expect(quedaPorCabeza(estadoPresupuesto(1200, 1000), 4)).toBeNull();
   });
 });
