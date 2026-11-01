@@ -16,7 +16,7 @@ import { leerImporte, loQueFalta, cuadra, importesAPartes, partesAImportes } fro
 import { platoNuevo, repartoPorPlatos, alternarEnPlato } from "../platos";
 import { BOTE } from "../bote";
 import { esImagen } from "../tickets";
-import { LARGO_NOTA, quedanEnNota } from "../notas";
+import { LARGO_NOTA, quedanEnNota, trozosConEnlaces } from "../notas";
 import { cuentaDe, textoCuentaDe, textoParteDe, mensajeDeCuenta } from "../loDeUno";
 import { posiblesRepetidos } from "../repetidos";
 import { leerSuma, esSuma, llevaSigno, ponerSigno, signoColgando, cabePorciento, ponerPorciento } from "../sumas";
@@ -1703,7 +1703,15 @@ function Gastos({
                         )}
                         {gasto.nota && (
                           <small className="gasto-nota">
-                            <Resaltado texto={gasto.nota} buscado={buscado} />
+                            {trozosConEnlaces(gasto.nota).map((t, i) =>
+                              t.href ? (
+                                <a key={i} href={t.href} target="_blank" rel="noopener noreferrer">
+                                  <Resaltado texto={t.texto} buscado={buscado} />
+                                </a>
+                              ) : (
+                                <Resaltado key={i} texto={t.texto} buscado={buscado} />
+                              )
+                            )}
                           </small>
                         )}
                       </span>

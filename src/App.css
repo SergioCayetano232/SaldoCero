@@ -3003,6 +3003,12 @@ button.pago-cantidad:hover {
   overflow-wrap: anywhere;
 }
 
+.gasto-nota a {
+  color: var(--teal-600);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .gasto-nota::before {
   content: "📝 ";
   font-style: normal;
