@@ -32,6 +32,7 @@ import Desglose from "./Desglose";
 import PorDias from "./PorDias";
 import Evolucion from "./Evolucion";
 import PagosACuenta from "./PagosACuenta";
+import { cuantosPago, textoPagados } from "../pagados";
 import Presupuesto from "./Presupuesto";
 import { porCabezaYDia } from "../presupuesto";
 import { gastadoHoy, frenteAAyer, miParteDeHoy, textoFrenteAAyer } from "../loDeHoy";
@@ -421,6 +422,7 @@ function Resumen({
       <ul className="lista">
         {personas.map((viajero, i) => {
           const estado = estadoDeBalance(viajero.balance);
+          const pagados = textoPagados(cuantosPago(gastos, viajero.id));
 
           return (
             <li
@@ -462,6 +464,7 @@ function Resumen({
                     puso {conMoneda(viajero.puesto, monedaViaje)}
                     {variosPusieron && viajero.puesto > 0 && <span className="reparto-tanto"> ({tantoPuesto[i]} %)</span>}
                   </span>{" "}
+                  {pagados && <span className="sin-partir">{pagados} </span>}
                   ·{" "}
                   <span className="sin-partir">le tocan {conMoneda(viajero.tocaPagar, monedaViaje)}</span>
                   {/* Si no, puso y le tocan no cuadran con lo que debe. */}
