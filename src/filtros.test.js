@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, alternarLoMio, alternarHoy, soloDelDia, SIN_FILTROS, hayTickets, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayGastosDeHoy, textoSinResultados, hayGastosDelBote, cuantosDe } from "./filtros";
+import { filtrarGastos, cuadraElImporte, normalizar, hayFiltros, soloDe, alternarLoMio, alternarHoy, soloDelDia, SIN_FILTROS, hayTickets, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayGastosDeHoy, textoSinResultados, hayGastosDelBote, cuantosDe, cuadraLaFecha } from "./filtros";
 
 const ana = { id: "a", nombre: "Ana" };
 const luis = { id: "b", nombre: "Luis" };
@@ -457,5 +457,62 @@ describe("textoSinResultados", () => {
   it("sin nada escrito, lo de siempre", () => {
     expect(textoSinResultados({ ...SIN_FILTROS, categoria: "comida" })).toBe("Ningún gasto encaja con eso.");
     expect(textoSinResultados({ ...SIN_FILTROS, texto: "   ", fecha: "2026-10-15" })).toBe("Ningún gasto encaja con eso.");
+  });
+});
+
+describe("cuadraLaFecha", () => {
+  // El 30 de octubre de 2026 es viernes.
+  const delDia = (fecha) => ({ id: fecha, concepto: "Algo", fecha });
+  const hoyEs = "2026-11-02";
+
+  it("hoy, ayer y anteayer, contando desde hoy", () => {
+    expect(cuadraLaFecha(delDia("2026-11-02"), "hoy", hoyEs)).toBe(true);
+    expect(cuadraLaFecha(delDia("2026-11-01"), "ayer", hoyEs)).toBe(true);
+    expect(cuadraLaFecha(delDia("2026-10-31"), "anteayer", hoyEs)).toBe(true);
+    expect(cuadraLaFecha(delDia("2026-11-01"), "hoy", hoyEs)).toBe(false);
+  });
+
+  it("ayer también cambiando de mes y de hora", () => {
+    expect(cuadraLaFecha(delDia("2026-10-25"), "ayer", "2026-10-26")).toBe(true);
+    expect(cuadraLaFecha(delDia("2026-09-30"), "ayer", "2026-10-01")).toBe(true);
+  });
+
+  it("el día de la semana, ya sin tildes", () => {
+    expect(cuadraLaFecha(delDia("2026-10-30"), "viernes", hoyEs)).toBe(true);
+    expect(cuadraLaFecha(delDia("2026-10-31"), "sabado", hoyEs)).toBe(true);
+    expect(cuadraLaFecha(delDia("2026-10-28"), "miercoles", hoyEs)).toBe(true);
+    expect(cuadraLaFecha(delDia("2026-10-30"), "lunes", hoyEs)).toBe(false);
+  });
+
+  it("día y mes, con barra o con guion", () => {
+    expect(cuadraLaFecha(delDia("2026-10-15"), "15/10", hoyEs)).toBe(true);
+    expect(cuadraLaFecha(delDia("2026-10-05"), "5-10", hoyEs)).toBe(true);
+    expect(cuadraLaFecha(delDia("2026-10-05"), "05/10", hoyEs)).toBe(true);
+    expect(cuadraLaFecha(delDia("2026-10-15"), "10/15", hoyEs)).toBe(false);
+  });
+
+  it("con el año, entero o en corto", () => {
+    expect(cuadraLaFecha(delDia("2026-10-15"), "15/10/2026", hoyEs)).toBe(true);
+    expect(cuadraLaFecha(delDia("2026-10-15"), "15/10/26", hoyEs)).toBe(true);
+    expect(cuadraLaFecha(delDia("2025-10-15"), "15/10/26", hoyEs)).toBe(false);
+  });
+
+  it("un número solo no es una fecha, que es un importe", () => {
+    expect(cuadraLaFecha(delDia("2026-10-15"), "15", hoyEs)).toBe(false);
+  });
+
+  it("los gastos de antes, sin fecha, nunca", () => {
+    expect(cuadraLaFecha({ id: "x", concepto: "Viejo" }, "hoy", hoyEs)).toBe(false);
+    expect(cuadraLaFecha({ id: "x", concepto: "Viejo" }, "15/10", hoyEs)).toBe(false);
+  });
+
+  it("en el buscador se junta con lo demás: la cena del sábado", () => {
+    const lista = [
+      { id: "1", concepto: "Cena", pagadorId: "a", fecha: "2026-10-31", importe: 40 },
+      { id: "2", concepto: "Cena", pagadorId: "a", fecha: "2026-10-30", importe: 30 },
+      { id: "3", concepto: "Museo", pagadorId: "a", fecha: "2026-10-31", importe: 12 },
+    ];
+    expect(ids(filtrarGastos(lista, con({ texto: "cena sábado" }), viajeros))).toEqual(["1"]);
+    expect(ids(filtrarGastos(lista, con({ texto: "31/10" }), viajeros))).toEqual(["1", "3"]);
   });
 });

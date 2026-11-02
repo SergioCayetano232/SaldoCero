@@ -1477,7 +1477,7 @@ function Gastos({
                   // Si no, el navegador saca encima lo que buscaste otras veces y tapa los resultados.
                   autoComplete="off"
                   // El atajo solo se cuenta donde hay teclado.
-                  placeholder={esOrdenador() ? "Concepto, importe o quién pagó (pulsa /)" : "Concepto, importe o quién pagó"}
+                  placeholder={esOrdenador() ? "Concepto, importe, quién o qué día (pulsa /)" : "Concepto, importe, quién o día"}
                   aria-keyshortcuts="/"
                   aria-label="Buscar un gasto"
                   enterKeyHint="search"

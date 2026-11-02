@@ -44,6 +44,33 @@ export function cuadraElImporte(gasto, texto) {
   );
 }
 
+const DIAS_SEMANA = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
+
+// Un día antes de otro, en UTC para que el cambio de hora no se coma un día.
+function diaAntes(fecha, cuantos) {
+  return new Date(Date.parse(fecha) - cuantos * 86400000).toISOString().slice(0, 10);
+}
+
+// "ayer", "sábado" o "15/10" para dar con lo de un día. La palabra ya viene sin
+// tildes. Un número solo no, que ese es un importe.
+export function cuadraLaFecha(gasto, palabra, dia = hoy()) {
+  if (!gasto.fecha) return false;
+
+  const cerca = ["hoy", "ayer", "anteayer"].indexOf(palabra);
+  if (cerca !== -1) return gasto.fecha === diaAntes(dia, cerca);
+
+  const semana = DIAS_SEMANA.indexOf(palabra);
+  if (semana !== -1) return new Date(Date.parse(gasto.fecha)).getUTCDay() === semana;
+
+  // "15/10", "15-10" o con el año, "15/10/2026" o "15/10/26".
+  const partes = palabra.match(/^(\d{1,2})[/-](\d{1,2})(?:[/-](\d{2}|\d{4}))?$/);
+  if (!partes) return false;
+
+  const [ano, mes, diaDelMes] = gasto.fecha.split("-").map(Number);
+  const anoBuscado = partes[3] && Number(partes[3].length === 2 ? `20${partes[3]}` : partes[3]);
+  return diaDelMes === Number(partes[1]) && mes === Number(partes[2]) && (!anoBuscado || ano === anoBuscado);
+}
+
 // Venir desde el resumen a ver lo de alguien: lo demás que hubiera se quita,
 // que si no puede salir la lista vacía sin saber por qué.
 export function soloDe(viajeroId) {
@@ -140,7 +167,7 @@ export function filtrarGastos(gastos, filtros, viajeros, monedaViaje) {
     // La nota también cuenta: "¿cuál era el de la propina?". Y quién pagó, que
     // escribir "ana" es más rápido que ir al desplegable. Con la categoría, igual.
     const dondeBuscar = normalizar(`${gasto.concepto} ${gasto.nota ?? ""} ${quienPago(gasto, viajeros)} ${categoriaDe(gasto.categoria).nombre}`);
-    if (!palabras.every((p) => dondeBuscar.includes(p) || cuadraElImporte(gasto, p))) return false;
+    if (!palabras.every((p) => dondeBuscar.includes(p) || cuadraElImporte(gasto, p) || cuadraLaFecha(gasto, p))) return false;
     if (filtros.categoria && (gasto.categoria ?? "otros") !== filtros.categoria) return false;
     if (filtros.fecha && gasto.fecha !== filtros.fecha) return false;
     // Para dar con el ticket que te pide alguien sin abrir gasto por gasto.

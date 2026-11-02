@@ -38,7 +38,8 @@ Pruébala aquí: https://saldo-cero-eight.vercel.app/
   que ya has apuntado, con lo que costó la última vez.
 - Buscas y filtras los gastos por concepto, importe, persona, categoría, si
   llevan ticket o nota, si se pagaron en otra moneda, si no son de todos, o
-  solo los de hoy. O ves solo los tuyos con lo que te toca de cada uno.
+  solo los de hoy. O escribes el día: "ayer", "sábado" o "15/10". O ves solo
+  los tuyos con lo que te toca de cada uno.
 - Y los ordenas como quieras: por días, por lo que costaron, por quién pagó,
   por categoría, por nombre, por cuándo se apuntaron o por lo que más te toca
   a ti.
