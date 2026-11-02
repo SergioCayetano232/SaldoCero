@@ -93,6 +93,29 @@ function losDeAlgunos(gastos, personas) {
 }
 
 // personas: los viajeros con lo que ha puesto cada uno (bote incluido).
+const EN_PLURAL = ["domingos", "lunes", "martes", "miércoles", "jueves", "viernes", "sábados"];
+
+// "Los sábados, 140 € de media". En un finde cada día sale una vez y esto sería
+// el día más caro otra vez, así que solo si el que gana se ha repetido.
+// Solo cuentan los días con gastos: el domingo de playa no baja la media.
+export function diaDeLaSemana(dias) {
+  const porDia = new Map();
+  for (const { fecha, total } of dias) {
+    // En UTC, que la fecha va sin hora y a medianoche aquí puede ser el día de antes.
+    const semana = new Date(Date.parse(fecha)).getUTCDay();
+    const antes = porDia.get(semana) ?? { total: 0, veces: 0 };
+    porDia.set(semana, { total: antes.total + total, veces: antes.veces + 1 });
+  }
+  if (porDia.size < 2) return null;
+
+  const medias = [...porDia].map(([semana, { total, veces }]) => ({ dia: EN_PLURAL[semana], media: total / veces, veces }));
+  const max = Math.max(...medias.map((m) => m.media));
+  // Por debajo del céntimo es empate.
+  const ganadores = medias.filter((m) => max - m.media < 0.005);
+  if (ganadores.length > 1 || ganadores[0].veces < 2) return null;
+  return ganadores[0];
+}
+
 export function cifrasDelViaje(gastos, personas, monedaViaje) {
   if (gastos.length === 0) return null;
 
@@ -134,6 +157,7 @@ export function cifrasDelViaje(gastos, personas, monedaViaje) {
     diaMasBarato: dias.length > 1 && masBarato.total < masCaro.total ? masBarato : null,
     // El que más gastos tuvo, que no tiene por qué ser el más caro. Con empate, nada.
     diaMasMovido: dias.length > 1 && losMasMovidos.length === 1 ? losMasMovidos[0] : null,
+    diaDeLaSemana: diaDeLaSemana(dias),
     gastoMasGrande: resumenDeGasto(grande, personas),
     // Con uno solo, o si todos costaron igual, sería el mismo que el más gordo.
     gastoMasPequeno:
@@ -184,6 +208,10 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   }
   if (cifras.diaMasMovido) {
     lineas.push(`🐝 El día más movido: ${enCorto(cifras.diaMasMovido.fecha)}, ${cifras.diaMasMovido.gastos} gastos`);
+  }
+  if (cifras.diaDeLaSemana) {
+    const d = cifras.diaDeLaSemana;
+    lineas.push(`🗓️ Cuando más gastáis: los ${d.dia}, ${conMoneda(d.media, moneda)} de media`);
   }
   const g = cifras.gastoMasGrande;
   lineas.push(`💸 El gasto más gordo: ${g.concepto}, ${conMoneda(g.importe, moneda)}${g.quien ? ` (${g.quien})` : ""}`);

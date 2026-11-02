@@ -40,7 +40,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
     setTimeout(() => setCopiado(""), 2500);
   }
 
-  const { quienMasPuso, quienMenosPuso, quienMasVeces, diaMasCaro, diaMasBarato, diaMasMovido, gastoMasGrande, gastoMasPequeno, masCaroPorCabeza, masRepetido, delBote, tickets, monedas, deAlgunos, categoria, porPersonaYDia } = cifras;
+  const { quienMasPuso, quienMenosPuso, quienMasVeces, diaMasCaro, diaMasBarato, diaMasMovido, diaDeLaSemana, gastoMasGrande, gastoMasPequeno, masCaroPorCabeza, masRepetido, delBote, tickets, monedas, deAlgunos, categoria, porPersonaYDia } = cifras;
 
   return (
     <section className="tarjeta cifras">
@@ -126,6 +126,13 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
             <span className="cifras-emoji">🐝</span>
             <strong>{enCorto(diaMasMovido.fecha)}</strong>
             <span>el día más movido, {diaMasMovido.gastos} gastos</span>
+          </li>
+        )}
+        {diaDeLaSemana && (
+          <li>
+            <span className="cifras-emoji">🗓️</span>
+            <strong>Los {diaDeLaSemana.dia}</strong>
+            <span>es cuando más gastáis, {conMoneda(diaDeLaSemana.media, moneda)} de media</span>
           </li>
         )}
         <li>

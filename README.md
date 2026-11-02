@@ -60,7 +60,8 @@ Pruébala aquí: https://saldo-cero-eight.vercel.app/
   Otra, cómo ha ido el saldo de cada uno día a día.
 - Al volver, cierras el viaje y ya nadie toca los gastos. Y te sale el viaje
   en cifras: el día más caro, el más movido, quién puso más y quién menos, lo
-  más caro por cabeza, lo que más se repitió ("Café, 7 veces")... Y te lo
+  más caro por cabeza, lo que más se repitió ("Café, 7 veces"), qué día de la
+  semana gastáis más... Y te lo
   cuenta en historias, como las de Instagram.
 - El resumen lo compartes por donde quieras, en texto o en una imagen, o te lo
   descargas en un txt. Los gastos, en un Excel con los totales al final.

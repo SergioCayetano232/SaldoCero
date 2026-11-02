@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cifrasDelViaje, cifrasEnTexto } from "./cifras";
+import { cifrasDelViaje, cifrasEnTexto, diaDeLaSemana } from "./cifras";
 import { BOTE } from "./bote";
 
 const personas = [
@@ -371,5 +371,54 @@ describe("cifrasEnTexto", () => {
     const unDia = cifrasEnTexto(cifrasDelViaje(gastos.slice(0, 2), personas), "Lisboa", "EUR");
     expect(unDia).not.toContain("por persona y día");
     expect(unDia).not.toContain("día más caro");
+  });
+});
+
+describe("diaDeLaSemana", () => {
+  // El 31 de octubre de 2026 es sábado, y el 7 de noviembre también.
+  const dia = (fecha, total) => ({ fecha, total });
+
+  it("el que más se gasta de media, si se ha repetido", () => {
+    const dias = [dia("2026-10-30", 50), dia("2026-10-31", 120), dia("2026-11-06", 60), dia("2026-11-07", 160)];
+    expect(diaDeLaSemana(dias)).toEqual({ dia: "sábados", media: 140, veces: 2 });
+  });
+
+  it("en un finde cada día sale una vez: eso ya es el día más caro", () => {
+    expect(diaDeLaSemana([dia("2026-10-30", 50), dia("2026-10-31", 120), dia("2026-11-01", 30)])).toBeNull();
+  });
+
+  it("si el que gana solo salió una vez, tampoco", () => {
+    const dias = [dia("2026-10-30", 50), dia("2026-11-06", 60), dia("2026-10-31", 300)];
+    expect(diaDeLaSemana(dias)).toBeNull();
+  });
+
+  it("con empate no hay uno que contar", () => {
+    const dias = [dia("2026-10-30", 100), dia("2026-11-06", 100), dia("2026-10-31", 50), dia("2026-11-07", 150)];
+    expect(diaDeLaSemana(dias)).toBeNull();
+  });
+
+  it("si todo cae en el mismo día de la semana, no hay con qué comparar", () => {
+    expect(diaDeLaSemana([dia("2026-10-31", 50), dia("2026-11-07", 80)])).toBeNull();
+  });
+
+  it("los días que no cambian de nombre en plural", () => {
+    const dias = [dia("2026-10-28", 90), dia("2026-11-04", 90), dia("2026-10-29", 10)];
+    expect(diaDeLaSemana(dias).dia).toBe("miércoles");
+  });
+
+  it("sale en las cifras del viaje y en el texto", () => {
+    const largo = [
+      { pagadorId: "a", importe: 50, concepto: "Cena", categoria: "comida", fecha: "2026-10-30" },
+      { pagadorId: "a", importe: 120, concepto: "Cena", categoria: "comida", fecha: "2026-10-31" },
+      { pagadorId: "b", importe: 60, concepto: "Cena", categoria: "comida", fecha: "2026-11-06" },
+      { pagadorId: "b", importe: 160, concepto: "Cena", categoria: "comida", fecha: "2026-11-07" },
+    ];
+    const cifras = cifrasDelViaje(largo, personas);
+    expect(cifras.diaDeLaSemana.dia).toBe("sábados");
+    expect(cifrasEnTexto(cifras, "Lisboa", "EUR")).toContain("🗓️ Cuando más gastáis: los sábados, 140.00 € de media");
+  });
+
+  it("en el viaje corto de siempre, no", () => {
+    expect(cifrasDelViaje(gastos, personas).diaDeLaSemana).toBeNull();
   });
 });
