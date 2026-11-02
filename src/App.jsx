@@ -4,7 +4,7 @@ import * as datos from "./datos";
 import { hayConexion, usarCodigo } from "./supabase";
 import { balancesConBote, hayBote } from "./bote";
 import { coloresDelViaje } from "./avatares";
-import { borradoConEspera, deshacerEdicion, ESPERA, queSeVaConViajero } from "./deshacer";
+import { borradoConEspera, deshacerEdicion, ESPERA, queSeVaConGastos, queSeVaConViajero } from "./deshacer";
 import { textoPasados } from "./recategorizar";
 import { novedades, textoDeNovedades } from "./novedades";
 import { turnos } from "./turnos";
@@ -476,11 +476,12 @@ function App() {
 
   // Lo que está a medio borrar no sale en la lista ni cuenta para las cuentas,
   // aunque en la base de datos siga estando unos segundos más.
-  const seVa = borrado?.id;
-  const viajeros = viaje.viajeros.filter((v) => v.id !== seVa);
-  const gastos = viaje.gastos.filter((g) => g.id !== seVa && g.pagadorId !== seVa);
-  const parciales = (viaje.parciales ?? []).filter((p) => p.id !== seVa);
-  const aportaciones = (viaje.aportaciones ?? []).filter((a) => a.id !== seVa && a.viajeroId !== seVa);
+  // Uno o varios: al quitar los gastos filtrados se van todos juntos.
+  const seVan = new Set([borrado?.id ?? []].flat());
+  const viajeros = viaje.viajeros.filter((v) => !seVan.has(v.id));
+  const gastos = viaje.gastos.filter((g) => !seVan.has(g.id) && !seVan.has(g.pagadorId));
+  const parciales = (viaje.parciales ?? []).filter((p) => !seVan.has(p.id));
+  const aportaciones = (viaje.aportaciones ?? []).filter((a) => !seVan.has(a.id) && !seVan.has(a.viajeroId));
   const balances = balancesConBote(viajeros, gastos, parciales, aportaciones);
   const colores = coloresDelViaje(viajeros.map((v) => v.nombre));
   const cerrado = estaCerrado(viaje);
@@ -584,6 +585,13 @@ function App() {
           const bien = await hacer(() => Promise.all(cambios.map((c) => datos.editarGasto(c.id, c.despues))));
           if (bien) setEditado({ texto: textoPasados(cambios.length, categoria), cambios, viajeId: viaje.id });
         }}
+        onQuitarVarios={(quitados) =>
+          borrarConAviso(
+            quitados.map((g) => g.id),
+            queSeVaConGastos(quitados, viaje.moneda ?? "EUR"),
+            () => Promise.all(quitados.map((g) => datos.quitarGasto(g.id, g.ticket)))
+          )
+        }
         onQuitar={(id, concepto, ticket) =>
           borrarConAviso(id, `"${concepto}"`, () => datos.quitarGasto(id, ticket))
         }

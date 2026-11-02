@@ -681,6 +681,17 @@ button:active {
   color: var(--teal-700);
 }
 
+.filtro-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.filtro-resumen .quitar-varios {
+  color: var(--rojo);
+}
+
 /* ===== Deslizar los gastos ===== */
 /* Lo que se sale por el lado al arrastrar no tiene que verse fuera de la tarjeta. */
 .lista-deslizable {

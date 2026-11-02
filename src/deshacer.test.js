@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { borradoConEspera, ESPERA, queSeVaConViajero, deshacerEdicion } from "./deshacer";
+import { borradoConEspera, ESPERA, queSeVaConViajero, deshacerEdicion, queSeVaConGastos, textoQuitarVarios } from "./deshacer";
 
 // Controlamos el reloj, que si no habría que esperar de verdad.
 beforeEach(() => vi.useFakeTimers());
@@ -169,5 +169,29 @@ describe("deshacerEdicion", () => {
 
   it("si el gasto ya no está, nada", () => {
     expect(deshacerEdicion(undefined, editado())).toBeNull();
+  });
+});
+
+describe("queSeVaConGastos", () => {
+  const cafe = (id, importe) => ({ id, concepto: "Café", importe });
+
+  it("varios: cuántos y lo que suman", () => {
+    expect(queSeVaConGastos([cafe("1", 2), cafe("2", 2.5), cafe("3", 2)])).toBe("3 gastos (6.50 €)");
+  });
+
+  it("en la moneda del viaje, con lo convertido", () => {
+    const fuera = { id: "1", concepto: "Ramen", importe: 1000, importeConvertido: 6.1 };
+    expect(queSeVaConGastos([fuera, cafe("2", 2)], "EUR")).toBe("2 gastos (8.10 €)");
+  });
+
+  it("uno solo, por su nombre, como al quitarlo a mano", () => {
+    expect(queSeVaConGastos([cafe("1", 2)])).toBe('"Café"');
+  });
+});
+
+describe("textoQuitarVarios", () => {
+  it("con dos se dice de otra forma", () => {
+    expect(textoQuitarVarios(2)).toBe("quitar los dos");
+    expect(textoQuitarVarios(5)).toBe("quitar los 5");
   });
 });

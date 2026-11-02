@@ -93,3 +93,13 @@ function mismoGasto(a, b) {
     reparto(a) === reparto(b)
   );
 }
+
+// Quitar varios de golpe: que se diga cuántos y cuánto, que es lo que asusta.
+export function queSeVaConGastos(gastos, moneda = "EUR") {
+  const total = conMoneda(calcularTotal(gastos), moneda);
+  return gastos.length === 1 ? `"${gastos[0].concepto}"` : `${gastos.length} gastos (${total})`;
+}
+
+export function textoQuitarVarios(cuantos) {
+  return cuantos === 2 ? "quitar los dos" : `quitar los ${cuantos}`;
+}

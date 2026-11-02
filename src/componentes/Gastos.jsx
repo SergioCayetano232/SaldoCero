@@ -38,6 +38,7 @@ import LeerTotal from "./LeerTotal";
 import { entenderDictado } from "../dictado";
 import { diasSinGastos, textoHuecos } from "../huecos";
 import { aOtraCategoria, categoriasDestino, textoPasarA } from "../recategorizar";
+import { textoQuitarVarios } from "../deshacer";
 
 function Gastos({
   codigo,
@@ -53,6 +54,7 @@ function Gastos({
   onAnadir,
   onEditar,
   onCambiarCategoria,
+  onQuitarVarios,
   onQuitar,
   verTicket,
   soy = null,
@@ -1652,30 +1654,37 @@ function Gastos({
                       </span>
                     )}
                   </span>
-                  {/* Lo que tienes a la vista, de una vez: buscas "café" y los pasas a Comida. */}
-                  {!cerrado && visibles.length > 1 && (
-                    <select
-                      className="pasar-a"
-                      value=""
-                      onChange={(e) => onCambiarCategoria(aOtraCategoria(visibles, e.target.value), e.target.value)}
-                      aria-label={`Cambiar la categoría de los ${visibles.length} gastos`}
+                  <span className="filtro-acciones">
+                    {/* Lo que tienes a la vista, de una vez: buscas "café" y los pasas a Comida. */}
+                    {!cerrado && visibles.length > 1 && (
+                      <select
+                        className="pasar-a"
+                        value=""
+                        onChange={(e) => onCambiarCategoria(aOtraCategoria(visibles, e.target.value), e.target.value)}
+                        aria-label={`Cambiar la categoría de los ${visibles.length} gastos`}
+                      >
+                        <option value="">{textoPasarA(visibles.length)}</option>
+                        {categoriasDestino(visibles).map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.emoji} {c.nombre}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                    {!cerrado && visibles.length > 1 && (
+                      <button className="enlace quitar-varios" onClick={() => onQuitarVarios(visibles)}>
+                        {textoQuitarVarios(visibles.length)}
+                      </button>
+                    )}
+                    <button
+                      className="enlace"
+                      onClick={() => setFiltros(SIN_FILTROS)}
+                      aria-keyshortcuts="x"
+                      title={esOrdenador() ? "También con la X" : undefined}
                     >
-                      <option value="">{textoPasarA(visibles.length)}</option>
-                      {categoriasDestino(visibles).map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.emoji} {c.nombre}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                  <button
-                    className="enlace"
-                    onClick={() => setFiltros(SIN_FILTROS)}
-                    aria-keyshortcuts="x"
-                    title={esOrdenador() ? "También con la X" : undefined}
-                  >
-                    quitar filtros
-                  </button>
+                      quitar filtros
+                    </button>
+                  </span>
                 </p>
               )}
             </div>
