@@ -42,6 +42,58 @@ export function nombreRepetido(nombre, viajeros, salvoId = null) {
   return viajeros.find((v) => v.id !== salvoId && igualar(v.nombre) === buscado)?.nombre ?? null;
 }
 
+// Cuántas letras hay que tocar para pasar de uno a otro. Dos cambiadas de sitio
+// cuentan como una, que "Lusi" por "Luis" es la errata de siempre.
+function letrasDistintas(a, b) {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const cambio = a[i - 1] === b[j - 1] ? 0 : 1;
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cambio);
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+        d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+      }
+    }
+  }
+  return d[a.length][b.length];
+}
+
+// Mario y María, Julio y Julia: eso son dos personas, no una errata.
+function soloCambiaLaO(a, b) {
+  return a.slice(0, -1) === b.slice(0, -1) && /[oa]$/.test(a) && /[oa]$/.test(b);
+}
+
+// "Ana M." cuando ya está "Ana", o "Lusi" cuando está "Luis": puede ser el mismo
+// metido dos veces. No se impide, se pregunta. Devuelve con quién se parece.
+// Los nombres cortos no: "Ana" y "Ane" pueden ser dos personas tranquilamente.
+export function nombreParecido(nombre, viajeros) {
+  const igualar = (texto) =>
+    String(texto ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[.]/g, "").trim();
+  const buscado = igualar(nombre);
+  const primera = buscado.split(/\s+/)[0];
+
+  return (
+    viajeros.find((v) => {
+      const otro = igualar(v.nombre);
+      if (otro === buscado) return false;
+      if (otro.split(/\s+/)[0] === primera) return true;
+      if (soloCambiaLaO(otro, buscado)) return false;
+      return Math.min(otro.length, buscado.length) >= 4 && letrasDistintas(otro, buscado) === 1;
+    })?.nombre ?? null
+  );
+}
+
+export function avisoDeParecidos(parecidos) {
+  if (parecidos.length === 0) return null;
+  if (parecidos.length === 1) {
+    const [{ nombre, conQuien }] = parecidos;
+    return `¿${nombre} es otra persona? Se parece a ${conQuien}, que ya está en el viaje.`;
+  }
+  return `¿${enLista(parecidos.map((p) => p.nombre))} son otras personas? Se parecen a ${enLista([...new Set(parecidos.map((p) => p.conQuien))])}.`;
+}
+
 // En el campo de añadir caben varios, "Ana, Luis, Marta", así que va más largo.
 export const LARGO_VARIOS = 200;
 

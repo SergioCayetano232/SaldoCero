@@ -20,7 +20,8 @@ Pruébala aquí: https://saldo-cero-eight.vercel.app/
 - Cada gasto lleva quién pagó, cuánto, en qué día y en concepto de qué.
 - O lo dictas: "cena 45 euros, pagó Ana", y se rellena solo.
 - Marcas cuál de los viajeros eres tú y te resalta tus cuentas.
-- ¿Nombre mal escrito? Lo tocas y lo cambias.
+- ¿Nombre mal escrito? Lo tocas y lo cambias. Y si metes "Ana M." con Ana ya
+  dentro, te pregunta si es otra persona antes de añadirla.
 - Cada gasto va en una categoría, y el resumen te dice en qué se va el dinero,
   del grupo o de cada uno.
 - Si un gasto no es de todos, marcas solo a los que van.

@@ -3779,6 +3779,39 @@ button.pago-cantidad:hover {
   color: var(--rojo);
 }
 
+/* No es un error como lo de arriba, es una pregunta: va en el tono de los avisos. */
+.nombre-parecido {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: -6px 0 14px;
+  padding: 10px 12px;
+  border-radius: var(--radio-sm);
+  background-color: var(--papel-hundido);
+  border: 1px solid var(--linea);
+  font-size: 13px;
+  color: var(--tinta-suave);
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
+}
+
+.nombre-parecido p {
+  flex: 1;
+  min-width: 0;
+}
+
+.nombre-parecido-botones {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+  line-height: 1.5;
+}
+
+.nombre-parecido .no-es-otro {
+  color: var(--tinta-suave);
+}
+
 /* Debajo de la deuda, a lo ancho: dónde pagar y copiarlo de un toque. */
 .pago-cobro {
   flex-basis: 100%;

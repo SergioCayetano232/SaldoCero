@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Avatar from "./Avatar";
 import NombreEditable from "./NombreEditable";
-import { nombreRepetido, separarNombres, avisoDeRepetidos, enUnaLinea, LARGO_VARIOS } from "../nombres";
+import { nombreRepetido, nombreParecido, separarNombres, avisoDeRepetidos, avisoDeParecidos, enUnaLinea, LARGO_VARIOS } from "../nombres";
 import { leerCobro, cobroDe, cobroComoTexto } from "../cobro";
 import { esAtajoViajero, esOrdenador } from "../teclado";
 
@@ -23,6 +23,8 @@ function Viajeros({
   // añadiendo o renombrando, que solo en lo primero se pone rojo el campo.
   const [repetido, setRepetido] = useState(null);
   const [alRenombrar, setAlRenombrar] = useState(false);
+  // Los que se parecen a alguien que ya está, esperando a que digas si son otros.
+  const [dudas, setDudas] = useState(null);
   // De quién estás poniendo el Bizum, y lo que llevas escrito.
   const [cobrando, setCobrando] = useState(null);
   const [textoCobro, setTextoCobro] = useState("");
@@ -73,16 +75,39 @@ function Viajeros({
   async function anadir() {
     const { nuevos, repetidos } = separarNombres(nombre, viajeros);
     const sobran = repetidos.map((r) => r.nombre);
+    const parecidos = nuevos
+      .map((n) => ({ nombre: n, conQuien: nombreParecido(n, viajeros) }))
+      .filter((p) => p.conQuien);
+    const seguros = nuevos.filter((n) => !parecidos.some((p) => p.nombre === n));
+
     setAlRenombrar(false);
     setRepetido(avisoDeRepetidos(repetidos.map((r) => r.yaEsta)));
-    setNombre(sobran.join(", "));
+    setDudas(parecidos.length > 0 ? { parecidos, sobran } : null);
+    // Los dudosos se quedan en el campo mientras contestas.
+    const quedan = [...parecidos.map((p) => p.nombre), ...sobran];
+    setNombre(quedan.join(", "));
+    await anadirTodos(seguros, quedan);
+  }
 
-    for (const [i, nuevo] of nuevos.entries()) {
+  async function anadirTodos(lista, resto) {
+    for (const [i, nuevo] of lista.entries()) {
       if (await onAnadir(nuevo)) continue;
       // Si uno falla, lo que faltaba vuelve al campo para darle otra vez.
-      setNombre([...nuevos.slice(i), ...sobran].join(", "));
+      setNombre([...lista.slice(i), ...resto].join(", "));
       break;
     }
+  }
+
+  function anadirIgual() {
+    const { parecidos, sobran } = dudas;
+    setDudas(null);
+    setNombre(sobran.join(", "));
+    anadirTodos(parecidos.map((p) => p.nombre), sobran);
+  }
+
+  function eraElMismo() {
+    setNombre(dudas.sobran.join(", "));
+    setDudas(null);
   }
 
   return (
@@ -111,6 +136,7 @@ function Viajeros({
             onChange={(e) => {
               setNombre(e.target.value);
               setRepetido(null);
+              setDudas(null);
             }}
             onPaste={(e) => {
               const pegado = e.clipboardData.getData("text");
@@ -125,6 +151,7 @@ function Viajeros({
               if (e.key === "Escape") {
                 setNombre("");
                 setRepetido(null);
+                setDudas(null);
               }
             }}
           />
@@ -136,6 +163,20 @@ function Viajeros({
 
       {repetido && (
         <p className="nombre-repetido">{repetido}</p>
+      )}
+
+      {dudas && (
+        <div className="nombre-parecido" role="status">
+          <p>{avisoDeParecidos(dudas.parecidos)}</p>
+          <div className="nombre-parecido-botones">
+            <button className="enlace" onClick={anadirIgual}>
+              Añadir igual
+            </button>
+            <button className="enlace no-es-otro" onClick={eraElMismo}>
+              {dudas.parecidos.length === 1 ? "Es la misma persona" : "Son las mismas"}
+            </button>
+          </div>
+        </div>
       )}
 
       {viajeros.length === 0 ? (

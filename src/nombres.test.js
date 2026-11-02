@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { limpiarNombre, conMayuscula, nombreNuevo, nombreRepetido, separarNombres, avisoDeRepetidos, enLista, enUnaLinea, LARGO_MAXIMO } from "./nombres";
+import { limpiarNombre, conMayuscula, nombreNuevo, nombreRepetido, separarNombres, avisoDeRepetidos, enLista, enUnaLinea, LARGO_MAXIMO, nombreParecido, avisoDeParecidos } from "./nombres";
 
 describe("limpiarNombre", () => {
   it("quita espacios de sobra", () => {
@@ -214,5 +214,70 @@ describe("enUnaLinea", () => {
 
   it("se salta las líneas vacías", () => {
     expect(enUnaLinea("Ana\n\n  \nLuis\n")).toBe("Ana, Luis");
+  });
+});
+
+describe("nombreParecido", () => {
+  const viajeros = [{ nombre: "Ana" }, { nombre: "Luis" }, { nombre: "María José" }];
+
+  it("el mismo nombre con la inicial o el apellido", () => {
+    expect(nombreParecido("Ana M.", viajeros)).toBe("Ana");
+    expect(nombreParecido("Ana García", viajeros)).toBe("Ana");
+    expect(nombreParecido("María", viajeros)).toBe("María José");
+  });
+
+  it("una letra cambiada, de más o de menos", () => {
+    expect(nombreParecido("Lusi", viajeros)).toBe("Luis");
+    expect(nombreParecido("Luiss", viajeros)).toBe("Luis");
+    expect(nombreParecido("Lis", viajeros)).toBeNull();
+  });
+
+  it("sin mirar tildes, mayúsculas ni puntos", () => {
+    expect(nombreParecido("luís", [{ nombre: "Luiz" }])).toBe("Luiz");
+    expect(nombreParecido("ANA m", viajeros)).toBe("Ana");
+  });
+
+  it("los nombres cortos con una letra distinta son otra persona", () => {
+    expect(nombreParecido("Ane", viajeros)).toBeNull();
+  });
+
+  it("dos letras distintas ya no se parecen", () => {
+    expect(nombreParecido("Lola", [{ nombre: "Lula" }, { nombre: "Pepe" }])).toBe("Lula");
+    expect(nombreParecido("Pablo", [{ nombre: "Paula" }])).toBeNull();
+  });
+
+  it("Mario y María son dos personas", () => {
+    expect(nombreParecido("Mario", [{ nombre: "María" }])).toBeNull();
+    expect(nombreParecido("Julia", [{ nombre: "Julio" }])).toBeNull();
+  });
+
+  it("igual del todo no es parecido: eso ya lo para el de repetidos", () => {
+    expect(nombreParecido("ana", viajeros)).toBeNull();
+  });
+
+  it("sin nadie parecido, nada", () => {
+    expect(nombreParecido("Marta", viajeros)).toBeNull();
+    expect(nombreParecido("Pedro", [])).toBeNull();
+  });
+});
+
+describe("avisoDeParecidos", () => {
+  it("uno", () => {
+    expect(avisoDeParecidos([{ nombre: "Ana M.", conQuien: "Ana" }])).toBe(
+      "¿Ana M. es otra persona? Se parece a Ana, que ya está en el viaje."
+    );
+  });
+
+  it("varios", () => {
+    expect(
+      avisoDeParecidos([
+        { nombre: "Ana M.", conQuien: "Ana" },
+        { nombre: "Lusi", conQuien: "Luis" },
+      ])
+    ).toBe("¿Ana M. y Lusi son otras personas? Se parecen a Ana y Luis.");
+  });
+
+  it("ninguno, nada", () => {
+    expect(avisoDeParecidos([])).toBeNull();
   });
 });
