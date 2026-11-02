@@ -43,7 +43,8 @@ Pruébala aquí: https://saldo-cero-eight.vercel.app/
   por categoría, por nombre, por cuándo se apuntaron o por lo que más te toca
   a ti.
 - Si borras algo sin querer, lo deshaces. Y si cambias un gasto y no era eso, también.
-- Puedes pagar en otra moneda y te lo convertimos a la del viaje.
+- Puedes pagar en otra moneda y te lo convertimos a la del viaje. Y si el viaje
+  no fue en la tuya, al lado de cada deuda te pone lo que sale en tu moneda.
 - Si hacéis bote, apuntas lo que pone cada uno y pagáis desde ahí.
 - Te dice a quién le toca pagar la próxima: al que menos ha puesto.
 - Y al final, la lista de quién paga a quién para quedar todos a cero, con un

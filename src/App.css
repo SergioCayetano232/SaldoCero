@@ -2979,6 +2979,20 @@ button.pago-cantidad:hover {
   background-color: var(--teal-50);
 }
 
+/* Lo de casa va flojito: es orientativo, la cifra buena es la del viaje. */
+.pago-en-casa {
+  font-size: 12px;
+  color: var(--tinta-tenue);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.en-casa {
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: var(--tinta-tenue);
+}
+
 /* ===== Foto del ticket ===== */
 .fila-ticket {
   display: flex;

@@ -12,7 +12,8 @@ import {
   redondearPagos,
   hayCentimos,
 } from "../calculos";
-import { conMoneda } from "../monedas";
+import { cambio, conMoneda, monedaDeCasa } from "../monedas";
+import { hayQuePasarACasa, textoACasa, textoCambioACasa } from "../enCasa";
 import { resumenEnTexto, copiarAlPortapapeles, descargarResumen, descargarGastos, invitar, enlaceDelViaje, compartirImagen, nombreDeArchivo } from "../compartir";
 import { datosDeTarjeta } from "../tarjeta";
 import { tarjetaEnImagen } from "../pintarTarjeta";
@@ -77,8 +78,21 @@ function Resumen({
   const [cobroCopiado, setCobroCopiado] = useState(null);
   // Y lo mismo con la cifra, que es lo otro que hay que escribir en el Bizum.
   const [cantidadCopiada, setCantidadCopiada] = useState(null);
+  // El cambio a la moneda de casa, con la moneda del viaje a la que corresponde.
+  const [casa] = useState(monedaDeCasa);
+  const [cambioACasa, setCambioACasa] = useState(null);
   // De quién es el desglose. null = del viaje entero.
   const [persona, setPersona] = useState(null);
+  useEffect(() => {
+    if (!hayQuePasarACasa(monedaViaje, casa)) return;
+    let sigue = true;
+    // Sin internet o sin cambio sale null, y las deudas se quedan como estaban.
+    cambio(monedaViaje, casa).then((tasa) => sigue && setCambioACasa({ moneda: monedaViaje, tasa }));
+    return () => {
+      sigue = false;
+    };
+  }, [monedaViaje, casa]);
+
   const total = calcularTotal(gastos);
   const media = mediaPorGasto(gastos);
   const masCaro = gastoMasCaro(gastos);
@@ -106,6 +120,7 @@ function Resumen({
     ? gastoPorCategoria(gastos, (g) => parteDe(g, deQuien.id, personas))
     : delViaje;
   const todoPagado = pagos.length > 0 && pendiente === 0;
+  const tasaACasa = cambioACasa?.moneda === monedaViaje ? cambioACasa.tasa : null;
   // Si se ha ido del viaje, ya no hay saldo suyo que enseñar.
   const loMio = personas.some((v) => v.id === soy) ? miSaldo(pagos, soy) : null;
 
@@ -514,6 +529,12 @@ function Resumen({
               <p className="saldadas">🎉 Todo pagado. Ya estáis a cero.</p>
             )}
 
+            {tasaACasa && pendiente > 0 && (
+              <p className="en-casa">
+                En {casa}, al cambio de hoy ({textoCambioACasa(tasaACasa, monedaViaje, casa)}).
+              </p>
+            )}
+
             {hayDiagrama(pagos) && (
               <DiagramaDeudas pagos={pagos} colores={colores} moneda={monedaViaje} soy={soy} />
             )}
@@ -546,6 +567,10 @@ function Resumen({
                           ? "✓ copiado"
                           : conMoneda(pago.cantidad, monedaViaje)}
                       </button>
+                    )}
+
+                    {!pago.saldado && tasaACasa && (
+                      <span className="pago-en-casa">{textoACasa(pago.cantidad, tasaACasa, casa)}</span>
                     )}
 
                     {/* Al bote no se le manda un WhatsApp. */}
