@@ -39,6 +39,7 @@ import { entenderDictado } from "../dictado";
 import { diasSinGastos, textoHuecos } from "../huecos";
 import { aOtraCategoria, categoriasDestino, textoPasarA } from "../recategorizar";
 import { textoQuitarVarios } from "../deshacer";
+import { esUnaLista, gastosDeLista, textoApuntarLista } from "../pegarGastos";
 
 function Gastos({
   codigo,
@@ -55,6 +56,7 @@ function Gastos({
   onEditar,
   onCambiarCategoria,
   onQuitarVarios,
+  onAnadirVarios,
   onQuitar,
   verTicket,
   soy = null,
@@ -189,6 +191,9 @@ function Gastos({
   const [raro, setRaro] = useState(null);
   const [otraFecha, setOtraFecha] = useState(null);
   const [sinGastar, setSinGastar] = useState(() => datos.leerDiasSinGastar(codigo));
+  // Lo pegado de las notas del móvil, mientras miras qué ha salido antes de apuntarlo.
+  const [pegado, setPegado] = useState(null);
+  const deLaLista = pegado && gastosDeLista(pegado, viajeros, { pagadorId, moneda: monedaViaje, soy });
   const huecos = diasSinGastos(gastos, sinGastar);
   const campoFecha = useRef(null);
   const formulario = useRef(null);
@@ -735,6 +740,21 @@ function Gastos({
     campoImporte.current?.focus();
   }
 
+  // Una lista entera no cabe en un campo: se abre aparte para ver qué sale.
+  function alPegar(e) {
+    const texto = e.clipboardData.getData("text");
+    if (editando || !esUnaLista(texto)) return;
+    e.preventDefault();
+    setPegado(texto);
+  }
+
+  async function apuntarLista() {
+    if (await onAnadirVarios(deLaLista.gastos)) {
+      setPegado(null);
+      avisarHecho("anadido");
+    }
+  }
+
   function noSeGasto() {
     const dias = [...sinGastar, ...huecos];
     datos.guardarDiasSinGastar(codigo, dias);
@@ -799,6 +819,44 @@ function Gastos({
                 </p>
               )}
 
+              {deLaLista && (
+                <div className="lista-pegada" role="status">
+                  <p>
+                    📋{" "}
+                    {deLaLista.gastos.length === 0
+                      ? "De lo que has pegado no sale ningún gasto."
+                      : `De lo que has pegado salen ${deLaLista.gastos.length === 1 ? "1 gasto" : `${deLaLista.gastos.length} gastos`}:`}
+                  </p>
+                  {deLaLista.gastos.length > 0 && (
+                    <ul>
+                      {deLaLista.gastos.map((g, i) => (
+                        <li key={i}>
+                          <span>
+                            {categoriaDe(g.categoria).emoji} {g.concepto}
+                            <small> · {nombrePagador(g.pagadorId)}{g.fecha !== hoy() && ` · ${comoTitulo(g.fecha)}`}</small>
+                          </span>
+                          <strong>{conMoneda(g.importe, monedaViaje)}</strong>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {deLaLista.sinEntender.length > 0 && (
+                    <p className="lista-pegada-fuera">
+                      {/* Lo normal es que falte quién pagó: con el de arriba elegido, entran. */}
+                      Se quedan fuera, sin importe o sin quién pagó: {deLaLista.sinEntender.map((l) => `«${l}»`).join(", ")}
+                    </p>
+                  )}
+                  <div className="lista-pegada-botones">
+                    {deLaLista.gastos.length > 0 && (
+                      <button className="apuntar-lista" onClick={apuntarLista}>{textoApuntarLista(deLaLista.gastos.length)}</button>
+                    )}
+                    <button className="enlace" onClick={() => setPegado(null)}>
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {!editando && huecos.length > 0 && (
                 <div className="dias-sin-gastos" role="status">
                   <span aria-hidden="true">📅</span>
@@ -851,6 +909,7 @@ function Gastos({
                     // Para corregirlo escribes encima, sin borrar antes.
                     onFocus={(e) => e.target.select()}
                     onChange={(e) => escribirImporte(e.target.value)}
+                    onPaste={alPegar}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
@@ -1045,6 +1104,7 @@ function Gastos({
                 enterKeyHint="done"
                 value={concepto}
                 onChange={(e) => escribirConcepto(e.target.value)}
+                onPaste={alPegar}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();

@@ -585,6 +585,12 @@ function App() {
           const bien = await hacer(() => Promise.all(cambios.map((c) => datos.editarGasto(c.id, c.despues))));
           if (bien) setEditado({ texto: textoPasados(cambios.length, categoria), cambios, viajeId: viaje.id });
         }}
+        // Uno detrás de otro, para que queden en la lista en el orden en que los pegaste.
+        onAnadirVarios={(lista) =>
+          hacer(async () => {
+            for (const gasto of lista) propios.current.add((await datos.anadirGasto(viaje.id, gasto)).id);
+          })
+        }
         onQuitarVarios={(quitados) =>
           borrarConAviso(
             quitados.map((g) => g.id),

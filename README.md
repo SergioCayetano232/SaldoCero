@@ -19,6 +19,8 @@ Pruébala aquí: https://saldo-cero-eight.vercel.app/
   que apuntan los demás.
 - Cada gasto lleva quién pagó, cuánto, en qué día y en concepto de qué.
 - O lo dictas: "cena 45 euros, pagó Ana", y se rellena solo.
+- ¿Lo fuisteis apuntando en las notas del móvil? Pegas la lista entera ("cena 45
+  ana", "taxi 12 luis"...) y te enseña lo que ha entendido antes de apuntarlo.
 - Marcas cuál de los viajeros eres tú y te resalta tus cuentas.
 - ¿Nombre mal escrito? Lo tocas y lo cambias. Y si metes "Ana M." con Ana ya
   dentro, te pregunta si es otra persona antes de añadirla.

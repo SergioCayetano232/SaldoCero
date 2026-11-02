@@ -3579,6 +3579,72 @@ button.pago-cantidad:hover {
   color: var(--tinta-suave);
 }
 
+/* Lo pegado de las notas: se enseña lo que sale antes de apuntar nada. */
+.lista-pegada {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--radio-sm);
+  background-color: var(--papel-hundido);
+  border: 1px solid var(--linea);
+  font-size: 13px;
+  color: var(--tinta-suave);
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
+}
+
+.lista-pegada ul {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lista-pegada li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--tinta);
+  animation: aparecer-creciendo var(--medio) var(--curva-muelle) both;
+}
+
+.lista-pegada li small {
+  color: var(--tinta-tenue);
+}
+
+.lista-pegada li strong {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.lista-pegada-fuera {
+  color: var(--rojo);
+}
+
+.lista-pegada-botones {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Como el de añadir gasto, pero en pequeño: va dentro del aviso. */
+.lista-pegada .apuntar-lista {
+  padding: 7px 14px;
+  background: linear-gradient(180deg, var(--teal-500), var(--teal-600));
+  color: white;
+  border-radius: var(--radio-sm);
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: var(--sombra-sm);
+}
+
+.lista-pegada .apuntar-lista:hover {
+  background: linear-gradient(180deg, var(--teal-600), var(--teal-700));
+  transform: translateY(-1px);
+}
+
 /* Los días sin nada apuntado: como lo de cerrar, pero dentro del formulario. */
 .dias-sin-gastos {
   display: flex;
