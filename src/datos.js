@@ -168,6 +168,34 @@ export function guardarAunNoCerrar(codigo, ultimo) {
   }
 }
 
+// Los días de cada viaje en los que dijiste que no se gastó nada, para no volver a avisar.
+const CLAVE_SIN_GASTAR = "saldocero-dias-sin-gastar";
+
+function sinGastarDe() {
+  try {
+    const guardado = JSON.parse(localStorage.getItem(CLAVE_SIN_GASTAR) ?? "{}");
+    return typeof guardado === "object" && guardado !== null ? guardado : {};
+  } catch {
+    return {};
+  }
+}
+
+export function leerDiasSinGastar(codigo) {
+  const dias = sinGastarDe()[codigo];
+  return Array.isArray(dias) ? dias : [];
+}
+
+export function guardarDiasSinGastar(codigo, dias) {
+  const todos = sinGastarDe();
+  todos[codigo] = dias;
+
+  try {
+    localStorage.setItem(CLAVE_SIN_GASTAR, JSON.stringify(todos));
+  } catch {
+    // Sin guardar, te lo volverá a preguntar. Nada grave.
+  }
+}
+
 // Claro, oscuro o automático. Lo lee también index.html, así que va en texto tal cual.
 const CLAVE_TEMA = "saldocero-tema";
 

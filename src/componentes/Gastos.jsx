@@ -36,6 +36,7 @@ import Resaltado from "./Resaltado";
 import Dictado from "./Dictado";
 import LeerTotal from "./LeerTotal";
 import { entenderDictado } from "../dictado";
+import { diasSinGastos, textoHuecos } from "../huecos";
 
 function Gastos({
   codigo,
@@ -183,6 +184,8 @@ function Gastos({
   const [repetido, setRepetido] = useState(null);
   const [raro, setRaro] = useState(null);
   const [otraFecha, setOtraFecha] = useState(null);
+  const [sinGastar, setSinGastar] = useState(() => datos.leerDiasSinGastar(codigo));
+  const huecos = diasSinGastos(gastos, sinGastar);
   const campoFecha = useRef(null);
   const formulario = useRef(null);
   // Lo que se acaba de guardar, mientras el botón lo cuenta.
@@ -722,6 +725,18 @@ function Gastos({
     limpiar();
   }
 
+  // Con varios días va al primero: al apuntarlo se quita y sale el siguiente.
+  function apuntarHueco() {
+    setFecha(huecos[0]);
+    campoImporte.current?.focus();
+  }
+
+  function noSeGasto() {
+    const dias = [...sinGastar, ...huecos];
+    datos.guardarDiasSinGastar(codigo, dias);
+    setSinGastar(dias);
+  }
+
   // Lo que se gastó ese día, en la moneda del viaje.
   function totalDelDia(dia) {
     return dia.gastos.reduce((t, g) => t + (g.importeConvertido ?? g.importe), 0);
@@ -778,6 +793,23 @@ function Gastos({
                     Descartar
                   </button>
                 </p>
+              )}
+
+              {!editando && huecos.length > 0 && (
+                <div className="dias-sin-gastos" role="status">
+                  <span aria-hidden="true">📅</span>
+                  <p>
+                    {textoHuecos(huecos)} <strong>¿Se os olvidó algo?</strong>
+                  </p>
+                  <div className="dias-sin-gastos-botones">
+                    <button className="enlace" onClick={apuntarHueco}>
+                      Apuntar{huecos.length > 1 ? " el primero" : ""}
+                    </button>
+                    <button className="enlace no-se-gasto" onClick={noSeGasto}>
+                      No gastamos
+                    </button>
+                  </div>
+                </div>
               )}
 
               {!editando && <Dictado onDictado={alDictar} />}

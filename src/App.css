@@ -3543,6 +3543,42 @@ button.pago-cantidad:hover {
   color: var(--tinta-suave);
 }
 
+/* Los días sin nada apuntado: como lo de cerrar, pero dentro del formulario. */
+.dias-sin-gastos {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radio-sm);
+  background-color: var(--papel-hundido);
+  border: 1px solid var(--linea);
+  font-size: 13px;
+  color: var(--tinta-suave);
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
+}
+
+.dias-sin-gastos p {
+  flex: 1;
+  min-width: 0;
+}
+
+.dias-sin-gastos strong {
+  color: var(--tinta);
+}
+
+.dias-sin-gastos-botones {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+  line-height: 1.5;
+}
+
+.dias-sin-gastos .no-se-gasto {
+  color: var(--tinta-suave);
+}
+
 .viaje-cerrado .enlace {
   flex-shrink: 0;
   line-height: 1.5;
