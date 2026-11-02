@@ -37,6 +37,7 @@ import Dictado from "./Dictado";
 import LeerTotal from "./LeerTotal";
 import { entenderDictado } from "../dictado";
 import { diasSinGastos, textoHuecos } from "../huecos";
+import { aOtraCategoria, categoriasDestino, textoPasarA } from "../recategorizar";
 
 function Gastos({
   codigo,
@@ -51,6 +52,7 @@ function Gastos({
   cerrado,
   onAnadir,
   onEditar,
+  onCambiarCategoria,
   onQuitar,
   verTicket,
   soy = null,
@@ -1650,6 +1652,22 @@ function Gastos({
                       </span>
                     )}
                   </span>
+                  {/* Lo que tienes a la vista, de una vez: buscas "café" y los pasas a Comida. */}
+                  {!cerrado && visibles.length > 1 && (
+                    <select
+                      className="pasar-a"
+                      value=""
+                      onChange={(e) => onCambiarCategoria(aOtraCategoria(visibles, e.target.value), e.target.value)}
+                      aria-label={`Cambiar la categoría de los ${visibles.length} gastos`}
+                    >
+                      <option value="">{textoPasarA(visibles.length)}</option>
+                      {categoriasDestino(visibles).map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.emoji} {c.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                   <button
                     className="enlace"
                     onClick={() => setFiltros(SIN_FILTROS)}

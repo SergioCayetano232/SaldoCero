@@ -5,6 +5,7 @@ import { hayConexion, usarCodigo } from "./supabase";
 import { balancesConBote, hayBote } from "./bote";
 import { coloresDelViaje } from "./avatares";
 import { borradoConEspera, deshacerEdicion, ESPERA, queSeVaConViajero } from "./deshacer";
+import { textoPasados } from "./recategorizar";
 import { novedades, textoDeNovedades } from "./novedades";
 import { turnos } from "./turnos";
 import { vibrar } from "./vibrar";
@@ -45,7 +46,7 @@ function App() {
   const [error, setError] = useState("");
   // Lo que acabas de borrar, mientras estás a tiempo de recuperarlo.
   const [borrado, setBorrado] = useState(null);
-  // El último gasto editado, con cómo estaba, mientras se puede deshacer.
+  // Lo último editado, con cómo estaba cada gasto, mientras se puede deshacer.
   const [editado, setEditado] = useState(null);
   // Cuál de los viajeros eres tú. Guardado en este navegador.
   const [soy, setSoy] = useState(null);
@@ -306,9 +307,9 @@ function App() {
 
   // Editar no tiene espera, ya está guardado: deshacer es volver a guardar lo de antes.
   function deshacerEditado() {
-    const { id, antes } = editado;
+    const { cambios } = editado;
     setEditado(null);
-    hacer(() => datos.editarGasto(id, antes));
+    hacer(() => Promise.all(cambios.map(({ id, antes }) => datos.editarGasto(id, antes))));
   }
 
   useEffect(() => {
@@ -574,8 +575,14 @@ function App() {
             if (foto) await datos.ponerTicket(viaje.id, id, foto, gasto.ticketAnterior);
             else if (gasto.quitarFoto) await datos.quitarTicket(id, gasto.ticketAnterior);
           });
-          if (bien && antes) setEditado({ id, que: `"${gasto.concepto}"`, viajeId: viaje.id, antes });
+          if (bien && antes) {
+            setEditado({ texto: `Has cambiado "${gasto.concepto}"`, cambios: [{ id, antes }], viajeId: viaje.id });
+          }
           return bien;
+        }}
+        onCambiarCategoria={async (cambios, categoria) => {
+          const bien = await hacer(() => Promise.all(cambios.map((c) => datos.editarGasto(c.id, c.despues))));
+          if (bien) setEditado({ texto: textoPasados(cambios.length, categoria), cambios, viajeId: viaje.id });
         }}
         onQuitar={(id, concepto, ticket) =>
           borrarConAviso(id, `"${concepto}"`, () => datos.quitarGasto(id, ticket))
@@ -669,7 +676,7 @@ function App() {
 
       {!borrado && editado?.viajeId === viaje.id && (
         <div className="deshacer">
-          <span>Has cambiado {editado.que}</span>
+          <span>{editado.texto}</span>
           <button onClick={deshacerEditado} title="También con Ctrl+Z (⌘Z en Mac)">
             Deshacer
           </button>
