@@ -16,7 +16,7 @@ export function esAtajoBuscar(e, hayVentana = false) {
   return !escribiendo(e.target);
 }
 
-// Ctrl+Z (Cmd+Z en Mac) recupera lo último que has quitado. Dentro de un campo
+// Ctrl+Z (Cmd+Z en Mac) deshace lo último que has quitado o cambiado. Dentro de un campo
 // no, que ahí deshace lo que estás escribiendo.
 export function esAtajoDeshacer(e) {
   if (e.key?.toLowerCase() !== "z" || !(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return false;
@@ -228,7 +228,7 @@ export function listaDeAtajos(mac = false, conDictado = false) {
     { teclas: ["T"], que: "Cambiar el tema" },
     { teclas: ["Q"], que: "Salir del viaje" },
     { teclas: [mac ? "⌘" : "Ctrl", "Enter"], que: "Guardar el gasto desde cualquier campo" },
-    { teclas: [mac ? "⌘" : "Ctrl", "Z"], que: "Recuperar lo último que has quitado" },
+    { teclas: [mac ? "⌘" : "Ctrl", "Z"], que: "Deshacer lo último que has quitado o cambiado" },
     { teclas: ["Esc"], que: "Dejar de editar, salir del buscador o cerrar una ventana" },
     { teclas: ["?"], que: "Ver estos atajos" },
   ];

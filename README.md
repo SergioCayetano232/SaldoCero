@@ -42,7 +42,7 @@ Pruébala aquí: https://saldo-cero-eight.vercel.app/
 - Y los ordenas como quieras: por días, por lo que costaron, por quién pagó,
   por categoría, por nombre, por cuándo se apuntaron o por lo que más te toca
   a ti.
-- Si borras algo sin querer, lo deshaces.
+- Si borras algo sin querer, lo deshaces. Y si cambias un gasto y no era eso, también.
 - Puedes pagar en otra moneda y te lo convertimos a la del viaje.
 - Si hacéis bote, apuntas lo que pone cada uno y pagáis desde ahí.
 - Te dice a quién le toca pagar la próxima: al que menos ha puesto.
@@ -96,7 +96,7 @@ más se usan:
 | `K` | Copiar el código del viaje |
 | `T` | Cambiar el tema |
 | `Ctrl+Enter` | Guardar el gasto desde cualquier campo (`⌘+Enter` en Mac) |
-| `Ctrl+Z` | Recuperar lo último que has quitado (`⌘+Z` en Mac) |
+| `Ctrl+Z` | Deshacer lo último que has quitado o cambiado (`⌘+Z` en Mac) |
 | `Esc` | Dejar de editar, salir del buscador o cerrar lo que tengas abierto |
 
 Un gasto también se edita con doble clic. Y con el viaje cerrado, la `V` lo pone

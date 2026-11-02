@@ -4,7 +4,7 @@ import * as datos from "./datos";
 import { hayConexion, usarCodigo } from "./supabase";
 import { balancesConBote, hayBote } from "./bote";
 import { coloresDelViaje } from "./avatares";
-import { borradoConEspera, queSeVaConViajero } from "./deshacer";
+import { borradoConEspera, deshacerEdicion, ESPERA, queSeVaConViajero } from "./deshacer";
 import { novedades, textoDeNovedades } from "./novedades";
 import { turnos } from "./turnos";
 import { vibrar } from "./vibrar";
@@ -45,6 +45,8 @@ function App() {
   const [error, setError] = useState("");
   // Lo que acabas de borrar, mientras estás a tiempo de recuperarlo.
   const [borrado, setBorrado] = useState(null);
+  // El último gasto editado, con cómo estaba, mientras se puede deshacer.
+  const [editado, setEditado] = useState(null);
   // Cuál de los viajeros eres tú. Guardado en este navegador.
   const [soy, setSoy] = useState(null);
   // El código del viaje que acabas de crear: lo siguiente es meter a la gente.
@@ -252,6 +254,8 @@ function App() {
       }
     });
 
+    // Uno solo a la vez: el aviso del borrado tapa al de la edición.
+    setEditado(null);
     setBorrado({ id, que, espera });
   }, [lecturas]);
 
@@ -299,6 +303,31 @@ function App() {
     window.addEventListener("keydown", alPulsar);
     return () => window.removeEventListener("keydown", alPulsar);
   }, [borrado]);
+
+  // Editar no tiene espera, ya está guardado: deshacer es volver a guardar lo de antes.
+  function deshacerEditado() {
+    const { id, antes } = editado;
+    setEditado(null);
+    hacer(() => datos.editarGasto(id, antes));
+  }
+
+  useEffect(() => {
+    if (!editado) return;
+    const reloj = setTimeout(() => setEditado(null), ESPERA);
+
+    function alPulsar(e) {
+      if (!esAtajoDeshacer(e)) return;
+      e.preventDefault();
+      deshacerEditado();
+    }
+
+    window.addEventListener("keydown", alPulsar);
+    return () => {
+      clearTimeout(reloj);
+      window.removeEventListener("keydown", alPulsar);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editado]);
 
   async function crearViaje(nombre, moneda) {
     setCargando(true);
@@ -537,14 +566,17 @@ function App() {
             if (foto) await datos.ponerTicket(viaje.id, nuevo.id, foto);
           })
         }
-        onEditar={(id, gasto) =>
-          hacer(async () => {
+        onEditar={async (id, gasto) => {
+          const antes = deshacerEdicion(gastos.find((g) => g.id === id), gasto);
+          const bien = await hacer(async () => {
             const foto = gasto.foto && (await reducirFoto(gasto.foto));
             await datos.editarGasto(id, gasto);
             if (foto) await datos.ponerTicket(viaje.id, id, foto, gasto.ticketAnterior);
             else if (gasto.quitarFoto) await datos.quitarTicket(id, gasto.ticketAnterior);
-          })
-        }
+          });
+          if (bien && antes) setEditado({ id, que: `"${gasto.concepto}"`, viajeId: viaje.id, antes });
+          return bien;
+        }}
         onQuitar={(id, concepto, ticket) =>
           borrarConAviso(id, `"${concepto}"`, () => datos.quitarGasto(id, ticket))
         }
@@ -630,6 +662,15 @@ function App() {
         <div className="deshacer">
           <span>Has quitado {borrado.que}</span>
           <button onClick={deshacerBorrado} title="También con Ctrl+Z (⌘Z en Mac)">
+            Deshacer
+          </button>
+        </div>
+      )}
+
+      {!borrado && editado?.viajeId === viaje.id && (
+        <div className="deshacer">
+          <span>Has cambiado {editado.que}</span>
+          <button onClick={deshacerEditado} title="También con Ctrl+Z (⌘Z en Mac)">
             Deshacer
           </button>
         </div>

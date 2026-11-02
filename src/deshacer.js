@@ -6,6 +6,7 @@
 
 import { conMoneda } from "./monedas";
 import { calcularTotal } from "./calculos";
+import { limpiarNota } from "./notas";
 
 export const ESPERA = 5000;
 
@@ -56,4 +57,39 @@ export function queSeVaConViajero(viajero, gastos, moneda = "EUR") {
   const total = conMoneda(calcularTotal(suyos), moneda);
   if (suyos.length === 1) return `a ${viajero.nombre} y el gasto que pagó (${total})`;
   return `a ${viajero.nombre} y los ${suyos.length} gastos que pagó (${total})`;
+}
+
+// Lo que hay que volver a guardar para dejar un gasto como estaba antes de
+// editarlo, o null si no hay nada que deshacer.
+export function deshacerEdicion(antes, despues) {
+  // La foto no: al cambiarla o quitarla, la de antes ya se ha borrado.
+  if (!antes || despues.foto || despues.quitarFoto) return null;
+
+  const comoEstaba = {
+    pagadorId: antes.pagadorId,
+    importe: antes.importe,
+    moneda: antes.moneda,
+    importeConvertido: antes.importeConvertido,
+    concepto: antes.concepto,
+    categoria: antes.categoria,
+    fecha: antes.fecha,
+    nota: antes.nota,
+    participantes: antes.participantes,
+    partes: antes.partes,
+  };
+
+  return mismoGasto(comoEstaba, despues) ? null : comoEstaba;
+}
+
+// Sin partes es a partes iguales, que es lo mismo que todos con un 1.
+function reparto(gasto) {
+  return [...gasto.participantes].sort().map((id) => `${id}:${gasto.partes?.[id] ?? 1}`).join(",");
+}
+
+function mismoGasto(a, b) {
+  return (
+    ["pagadorId", "importe", "moneda", "importeConvertido", "concepto", "categoria", "fecha"].every((c) => a[c] === b[c]) &&
+    limpiarNota(a.nota) === limpiarNota(b.nota) &&
+    reparto(a) === reparto(b)
+  );
 }

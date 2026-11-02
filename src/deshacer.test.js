@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { borradoConEspera, ESPERA, queSeVaConViajero } from "./deshacer";
+import { borradoConEspera, ESPERA, queSeVaConViajero, deshacerEdicion } from "./deshacer";
 
 // Controlamos el reloj, que si no habría que esperar de verdad.
 beforeEach(() => vi.useFakeTimers());
@@ -106,5 +106,68 @@ describe("queSeVaConViajero", () => {
 
   it("con la moneda del viaje", () => {
     expect(queSeVaConViajero(luis, gastos.slice(0, 1), "USD")).toBe("a Luis y el gasto que pagó ($30.00)");
+  });
+});
+
+describe("deshacerEdicion", () => {
+  const antes = {
+    id: "g1",
+    pagadorId: "a",
+    importe: 40,
+    moneda: "EUR",
+    importeConvertido: 40,
+    concepto: "Cena",
+    categoria: "comida",
+    fecha: "2026-10-30",
+    nota: null,
+    ticket: null,
+    participantes: ["a", "b"],
+    partes: { a: 1, b: 1 },
+  };
+  // Así llega del formulario: las partes en null si es a partes iguales.
+  const editado = (cambio = {}) => ({ ...antes, partes: null, foto: null, quitarFoto: false, ticketAnterior: null, ...cambio });
+
+  it("devuelve el gasto como estaba", () => {
+    expect(deshacerEdicion(antes, editado({ importe: 400, importeConvertido: 400 }))).toEqual({
+      pagadorId: "a",
+      importe: 40,
+      moneda: "EUR",
+      importeConvertido: 40,
+      concepto: "Cena",
+      categoria: "comida",
+      fecha: "2026-10-30",
+      nota: null,
+      participantes: ["a", "b"],
+      partes: { a: 1, b: 1 },
+    });
+  });
+
+  it("guardar sin cambiar nada no tiene nada que deshacer", () => {
+    expect(deshacerEdicion(antes, editado())).toBeNull();
+  });
+
+  it("una nota vacía es lo mismo que no tenerla", () => {
+    expect(deshacerEdicion(antes, editado({ nota: "  " }))).toBeNull();
+  });
+
+  it("los mismos de siempre en otro orden no es un cambio", () => {
+    expect(deshacerEdicion(antes, editado({ participantes: ["b", "a"] }))).toBeNull();
+  });
+
+  it("cambiar las partes sí lo es", () => {
+    expect(deshacerEdicion(antes, editado({ partes: { a: 2, b: 1 } }))).not.toBeNull();
+  });
+
+  it("quitar a uno del gasto también", () => {
+    expect(deshacerEdicion(antes, editado({ participantes: ["a"] }))).not.toBeNull();
+  });
+
+  it("con la foto cambiada o quitada no se puede, que la de antes ya no está", () => {
+    expect(deshacerEdicion(antes, editado({ importe: 50, foto: new Blob() }))).toBeNull();
+    expect(deshacerEdicion(antes, editado({ importe: 50, quitarFoto: true }))).toBeNull();
+  });
+
+  it("si el gasto ya no está, nada", () => {
+    expect(deshacerEdicion(undefined, editado())).toBeNull();
   });
 });
