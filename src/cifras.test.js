@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cifrasDelViaje, cifrasEnTexto, diaDeLaSemana, horaDeApuntar, elGordoDeCadaUno } from "./cifras";
+import { cifrasDelViaje, cifrasEnTexto, diaDeLaSemana, horaDeApuntar, elGordoDeCadaUno, categoriaMasVeces } from "./cifras";
 import { BOTE } from "./bote";
 
 const personas = [
@@ -498,5 +498,24 @@ describe("elGordoDeCadaUno", () => {
 
   it("sale en el texto", () => {
     expect(cifrasEnTexto(cifrasDelViaje(gastos, personas), "Lisboa", "EUR")).toContain("Lo más gordo de cada uno: Ana, Hotel");
+  });
+});
+
+describe("categoriaMasVeces", () => {
+  it("la que más veces salió, si no es donde más dinero se fue", () => {
+    const c = cifrasDelViaje(gastos, personas);
+    expect(c.categoria.id).toBe("alojamiento");
+    expect(c.categoriaMasVeces).toMatchObject({ id: "comida", veces: 2 });
+    expect(cifrasEnTexto(c, "Lisboa", "EUR")).toContain("La categoría estrella: comida, en 2 gastos");
+  });
+
+  it("si coincide con donde más dinero, ya está dicho", () => {
+    expect(categoriaMasVeces(gastos, { id: "comida" })).toBeNull();
+  });
+
+  it("con empate, o con una vez cada una, nada", () => {
+    expect(categoriaMasVeces(gastos.slice(0, 2), null)).toBeNull();
+    const empate = [...gastos, { ...gastos[4], concepto: "Bus" }];
+    expect(categoriaMasVeces(empate, null)).toBeNull();
   });
 });

@@ -60,6 +60,15 @@ export function elGordoDeCadaUno(gastos, personas) {
   return lista.length >= 2 ? lista : null;
 }
 
+// La categoría que más veces salió, que no tiene por qué ser donde más dinero
+// se fue: el hotel se lleva el dinero, pero los cafés se llevan las veces.
+export function categoriaMasVeces(gastos, dondeMasDinero) {
+  const [primera, segunda] = gastoPorCategoria(gastos, () => 1);
+  if (!primera || primera.total < 2 || segunda?.total === primera.total) return null;
+  if (primera.id === dondeMasDinero?.id) return null;
+  return { id: primera.id, nombre: primera.nombre, emoji: primera.emoji, veces: primera.total };
+}
+
 // Lo que más veces se apuntó: "Café, 7 veces". Sin mirar tildes ni mayúsculas.
 function loMasRepetido(gastos) {
   const veces = new Map();
@@ -231,6 +240,7 @@ export function cifrasDelViaje(gastos, personas, monedaViaje) {
     categoria: categoria
       ? { ...categoria, porcentaje: Math.round((categoria.total / total) * 100) }
       : null,
+    categoriaMasVeces: categoriaMasVeces(gastos, categoria),
   };
 }
 
@@ -311,6 +321,11 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   }
   if (cifras.categoria) {
     lineas.push(`${cifras.categoria.emoji} Donde más se fue: ${cifras.categoria.nombre.toLowerCase()}, el ${cifras.categoria.porcentaje} %`);
+  }
+
+  if (cifras.categoriaMasVeces) {
+    const c = cifras.categoriaMasVeces;
+    lineas.push(`${c.emoji} La categoría estrella: ${c.nombre.toLowerCase()}, en ${c.veces} gastos`);
   }
 
   return lineas.join("\n");
