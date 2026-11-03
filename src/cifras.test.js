@@ -273,6 +273,18 @@ describe("cifrasDelViaje", () => {
     expect(cifrasDelViaje(gastos.map((g) => ({ ...g, participantes: ["a", "b", "c"] })), personas).deAlgunos).toBeNull();
   });
 
+  it("el que más gastó va por lo que le tocaba, no por lo que puso", () => {
+    const comilones = personas.map((p, i) => ({ ...p, tocaPagar: [50, 140, 50][i] }));
+    expect(cifrasDelViaje(gastos, comilones).quienMasGasto).toMatchObject({ nombre: "Luis", tocaPagar: 140 });
+    expect(cifrasEnTexto(cifrasDelViaje(gastos, comilones), "Lisboa", "EUR")).toContain("El que más gastó: Luis");
+  });
+
+  it("si todos gastaron lo mismo o empatan, nadie gastó más", () => {
+    expect(cifrasDelViaje(gastos, personas.map((p) => ({ ...p, tocaPagar: 80 }))).quienMasGasto).toBeNull();
+    expect(cifrasDelViaje(gastos, personas.map((p, i) => ({ ...p, tocaPagar: [100, 100, 40][i] }))).quienMasGasto).toBeNull();
+    expect(cifrasDelViaje(gastos, personas).quienMasGasto).toBeNull();
+  });
+
   it("sin gastos, nada", () => {
     expect(cifrasDelViaje([], personas)).toBeNull();
   });

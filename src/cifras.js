@@ -139,6 +139,11 @@ export function cifrasDelViaje(gastos, personas, monedaViaje) {
   const losQueMenos = personas.filter((p) => p.puesto === menos);
   const [categoria] = gastoPorCategoria(gastos, importeDeGasto);
 
+  // Lo que se llevó cada uno, que no es lo que puso: el que paga no siempre es el que más come.
+  const tocaMas = Math.max(0, ...personas.map((p) => p.tocaPagar ?? 0));
+  const losQueMasGastaron = personas.filter((p) => (p.tocaPagar ?? 0) === tocaMas);
+  const tocaMenos = Math.min(...personas.map((p) => p.tocaPagar ?? 0));
+
   // Cuántas veces sacó la cartera cada uno. Lo del bote no es de nadie.
   const veces = personas.map((p) => ({ ...p, veces: gastos.filter((g) => g.pagadorId === p.id).length }));
   const masVeces = Math.max(0, ...veces.map((p) => p.veces));
@@ -168,6 +173,9 @@ export function cifrasDelViaje(gastos, personas, monedaViaje) {
     // Si empatan por abajo, señalar a uno solo sería injusto.
     quienMenosPuso:
       losQueMenos.length === 1 && personas.some((p) => p.puesto > menos) ? losQueMenos[0] : null,
+    // Si se lo repartieron todo a partes iguales, o empatan, no hay nada que contar.
+    quienMasGasto:
+      tocaMas > 0 && losQueMasGastaron.length === 1 && tocaMenos < tocaMas ? losQueMasGastaron[0] : null,
     // Con empate, o una sola vez, no hay nada que contar.
     quienMasVeces: masVeces > 1 && losQueMas.length === 1 ? losQueMas[0] : null,
     masCaroPorCabeza: masCaroPorCabeza(gastos, personas, grande),
@@ -196,6 +204,9 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   }
   if (cifras.quienMenosPuso) {
     lineas.push(`🤏 El que menos puso: ${cifras.quienMenosPuso.nombre}, ${conMoneda(cifras.quienMenosPuso.puesto, moneda)}`);
+  }
+  if (cifras.quienMasGasto) {
+    lineas.push(`🍽️ El que más gastó: ${cifras.quienMasGasto.nombre}, ${conMoneda(cifras.quienMasGasto.tocaPagar, moneda)}`);
   }
   if (cifras.quienMasVeces) {
     lineas.push(`💳 El que más veces pagó: ${cifras.quienMasVeces.nombre}, ${cifras.quienMasVeces.veces} veces`);
