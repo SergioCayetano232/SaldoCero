@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cifrasDelViaje, cifrasEnTexto, diaDeLaSemana } from "./cifras";
+import { cifrasDelViaje, cifrasEnTexto, diaDeLaSemana, horaDeApuntar } from "./cifras";
 import { BOTE } from "./bote";
 
 const personas = [
@@ -452,5 +452,28 @@ describe("diaDeLaSemana", () => {
 
   it("en el viaje corto de siempre, no", () => {
     expect(cifrasDelViaje(gastos, personas).diaDeLaSemana).toBeNull();
+  });
+});
+
+describe("horaDeApuntar", () => {
+  const a = (hora) => ({ creadoEn: `2026-09-12T${hora}:00` });
+
+  it("la franja en la que más se apunta", () => {
+    expect(horaDeApuntar([a("22:10"), a("23:40"), a("02:15"), a("13:00")])).toEqual({
+      franja: "por la noche",
+      emoji: "🌙",
+      veces: 3,
+      de: 4,
+    });
+  });
+
+  it("con empate, o con menos de tres con hora, nada", () => {
+    expect(horaDeApuntar([a("09:00"), a("16:00"), a("22:00")])).toBeNull();
+    expect(horaDeApuntar([a("09:00"), a("10:00"), {}, {}])).toBeNull();
+  });
+
+  it("sale en el texto", () => {
+    const conHora = gastos.map((g) => ({ ...g, creadoEn: "2026-09-12T10:00:00" }));
+    expect(cifrasEnTexto(cifrasDelViaje(conHora, personas), "Lisboa", "EUR")).toContain("Apuntáis más por la mañana: 5 de 5 gastos");
   });
 });

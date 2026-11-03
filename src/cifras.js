@@ -29,6 +29,22 @@ function lasPuntas(gastos, personas) {
   return { primerGasto: resumenDeGasto(conDia[0], personas), ultimoGasto: resumenDeGasto(conDia.at(-1), personas) };
 }
 
+// A qué hora se apunta más, por cuándo se apuntó y no por el día del gasto.
+// Los de antes no guardaban la hora; con menos de tres no es costumbre de nada.
+export function horaDeApuntar(gastos) {
+  const horas = gastos.filter((g) => g.creadoEn).map((g) => new Date(g.creadoEn).getHours());
+  if (horas.length < 3) return null;
+
+  const franjas = [
+    { franja: "por la mañana", emoji: "☀️", veces: horas.filter((h) => h >= 6 && h < 14).length },
+    { franja: "por la tarde", emoji: "🌇", veces: horas.filter((h) => h >= 14 && h < 21).length },
+    { franja: "por la noche", emoji: "🌙", veces: horas.filter((h) => h >= 21 || h < 6).length },
+  ];
+  const mas = Math.max(...franjas.map((f) => f.veces));
+  const ganadoras = franjas.filter((f) => f.veces === mas);
+  return ganadoras.length === 1 ? { ...ganadoras[0], de: horas.length } : null;
+}
+
 // Lo que más veces se apuntó: "Café, 7 veces". Sin mirar tildes ni mayúsculas.
 function loMasRepetido(gastos) {
   const veces = new Map();
@@ -173,6 +189,7 @@ export function cifrasDelViaje(gastos, personas, monedaViaje) {
     // El que más gastos tuvo, que no tiene por qué ser el más caro. Con empate, nada.
     diaMasMovido: dias.length > 1 && losMasMovidos.length === 1 ? losMasMovidos[0] : null,
     diaDeLaSemana: diaDeLaSemana(dias),
+    horaDeApuntar: horaDeApuntar(gastos),
     gastoMasGrande: resumenDeGasto(grande, personas),
     // Con uno solo, o si todos costaron igual, sería el mismo que el más gordo.
     gastoMasPequeno:
@@ -234,6 +251,10 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   if (cifras.diaDeLaSemana) {
     const d = cifras.diaDeLaSemana;
     lineas.push(`🗓️ Cuando más gastáis: los ${d.dia}, ${conMoneda(d.media, moneda)} de media`);
+  }
+  if (cifras.horaDeApuntar) {
+    const h = cifras.horaDeApuntar;
+    lineas.push(`${h.emoji} Apuntáis más ${h.franja}: ${h.veces} de ${h.de} gastos`);
   }
   const g = cifras.gastoMasGrande;
   lineas.push(`💸 El gasto más gordo: ${g.concepto}, ${conMoneda(g.importe, moneda)}${g.quien ? ` (${g.quien})` : ""}`);
