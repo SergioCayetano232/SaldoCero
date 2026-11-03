@@ -17,6 +17,13 @@ function momento(iso) {
   return new Date(iso).toLocaleString("sv-SE", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
 }
 
+// "sábado", para poder filtrar los findes en el Excel sin fórmulas. A mediodía,
+// que a medianoche un cambio de hora te lo pasa al día anterior.
+function diaDeLaSemana(fecha) {
+  if (!fecha) return "";
+  return new Date(`${fecha}T12:00:00`).toLocaleDateString("es-ES", { weekday: "long" });
+}
+
 // El nombre del viaje y sus días, para que el archivo se entienda sin abrir la app.
 // Con una fila en blanco detrás, por lo mismo que la del total.
 function arriba(nombre, gastos) {
@@ -42,6 +49,7 @@ export function celda(valor) {
 export function gastosEnCSV({ gastos, viajeros, moneda, nombre, pagos }) {
   const cabecera = [
     "Fecha",
+    "Día",
     "Concepto",
     "Categoría",
     "Pagó",
@@ -59,6 +67,7 @@ export function gastosEnCSV({ gastos, viajeros, moneda, nombre, pagos }) {
     .sort((a, b) => (a.fecha ?? "").localeCompare(b.fecha ?? ""))
     .map((g) => [
       g.fecha ?? "",
+      diaDeLaSemana(g.fecha),
       g.concepto,
       categoriaDe(g.categoria).nombre,
       g.pagadorId === BOTE ? "Bote" : viajeros.find((v) => v.id === g.pagadorId)?.nombre ?? "",
@@ -77,6 +86,7 @@ export function gastosEnCSV({ gastos, viajeros, moneda, nombre, pagos }) {
   // Lo pagado no se suma: cada uno puede ir en una moneda.
   const total = [
     "",
+    "",
     "Total",
     "",
     "",
@@ -90,6 +100,7 @@ export function gastosEnCSV({ gastos, viajeros, moneda, nombre, pagos }) {
   ];
   // Lo pagado del bote no sale aquí, que no lo puso nadie de su bolsillo.
   const puso = [
+    "",
     "",
     "Puso",
     "",

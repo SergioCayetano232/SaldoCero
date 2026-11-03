@@ -25,12 +25,12 @@ function lineas(csv) {
 describe("gastosEnCSV", () => {
   it("una cabecera con una columna por viajero", () => {
     const [cabecera] = lineas(gastosEnCSV({ gastos: [], viajeros, moneda: "EUR" }));
-    expect(cabecera).toBe("Fecha;Concepto;Categoría;Pagó;Importe;Moneda;Importe en EUR;Nota;Ticket;Apuntado;Ana;Luis");
+    expect(cabecera).toBe("Fecha;Día;Concepto;Categoría;Pagó;Importe;Moneda;Importe en EUR;Nota;Ticket;Apuntado;Ana;Luis");
   });
 
   it("un gasto por fila, con coma decimal y lo que le toca a cada uno", () => {
     const [, fila] = lineas(gastosEnCSV({ gastos: [cena], viajeros, moneda: "EUR" }));
-    expect(fila).toBe("2026-09-13;Cena;Comida;Ana;30,00;EUR;30,00;;No;;15,00;15,00");
+    expect(fila).toBe("2026-09-13;domingo;Cena;Comida;Ana;30,00;EUR;30,00;;No;;15,00;15,00");
   });
 
   it("en otra moneda, lo pagado y lo convertido", () => {
@@ -48,19 +48,19 @@ describe("gastosEnCSV", () => {
 
   it("los del bote dicen Bote", () => {
     const [, fila] = lineas(gastosEnCSV({ gastos: [{ ...cena, pagadorId: BOTE }], viajeros, moneda: "EUR" }));
-    expect(fila.split(";")[3]).toBe("Bote");
+    expect(fila.split(";")[4]).toBe("Bote");
   });
 
   it("del más antiguo al más nuevo", () => {
     const taxi = { ...cena, id: "g2", concepto: "Taxi", fecha: "2026-09-12" };
     const filas = lineas(gastosEnCSV({ gastos: [cena, taxi], viajeros, moneda: "EUR" }));
-    expect(filas.slice(1, -3).map((f) => f.split(";")[1])).toEqual(["Taxi", "Cena"]);
+    expect(filas.slice(1, -3).map((f) => f.split(";")[2])).toEqual(["Taxi", "Cena"]);
   });
 
   it("con la nota, y entre comillas si lleva saltos de línea", () => {
     const conNota = { ...cena, nota: "Luis no tomó postre" };
     const [, fila] = lineas(gastosEnCSV({ gastos: [conNota], viajeros, moneda: "EUR" }));
-    expect(fila.split(";")[7]).toBe("Luis no tomó postre");
+    expect(fila.split(";")[8]).toBe("Luis no tomó postre");
 
     const enDos = { ...cena, nota: "con propina\ny el agua" };
     const csv = gastosEnCSV({ gastos: [enDos], viajeros, moneda: "EUR" });
@@ -71,21 +71,21 @@ describe("gastosEnCSV", () => {
     const [, conFoto, sinFoto] = lineas(
       gastosEnCSV({ gastos: [{ ...cena, ticket: "viaje/g1.jpg" }, { ...cena, id: "g2" }], viajeros, moneda: "EUR" }),
     );
-    expect(conFoto.split(";")[8]).toBe("Sí");
-    expect(sinFoto.split(";")[8]).toBe("No");
+    expect(conFoto.split(";")[9]).toBe("Sí");
+    expect(sinFoto.split(";")[9]).toBe("No");
   });
 
   it("cuándo se apuntó, en la hora de aquí", () => {
     // Sin zona, la fecha se lee en la hora local y la prueba no depende de dónde se corra.
     const [, fila] = lineas(gastosEnCSV({ gastos: [{ ...cena, creadoEn: "2026-09-13T21:05:40" }], viajeros, moneda: "EUR" }));
-    expect(fila.split(";")[9]).toBe("2026-09-13 21:05");
+    expect(fila.split(";")[10]).toBe("2026-09-13 21:05");
   });
 
   it("al final, el total y lo de cada uno, tras una fila en blanco", () => {
     const yenes = { ...cena, id: "g2", importe: 5000, importeConvertido: 31.25, moneda: "JPY", participantes: ["a"] };
     const filas = lineas(gastosEnCSV({ gastos: [cena, yenes], viajeros, moneda: "EUR" }));
     expect(filas.at(-3)).toBe("");
-    expect(filas.at(-2)).toBe(";Total;;;;;61,25;;;;46,25;15,00");
+    expect(filas.at(-2)).toBe(";;Total;;;;;61,25;;;;46,25;15,00");
   });
 
   it("debajo del total, quién paga a quién y si ya está pagado", () => {
@@ -95,7 +95,7 @@ describe("gastosEnCSV", () => {
     ];
     const filas = lineas(gastosEnCSV({ gastos: [cena], viajeros, moneda: "EUR", pagos }));
     expect(filas.slice(-7)).toEqual([
-      ";Puso;;;;;;;;;30,00;0,00",
+      ";;Puso;;;;;;;;;30,00;0,00",
       "",
       "",
       "Quién paga a quién",
@@ -110,7 +110,7 @@ describe("gastosEnCSV", () => {
     const taxi = { ...cena, id: "g3", concepto: "Taxi", categoria: "transporte", importe: 25, importeConvertido: 20, moneda: "USD" };
     const filas = lineas(gastosEnCSV({ gastos: [cena, hotel, taxi], viajeros, moneda: "EUR" }));
     expect(filas.slice(-8)).toEqual([
-      ";Puso;;;;;;;;;150,00;0,00",
+      ";;Puso;;;;;;;;;150,00;0,00",
       "",
       "",
       "En qué se fue",
@@ -161,17 +161,22 @@ describe("gastosEnCSV", () => {
   it("debajo del total, lo que puso cada uno en la moneda del viaje", () => {
     const yenes = { ...cena, id: "g2", pagadorId: "b", importe: 5000, importeConvertido: 31.25, moneda: "JPY" };
     const filas = lineas(gastosEnCSV({ gastos: [cena, yenes], viajeros, moneda: "EUR" }));
-    expect(filas.at(-1)).toBe(";Puso;;;;;;;;;30,00;31,25");
+    expect(filas.at(-1)).toBe(";;Puso;;;;;;;;;30,00;31,25");
   });
 
   it("lo pagado con el bote no se lo apunta nadie", () => {
     const filas = lineas(gastosEnCSV({ gastos: [cena, { ...cena, id: "g2", pagadorId: BOTE }], viajeros, moneda: "EUR" }));
-    expect(filas.at(-1)).toBe(";Puso;;;;;;;;;30,00;0,00");
+    expect(filas.at(-1)).toBe(";;Puso;;;;;;;;;30,00;0,00");
+  });
+
+  it("el día de la semana al lado de la fecha, y vacío en los de antes", () => {
+    const filas = lineas(gastosEnCSV({ gastos: [{ ...cena, fecha: "2026-10-24" }, { ...cena, id: "g2", fecha: undefined }], viajeros, moneda: "EUR" }));
+    expect(filas.slice(1, 3).map((f) => f.split(";")[1])).toEqual(["", "sábado"]);
   });
 
   it("una categoría que ya no existe sale como Otros", () => {
     const [, fila] = lineas(gastosEnCSV({ gastos: [{ ...cena, categoria: "rara" }], viajeros, moneda: "EUR" }));
-    expect(fila.split(";")[2]).toBe("Otros");
+    expect(fila.split(";")[3]).toBe("Otros");
   });
 });
 
