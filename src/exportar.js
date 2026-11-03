@@ -88,7 +88,21 @@ export function gastosEnCSV({ gastos, viajeros, moneda, nombre, pagos }) {
     "",
     ...viajeros.map((v) => cifra(gastos.reduce((t, g) => t + parteDe(g, v.id, viajeros), 0))),
   ];
-  const alFinal = gastos.length > 0 ? [[], total, ...porCategoria(gastos, moneda), ...comoQuedan(pagos, moneda)] : [];
+  // Lo pagado del bote no sale aquí, que no lo puso nadie de su bolsillo.
+  const puso = [
+    "",
+    "Puso",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ...viajeros.map((v) => cifra(gastos.filter((g) => g.pagadorId === v.id).reduce((t, g) => t + importeDeGasto(g), 0))),
+  ];
+  const alFinal = gastos.length > 0 ? [[], total, puso, ...porCategoria(gastos, moneda), ...comoQuedan(pagos, moneda)] : [];
 
   return [...arriba(nombre, gastos), cabecera, ...filas, ...alFinal].map((fila) => fila.map(celda).join(SEPARADOR)).join("\r\n");
 }

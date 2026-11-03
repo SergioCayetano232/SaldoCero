@@ -54,7 +54,7 @@ describe("gastosEnCSV", () => {
   it("del más antiguo al más nuevo", () => {
     const taxi = { ...cena, id: "g2", concepto: "Taxi", fecha: "2026-09-12" };
     const filas = lineas(gastosEnCSV({ gastos: [cena, taxi], viajeros, moneda: "EUR" }));
-    expect(filas.slice(1, -2).map((f) => f.split(";")[1])).toEqual(["Taxi", "Cena"]);
+    expect(filas.slice(1, -3).map((f) => f.split(";")[1])).toEqual(["Taxi", "Cena"]);
   });
 
   it("con la nota, y entre comillas si lleva saltos de línea", () => {
@@ -84,8 +84,8 @@ describe("gastosEnCSV", () => {
   it("al final, el total y lo de cada uno, tras una fila en blanco", () => {
     const yenes = { ...cena, id: "g2", importe: 5000, importeConvertido: 31.25, moneda: "JPY", participantes: ["a"] };
     const filas = lineas(gastosEnCSV({ gastos: [cena, yenes], viajeros, moneda: "EUR" }));
-    expect(filas.at(-2)).toBe("");
-    expect(filas.at(-1)).toBe(";Total;;;;;61,25;;;;46,25;15,00");
+    expect(filas.at(-3)).toBe("");
+    expect(filas.at(-2)).toBe(";Total;;;;;61,25;;;;46,25;15,00");
   });
 
   it("debajo del total, quién paga a quién y si ya está pagado", () => {
@@ -95,7 +95,7 @@ describe("gastosEnCSV", () => {
     ];
     const filas = lineas(gastosEnCSV({ gastos: [cena], viajeros, moneda: "EUR", pagos }));
     expect(filas.slice(-7)).toEqual([
-      ";Total;;;;;30,00;;;;15,00;15,00",
+      ";Puso;;;;;;;;;30,00;0,00",
       "",
       "",
       "Quién paga a quién",
@@ -110,7 +110,7 @@ describe("gastosEnCSV", () => {
     const taxi = { ...cena, id: "g3", concepto: "Taxi", categoria: "transporte", importe: 25, importeConvertido: 20, moneda: "USD" };
     const filas = lineas(gastosEnCSV({ gastos: [cena, hotel, taxi], viajeros, moneda: "EUR" }));
     expect(filas.slice(-8)).toEqual([
-      ";Total;;;;;150,00;;;;75,00;75,00",
+      ";Puso;;;;;;;;;150,00;0,00",
       "",
       "",
       "En qué se fue",
@@ -156,6 +156,17 @@ describe("gastosEnCSV", () => {
 
   it("sin gastos, sin fila de total", () => {
     expect(lineas(gastosEnCSV({ gastos: [], viajeros, moneda: "EUR" }))).toHaveLength(1);
+  });
+
+  it("debajo del total, lo que puso cada uno en la moneda del viaje", () => {
+    const yenes = { ...cena, id: "g2", pagadorId: "b", importe: 5000, importeConvertido: 31.25, moneda: "JPY" };
+    const filas = lineas(gastosEnCSV({ gastos: [cena, yenes], viajeros, moneda: "EUR" }));
+    expect(filas.at(-1)).toBe(";Puso;;;;;;;;;30,00;31,25");
+  });
+
+  it("lo pagado con el bote no se lo apunta nadie", () => {
+    const filas = lineas(gastosEnCSV({ gastos: [cena, { ...cena, id: "g2", pagadorId: BOTE }], viajeros, moneda: "EUR" }));
+    expect(filas.at(-1)).toBe(";Puso;;;;;;;;;30,00;0,00");
   });
 
   it("una categoría que ya no existe sale como Otros", () => {
