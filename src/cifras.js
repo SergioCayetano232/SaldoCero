@@ -45,6 +45,21 @@ export function horaDeApuntar(gastos) {
   return ganadoras.length === 1 ? { ...ganadoras[0], de: horas.length } : null;
 }
 
+// Lo más gordo que pagó cada uno, para que todos tengan algo que contar.
+// Con uno solo pagando ya está el gasto más gordo; lo del bote no es de nadie.
+export function elGordoDeCadaUno(gastos, personas) {
+  const lista = personas
+    .map((p) => {
+      const suyos = gastos.filter((g) => g.pagadorId === p.id);
+      if (suyos.length === 0) return null;
+      const gordo = suyos.reduce((max, g) => (importeDeGasto(g) > importeDeGasto(max) ? g : max));
+      return { nombre: p.nombre, concepto: gordo.concepto, importe: importeDeGasto(gordo) };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.importe - a.importe);
+  return lista.length >= 2 ? lista : null;
+}
+
 // Lo que más veces se apuntó: "Café, 7 veces". Sin mirar tildes ni mayúsculas.
 function loMasRepetido(gastos) {
   const veces = new Map();
@@ -207,6 +222,7 @@ export function cifrasDelViaje(gastos, personas, monedaViaje) {
     quienMasVeces: masVeces > 1 && losQueMas.length === 1 ? losQueMas[0] : null,
     masCaroPorCabeza: masCaroPorCabeza(gastos, personas, grande),
     masRepetido: loMasRepetido(gastos),
+    gordoDeCadaUno: elGordoDeCadaUno(gastos, personas),
     ...lasPuntas(gastos, personas),
     delBote: loDelBote(gastos, total),
     tickets: losDelTicket(gastos),
@@ -269,6 +285,10 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   if (cifras.primerGasto) {
     lineas.push(`🚀 Empezasteis con: ${cifras.primerGasto.concepto}, ${conMoneda(cifras.primerGasto.importe, moneda)}`);
     lineas.push(`🏁 Y acabasteis con: ${cifras.ultimoGasto.concepto}, ${conMoneda(cifras.ultimoGasto.importe, moneda)}`);
+  }
+  if (cifras.gordoDeCadaUno) {
+    const cada = cifras.gordoDeCadaUno.map((c) => `${c.nombre}, ${c.concepto} (${conMoneda(c.importe, moneda)})`);
+    lineas.push(`🎯 Lo más gordo de cada uno: ${cada.join(" · ")}`);
   }
   if (cifras.masRepetido) {
     const r = cifras.masRepetido;

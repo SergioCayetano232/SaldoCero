@@ -40,7 +40,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
     setTimeout(() => setCopiado(""), 2500);
   }
 
-  const { quienMasPuso, quienMenosPuso, quienMasGasto, quienMasVeces, diaMasCaro, diaMasBarato, diaMasMovido, diaDeLaSemana, horaDeApuntar, gastoMasGrande, gastoMasPequeno, primerGasto, ultimoGasto, masCaroPorCabeza, masRepetido, delBote, tickets, monedas, deAlgunos, categoria, porPersonaYDia } = cifras;
+  const { quienMasPuso, quienMenosPuso, quienMasGasto, quienMasVeces, diaMasCaro, diaMasBarato, diaMasMovido, diaDeLaSemana, horaDeApuntar, gastoMasGrande, gastoMasPequeno, primerGasto, ultimoGasto, gordoDeCadaUno, masCaroPorCabeza, masRepetido, delBote, tickets, monedas, deAlgunos, categoria, porPersonaYDia } = cifras;
 
   return (
     <section className="tarjeta cifras">
@@ -170,6 +170,17 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
               <span>lo último, {conMoneda(ultimoGasto.importe, moneda)}</span>
             </li>
           </>
+        )}
+        {gordoDeCadaUno && (
+          <li>
+            <span className="cifras-emoji">🎯</span>
+            <strong>Lo más gordo de cada uno</strong>
+            <span>
+              {gordoDeCadaUno
+                .map((c) => `${c.nombre}, ${c.concepto} (${conMoneda(c.importe, moneda)})`)
+                .join(" · ")}
+            </span>
+          </li>
         )}
         {gastoMasPequeno && (
           <li>

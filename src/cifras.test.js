@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cifrasDelViaje, cifrasEnTexto, diaDeLaSemana, horaDeApuntar } from "./cifras";
+import { cifrasDelViaje, cifrasEnTexto, diaDeLaSemana, horaDeApuntar, elGordoDeCadaUno } from "./cifras";
 import { BOTE } from "./bote";
 
 const personas = [
@@ -475,5 +475,28 @@ describe("horaDeApuntar", () => {
   it("sale en el texto", () => {
     const conHora = gastos.map((g) => ({ ...g, creadoEn: "2026-09-12T10:00:00" }));
     expect(cifrasEnTexto(cifrasDelViaje(conHora, personas), "Lisboa", "EUR")).toContain("Apuntáis más por la mañana: 5 de 5 gastos");
+  });
+});
+
+describe("elGordoDeCadaUno", () => {
+  it("lo más caro que pagó cada uno, del más gordo al menos", () => {
+    expect(elGordoDeCadaUno(gastos, personas)).toEqual([
+      { nombre: "Ana", concepto: "Hotel", importe: 120 },
+      { nombre: "Luis", concepto: "Cena", importe: 40 },
+      { nombre: "Marta", concepto: "Comida", importe: 30 },
+    ]);
+  });
+
+  it("el que no pagó nada no sale, y lo del bote tampoco", () => {
+    const sinMarta = [...gastos.filter((g) => g.pagadorId !== "c"), { ...gastos[0], pagadorId: BOTE, importe: 500 }];
+    expect(elGordoDeCadaUno(sinMarta, personas).map((c) => c.nombre)).toEqual(["Ana", "Luis"]);
+  });
+
+  it("si solo pagó uno, nada", () => {
+    expect(elGordoDeCadaUno(gastos.filter((g) => g.pagadorId === "a"), personas)).toBeNull();
+  });
+
+  it("sale en el texto", () => {
+    expect(cifrasEnTexto(cifrasDelViaje(gastos, personas), "Lisboa", "EUR")).toContain("Lo más gordo de cada uno: Ana, Hotel");
   });
 });
