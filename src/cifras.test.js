@@ -285,6 +285,26 @@ describe("cifrasDelViaje", () => {
     expect(cifrasDelViaje(gastos, personas).quienMasGasto).toBeNull();
   });
 
+  it("el primer y el último gasto, por su día", () => {
+    const c = cifrasDelViaje(gastos, personas);
+    expect(c.primerGasto.concepto).toBe("Hotel");
+    expect(c.ultimoGasto).toMatchObject({ concepto: "Taxi", importe: 20 });
+    expect(cifrasEnTexto(c, "Lisboa", "EUR")).toContain("Empezasteis con: Hotel");
+  });
+
+  it("el mismo día, manda cuándo se apuntó", () => {
+    const desordenados = [
+      { ...gastos[4], creadoEn: "2026-09-12T22:00" },
+      { ...gastos[3], creadoEn: "2026-09-12T14:00" },
+      gastos[0],
+    ];
+    expect(cifrasDelViaje(desordenados, personas).ultimoGasto.concepto).toBe("Taxi");
+  });
+
+  it("en un solo día no hay primero ni último", () => {
+    expect(cifrasDelViaje(gastos.slice(0, 2), personas).primerGasto).toBeNull();
+  });
+
   it("sin gastos, nada", () => {
     expect(cifrasDelViaje([], personas)).toBeNull();
   });

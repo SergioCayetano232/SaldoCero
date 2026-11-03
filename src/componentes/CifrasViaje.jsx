@@ -40,7 +40,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
     setTimeout(() => setCopiado(""), 2500);
   }
 
-  const { quienMasPuso, quienMenosPuso, quienMasGasto, quienMasVeces, diaMasCaro, diaMasBarato, diaMasMovido, diaDeLaSemana, gastoMasGrande, gastoMasPequeno, masCaroPorCabeza, masRepetido, delBote, tickets, monedas, deAlgunos, categoria, porPersonaYDia } = cifras;
+  const { quienMasPuso, quienMenosPuso, quienMasGasto, quienMasVeces, diaMasCaro, diaMasBarato, diaMasMovido, diaDeLaSemana, gastoMasGrande, gastoMasPequeno, primerGasto, ultimoGasto, masCaroPorCabeza, masRepetido, delBote, tickets, monedas, deAlgunos, categoria, porPersonaYDia } = cifras;
 
   return (
     <section className="tarjeta cifras">
@@ -150,6 +150,20 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
             {gastoMasGrande.quien && ` (${gastoMasGrande.quien})`}
           </span>
         </li>
+        {primerGasto && (
+          <>
+            <li>
+              <span className="cifras-emoji">🚀</span>
+              <strong>{primerGasto.concepto}</strong>
+              <span>lo primero, {conMoneda(primerGasto.importe, moneda)}</span>
+            </li>
+            <li>
+              <span className="cifras-emoji">🏁</span>
+              <strong>{ultimoGasto.concepto}</strong>
+              <span>lo último, {conMoneda(ultimoGasto.importe, moneda)}</span>
+            </li>
+          </>
+        )}
         {gastoMasPequeno && (
           <li>
             <span className="cifras-emoji">🪙</span>

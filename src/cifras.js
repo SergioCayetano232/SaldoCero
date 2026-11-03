@@ -19,6 +19,16 @@ function resumenDeGasto(gasto, personas) {
   };
 }
 
+// El primero y el último del viaje, por su día. Si caen el mismo día, manda cuándo se apuntaron.
+function lasPuntas(gastos, personas) {
+  const conDia = gastos
+    .filter((g) => g.fecha)
+    .sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.creadoEn ?? "").localeCompare(b.creadoEn ?? ""));
+  // En un solo día no hay principio ni final que contar.
+  if (conDia.length < 2 || conDia[0].fecha === conDia.at(-1).fecha) return { primerGasto: null, ultimoGasto: null };
+  return { primerGasto: resumenDeGasto(conDia[0], personas), ultimoGasto: resumenDeGasto(conDia.at(-1), personas) };
+}
+
 // Lo que más veces se apuntó: "Café, 7 veces". Sin mirar tildes ni mayúsculas.
 function loMasRepetido(gastos) {
   const veces = new Map();
@@ -180,6 +190,7 @@ export function cifrasDelViaje(gastos, personas, monedaViaje) {
     quienMasVeces: masVeces > 1 && losQueMas.length === 1 ? losQueMas[0] : null,
     masCaroPorCabeza: masCaroPorCabeza(gastos, personas, grande),
     masRepetido: loMasRepetido(gastos),
+    ...lasPuntas(gastos, personas),
     delBote: loDelBote(gastos, total),
     tickets: losDelTicket(gastos),
     monedas: lasMonedas(gastos, monedaViaje),
@@ -233,6 +244,10 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   if (cifras.masCaroPorCabeza) {
     const c = cifras.masCaroPorCabeza;
     lineas.push(`👤 Lo más caro por cabeza: ${c.concepto}, ${conMoneda(c.porCabeza, moneda)} cada uno (entre ${c.cuantos})`);
+  }
+  if (cifras.primerGasto) {
+    lineas.push(`🚀 Empezasteis con: ${cifras.primerGasto.concepto}, ${conMoneda(cifras.primerGasto.importe, moneda)}`);
+    lineas.push(`🏁 Y acabasteis con: ${cifras.ultimoGasto.concepto}, ${conMoneda(cifras.ultimoGasto.importe, moneda)}`);
   }
   if (cifras.masRepetido) {
     const r = cifras.masRepetido;
