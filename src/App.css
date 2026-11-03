@@ -557,6 +557,11 @@ button:active {
   background-position: 14px center;
 }
 
+.buscar-viajes {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
 .filtro-fila {
   display: flex;
   gap: 8px;

@@ -1,4 +1,5 @@
 import { monedaConBandera } from "./monedas";
+import { normalizar } from "./filtros";
 
 // La lista de "Tus viajes" con el candado puesto o quitado en uno de ellos.
 // Devuelve null si no cambia nada, para no escribir por escribir.
@@ -34,4 +35,16 @@ export function seOlvidanTodos(lista) {
 // Se pide confirmar: sin el código no hay forma de volver a entrar.
 export function avisoOlvidarTodos(cuantos) {
   return `¿Quitar los ${cuantos}? Los viajes siguen ahí, pero sin el código no podrás volver a entrar.`;
+}
+
+// Con pocos se ven todos de un vistazo, el buscador solo estorbaría.
+export function seBuscanViajes(lista) {
+  return lista.length >= 6;
+}
+
+// Por el nombre o por el código, sin tildes ni mayúsculas.
+export function buscarViajes(lista, texto) {
+  const buscado = normalizar(texto);
+  if (!buscado) return lista;
+  return lista.filter((v) => normalizar(v.nombre).includes(buscado) || normalizar(v.codigo).includes(buscado));
 }

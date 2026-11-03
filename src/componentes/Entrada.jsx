@@ -4,7 +4,7 @@ import { MONEDAS, monedaConBandera, monedaDeCasa } from "../monedas";
 import { haceCuanto } from "../fechas";
 import { LARGO_MAXIMO } from "../nombres";
 import { codigoDelPortapapeles } from "../codigos";
-import { monedaEnLista, seOlvidanTodos, avisoOlvidarTodos } from "../pasados";
+import { monedaEnLista, seOlvidanTodos, avisoOlvidarTodos, seBuscanViajes, buscarViajes } from "../pasados";
 import { cuentaDeNeto } from "../titulo";
 import { esOrdenador, viajeDeLaTecla } from "../teclado";
 
@@ -18,6 +18,9 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
   const [pasados, setPasados] = useState(() => datos.historial());
   const [nadaCopiado, setNadaCopiado] = useState(false);
   const [olvidandoTodos, setOlvidandoTodos] = useState(false);
+  const [buscado, setBuscado] = useState("");
+  // Las teclas del 1 al 9 van por lo que se ve, no por la lista entera.
+  const visibles = seBuscanViajes(pasados) ? buscarViajes(pasados, buscado) : pasados;
   const sePuedePegar = typeof navigator !== "undefined" && Boolean(navigator.clipboard?.readText);
 
   async function pegar() {
@@ -32,15 +35,15 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
     if (cargando) return;
 
     function alPulsar(e) {
-      const cual = viajeDeLaTecla(e, pasados.length, Boolean(document.querySelector('[aria-modal="true"]')));
+      const cual = viajeDeLaTecla(e, visibles.length, Boolean(document.querySelector('[aria-modal="true"]')));
       if (cual < 0) return;
       e.preventDefault();
-      onEntrar(pasados[cual].codigo);
+      onEntrar(visibles[cual].codigo);
     }
 
     window.addEventListener("keydown", alPulsar);
     return () => window.removeEventListener("keydown", alPulsar);
-  }, [cargando, pasados, onEntrar]);
+  }, [cargando, visibles, onEntrar]);
 
   function olvidar(codigoViaje) {
     datos.olvidarDelHistorial(codigoViaje);
@@ -148,8 +151,24 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
             <span className="titulo-cuantos">{pasados.length}</span>
           </h2>
 
+          {seBuscanViajes(pasados) && (
+            <input
+              type="search"
+              className="filtro-buscar buscar-viajes"
+              autoComplete="off"
+              placeholder="Buscar por nombre o código"
+              aria-label="Buscar en tus viajes"
+              enterKeyHint="search"
+              value={buscado}
+              onChange={(e) => setBuscado(e.target.value)}
+              onKeyDown={(e) => e.key === "Escape" && setBuscado("")}
+            />
+          )}
+
+          {visibles.length === 0 && <p className="vacio">Ningún viaje con "{buscado.trim()}".</p>}
+
           <ul className="lista">
-            {pasados.map((viaje, i) => (
+            {visibles.map((viaje, i) => (
               <li key={viaje.codigo}>
                 <button
                   className="viaje-pasado"

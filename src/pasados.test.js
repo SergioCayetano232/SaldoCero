@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { conCerrado, conNeto, monedaEnLista, seOlvidanTodos, avisoOlvidarTodos } from "./pasados";
+import { conCerrado, conNeto, monedaEnLista, seOlvidanTodos, avisoOlvidarTodos, seBuscanViajes, buscarViajes } from "./pasados";
 
 const lista = [
   { codigo: "AAA111", nombre: "Lisboa", visto: 1 },
@@ -88,5 +88,31 @@ describe("avisoOlvidarTodos", () => {
     expect(avisoOlvidarTodos(5)).toBe(
       "¿Quitar los 5? Los viajes siguen ahí, pero sin el código no podrás volver a entrar."
     );
+  });
+});
+
+describe("buscar en tus viajes", () => {
+  const viajes = [
+    { codigo: "AAA111", nombre: "Lisboa" },
+    { codigo: "BBB222", nombre: "Cádiz con los primos" },
+    { codigo: "CCC333", nombre: "Lisboa otra vez" },
+  ];
+
+  it("solo sale con seis o más", () => {
+    expect(seBuscanViajes(viajes)).toBe(false);
+    expect(seBuscanViajes([...viajes, ...viajes])).toBe(true);
+  });
+
+  it("por el nombre, sin tildes ni mayúsculas", () => {
+    expect(buscarViajes(viajes, "cadiz").map((v) => v.codigo)).toEqual(["BBB222"]);
+    expect(buscarViajes(viajes, "LISBOA")).toHaveLength(2);
+  });
+
+  it("también por el código", () => {
+    expect(buscarViajes(viajes, "ccc3").map((v) => v.nombre)).toEqual(["Lisboa otra vez"]);
+  });
+
+  it("sin nada escrito, todos", () => {
+    expect(buscarViajes(viajes, "  ")).toEqual(viajes);
   });
 });
