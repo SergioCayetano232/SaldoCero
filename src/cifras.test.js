@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cifrasDelViaje, cifrasEnTexto, diaDeLaSemana, findeContraSemana, cuantasVeces, horaDeApuntar, elGordoDeCadaUno, categoriaMasVeces } from "./cifras";
+import { cifrasDelViaje, cifrasEnTexto, diaDeLaSemana, findeContraSemana, cuantasVeces, laMitadEn, horaDeApuntar, elGordoDeCadaUno, categoriaMasVeces } from "./cifras";
 import { BOTE } from "./bote";
 
 const personas = [
@@ -528,6 +528,38 @@ describe("findeContraSemana", () => {
     expect(cifrasEnTexto(cifrasDelViaje(largo, personas), "Lisboa", "EUR")).toContain(
       "🎉 Entre semana gastáis el triple que los findes: 150.00 € al día contra 50.00 €",
     );
+  });
+});
+
+describe("laMitadEn", () => {
+  const de = (...importes) => importes.map((importe) => ({ pagadorId: "a", importe, concepto: "Cena", categoria: "comida" }));
+
+  it("los pocos gastos que se llevaron la mitad", () => {
+    // 200 en total: 60 + 40 ya son 100.
+    expect(laMitadEn(de(60, 40, 20, 20, 20, 20, 10, 10))).toEqual({ gastos: 2, de: 8 });
+  });
+
+  it("si justo llega a la mitad, ya cuenta", () => {
+    expect(laMitadEn(de(30, 30, 10, 10, 10, 10))).toEqual({ gastos: 2, de: 6 });
+  });
+
+  it("con uno solo ya está el gasto más gordo", () => {
+    expect(laMitadEn(de(100, 10, 10, 10, 10, 10))).toBeNull();
+  });
+
+  it("si hace falta más de un tercio de los gastos, no", () => {
+    expect(laMitadEn(de(20, 20, 20, 20, 20, 20))).toBeNull();
+  });
+
+  it("sin dinero no hay mitad", () => {
+    expect(laMitadEn([])).toBeNull();
+    expect(laMitadEn(de(0, 0, 0))).toBeNull();
+  });
+
+  it("sale en las cifras del viaje y en el texto", () => {
+    const cifras = cifrasDelViaje(de(60, 40, 20, 20, 20, 20, 10, 10), personas);
+    expect(cifras.laMitadEn).toEqual({ gastos: 2, de: 8 });
+    expect(cifrasEnTexto(cifras, "Lisboa", "EUR")).toContain("⚖️ La mitad del dinero se fue en 2 de 8 gastos");
   });
 });
 

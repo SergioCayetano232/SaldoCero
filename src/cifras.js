@@ -172,6 +172,20 @@ export function diaDeLaSemana(dias) {
   return ganadores[0];
 }
 
+// "La mitad del dinero se fue en 3 de 20 gastos". Con uno solo ya está el más
+// gordo, y si hacen falta más de un tercio de los gastos no sorprende a nadie.
+export function laMitadEn(gastos) {
+  const importes = gastos.map(importeDeGasto).sort((a, b) => b - a);
+  const total = importes.reduce((a, b) => a + b, 0);
+  if (total <= 0) return null;
+
+  let suma = 0;
+  let cuantos = 0;
+  while (suma < total / 2 - 0.005) suma += importes[cuantos++];
+  if (cuantos < 2 || cuantos * 3 > importes.length) return null;
+  return { gastos: cuantos, de: importes.length };
+}
+
 // "Los findes gastáis el doble que entre semana". Por debajo de vez y media no
 // tiene gracia: es lo normal, que el sábado se sale más.
 export function findeContraSemana(dias) {
@@ -267,6 +281,7 @@ export function cifrasDelViaje(gastos, personas, monedaViaje) {
     masCaroPorCabeza: masCaroPorCabeza(gastos, personas, grande),
     masRepetido: loMasRepetido(gastos),
     gordoDeCadaUno: elGordoDeCadaUno(gastos, personas),
+    laMitadEn: laMitadEn(gastos),
     ...lasPuntas(gastos, personas),
     delBote: loDelBote(gastos, total),
     tickets: losDelTicket(gastos),
@@ -341,6 +356,9 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   if (cifras.gordoDeCadaUno) {
     const cada = cifras.gordoDeCadaUno.map((c) => `${c.nombre}, ${c.concepto} (${conMoneda(c.importe, moneda)})`);
     lineas.push(`🎯 Lo más gordo de cada uno: ${cada.join(" · ")}`);
+  }
+  if (cifras.laMitadEn) {
+    lineas.push(`⚖️ La mitad del dinero se fue en ${cifras.laMitadEn.gastos} de ${cifras.laMitadEn.de} gastos`);
   }
   if (cifras.masRepetido) {
     const r = cifras.masRepetido;
