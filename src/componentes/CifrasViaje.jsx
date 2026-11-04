@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { cifrasDelViaje, cifrasEnTexto } from "../cifras";
+import { cifrasDelViaje, cifrasEnTexto, cuantasVeces } from "../cifras";
 import { sinBote } from "../bote";
 import { copiarAlPortapapeles } from "../compartir";
 import { conMoneda } from "../monedas";
@@ -40,7 +40,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
     setTimeout(() => setCopiado(""), 2500);
   }
 
-  const { quienMasPuso, quienMenosPuso, quienMasGasto, quienMasVeces, diaMasCaro, diaMasBarato, diaMasMovido, diaDeLaSemana, horaDeApuntar, gastoMasGrande, gastoMasPequeno, primerGasto, ultimoGasto, gordoDeCadaUno, masCaroPorCabeza, masRepetido, delBote, tickets, notas, monedas, deAlgunos, categoria, categoriaMasVeces, porPersonaYDia } = cifras;
+  const { quienMasPuso, quienMenosPuso, quienMasGasto, quienMasVeces, diaMasCaro, diaMasBarato, diaMasMovido, diaDeLaSemana, findeContraSemana, horaDeApuntar, gastoMasGrande, gastoMasPequeno, primerGasto, ultimoGasto, gordoDeCadaUno, masCaroPorCabeza, masRepetido, delBote, tickets, notas, monedas, deAlgunos, categoria, categoriaMasVeces, porPersonaYDia } = cifras;
 
   return (
     <section className="tarjeta cifras">
@@ -140,6 +140,17 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
             <span className="cifras-emoji">🗓️</span>
             <strong>Los {diaDeLaSemana.dia}</strong>
             <span>es cuando más gastáis, {conMoneda(diaDeLaSemana.media, moneda)} de media</span>
+          </li>
+        )}
+        {findeContraSemana && (
+          <li>
+            <span className="cifras-emoji">🎉</span>
+            <strong>{findeContraSemana.gana === "finde" ? "Los findes" : "Entre semana"}</strong>
+            <span>
+              gastáis {cuantasVeces(findeContraSemana.veces)},{" "}
+              {conMoneda(findeContraSemana.gana === "finde" ? findeContraSemana.finde : findeContraSemana.semana, moneda)} al
+              día contra {conMoneda(findeContraSemana.gana === "finde" ? findeContraSemana.semana : findeContraSemana.finde, moneda)}
+            </span>
           </li>
         )}
         {horaDeApuntar && (

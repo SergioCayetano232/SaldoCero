@@ -172,6 +172,34 @@ export function diaDeLaSemana(dias) {
   return ganadores[0];
 }
 
+// "Los findes gastáis el doble que entre semana". Por debajo de vez y media no
+// tiene gracia: es lo normal, que el sábado se sale más.
+export function findeContraSemana(dias) {
+  const finde = [];
+  const semana = [];
+  for (const { fecha, total } of dias) {
+    const dia = new Date(Date.parse(fecha)).getUTCDay();
+    (dia === 0 || dia === 6 ? finde : semana).push(total);
+  }
+  if (finde.length === 0 || semana.length === 0) return null;
+
+  const media = (totales) => totales.reduce((a, b) => a + b, 0) / totales.length;
+  const enFinde = media(finde);
+  const enSemana = media(semana);
+  const mas = Math.max(enFinde, enSemana);
+  const menos = Math.min(enFinde, enSemana);
+  if (menos <= 0 || mas / menos < 1.5) return null;
+
+  return { gana: enFinde > enSemana ? "finde" : "semana", finde: enFinde, semana: enSemana, veces: Math.round((mas / menos) * 10) / 10 };
+}
+
+// 2 → "el doble", 1.8 → "1,8 veces más".
+export function cuantasVeces(veces) {
+  if (veces === 2) return "el doble";
+  if (veces === 3) return "el triple";
+  return `${String(veces).replace(".", ",")} veces más`;
+}
+
 export function cifrasDelViaje(gastos, personas, monedaViaje) {
   if (gastos.length === 0) return null;
 
@@ -219,6 +247,7 @@ export function cifrasDelViaje(gastos, personas, monedaViaje) {
     // El que más gastos tuvo, que no tiene por qué ser el más caro. Con empate, nada.
     diaMasMovido: dias.length > 1 && losMasMovidos.length === 1 ? losMasMovidos[0] : null,
     diaDeLaSemana: diaDeLaSemana(dias),
+    findeContraSemana: findeContraSemana(dias),
     horaDeApuntar: horaDeApuntar(gastos),
     gastoMasGrande: resumenDeGasto(grande, personas),
     // Con uno solo, o si todos costaron igual, sería el mismo que el más gordo.
@@ -284,6 +313,12 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   if (cifras.diaDeLaSemana) {
     const d = cifras.diaDeLaSemana;
     lineas.push(`🗓️ Cuando más gastáis: los ${d.dia}, ${conMoneda(d.media, moneda)} de media`);
+  }
+  if (cifras.findeContraSemana) {
+    const f = cifras.findeContraSemana;
+    const [quien, que, deMas, deMenos] =
+      f.gana === "finde" ? ["Los findes", "entre semana", f.finde, f.semana] : ["Entre semana", "los findes", f.semana, f.finde];
+    lineas.push(`🎉 ${quien} gastáis ${cuantasVeces(f.veces)} que ${que}: ${conMoneda(deMas, moneda)} al día contra ${conMoneda(deMenos, moneda)}`);
   }
   if (cifras.horaDeApuntar) {
     const h = cifras.horaDeApuntar;

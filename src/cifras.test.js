@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cifrasDelViaje, cifrasEnTexto, diaDeLaSemana, horaDeApuntar, elGordoDeCadaUno, categoriaMasVeces } from "./cifras";
+import { cifrasDelViaje, cifrasEnTexto, diaDeLaSemana, findeContraSemana, cuantasVeces, horaDeApuntar, elGordoDeCadaUno, categoriaMasVeces } from "./cifras";
 import { BOTE } from "./bote";
 
 const personas = [
@@ -471,6 +471,63 @@ describe("diaDeLaSemana", () => {
 
   it("en el viaje corto de siempre, no", () => {
     expect(cifrasDelViaje(gastos, personas).diaDeLaSemana).toBeNull();
+  });
+});
+
+describe("findeContraSemana", () => {
+  // El 30 de octubre de 2026 es viernes; el 31 sábado y el 1 de noviembre domingo.
+  const dia = (fecha, total) => ({ fecha, total });
+
+  it("los findes, si se gasta bastante más", () => {
+    const dias = [dia("2026-10-29", 40), dia("2026-10-30", 80), dia("2026-10-31", 150), dia("2026-11-01", 90)];
+    expect(findeContraSemana(dias)).toEqual({ gana: "finde", finde: 120, semana: 60, veces: 2 });
+  });
+
+  it("o entre semana, que también pasa", () => {
+    const dias = [dia("2026-10-30", 90), dia("2026-10-31", 50)];
+    expect(findeContraSemana(dias)).toEqual({ gana: "semana", finde: 50, semana: 90, veces: 1.8 });
+  });
+
+  it("por debajo de vez y media no cuenta", () => {
+    expect(findeContraSemana([dia("2026-10-30", 100), dia("2026-10-31", 140)])).toBeNull();
+  });
+
+  it("sin días de los dos lados no hay con qué comparar", () => {
+    expect(findeContraSemana([dia("2026-10-31", 100), dia("2026-11-01", 20)])).toBeNull();
+    expect(findeContraSemana([dia("2026-10-29", 100), dia("2026-10-30", 20)])).toBeNull();
+    expect(findeContraSemana([])).toBeNull();
+  });
+
+  it("un lado a cero no es infinitas veces más", () => {
+    expect(findeContraSemana([dia("2026-10-30", 0), dia("2026-10-31", 50)])).toBeNull();
+  });
+
+  it("en palabras", () => {
+    expect(cuantasVeces(2)).toBe("el doble");
+    expect(cuantasVeces(3)).toBe("el triple");
+    expect(cuantasVeces(1.8)).toBe("1,8 veces más");
+  });
+
+  it("sale en las cifras del viaje y en el texto", () => {
+    const largo = [
+      { pagadorId: "a", importe: 60, concepto: "Cena", categoria: "comida", fecha: "2026-10-30" },
+      { pagadorId: "b", importe: 120, concepto: "Cena", categoria: "comida", fecha: "2026-10-31" },
+    ];
+    const cifras = cifrasDelViaje(largo, personas);
+    expect(cifras.findeContraSemana.gana).toBe("finde");
+    expect(cifrasEnTexto(cifras, "Lisboa", "EUR")).toContain(
+      "🎉 Los findes gastáis el doble que entre semana: 120.00 € al día contra 60.00 €",
+    );
+  });
+
+  it("y al revés en el texto", () => {
+    const largo = [
+      { pagadorId: "a", importe: 150, concepto: "Cena", categoria: "comida", fecha: "2026-10-30" },
+      { pagadorId: "b", importe: 50, concepto: "Cena", categoria: "comida", fecha: "2026-10-31" },
+    ];
+    expect(cifrasEnTexto(cifrasDelViaje(largo, personas), "Lisboa", "EUR")).toContain(
+      "🎉 Entre semana gastáis el triple que los findes: 150.00 € al día contra 50.00 €",
+    );
   });
 });
 
