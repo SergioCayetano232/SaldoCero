@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cifrasDelViaje, cifrasEnTexto, diaDeLaSemana, elMasTrasnochado, findeContraSemana, cuantasVeces, laMitadEn, horaDeApuntar, elGordoDeCadaUno, categoriaMasVeces } from "./cifras";
+import { cifrasDelViaje, cifrasEnTexto, diaDeLaSemana, elMasTrasnochado, findeContraSemana, cuantasVeces, laMitadEn, horaDeApuntar, elGordoDeCadaUno, elDiaDeCadaUno, categoriaMasVeces } from "./cifras";
 import { BOTE } from "./bote";
 
 const personas = [
@@ -650,6 +650,49 @@ describe("elGordoDeCadaUno", () => {
 
   it("sale en el texto", () => {
     expect(cifrasEnTexto(cifrasDelViaje(gastos, personas), "Lisboa", "EUR")).toContain("Lo más gordo de cada uno: Ana, Hotel");
+  });
+});
+
+describe("elDiaDeCadaUno", () => {
+  it("el día que más pagó cada uno, del más caro al menos", () => {
+    expect(elDiaDeCadaUno(gastos, personas)).toEqual([
+      { nombre: "Ana", fecha: "2026-09-10", total: 120 },
+      { nombre: "Luis", fecha: "2026-09-10", total: 40 },
+      { nombre: "Marta", fecha: "2026-09-12", total: 30 },
+    ]);
+  });
+
+  it("suma todo lo del día, no solo el más gordo", () => {
+    const canas = [
+      { pagadorId: "a", importe: 50, concepto: "Cena", fecha: "2026-09-10" },
+      { pagadorId: "a", importe: 30, concepto: "Cañas", fecha: "2026-09-11" },
+      { pagadorId: "a", importe: 30, concepto: "Cañas", fecha: "2026-09-11" },
+      { pagadorId: "b", importe: 20, concepto: "Taxi", fecha: "2026-09-11" },
+    ];
+    expect(elDiaDeCadaUno(canas, personas)[0]).toEqual({ nombre: "Ana", fecha: "2026-09-11", total: 60 });
+  });
+
+  it("con empate, el primer día", () => {
+    const iguales = [
+      { pagadorId: "a", importe: 40, concepto: "Cena", fecha: "2026-09-10" },
+      { pagadorId: "a", importe: 40, concepto: "Cena", fecha: "2026-09-11" },
+      { pagadorId: "b", importe: 20, concepto: "Taxi", fecha: "2026-09-11" },
+    ];
+    expect(elDiaDeCadaUno(iguales, personas)[0].fecha).toBe("2026-09-10");
+  });
+
+  it("el del bote y los gastos sin día no cuentan", () => {
+    const conBote = [...gastos, { pagadorId: BOTE, importe: 500, concepto: "Hotel", fecha: "2026-09-11" }, { pagadorId: "c", importe: 900, concepto: "Viejo" }];
+    expect(elDiaDeCadaUno(conBote, personas).map((c) => c.total)).toEqual([120, 40, 30]);
+  });
+
+  it("con un solo día, o si solo pagó uno, nada", () => {
+    expect(elDiaDeCadaUno(gastos.map((g) => ({ ...g, fecha: "2026-09-10" })), personas)).toBeNull();
+    expect(elDiaDeCadaUno(gastos.filter((g) => g.pagadorId === "a"), personas)).toBeNull();
+  });
+
+  it("sale en el texto", () => {
+    expect(cifrasEnTexto(cifrasDelViaje(gastos, personas), "Lisboa", "EUR")).toContain("📆 El día más caro de cada uno: Ana: ");
   });
 });
 

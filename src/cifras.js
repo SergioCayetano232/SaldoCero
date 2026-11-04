@@ -75,6 +75,25 @@ export function elGordoDeCadaUno(gastos, personas) {
   return lista.length >= 2 ? lista : null;
 }
 
+// El día que más pagó cada uno, que no siempre es el del gasto más gordo: tres
+// rondas de cañas también suman. Con un solo día de viaje sería el mismo para todos.
+export function elDiaDeCadaUno(gastos, personas) {
+  if (new Set(gastos.map((g) => g.fecha).filter(Boolean)).size < 2) return null;
+
+  const lista = personas
+    .map((p) => {
+      const suyos = gastos.filter((g) => g.pagadorId === p.id && g.fecha);
+      // porDias los da del último al primero, y con empate quiero el primero.
+      const dias = porDias(suyos).reverse().map((d) => ({ fecha: d.fecha, total: calcularTotal(d.gastos) }));
+      if (dias.length === 0) return null;
+      const caro = dias.reduce((max, d) => (d.total > max.total + 0.005 ? d : max));
+      return { nombre: p.nombre, fecha: caro.fecha, total: caro.total };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.total - a.total);
+  return lista.length >= 2 ? lista : null;
+}
+
 // La categoría que más veces salió, que no tiene por qué ser donde más dinero
 // se fue: el hotel se lleva el dinero, pero los cafés se llevan las veces.
 export function categoriaMasVeces(gastos, dondeMasDinero) {
@@ -307,6 +326,7 @@ export function cifrasDelViaje(gastos, personas, monedaViaje) {
     masCaroPorCabeza: masCaroPorCabeza(gastos, personas, grande),
     masRepetido: loMasRepetido(gastos),
     gordoDeCadaUno: elGordoDeCadaUno(gastos, personas),
+    diaDeCadaUno: elDiaDeCadaUno(gastos, personas),
     laMitadEn: laMitadEn(gastos),
     ...lasPuntas(gastos, personas),
     delBote: loDelBote(gastos, total),
@@ -390,6 +410,10 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   }
   if (cifras.laMitadEn) {
     lineas.push(`⚖️ La mitad del dinero se fue en ${cifras.laMitadEn.gastos} de ${cifras.laMitadEn.de} gastos`);
+  }
+  if (cifras.diaDeCadaUno) {
+    const cada = cifras.diaDeCadaUno.map((c) => `${c.nombre}: ${enCorto(c.fecha)} (${conMoneda(c.total, moneda)})`);
+    lineas.push(`📆 El día más caro de cada uno: ${cada.join(" · ")}`);
   }
   if (cifras.masRepetido) {
     const r = cifras.masRepetido;

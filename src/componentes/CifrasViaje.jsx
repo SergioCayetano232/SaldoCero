@@ -40,7 +40,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
     setTimeout(() => setCopiado(""), 2500);
   }
 
-  const { quienMasPuso, quienMenosPuso, quienMasGasto, quienMasVeces, diaMasCaro, diaMasBarato, diaMasMovido, diaDeLaSemana, findeContraSemana, horaDeApuntar, trasnochado, gastoMasGrande, gastoMasPequeno, primerGasto, ultimoGasto, gordoDeCadaUno, laMitadEn, masCaroPorCabeza, masRepetido, delBote, tickets, notas, redondos, monedas, deAlgunos, categoria, categoriaMasVeces, porPersonaYDia } = cifras;
+  const { quienMasPuso, quienMenosPuso, quienMasGasto, quienMasVeces, diaMasCaro, diaMasBarato, diaMasMovido, diaDeLaSemana, findeContraSemana, horaDeApuntar, trasnochado, gastoMasGrande, gastoMasPequeno, primerGasto, ultimoGasto, gordoDeCadaUno, diaDeCadaUno, laMitadEn, masCaroPorCabeza, masRepetido, delBote, tickets, notas, redondos, monedas, deAlgunos, categoria, categoriaMasVeces, porPersonaYDia } = cifras;
 
   return (
     <section className="tarjeta cifras">
@@ -200,6 +200,15 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
               {gordoDeCadaUno
                 .map((c) => `${c.nombre}, ${c.concepto} (${conMoneda(c.importe, moneda)})`)
                 .join(" · ")}
+            </span>
+          </li>
+        )}
+        {diaDeCadaUno && (
+          <li>
+            <span className="cifras-emoji">📆</span>
+            <strong>El día más caro de cada uno</strong>
+            <span>
+              {diaDeCadaUno.map((c) => `${c.nombre}: ${enCorto(c.fecha)} (${conMoneda(c.total, moneda)})`).join(" · ")}
             </span>
           </li>
         )}
