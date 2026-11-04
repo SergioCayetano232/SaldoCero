@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cifrasDelViaje, cifrasEnTexto, diaDeLaSemana, elMasTrasnochado, findeContraSemana, cuantasVeces, laMitadEn, horaDeApuntar, elGordoDeCadaUno, elDiaDeCadaUno, categoriaMasVeces } from "./cifras";
+import { cifrasDelViaje, cifrasEnTexto, diaDeLaSemana, elMasTrasnochado, findeContraSemana, cuantasVeces, laMitadEn, horaDeApuntar, elGordoDeCadaUno, elDiaDeCadaUno, elGordoDeFuera, categoriaMasVeces } from "./cifras";
 import { BOTE } from "./bote";
 
 const personas = [
@@ -693,6 +693,41 @@ describe("elDiaDeCadaUno", () => {
 
   it("sale en el texto", () => {
     expect(cifrasEnTexto(cifrasDelViaje(gastos, personas), "Lisboa", "EUR")).toContain("📆 El día más caro de cada uno: Ana: ");
+  });
+});
+
+describe("elGordoDeFuera", () => {
+  const deFuera = [
+    { pagadorId: "a", importe: 300, concepto: "Hotel", fecha: "2026-09-10" },
+    { pagadorId: "b", importe: 50, moneda: "USD", importeConvertido: 46.1, concepto: "Cena", fecha: "2026-09-10" },
+    { pagadorId: "a", importe: 400, moneda: "MAD", importeConvertido: 37.2, concepto: "Zoco", fecha: "2026-09-11" },
+    { pagadorId: "c", importe: 20, moneda: "EUR", concepto: "Taxi", fecha: "2026-09-11" },
+  ];
+
+  it("lo más caro en otra moneda, por lo que salió en la del viaje", () => {
+    // 400 dírhams son más que 50 dólares escritos, pero salen por menos.
+    expect(elGordoDeFuera(deFuera, personas, "EUR", deFuera[0])).toEqual({
+      concepto: "Cena",
+      importe: 46.1,
+      quien: "Luis",
+      pagado: 50,
+      moneda: "USD",
+    });
+  });
+
+  it("si es el más gordo del viaje, ya sale arriba", () => {
+    expect(elGordoDeFuera(deFuera.slice(1), personas, "EUR", deFuera[1])).toBeNull();
+  });
+
+  it("todo en la del viaje, o los de antes sin moneda, nada", () => {
+    expect(elGordoDeFuera(gastos, personas, "EUR", gastos[0])).toBeNull();
+    expect(elGordoDeFuera(deFuera.filter((g) => g.moneda !== "USD" && g.moneda !== "MAD"), personas, "EUR", null)).toBeNull();
+  });
+
+  it("sale en el texto", () => {
+    expect(cifrasEnTexto(cifrasDelViaje(deFuera, personas, "EUR"), "Lisboa", "EUR")).toContain(
+      "💵 Lo más caro en otra moneda: Cena, ",
+    );
   });
 });
 

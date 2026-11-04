@@ -186,6 +186,17 @@ function lasMonedas(gastos, monedaViaje) {
   return monedas.length > 1 ? monedas : null;
 }
 
+// Lo más caro que se pagó en otra moneda, con lo que se pagó de verdad y lo que
+// salió en la del viaje. Si es el más gordo del viaje ya sale arriba.
+export function elGordoDeFuera(gastos, personas, monedaViaje, grande) {
+  const deFuera = gastos.filter((g) => g.moneda && g.moneda !== monedaViaje);
+  if (deFuera.length === 0) return null;
+
+  const gordo = deFuera.reduce((max, g) => (importeDeGasto(g) > importeDeGasto(max) ? g : max));
+  if (gordo === grande) return null;
+  return { ...resumenDeGasto(gordo, personas), pagado: Number(gordo.importe), moneda: gordo.moneda };
+}
+
 // Los que no fueron entre todos: la cena a la que no fue uno, el museo de dos...
 function losDeAlgunos(gastos, personas) {
   const cuantos = gastos.filter((g) => deAlgunos(g, personas)).length;
@@ -334,6 +345,7 @@ export function cifrasDelViaje(gastos, personas, monedaViaje) {
     notas: losDeNota(gastos),
     redondos: losRedondos(gastos),
     monedas: lasMonedas(gastos, monedaViaje),
+    gordoDeFuera: elGordoDeFuera(gastos, personas, monedaViaje, grande),
     deAlgunos: losDeAlgunos(gastos, personas),
     categoria: categoria
       ? { ...categoria, porcentaje: Math.round((categoria.total / total) * 100) }
@@ -425,6 +437,10 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   }
   if (cifras.monedas) {
     lineas.push(`🌍 Pagasteis en ${cifras.monedas.length} monedas: ${enLista(cifras.monedas)}`);
+  }
+  if (cifras.gordoDeFuera) {
+    const f = cifras.gordoDeFuera;
+    lineas.push(`💵 Lo más caro en otra moneda: ${f.concepto}, ${conMoneda(f.pagado, f.moneda)} (${conMoneda(f.importe, moneda)})`);
   }
   if (cifras.deAlgunos) {
     const a = cifras.deAlgunos;
