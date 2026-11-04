@@ -247,6 +247,21 @@ describe("cifrasDelViaje", () => {
     expect(cifrasDelViaje(conNotas, personas).notas).toEqual({ conNota: 2, gastos: 5 });
   });
 
+  it("cuántos se pagaron sin céntimos, con lo que se pagó de verdad", () => {
+    const deFuera = [
+      { pagadorId: "a", importe: 20, moneda: "USD", importeConvertido: 18.43, concepto: "Cena", categoria: "comida" },
+      { pagadorId: "a", importe: 12.5, concepto: "Taxi", categoria: "transporte" },
+      { pagadorId: "b", importe: 30, concepto: "Museo", categoria: "ocio" },
+    ];
+    expect(cifrasDelViaje(deFuera, personas).redondos).toEqual({ redondos: 2, gastos: 3 });
+  });
+
+  it("con uno solo redondo, o menos de tres gastos, nada", () => {
+    const pocos = (...importes) => importes.map((importe) => ({ pagadorId: "a", importe, concepto: "Cena", categoria: "comida" }));
+    expect(cifrasDelViaje(pocos(20, 12.5, 3.2), personas).redondos).toBeNull();
+    expect(cifrasDelViaje(pocos(20, 30), personas).redondos).toBeNull();
+  });
+
   it("si nadie puso nota, nada de notas", () => {
     expect(cifras.notas).toBeNull();
     expect(cifrasDelViaje(gastos.map((g) => ({ ...g, nota: "" })), personas).notas).toBeNull();
@@ -400,6 +415,12 @@ describe("cifrasEnTexto", () => {
       "1 de 1 gasto con nota",
     );
     expect(cifrasEnTexto(cifrasDelViaje(gastos, personas), "Lisboa", "EUR")).not.toContain("con nota");
+  });
+
+  it("los redondos, y si lo son todos lo dice", () => {
+    const pocos = (...importes) => importes.map((importe) => ({ pagadorId: "a", importe, concepto: "Cena", categoria: "comida" }));
+    expect(cifrasEnTexto(cifrasDelViaje(pocos(20, 30, 4.5), personas), "Lisboa", "EUR")).toContain("💯 2 de 3 gastos, sin céntimos");
+    expect(cifrasEnTexto(cifrasDelViaje(pocos(20, 30, 5), personas), "Lisboa", "EUR")).toContain("💯 Todos los gastos, sin céntimos");
   });
 
   it("las monedas, si hubo más de una", () => {

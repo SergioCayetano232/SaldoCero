@@ -40,7 +40,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
     setTimeout(() => setCopiado(""), 2500);
   }
 
-  const { quienMasPuso, quienMenosPuso, quienMasGasto, quienMasVeces, diaMasCaro, diaMasBarato, diaMasMovido, diaDeLaSemana, findeContraSemana, horaDeApuntar, gastoMasGrande, gastoMasPequeno, primerGasto, ultimoGasto, gordoDeCadaUno, laMitadEn, masCaroPorCabeza, masRepetido, delBote, tickets, notas, monedas, deAlgunos, categoria, categoriaMasVeces, porPersonaYDia } = cifras;
+  const { quienMasPuso, quienMenosPuso, quienMasGasto, quienMasVeces, diaMasCaro, diaMasBarato, diaMasMovido, diaDeLaSemana, findeContraSemana, horaDeApuntar, gastoMasGrande, gastoMasPequeno, primerGasto, ultimoGasto, gordoDeCadaUno, laMitadEn, masCaroPorCabeza, masRepetido, delBote, tickets, notas, redondos, monedas, deAlgunos, categoria, categoriaMasVeces, porPersonaYDia } = cifras;
 
   return (
     <section className="tarjeta cifras">
@@ -265,6 +265,13 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
               {tickets.conTicket} de {tickets.gastos}
             </strong>
             <span>{tickets.gastos === 1 ? "gasto" : "gastos"} con su ticket</span>
+          </li>
+        )}
+        {redondos && (
+          <li>
+            <span className="cifras-emoji">💯</span>
+            <strong>{redondos.redondos === redondos.gastos ? "Todos" : `${redondos.redondos} de ${redondos.gastos}`}</strong>
+            <span>{redondos.redondos === redondos.gastos ? "los gastos" : "gastos"} sin céntimos</span>
           </li>
         )}
         {notas && (

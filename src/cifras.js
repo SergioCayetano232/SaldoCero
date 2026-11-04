@@ -128,6 +128,16 @@ function losDelTicket(gastos) {
   return conTicket > 0 ? { conTicket, gastos: gastos.length } : null;
 }
 
+// Los que se pagaron sin céntimos. Con lo que se pagó de verdad y no lo
+// convertido: 20 dólares es redondo aunque en euros salga 18,43.
+function losRedondos(gastos) {
+  const redondos = gastos.filter((g) => {
+    const importe = Number(g.importe);
+    return importe > 0 && Math.abs(importe - Math.round(importe)) < 0.005;
+  }).length;
+  return gastos.length >= 3 && redondos >= 2 ? { redondos, gastos: gastos.length } : null;
+}
+
 // Lo mismo con las notas. Una nota de espacios en blanco no es nota.
 function losDeNota(gastos) {
   const conNota = gastos.filter((g) => g.nota?.trim()).length;
@@ -286,6 +296,7 @@ export function cifrasDelViaje(gastos, personas, monedaViaje) {
     delBote: loDelBote(gastos, total),
     tickets: losDelTicket(gastos),
     notas: losDeNota(gastos),
+    redondos: losRedondos(gastos),
     monedas: lasMonedas(gastos, monedaViaje),
     deAlgunos: losDeAlgunos(gastos, personas),
     categoria: categoria
@@ -378,6 +389,10 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   if (cifras.tickets) {
     const t = cifras.tickets;
     lineas.push(`🧾 ${t.conTicket} de ${t.gastos} ${t.gastos === 1 ? "gasto" : "gastos"} con ticket`);
+  }
+  if (cifras.redondos) {
+    const r = cifras.redondos;
+    lineas.push(`💯 ${r.redondos === r.gastos ? "Todos los" : `${r.redondos} de ${r.gastos}`} gastos, sin céntimos`);
   }
   if (cifras.notas) {
     const n = cifras.notas;
