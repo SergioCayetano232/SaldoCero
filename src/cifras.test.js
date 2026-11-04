@@ -242,6 +242,16 @@ describe("cifrasDelViaje", () => {
     expect(cifrasDelViaje(conFotos, personas).tickets).toEqual({ conTicket: 2, gastos: 5 });
   });
 
+  it("cuántos llevan nota, sin contar las que son solo espacios", () => {
+    const conNotas = gastos.map((g, i) => (i < 2 ? { ...g, nota: "incluye la propina" } : i === 2 ? { ...g, nota: "   " } : g));
+    expect(cifrasDelViaje(conNotas, personas).notas).toEqual({ conNota: 2, gastos: 5 });
+  });
+
+  it("si nadie puso nota, nada de notas", () => {
+    expect(cifras.notas).toBeNull();
+    expect(cifrasDelViaje(gastos.map((g) => ({ ...g, nota: "" })), personas).notas).toBeNull();
+  });
+
   it("si nadie hizo foto, nada de tickets", () => {
     expect(cifras.tickets).toBeNull();
     expect(cifrasDelViaje(gastos.map((g) => ({ ...g, ticket: null })), personas).tickets).toBeNull();
@@ -381,6 +391,15 @@ describe("cifrasEnTexto", () => {
       "1 de 1 gasto con ticket",
     );
     expect(cifrasEnTexto(cifrasDelViaje(gastos, personas), "Lisboa", "EUR")).not.toContain("ticket");
+  });
+
+  it("las notas, y en singular si solo hubo un gasto", () => {
+    const conNota = gastos.map((g, i) => (i === 0 ? { ...g, nota: "incluye la propina" } : g));
+    expect(cifrasEnTexto(cifrasDelViaje(conNota, personas), "Lisboa", "EUR")).toContain("1 de 5 gastos con nota");
+    expect(cifrasEnTexto(cifrasDelViaje(conNota.slice(0, 1), personas), "Lisboa", "EUR")).toContain(
+      "1 de 1 gasto con nota",
+    );
+    expect(cifrasEnTexto(cifrasDelViaje(gastos, personas), "Lisboa", "EUR")).not.toContain("con nota");
   });
 
   it("las monedas, si hubo más de una", () => {

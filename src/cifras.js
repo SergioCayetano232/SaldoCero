@@ -128,6 +128,12 @@ function losDelTicket(gastos) {
   return conTicket > 0 ? { conTicket, gastos: gastos.length } : null;
 }
 
+// Lo mismo con las notas. Una nota de espacios en blanco no es nota.
+function losDeNota(gastos) {
+  const conNota = gastos.filter((g) => g.nota?.trim()).length;
+  return conNota > 0 ? { conNota, gastos: gastos.length } : null;
+}
+
 // En qué monedas se pagó, la del viaje primero. Con una sola no hay nada que contar.
 function lasMonedas(gastos, monedaViaje) {
   // Los gastos de antes de las monedas no la traen, y esos iban en la del viaje.
@@ -235,6 +241,7 @@ export function cifrasDelViaje(gastos, personas, monedaViaje) {
     ...lasPuntas(gastos, personas),
     delBote: loDelBote(gastos, total),
     tickets: losDelTicket(gastos),
+    notas: losDeNota(gastos),
     monedas: lasMonedas(gastos, monedaViaje),
     deAlgunos: losDeAlgunos(gastos, personas),
     categoria: categoria
@@ -318,6 +325,10 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   if (cifras.tickets) {
     const t = cifras.tickets;
     lineas.push(`🧾 ${t.conTicket} de ${t.gastos} ${t.gastos === 1 ? "gasto" : "gastos"} con ticket`);
+  }
+  if (cifras.notas) {
+    const n = cifras.notas;
+    lineas.push(`🗒️ ${n.conNota} de ${n.gastos} ${n.gastos === 1 ? "gasto" : "gastos"} con nota`);
   }
   if (cifras.categoria) {
     lineas.push(`${cifras.categoria.emoji} Donde más se fue: ${cifras.categoria.nombre.toLowerCase()}, el ${cifras.categoria.porcentaje} %`);

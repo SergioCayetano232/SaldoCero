@@ -40,7 +40,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
     setTimeout(() => setCopiado(""), 2500);
   }
 
-  const { quienMasPuso, quienMenosPuso, quienMasGasto, quienMasVeces, diaMasCaro, diaMasBarato, diaMasMovido, diaDeLaSemana, horaDeApuntar, gastoMasGrande, gastoMasPequeno, primerGasto, ultimoGasto, gordoDeCadaUno, masCaroPorCabeza, masRepetido, delBote, tickets, monedas, deAlgunos, categoria, categoriaMasVeces, porPersonaYDia } = cifras;
+  const { quienMasPuso, quienMenosPuso, quienMasGasto, quienMasVeces, diaMasCaro, diaMasBarato, diaMasMovido, diaDeLaSemana, horaDeApuntar, gastoMasGrande, gastoMasPequeno, primerGasto, ultimoGasto, gordoDeCadaUno, masCaroPorCabeza, masRepetido, delBote, tickets, notas, monedas, deAlgunos, categoria, categoriaMasVeces, porPersonaYDia } = cifras;
 
   return (
     <section className="tarjeta cifras">
@@ -245,6 +245,15 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
               {tickets.conTicket} de {tickets.gastos}
             </strong>
             <span>{tickets.gastos === 1 ? "gasto" : "gastos"} con su ticket</span>
+          </li>
+        )}
+        {notas && (
+          <li>
+            <span className="cifras-emoji">🗒️</span>
+            <strong>
+              {notas.conNota} de {notas.gastos}
+            </strong>
+            <span>{notas.gastos === 1 ? "gasto" : "gastos"} con su nota</span>
           </li>
         )}
         {categoria && (
