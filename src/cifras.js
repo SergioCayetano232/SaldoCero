@@ -45,6 +45,21 @@ export function horaDeApuntar(gastos) {
   return ganadoras.length === 1 ? { ...ganadoras[0], de: horas.length } : null;
 }
 
+// El que se apuntó más tarde por la noche. La 1 cuenta como más tarde que las
+// 23, por eso le sumo un día a lo de antes de las 6. Si nadie trasnochó, nada.
+export function elMasTrasnochado(gastos, personas) {
+  let max = null;
+  for (const gasto of gastos) {
+    if (!gasto.creadoEn) continue;
+    const cuando = new Date(gasto.creadoEn);
+    const h = cuando.getHours();
+    if (h >= 6 && h < 23) continue;
+    const minutos = (h < 6 ? h + 24 : h) * 60 + cuando.getMinutes();
+    if (!max || minutos > max.minutos) max = { gasto, minutos, hora: `${h}:${String(cuando.getMinutes()).padStart(2, "0")}` };
+  }
+  return max ? { ...resumenDeGasto(max.gasto, personas), hora: max.hora } : null;
+}
+
 // Lo más gordo que pagó cada uno, para que todos tengan algo que contar.
 // Con uno solo pagando ya está el gasto más gordo; lo del bote no es de nadie.
 export function elGordoDeCadaUno(gastos, personas) {
@@ -273,6 +288,7 @@ export function cifrasDelViaje(gastos, personas, monedaViaje) {
     diaDeLaSemana: diaDeLaSemana(dias),
     findeContraSemana: findeContraSemana(dias),
     horaDeApuntar: horaDeApuntar(gastos),
+    trasnochado: elMasTrasnochado(gastos, personas),
     gastoMasGrande: resumenDeGasto(grande, personas),
     // Con uno solo, o si todos costaron igual, sería el mismo que el más gordo.
     gastoMasPequeno:
@@ -349,6 +365,10 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   if (cifras.horaDeApuntar) {
     const h = cifras.horaDeApuntar;
     lineas.push(`${h.emoji} Apuntáis más ${h.franja}: ${h.veces} de ${h.de} gastos`);
+  }
+  if (cifras.trasnochado) {
+    const t = cifras.trasnochado;
+    lineas.push(`🦉 Lo más trasnochado: ${t.concepto}, apuntado a las ${t.hora}${t.quien ? ` (${t.quien})` : ""}`);
   }
   const g = cifras.gastoMasGrande;
   lineas.push(`💸 El gasto más gordo: ${g.concepto}, ${conMoneda(g.importe, moneda)}${g.quien ? ` (${g.quien})` : ""}`);

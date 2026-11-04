@@ -40,7 +40,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
     setTimeout(() => setCopiado(""), 2500);
   }
 
-  const { quienMasPuso, quienMenosPuso, quienMasGasto, quienMasVeces, diaMasCaro, diaMasBarato, diaMasMovido, diaDeLaSemana, findeContraSemana, horaDeApuntar, gastoMasGrande, gastoMasPequeno, primerGasto, ultimoGasto, gordoDeCadaUno, laMitadEn, masCaroPorCabeza, masRepetido, delBote, tickets, notas, redondos, monedas, deAlgunos, categoria, categoriaMasVeces, porPersonaYDia } = cifras;
+  const { quienMasPuso, quienMenosPuso, quienMasGasto, quienMasVeces, diaMasCaro, diaMasBarato, diaMasMovido, diaDeLaSemana, findeContraSemana, horaDeApuntar, trasnochado, gastoMasGrande, gastoMasPequeno, primerGasto, ultimoGasto, gordoDeCadaUno, laMitadEn, masCaroPorCabeza, masRepetido, delBote, tickets, notas, redondos, monedas, deAlgunos, categoria, categoriaMasVeces, porPersonaYDia } = cifras;
 
   return (
     <section className="tarjeta cifras">
@@ -158,6 +158,16 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
             <span className="cifras-emoji">{horaDeApuntar.emoji}</span>
             <strong>{horaDeApuntar.franja[0].toUpperCase() + horaDeApuntar.franja.slice(1)}</strong>
             <span>es cuando más apuntáis, {horaDeApuntar.veces} de {horaDeApuntar.de} gastos</span>
+          </li>
+        )}
+        {trasnochado && (
+          <li>
+            <span className="cifras-emoji">🦉</span>
+            <strong>{trasnochado.concepto}</strong>
+            <span>
+              lo más trasnochado, a las {trasnochado.hora}
+              {trasnochado.quien && ` (${trasnochado.quien})`}
+            </span>
           </li>
         )}
         <li>

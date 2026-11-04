@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cifrasDelViaje, cifrasEnTexto, diaDeLaSemana, findeContraSemana, cuantasVeces, laMitadEn, horaDeApuntar, elGordoDeCadaUno, categoriaMasVeces } from "./cifras";
+import { cifrasDelViaje, cifrasEnTexto, diaDeLaSemana, elMasTrasnochado, findeContraSemana, cuantasVeces, laMitadEn, horaDeApuntar, elGordoDeCadaUno, categoriaMasVeces } from "./cifras";
 import { BOTE } from "./bote";
 
 const personas = [
@@ -581,6 +581,29 @@ describe("laMitadEn", () => {
     const cifras = cifrasDelViaje(de(60, 40, 20, 20, 20, 20, 10, 10), personas);
     expect(cifras.laMitadEn).toEqual({ gastos: 2, de: 8 });
     expect(cifrasEnTexto(cifras, "Lisboa", "EUR")).toContain("⚖️ La mitad del dinero se fue en 2 de 8 gastos");
+  });
+});
+
+describe("elMasTrasnochado", () => {
+  const a = (concepto, hora, pagadorId = "a") => ({ concepto, pagadorId, importe: 10, creadoEn: `2026-09-12T${hora}:00` });
+
+  it("las 3 de la mañana van después de las 23", () => {
+    const gastos = [a("Cena", "21:30"), a("Copas", "23:50", "b"), a("Kebab", "03:12"), a("Taxi", "01:05")];
+    expect(elMasTrasnochado(gastos, personas)).toEqual({ concepto: "Kebab", importe: 10, quien: "Ana", hora: "3:12" });
+  });
+
+  it("si nadie apuntó nada de noche, nada", () => {
+    expect(elMasTrasnochado([a("Desayuno", "06:00"), a("Cena", "22:59")], personas)).toBeNull();
+  });
+
+  it("los de antes no guardaban la hora", () => {
+    expect(elMasTrasnochado([{ concepto: "Cena", pagadorId: "a", importe: 10 }], personas)).toBeNull();
+  });
+
+  it("sale en las cifras del viaje y en el texto", () => {
+    const cifras = cifrasDelViaje([a("Cena", "21:30"), a("Kebab", "02:07", "b")], personas);
+    expect(cifras.trasnochado.concepto).toBe("Kebab");
+    expect(cifrasEnTexto(cifras, "Lisboa", "EUR")).toContain("🦉 Lo más trasnochado: Kebab, apuntado a las 2:07 (Luis)");
   });
 });
 
