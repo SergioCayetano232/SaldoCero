@@ -11,7 +11,7 @@ export function deudoresConVarias(pagos) {
   for (const pago of pagos) {
     if (pago.saldado || pago.deId === BOTE) continue;
     const clave = pago.deId ?? pago.de;
-    if (!porDeudor.has(clave)) porDeudor.set(clave, { deId: pago.deId, de: pago.de, pagos: [], cantidad: 0 });
+    if (!porDeudor.has(clave)) porDeudor.set(clave, { deId: pago.deId, deIds: pago.deIds, de: pago.de, pagos: [], cantidad: 0 });
     const deudor = porDeudor.get(clave);
     deudor.pagos.push(pago);
     deudor.cantidad += pago.cantidad;

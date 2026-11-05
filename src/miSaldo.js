@@ -2,6 +2,7 @@
 // Sale de los pagos y no del balance, que así cuenta el redondeo y lo ya pagado.
 
 import { conMoneda } from "./monedas";
+import { pagaYo, cobroYo } from "./juntos";
 
 export function miSaldo(pagos, soy) {
   if (!soy) return null;
@@ -11,10 +12,10 @@ export function miSaldo(pagos, soy) {
   let tenias = false;
 
   for (const pago of pagos) {
-    if (pago.deId !== soy && pago.aId !== soy) continue;
+    if (!pagaYo(pago, soy) && !cobroYo(pago, soy)) continue;
     tenias = true;
     if (pago.saldado) continue;
-    if (pago.deId === soy) debes += pago.cantidad;
+    if (pagaYo(pago, soy)) debes += pago.cantidad;
     else teDeben += pago.cantidad;
   }
 

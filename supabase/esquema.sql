@@ -25,6 +25,8 @@ create table viajeros (
   nombre text not null,
   -- Dónde cobra: su móvil de Bizum o su IBAN, pegado y sin espacios.
   cobro text check (char_length(cobro) <= 40),
+  -- Con quién lleva la cuenta al saldar, si van en pareja o en familia.
+  con_id uuid references viajeros(id) on delete set null,
   creado_en timestamptz not null default now()
 );
 
@@ -168,7 +170,7 @@ alter table aportaciones_bote enable row level security;
 revoke update on viajes from anon, authenticated;
 grant update (nombre, presupuesto, cerrado_en, redondear) on viajes to anon, authenticated;
 revoke update on viajeros from anon, authenticated;
-grant update (nombre) on viajeros to anon, authenticated;
+grant update (nombre, con_id) on viajeros to anon, authenticated;
 
 -- Un viaje solo se ve si traes su código. Nunca se listan todos.
 create policy "ver mi viaje" on viajes for select using (id = viaje_actual());
@@ -550,3 +552,7 @@ $$;
 -- Redondear las deudas.
 --   alter table viajes add column redondear boolean not null default false;
 --   grant update (redondear) on viajes to anon, authenticated;
+
+-- Parejas o familias que pagan juntas.
+--   alter table viajeros add column con_id uuid references viajeros(id) on delete set null;
+--   grant update (con_id) on viajeros to anon, authenticated;

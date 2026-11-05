@@ -1,5 +1,7 @@
 // Las cuentas del viaje, sueltas de la interfaz.
 
+import { juntarBalances } from "./juntos";
+
 // Por debajo de un céntimo lo damos por cero, son restos de los decimales.
 const MARGEN = 0.01;
 
@@ -155,12 +157,12 @@ export function calcularPagos(balances) {
   // Copias, que no queremos tocar los balances.
   const deudores = balances
     .filter((v) => v.balance < -MARGEN)
-    .map((v) => ({ id: v.id, nombre: v.nombre, cantidad: -v.balance }))
+    .map((v) => ({ id: v.id, nombre: v.nombre, ids: v.ids, cantidad: -v.balance }))
     .sort((a, b) => b.cantidad - a.cantidad);
 
   const acreedores = balances
     .filter((v) => v.balance > MARGEN)
-    .map((v) => ({ id: v.id, nombre: v.nombre, cantidad: v.balance }))
+    .map((v) => ({ id: v.id, nombre: v.nombre, ids: v.ids, cantidad: v.balance }))
     .sort((a, b) => b.cantidad - a.cantidad);
 
   const pagos = [];
@@ -176,6 +178,9 @@ export function calcularPagos(balances) {
       a: acreedores[j].nombre,
       deId: deudores[i].id,
       aId: acreedores[j].id,
+      // Solo si es un grupo: así sabe cada uno de los dos que el pago es suyo.
+      ...(deudores[i].ids && { deIds: deudores[i].ids }),
+      ...(acreedores[j].ids && { aIds: acreedores[j].ids }),
       cantidad,
     });
 
@@ -243,7 +248,7 @@ export function balancesTrasPagos(balances, pagos) {
 // Los pagos tal y como salen en el resumen: sin céntimos si así lo quiere el
 // viaje y con lo que ya se ha marcado como pagado.
 export function pagosDelViaje(balances, viaje) {
-  const exactos = calcularPagos(balances);
+  const exactos = calcularPagos(juntarBalances(balances));
   return marcarSaldados(viaje?.redondear ? redondearPagos(exactos) : exactos, viaje?.saldados ?? []);
 }
 

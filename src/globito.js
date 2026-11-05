@@ -1,9 +1,11 @@
 // El número en el icono de la app instalada, como el de los mensajes sin leer:
 // cuántos pagos tuyos quedan, sea para pagar o para cobrar.
 
+import { pagaYo, cobroYo } from "./juntos";
+
 export function cuantosMios(pagos, soy) {
   if (!soy) return 0;
-  return pagos.filter((p) => !p.saldado && (p.deId === soy || p.aId === soy)).length;
+  return pagos.filter((p) => !p.saldado && (pagaYo(p, soy) || cobroYo(p, soy))).length;
 }
 
 // Solo lo tienen Chrome y Safari con la app instalada. Donde no, no pasa nada.

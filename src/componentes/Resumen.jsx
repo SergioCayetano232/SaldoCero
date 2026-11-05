@@ -20,6 +20,7 @@ import { tarjetaEnImagen } from "../pintarTarjeta";
 import { hayDiagrama } from "../diagrama";
 import DiagramaDeudas from "./DiagramaDeudas";
 import { gastosEnCSV } from "../exportar";
+import { juntarBalances, pagaYo, cobroYo } from "../juntos";
 import { mensajeDeCobro, enlaceWhatsApp } from "../cobrar";
 import { cobroDe, cobroComoTexto, cantidadParaPegar } from "../cobro";
 import { BOTE, sinBote } from "../bote";
@@ -103,7 +104,7 @@ function Resumen({
   const deHoy = gastadoHoy(gastos);
   const comoAyer = textoFrenteAAyer(frenteAAyer(gastos), monedaViaje);
   const miParte = personas.some((v) => v.id === soy) ? miParteDeHoy(gastos, soy, personas) : null;
-  const exactos = calcularPagos(balances);
+  const exactos = calcularPagos(juntarBalances(balances));
   const redondear = viaje?.redondear === true;
   const pagos = marcarSaldados(redondear ? redondearPagos(exactos) : exactos, saldados);
   const deGolpe = deudoresConVarias(pagos);
@@ -545,7 +546,7 @@ function Resumen({
               return (
                 <div
                   className={`pago ${pago.saldado ? "pagado" : ""} ${
-                    soy && (pago.deId === soy || pago.aId === soy) ? "pago-mio" : ""
+                    pagaYo(pago, soy) || cobroYo(pago, soy) ? "pago-mio" : ""
                   }`}
                   key={`${pago.deId}-${pago.aId}`}
                 >
@@ -637,7 +638,7 @@ function Resumen({
                 onClick={() => saldarTodoDe(deudor)}
                 title={`Marcar como pagadas sus ${deudor.pagos.length} deudas`}
               >
-                ✓ {deudor.deId === soy ? "Lo he pagado todo" : `${deudor.de} lo ha pagado todo`} ·{" "}
+                ✓ {pagaYo(deudor, soy) ? "Lo he pagado todo" : `${deudor.de} lo ha pagado todo`} ·{" "}
                 {conMoneda(deudor.cantidad, monedaViaje)}
               </button>
             ))}

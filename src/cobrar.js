@@ -3,12 +3,13 @@
 import { conMoneda } from "./monedas";
 import { enlaceDelViaje } from "./compartir";
 import { lineaDeCobro } from "./cobro";
+import { cobroYo as cobroEsMio } from "./juntos";
 
 // Si eres tú quien cobra, el mensaje va en primera persona. Si no, lo manda
 // alguien de fuera de la deuda y queda raro decir "me debes".
 export function mensajeDeCobro({ pago, soy, nombreViaje, codigo, moneda, base, cobro = null }) {
   const cantidad = conMoneda(pago.cantidad, moneda);
-  const cobroYo = soy && soy === pago.aId;
+  const cobroYo = cobroEsMio(pago, soy);
 
   const lineas = [
     cobroYo

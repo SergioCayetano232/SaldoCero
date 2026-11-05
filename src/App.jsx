@@ -4,6 +4,7 @@ import * as datos from "./datos";
 import { hayConexion, usarCodigo } from "./supabase";
 import { balancesConBote, hayBote } from "./bote";
 import { coloresDelViaje } from "./avatares";
+import { conColoresDeGrupos } from "./juntos";
 import { borradoConEspera, deshacerEdicion, ESPERA, queSeVaConGastos, queSeVaConViajero } from "./deshacer";
 import { textoPasados } from "./recategorizar";
 import { novedades, textoDeNovedades } from "./novedades";
@@ -483,7 +484,7 @@ function App() {
   const parciales = (viaje.parciales ?? []).filter((p) => !seVan.has(p.id));
   const aportaciones = (viaje.aportaciones ?? []).filter((a) => !seVan.has(a.id) && !seVan.has(a.viajeroId));
   const balances = balancesConBote(viajeros, gastos, parciales, aportaciones);
-  const colores = coloresDelViaje(viajeros.map((v) => v.nombre));
+  const colores = conColoresDeGrupos(coloresDelViaje(viajeros.map((v) => v.nombre)), viajeros);
   const cerrado = estaCerrado(viaje);
 
   return (
@@ -515,6 +516,7 @@ function App() {
         }
         onRenombrar={(id, nombre) => hacer(() => datos.renombrarViajero(id, nombre))}
         onCobro={(id, cobro) => hacer(() => datos.ponerCobro(id, cobro))}
+        onJuntar={(id, conId) => hacer(() => datos.juntarViajero(id, conId))}
         onQuitar={(id, nombre) =>
           borrarConAviso(
             id,

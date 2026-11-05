@@ -309,7 +309,7 @@ async function cargarContenido(viajeId) {
   const [delViaje, viajeros, gastos, participantes, saldados, parciales, bote] = await Promise.all([
     // Lo del viaje otra vez, por si lo ha cambiado alguien desde otro móvil.
     supabase.from("viajes").select("nombre, presupuesto, cerrado_en, redondear").eq("id", viajeId).single(),
-    supabase.from("viajeros").select("id, nombre, cobro").eq("viaje_id", viajeId).order("creado_en"),
+    supabase.from("viajeros").select("id, nombre, cobro, con_id").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
       .select("id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha, ticket, nota, creado_en")
@@ -348,7 +348,7 @@ async function cargarContenido(viajeId) {
     cerradoEn: delViaje.data.cerrado_en,
     // Los viajes de antes de esto no lo traen: con céntimos, como siempre.
     redondear: delViaje.data.redondear === true,
-    viajeros: viajeros.data,
+    viajeros: viajeros.data.map(({ con_id, ...v }) => ({ ...v, conId: con_id ?? null })),
     // Los marcados antes de guardar ids no los traen: esos van por nombre.
     saldados: saldados.data.map((p) => ({
       deId: idDeSaldado(p.de_id, p.de_nombre, p.a_id),
@@ -416,6 +416,12 @@ export async function renombrarViajero(id, nombre) {
   // Si las reglas no le dejan, no da error: simplemente no cambia nada.
   const { data, error } = await supabase.from("viajeros").update({ nombre }).eq("id", id).select("id");
   if (error || !data.length) throw fallo(error, "No hemos podido cambiarle el nombre.");
+}
+
+// Con quién lleva la cuenta, o null para ir por libre.
+export async function juntarViajero(id, conId) {
+  const { data, error } = await supabase.from("viajeros").update({ con_id: conId }).eq("id", id).select("id");
+  if (error || !data.length) throw fallo(error, "No hemos podido guardarlo.");
 }
 
 // El Bizum o el IBAN, ya limpio. Vacío para quitarlo.

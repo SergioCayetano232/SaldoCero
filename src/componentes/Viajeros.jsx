@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import Avatar from "./Avatar";
 import NombreEditable from "./NombreEditable";
-import { nombreRepetido, nombreParecido, separarNombres, avisoDeRepetidos, avisoDeParecidos, enUnaLinea, LARGO_VARIOS } from "../nombres";
+import { enLista, nombreRepetido, nombreParecido, separarNombres, avisoDeRepetidos, avisoDeParecidos, enUnaLinea, LARGO_VARIOS } from "../nombres";
 import { leerCobro, cobroDe, cobroComoTexto } from "../cobro";
 import { esAtajoViajero, esOrdenador } from "../teclado";
+import { conQuienVa, losQueVanCon, conQuienPuedeIr, MINIMO_PARA_JUNTAR } from "../juntos";
 
 function Viajeros({
   viajeros,
@@ -14,6 +15,7 @@ function Viajeros({
   onRenombrar,
   onQuitar,
   onCobro,
+  onJuntar,
   enfocar = false,
   soy,
   onSoyYo,
@@ -29,6 +31,8 @@ function Viajeros({
   const [cobrando, setCobrando] = useState(null);
   const [textoCobro, setTextoCobro] = useState("");
   const [cobroMal, setCobroMal] = useState(false);
+  // De quién estás eligiendo con quién paga.
+  const [juntando, setJuntando] = useState(null);
   const campo = useRef(null);
 
   useEffect(() => {
@@ -61,6 +65,17 @@ function Viajeros({
 
     onCobro(cobrando, cobro?.valor ?? "");
     setCobrando(null);
+  }
+
+  // Los demás de su grupo: "con Ana", o "con Luis y Hugo" si es el que lleva la cuenta.
+  function suGrupo(viajero) {
+    const lleva = conQuienVa(viajero, viajeros) ?? viajero;
+    return [lleva, ...losQueVanCon(lleva, viajeros)].filter((v) => v.id !== viajero.id);
+  }
+
+  function juntar(viajero, conId) {
+    setJuntando(null);
+    if ((viajero.conId ?? null) !== conId) onJuntar(viajero.id, conId);
   }
 
   function renombrar(viajero, nuevo) {
@@ -188,7 +203,7 @@ function Viajeros({
               key={viajero.id}
               className={`${viajero.id === soy ? "soy-yo" : ""} ${
                 recienLlegados?.has(viajero.id) ? "recien-llegado" : ""
-              } ${cobrando === viajero.id ? "con-cobro" : ""}`}
+              } ${cobrando === viajero.id || juntando === viajero.id ? "con-cobro" : ""}`}
             >
               <span className="viajero-quien">
                 <Avatar nombre={viajero.nombre} color={colores?.get(viajero.nombre)} />
@@ -202,7 +217,20 @@ function Viajeros({
                   />
                 )}
                 {viajero.id === soy && <span className="etiqueta-tu">tú</span>}
+                {suGrupo(viajero).length > 0 && (
+                  <span className="etiqueta-con">con {enLista(suGrupo(viajero).map((v) => v.nombre))}</span>
+                )}
               </span>
+
+              {!cerrado && viajeros.length >= MINIMO_PARA_JUNTAR && (
+                <button
+                  className={`boton-cobro ${suGrupo(viajero).length > 0 ? "tiene-cobro" : ""}`}
+                  onClick={() => setJuntando(juntando === viajero.id ? null : viajero.id)}
+                  title={`Con quién paga ${viajero.nombre} al saldar`}
+                >
+                  👫
+                </button>
+              )}
 
               {/* Con el viaje cerrado también: es cuando más falta hace. */}
               <button
@@ -229,6 +257,39 @@ function Viajeros({
                 >
                   ✕
                 </button>
+              )}
+
+              {juntando === viajero.id && (
+                <div className="editar-cobro">
+                  {conQuienPuedeIr(viajero, viajeros).length === 0 ? (
+                    <p className="cobro-ayuda">
+                      {viajero.nombre} lleva la cuenta de {enLista(suGrupo(viajero).map((v) => v.nombre))}. Para
+                      separarlos, cámbialo desde ellos.
+                    </p>
+                  ) : (
+                    <>
+                      <div className="fila-formulario">
+                        <select
+                          autoFocus
+                          value={conQuienVa(viajero, viajeros)?.id ?? ""}
+                          onChange={(e) => juntar(viajero, e.target.value || null)}
+                          onKeyDown={(e) => e.key === "Escape" && setJuntando(null)}
+                          aria-label={`Con quién paga ${viajero.nombre}`}
+                        >
+                          <option value="">Paga por su cuenta</option>
+                          {conQuienPuedeIr(viajero, viajeros).map((v) => (
+                            <option key={v.id} value={v.id}>
+                              Paga con {v.nombre}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <p className="cobro-ayuda">
+                        Al saldar, los que van juntos hacen un solo pago. Lo de cada uno se sigue viendo por separado.
+                      </p>
+                    </>
+                  )}
+                </div>
               )}
 
               {cobrando === viajero.id && (
