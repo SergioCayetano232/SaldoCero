@@ -1167,6 +1167,7 @@ function Gastos({
                   foto={foto}
                   moneda={moneda}
                   onTotal={escribirImporte}
+                  onFecha={setFecha}
                 />
               )}
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { totalDelTicket, totalComoTexto, medidaParaLeer } from "./leerTicket";
+import { totalDelTicket, totalComoTexto, medidaParaLeer, fechaDelTicket } from "./leerTicket";
 
 describe("totalDelTicket", () => {
   it("la línea del total", () => {
@@ -59,6 +59,50 @@ ENTREGADO 10,00`;
   it("sin nada que leer, null", () => {
     expect(totalDelTicket("")).toBeNull();
     expect(totalDelTicket(null)).toBeNull();
+  });
+});
+
+describe("fechaDelTicket", () => {
+  const hoyEs = "2026-11-05";
+  const leer = (texto) => fechaDelTicket(texto, hoyEs);
+
+  it("con barras, guiones o puntos, y el año entero o en corto", () => {
+    expect(leer("FECHA: 03/11/2026 14:32")).toBe("2026-11-03");
+    expect(leer("3-11-26")).toBe("2026-11-03");
+    expect(leer("03.11.2026")).toBe("2026-11-03");
+    expect(leer("2026-11-03 21:05")).toBe("2026-11-03");
+  });
+
+  it("sin año no es una fecha, que es un precio", () => {
+    expect(leer("CAFE 12.50\nTOTAL 03/11")).toBeNull();
+  });
+
+  it("con las O del OCR por ceros", () => {
+    expect(leer("Fecha O3/11/2O26")).toBe("2026-11-03");
+  });
+
+  it("la de la línea que dice fecha antes que otra", () => {
+    expect(leer("Vale hasta 01/10/2026\nFecha: 02/11/2026")).toBe("2026-11-02");
+  });
+
+  it("si no, la primera", () => {
+    expect(leer("Mesa 4  01/11/2026\nVálido hasta 30/10/2026")).toBe("2026-11-01");
+  });
+
+  it("ni del futuro, ni de hace más de un año, ni días que no existen", () => {
+    expect(leer("10/12/2026")).toBeNull();
+    expect(leer("03/11/2024")).toBeNull();
+    expect(leer("31/02/2026")).toBeNull();
+    expect(leer("Caduca 10/12/2026\n03/11/2026")).toBe("2026-11-03");
+  });
+
+  it("el CIF o el teléfono no son fechas", () => {
+    expect(leer("CIF B12345678\nTel 912 345 678")).toBeNull();
+  });
+
+  it("sin texto, nada", () => {
+    expect(leer("")).toBeNull();
+    expect(leer(null)).toBeNull();
   });
 });
 

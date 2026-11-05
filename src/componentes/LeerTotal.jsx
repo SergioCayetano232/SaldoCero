@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import { totalDelTicket, totalComoTexto } from "../leerTicket";
+import { totalDelTicket, totalComoTexto, fechaDelTicket } from "../leerTicket";
+import { hoy, enCorto } from "../fechas";
 import { leerFoto } from "../ocr";
 import { conMoneda } from "../monedas";
 import { esAtajoLeer } from "../teclado";
 
 // El botón de leer el total de la foto, y lo que va saliendo. No guarda nada:
-// pone el importe en su campo y tú lo miras antes de apuntarlo.
-function LeerTotal({ foto, moneda, onTotal }) {
+// pone el importe en su campo, y el día si lo ve, y tú lo miras antes de apuntarlo.
+function LeerTotal({ foto, moneda, onTotal, onFecha }) {
   const [estado, setEstado] = useState("quieto");
   const [avance, setAvance] = useState(0);
   const [leido, setLeido] = useState(null);
+  const [dia, setDia] = useState(null);
   // Si quitas la foto a medio leer, lo que llegue luego ya no vale.
   const sigue = useRef(true);
 
@@ -41,7 +43,11 @@ function LeerTotal({ foto, moneda, onTotal }) {
       if (!sigue.current) return;
 
       const total = totalDelTicket(texto);
+      // La fecha va aparte: aunque no salga el total, el día ya te lo ahorras.
+      const fecha = fechaDelTicket(texto, hoy());
       setLeido(total);
+      setDia(fecha);
+      if (fecha) onFecha?.(fecha);
       setEstado(total === null ? "nada" : "leido");
       if (total !== null) onTotal(totalComoTexto(total));
     } catch (fallo) {
@@ -68,12 +74,14 @@ function LeerTotal({ foto, moneda, onTotal }) {
       </button>
       {estado === "leido" && (
         <span className="leer-total-bien" role="status">
-          ✓ {conMoneda(leido, moneda)}. Revísalo antes de apuntarlo.
+          ✓ {conMoneda(leido, moneda)}
+          {dia && `, del ${enCorto(dia)}`}. Revísalo antes de apuntarlo.
         </span>
       )}
       {estado === "nada" && (
         <span className="leer-total-mal" role="status">
           No encuentro el total. Escríbelo tú.
+          {dia && ` El día sí: ${enCorto(dia)}.`}
         </span>
       )}
       {estado === "fallo" && (

@@ -44,6 +44,36 @@ export function totalDelTicket(texto) {
   return max > 0 ? max : null;
 }
 
+// "03/11/2026", "3-11-26", "03.11.2026" o "2026-11-03". Siempre con año: sin él,
+// "12.50" sería el 12 de mayo.
+const FECHA = /(?<!\d)(?:(\d{1,2})[/.-](\d{1,2})[/.-](\d{4}|\d{2})|(\d{4})-(\d{2})-(\d{2}))(?!\d)/g;
+// Más atrás de esto no es la fecha del ticket, es el OCR leyendo otra cosa.
+const DIAS_ATRAS = 365;
+
+function fechaValida(ano, mes, dia) {
+  const d = new Date(Date.UTC(ano, mes - 1, dia));
+  return d.getUTCMonth() === mes - 1 && d.getUTCDate() === dia ? d.toISOString().slice(0, 10) : null;
+}
+
+// El día del ticket, en "2026-11-03", o null. Si hay varias, la de la línea que
+// dice "fecha"; si no, la primera, que la de abajo suele ser la de caducidad de un vale.
+export function fechaDelTicket(texto, hoyEs) {
+  const limite = new Date(Date.parse(hoyEs) - DIAS_ATRAS * 86400000).toISOString().slice(0, 10);
+  const encontradas = [];
+
+  for (const linea of String(texto ?? "").split(/\n+/)) {
+    for (const m of arreglarCifras(linea).matchAll(FECHA)) {
+      const fecha = m[4]
+        ? fechaValida(Number(m[4]), Number(m[5]), Number(m[6]))
+        : fechaValida(Number(m[3].length === 2 ? `20${m[3]}` : m[3]), Number(m[2]), Number(m[1]));
+      // Del futuro no puede ser: es otra cosa, o el día y el mes al revés.
+      if (fecha && fecha <= hoyEs && fecha >= limite) encontradas.push({ fecha, conNombre: /fecha/.test(normalizar(linea)) });
+    }
+  }
+
+  return (encontradas.find((f) => f.conNombre) ?? encontradas[0])?.fecha ?? null;
+}
+
 // Con coma, como se escribe aquí, para el campo del importe.
 export function totalComoTexto(total) {
   return String(total).replace(".", ",");
