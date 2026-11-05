@@ -50,8 +50,9 @@ export function conMoneda(importe, codigo = "EUR") {
   const cifra = importe.toFixed(2);
   const simbolo = simboloDe(codigo);
 
+  // Con el símbolo delante, el menos va antes que él: "-$400.00", no "$-400.00".
   return codigo === "USD" || codigo === "GBP"
-    ? `${simbolo}${cifra}`
+    ? `${importe < 0 ? "-" : ""}${simbolo}${cifra.replace("-", "")}`
     : `${cifra} ${simbolo}`;
 }
 

@@ -19,12 +19,24 @@ export function importeDeGasto(gasto) {
   return gasto.importeConvertido ?? gasto.importe;
 }
 
+// Una devolución es un gasto en negativo: la fianza que os devuelven, lo que
+// os reembolsa la aerolínea... Así las cuentas salen solas.
+export function esDevolucion(gasto) {
+  return importeDeGasto(gasto) < 0;
+}
+
+export function soloGastos(gastos) {
+  return gastos.filter((g) => !esDevolucion(g));
+}
+
 export function calcularTotal(gastos) {
   return gastos.reduce((suma, gasto) => suma + importeDeGasto(gasto), 0);
 }
 
 // Lo que sale cada gasto de media. Con uno solo no hay media que dar.
-export function mediaPorGasto(gastos) {
+// Las devoluciones no cuentan, que no son gastos.
+export function mediaPorGasto(todos) {
+  const gastos = soloGastos(todos);
   if (gastos.length < 2) return null;
   return Math.round((calcularTotal(gastos) / gastos.length) * 100) / 100;
 }

@@ -1,6 +1,6 @@
 // Subir un gasto al formulario, para editarlo o para apuntar otro igual.
 
-import { participantesDeGasto } from "./calculos";
+import { participantesDeGasto, esDevolucion } from "./calculos";
 import { POR_DEFECTO } from "./categorias";
 import { tasaDeGasto, tasaComoTexto } from "./monedas";
 import { vanPorImportes } from "./importes";
@@ -9,11 +9,14 @@ export function gastoAlFormulario(gasto, viajeros, monedaViaje) {
   const moneda = gasto.moneda ?? monedaViaje;
   const suyas = gasto.partes ?? {};
   const desigual = Object.values(suyas).some((p) => p !== 1);
-  const porImportes = vanPorImportes(suyas, gasto.importe);
+  // En el formulario va en positivo, con la marca de devolución aparte.
+  const devolucion = esDevolucion(gasto);
+  const porImportes = vanPorImportes(suyas, Math.abs(gasto.importe));
 
   return {
     pagadorId: gasto.pagadorId,
-    importe: String(gasto.importe),
+    importe: String(Math.abs(gasto.importe)),
+    devolucion,
     moneda,
     // Con el cambio que tenía, que si no se recalcula con el de hoy.
     tasaAMano: moneda === monedaViaje ? null : tasaComoTexto(tasaDeGasto(gasto)),

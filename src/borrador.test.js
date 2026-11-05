@@ -36,7 +36,11 @@ describe("borradorQueVale", () => {
   it("devuelve lo guardado, sin la hora", () => {
     const { guardadoEn, ...campos } = guardado;
     expect(guardadoEn).toBeTruthy();
-    expect(borradorQueVale(guardado, ahora, viajeros)).toEqual(campos);
+    expect(borradorQueVale(guardado, ahora, viajeros)).toEqual({ ...campos, devolucion: false });
+  });
+
+  it("si era una devolución, lo recuerda", () => {
+    expect(borradorQueVale({ ...guardado, devolucion: true }, ahora, viajeros).devolucion).toBe(true);
   });
 
   it("si no hay nada, null", () => {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { calcularTotal, gastoMasCaro, importeDeGasto, mediaPorGasto, participantesDeGasto } from "../calculos";
+import { calcularTotal, gastoMasCaro, importeDeGasto, mediaPorGasto, participantesDeGasto, esDevolucion } from "../calculos";
 import { MONEDAS, cambio, cambioDelGasto, conMoneda, leerTasa, monedaDelSiguiente, monedasEnOrden, tasaComoTexto } from "../monedas";
 import { enLista } from "../nombres";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
@@ -89,6 +89,8 @@ function Gastos({
   const [categoriaAMano, setCategoriaAMano] = useState(borrador?.categoriaAMano ?? false);
   // La nota va escondida hasta que la pides: casi ningún gasto la lleva.
   const [nota, setNota] = useState(borrador?.nota ?? "");
+  // Dinero que vuelve: se escribe en positivo y se guarda en negativo.
+  const [devolucion, setDevolucion] = useState(borrador?.devolucion ?? false);
   const [notaAbierta, setNotaAbierta] = useState(Boolean(borrador?.nota));
   // Las partes de cada uno. Vacío = a partes iguales, que es lo normal.
   const [partes, setPartes] = useState({});
@@ -216,8 +218,8 @@ function Gastos({
     if (editando) return;
 
     const ahora = { pagadorId, importe, moneda, concepto, categoria, categoriaAMano, nota, fecha };
-    datos.guardarBorrador(codigo, hayAlgoEscrito(ahora) ? { ...ahora, guardadoEn: Date.now() } : null);
-  }, [codigo, editando, pagadorId, importe, moneda, concepto, categoria, categoriaAMano, nota, fecha]);
+    datos.guardarBorrador(codigo, hayAlgoEscrito(ahora) ? { ...ahora, devolucion, guardadoEn: Date.now() } : null);
+  }, [codigo, editando, pagadorId, importe, moneda, concepto, categoria, categoriaAMano, nota, fecha, devolucion]);
 
   // Escape deja la edición, esté donde esté el foco. Pero si hay un visor abierto
   // o estás en otro campo (el presupuesto, un nombre), ese Escape es para ellos.
@@ -527,6 +529,7 @@ function Gastos({
     setCategoriaAMano(false);
     setNota("");
     setNotaAbierta(false);
+    setDevolucion(false);
     setPartes({});
     setRepartoAbierto(false);
     setPorImportes(false);
@@ -554,6 +557,7 @@ function Gastos({
     elegirCategoria(f.categoria);
     setNota(f.nota);
     setNotaAbierta(Boolean(f.nota));
+    setDevolucion(f.devolucion ?? false);
     setFecha(f.fecha ?? hoy());
     setParticipantes(f.participantes);
     setPartes(f.partes);
@@ -668,12 +672,13 @@ function Gastos({
     if (typeof tasa !== "number") return;
     if (descuadrado) return;
 
+    const signo = devolucion ? -1 : 1;
     const gasto = {
       pagadorId,
-      importe: importeNumero,
+      importe: signo * importeNumero,
       moneda,
       // Lo guardamos ya convertido: si mañana cambia el cambio, este viaje no.
-      importeConvertido: Number((importeNumero * tasa).toFixed(2)),
+      importeConvertido: signo * Number((importeNumero * tasa).toFixed(2)),
       concepto: concepto.trim() === "" ? conceptoSinEscribir(categoria) : arreglarConcepto(concepto),
       categoria,
       fecha,
@@ -888,7 +893,7 @@ function Gastos({
                 value={pagadorId}
                 onChange={(e) => setPagadorId(e.target.value)}
               >
-                <option value="">¿Quién pagó?</option>
+                <option value="">{devolucion ? "¿Quién lo recibió?" : "¿Quién pagó?"}</option>
                 {viajeros.map((viajero) => (
                   <option key={viajero.id} value={viajero.id}>
                     {viajero.nombre}
@@ -1024,7 +1029,7 @@ function Gastos({
               </div>
 
               {/* Solo en lo de comer, que es donde se deja. */}
-              {categoria === "comida" && importeLeido > 0 && (
+              {categoria === "comida" && importeLeido > 0 && !devolucion && (
                 <div className="propinas">
                   <span>Propina</span>
                   {PROPINAS.map((p) => (
@@ -1158,6 +1163,15 @@ function Gastos({
                     📝 Nota
                   </button>
                 )}
+
+                <button
+                  className={`boton-foto ${devolucion ? "boton-devolucion" : ""}`}
+                  aria-pressed={devolucion}
+                  onClick={() => setDevolucion(!devolucion)}
+                  title="Dinero que os devuelven: una fianza, un reembolso…"
+                >
+                  ↩️ {devolucion ? "Es una devolución" : "Devolución"}
+                </button>
               </div>
 
               {foto && (
@@ -1803,7 +1817,7 @@ function Gastos({
                   {dia.gastos.map((gasto) => (
                     <Deslizable
                       key={gasto.id}
-                      className={`${gasto.id === editando ? "editandose" : ""} ${
+                      className={`${gasto.id === editando ? "editandose" : ""} ${esDevolucion(gasto) ? "es-devolucion" : ""} ${
                         recienLlegados?.has(gasto.id) ? "recien-llegado" : ""
                       } ${gasto.id === senalado ? "senalado" : ""}`}
                       onEditar={() => editar(gasto)}
@@ -1822,6 +1836,7 @@ function Gastos({
                           <Resaltado texto={gasto.concepto} buscado={buscado} />
                         </span>
                         {gasto.id === masCaro?.id && <span className="etiqueta-mas-caro">el más caro</span>}
+                        {esDevolucion(gasto) && <span className="etiqueta-devolucion">devolución</span>}
                         {gasto.ticket && (
                           <button
                             className="boton-ticket"

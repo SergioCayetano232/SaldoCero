@@ -25,7 +25,8 @@ export function gastoPorDia(gastos) {
   for (let t = desde; t <= hasta; t += DIA) {
     const fecha = new Date(t).toISOString().slice(0, 10);
     const suyos = porFecha.get(fecha) ?? [];
-    dias.push({ fecha, total: calcularTotal(suyos), gastos: suyos.length });
+    // Un día con solo una devolución saldría en negativo: se queda en cero.
+    dias.push({ fecha, total: Math.max(0, calcularTotal(suyos)), gastos: suyos.length });
   }
   return dias;
 }

@@ -36,11 +36,12 @@ create table gastos (
   -- Null, pagado desde el bote común.
   pagador_id uuid references viajeros(id) on delete cascade,
   -- Lo que se pagó de verdad, en la moneda en que se pagó.
-  importe numeric(10, 2) not null check (importe > 0),
+  -- En negativo es una devolución: la fianza que os devuelven, un reembolso...
+  importe numeric(10, 2) not null check (importe <> 0),
   moneda text not null default 'EUR',
   -- Y eso mismo pasado a la moneda del viaje, que es con lo que echamos cuentas.
   -- Lo guardamos hecho: si mañana cambia el cambio, el viaje no se descuadra.
-  importe_convertido numeric(10, 2) not null check (importe_convertido > 0),
+  importe_convertido numeric(10, 2) not null check (importe_convertido <> 0 and sign(importe_convertido) = sign(importe)),
   concepto text not null,
   -- En qué se fue: comida, transporte, alojamiento...
   categoria text not null default 'otros',
@@ -556,3 +557,10 @@ $$;
 -- Parejas o familias que pagan juntas.
 --   alter table viajeros add column con_id uuid references viajeros(id) on delete set null;
 --   grant update (con_id) on viajeros to anon, authenticated;
+
+-- Devoluciones: un gasto en negativo.
+--   alter table gastos drop constraint if exists gastos_importe_check;
+--   alter table gastos drop constraint if exists gastos_importe_convertido_check;
+--   alter table gastos add constraint gastos_importe_check check (importe <> 0);
+--   alter table gastos add constraint gastos_importe_convertido_check
+--     check (importe_convertido <> 0 and sign(importe_convertido) = sign(importe));

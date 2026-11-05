@@ -41,5 +41,6 @@ export function borradorQueVale(guardado, ahora, viajeros) {
     ...limpio,
     pagadorId: sigue ? guardado.pagadorId : "",
     categoriaAMano: guardado.categoriaAMano === true,
+    devolucion: guardado.devolucion === true,
   };
 }

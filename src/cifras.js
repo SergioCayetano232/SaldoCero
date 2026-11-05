@@ -1,6 +1,6 @@
 // El viaje en cifras, para cuando se cierra: el día más caro, quién puso más...
 
-import { importeDeGasto, calcularTotal, mediaPorGasto, participantesDeGasto } from "./calculos";
+import { importeDeGasto, calcularTotal, mediaPorGasto, participantesDeGasto, soloGastos } from "./calculos";
 import { porCabeza } from "./porCabeza";
 import { gastoPorCategoria } from "./categorias";
 import { porDias, enCorto } from "./fechas";
@@ -269,10 +269,12 @@ export function cuantasVeces(veces) {
   return `${String(veces).replace(".", ",")} veces más`;
 }
 
-export function cifrasDelViaje(gastos, personas, monedaViaje) {
+export function cifrasDelViaje(todos, personas, monedaViaje) {
+  // Lo que se cuenta son los gastos. Las devoluciones solo restan del total.
+  const gastos = soloGastos(todos);
   if (gastos.length === 0) return null;
 
-  const total = calcularTotal(gastos);
+  const total = calcularTotal(todos);
   // Los gastos de antes de las fechas no tienen día, esos no cuentan aquí.
   const dias = porDias(gastos)
     .filter((d) => d.fecha)

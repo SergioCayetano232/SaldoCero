@@ -68,6 +68,13 @@ describe("monedas a mano", () => {
   it("se escriben con su símbolo", () => {
     expect(conMoneda(150, "MAD")).toBe("150.00 DH");
   });
+
+  it("en negativo, el menos delante del todo", () => {
+    expect(conMoneda(-400, "USD")).toBe("-$400.00");
+    expect(conMoneda(-12.5, "GBP")).toBe("-£12.50");
+    expect(conMoneda(-400, "EUR")).toBe("-400.00 €");
+    expect(conMoneda(400, "USD")).toBe("$400.00");
+  });
 });
 
 describe("leerImporte", () => {

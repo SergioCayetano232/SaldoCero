@@ -24,6 +24,7 @@ describe("gastoAlFormulario", () => {
     expect(gastoAlFormulario(desayuno, viajeros, "EUR")).toEqual({
       pagadorId: "a",
       importe: "12.5",
+      devolucion: false,
       moneda: "EUR",
       tasaAMano: null,
       concepto: "Desayuno",
