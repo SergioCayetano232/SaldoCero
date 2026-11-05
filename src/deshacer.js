@@ -76,6 +76,7 @@ export function deshacerEdicion(antes, despues) {
     nota: antes.nota,
     participantes: antes.participantes,
     partes: antes.partes,
+    pagadores: antes.pagadores ?? null,
   };
 
   return mismoGasto(comoEstaba, despues) ? null : comoEstaba;
@@ -90,7 +91,8 @@ function mismoGasto(a, b) {
   return (
     ["pagadorId", "importe", "moneda", "importeConvertido", "concepto", "categoria", "fecha"].every((c) => a[c] === b[c]) &&
     limpiarNota(a.nota) === limpiarNota(b.nota) &&
-    reparto(a) === reparto(b)
+    reparto(a) === reparto(b) &&
+    JSON.stringify(a.pagadores ?? null) === JSON.stringify(b.pagadores ?? null)
   );
 }
 

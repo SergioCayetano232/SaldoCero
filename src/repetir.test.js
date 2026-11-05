@@ -36,6 +36,7 @@ describe("gastoAlFormulario", () => {
       importes: {},
       porImportes: false,
       repartoAbierto: false,
+      pagadores: {},
     });
   });
 

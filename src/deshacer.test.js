@@ -139,6 +139,7 @@ describe("deshacerEdicion", () => {
       nota: null,
       participantes: ["a", "b"],
       partes: { a: 1, b: 1 },
+      pagadores: null,
     });
   });
 

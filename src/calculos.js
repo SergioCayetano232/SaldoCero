@@ -80,6 +80,19 @@ export function repartoDeGasto(gasto, participantes) {
   return reparto;
 }
 
+// Lo que puso cada uno de un gasto, en la moneda del viaje. Si lo pagaron entre
+// varios, lo de cada uno son pesos, como las partes del reparto: así cuadra
+// siempre con el importe. Si de esos ya no queda nadie, vale el pagador de siempre.
+export function loQuePuso(gasto, viajeros) {
+  const importe = importeDeGasto(gasto);
+  const pesos = Object.entries(gasto.pagadores ?? {}).filter(
+    ([id, p]) => p > 0 && viajeros.some((v) => v.id === id)
+  );
+  const suma = pesos.reduce((t, [, p]) => t + p, 0);
+  if (pesos.length < 2 || suma <= 0) return new Map([[gasto.pagadorId, importe]]);
+  return new Map(pesos.map(([id, p]) => [id, (importe * p) / suma]));
+}
+
 // Lo que le toca a uno de un gasto. Cero si no va en él.
 export function parteDe(gasto, viajeroId, viajeros) {
   return repartoDeGasto(gasto, participantesDeGasto(gasto, viajeros)).get(viajeroId) ?? 0;
@@ -105,10 +118,8 @@ export function calcularBalances(viajeros, gastos, parciales = []) {
   }
 
   for (const gasto of gastos) {
-    const importe = importeDeGasto(gasto);
-
-    if (puesto.has(gasto.pagadorId)) {
-      puesto.set(gasto.pagadorId, puesto.get(gasto.pagadorId) + importe);
+    for (const [id, cuanto] of loQuePuso(gasto, viajeros)) {
+      if (puesto.has(id)) puesto.set(id, puesto.get(id) + cuanto);
     }
 
     const participantes = participantesDeGasto(gasto, viajeros);

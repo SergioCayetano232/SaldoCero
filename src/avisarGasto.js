@@ -8,12 +8,13 @@ import { porCabeza } from "./porCabeza";
 import { BOTE } from "./bote";
 import { enlaceDelViaje } from "./compartir";
 import { enLista } from "./nombres";
+import { nombreDeQuienPago, idsDeQuienPago } from "./pagadores";
 
 export function mensajeDeGasto({ gasto, viajeros, moneda, codigo, base }) {
   const pagador =
     gasto.pagadorId === BOTE
       ? "del bote"
-      : `pagó ${viajeros.find((v) => v.id === gasto.pagadorId)?.nombre ?? "alguien"}`;
+      : `${idsDeQuienPago(gasto).length > 1 ? "pagaron" : "pagó"} ${nombreDeQuienPago(gasto, viajeros) || "alguien"}`;
 
   // Si se pagó en otra moneda, las dos: la de verdad y la que cuenta.
   const otraMoneda = gasto.moneda && gasto.moneda !== moneda;

@@ -1,6 +1,7 @@
 // Los gastos vistos desde una persona: lo que pagó y lo que le tocaba.
 
-import { importeDeGasto, parteDe } from "./calculos";
+import { importeDeGasto, parteDe, loQuePuso } from "./calculos";
+import { pagoEnElGasto } from "./pagadores";
 import { conMoneda } from "./monedas";
 import { enCorto } from "./fechas";
 import { enlaceDelViaje } from "./compartir";
@@ -10,7 +11,7 @@ export function cuentaDe(gastos, viajeroId, viajeros) {
   let leToca = 0;
 
   for (const gasto of gastos) {
-    if (gasto.pagadorId === viajeroId) pagado += importeDeGasto(gasto);
+    pagado += loQuePuso(gasto, viajeros).get(viajeroId) ?? 0;
     leToca += parteDe(gasto, viajeroId, viajeros);
   }
 
@@ -35,12 +36,12 @@ export function textoParteDe(gasto, viajeroId, viajeros, esYo, moneda) {
 // Sus cuentas gasto a gasto, para mandárselas al que no se cree lo que debe.
 // Si eres tú, en primera persona: es para enseñárselo tú a otro.
 export function mensajeDeCuenta({ gastos, viajero, viajeros, esYo, nombreViaje, moneda, codigo, base }) {
-  const suyos = gastos.filter((g) => g.pagadorId === viajero.id || parteDe(g, viajero.id, viajeros) > 0);
+  const suyos = gastos.filter((g) => pagoEnElGasto(g, viajero.id) || parteDe(g, viajero.id, viajeros) > 0);
   const lineas = [esYo ? `Mis cuentas de *${nombreViaje}* 🧾` : `Hola ${viajero.nombre}! Tus cuentas de *${nombreViaje}* 🧾`, ""];
 
   for (const gasto of suyos) {
     const parte = parteDe(gasto, viajero.id, viajeros);
-    const pago = gasto.pagadorId === viajero.id;
+    const pago = pagoEnElGasto(gasto, viajero.id);
     const cuanto = conMoneda(importeDeGasto(gasto), moneda);
     const cuando = gasto.fecha ? `, ${enCorto(gasto.fecha)}` : "";
 

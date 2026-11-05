@@ -1203,6 +1203,18 @@ button:active {
   font-variant-numeric: tabular-nums;
 }
 
+/* Lo de "entre varios" va pegado al pagador, sin la raya de las partes. */
+.partes.pagaron-varios {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.fila-varios {
+  margin: -4px 0 10px;
+  font-size: 13px;
+}
+
 .cuadre {
   margin-top: 8px;
   font-size: 13px;

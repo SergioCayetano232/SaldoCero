@@ -1,6 +1,7 @@
 // Los gastos en una hoja de cálculo, para quien quiera echar sus propias cuentas.
 
-import { importeDeGasto, parteDe, calcularTotal } from "./calculos";
+import { importeDeGasto, parteDe, calcularTotal, loQuePuso } from "./calculos";
+import { nombreDeQuienPago } from "./pagadores";
 import { categoriaDe, gastoPorCategoria } from "./categorias";
 import { BOTE } from "./bote";
 
@@ -72,7 +73,7 @@ export function gastosEnCSV({ gastos, viajeros, moneda, nombre, pagos, deCuantos
       diaDeLaSemana(g.fecha),
       g.concepto,
       categoriaDe(g.categoria).nombre,
-      g.pagadorId === BOTE ? "Bote" : viajeros.find((v) => v.id === g.pagadorId)?.nombre ?? "",
+      g.pagadorId === BOTE ? "Bote" : nombreDeQuienPago(g, viajeros),
       cifra(g.importe),
       g.moneda ?? moneda,
       cifra(importeDeGasto(g)),
@@ -113,7 +114,7 @@ export function gastosEnCSV({ gastos, viajeros, moneda, nombre, pagos, deCuantos
     "",
     "",
     "",
-    ...viajeros.map((v) => cifra(gastos.filter((g) => g.pagadorId === v.id).reduce((t, g) => t + importeDeGasto(g), 0))),
+    ...viajeros.map((v) => cifra(gastos.reduce((t, g) => t + (loQuePuso(g, viajeros).get(v.id) ?? 0), 0))),
   ];
   const alFinal = gastos.length > 0 ? [[], total, puso, ...porCategoria(gastos, moneda), ...comoQuedan(pagos, moneda)] : [];
 

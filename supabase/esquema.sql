@@ -37,6 +37,9 @@ create table gastos (
   viaje_id uuid not null references viajes(id) on delete cascade,
   -- Null, pagado desde el bote común.
   pagador_id uuid references viajeros(id) on delete cascade,
+  -- Si lo pagaron entre varios, lo que puso cada uno: {"<id>": 40, "<id>": 20}.
+  -- El pagador_id es entonces el que más puso.
+  pagadores jsonb check (jsonb_typeof(pagadores) = 'object'),
   -- Lo que se pagó de verdad, en la moneda en que se pagó.
   -- En negativo es una devolución: la fianza que os devuelven, un reembolso...
   importe numeric(10, 2) not null check (importe <> 0),
@@ -318,7 +321,8 @@ create function editar_gasto(
   -- [{"viajero_id": "...", "partes": 1}, ...]
   g_participantes jsonb,
   -- Con valor por defecto, para que la versión de la web de antes siga guardando.
-  g_nota text default null
+  g_nota text default null,
+  g_pagadores jsonb default null
 )
 returns void
 language plpgsql
@@ -338,7 +342,8 @@ begin
     concepto = g_concepto,
     categoria = g_categoria,
     fecha = g_fecha,
-    nota = g_nota
+    nota = g_nota,
+    pagadores = g_pagadores
   where id = g_id;
 
   -- Si no lo ve (no existe, o es de otro viaje), no ha tocado nada.
@@ -385,7 +390,8 @@ create function crear_gasto(
   g_categoria text,
   g_fecha date,
   g_participantes jsonb,
-  g_nota text default null
+  g_nota text default null,
+  g_pagadores jsonb default null
 )
 returns uuid
 language plpgsql
@@ -399,11 +405,11 @@ begin
     raise exception 'Un gasto tiene que repartirse entre alguien';
   end if;
 
-  insert into gastos (viaje_id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha, nota)
+  insert into gastos (viaje_id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha, nota, pagadores)
   values (
     g_viaje, g_pagador, g_importe,
     coalesce(g_moneda, 'EUR'), g_convertido, g_concepto,
-    coalesce(g_categoria, 'otros'), coalesce(g_fecha, current_date), g_nota
+    coalesce(g_categoria, 'otros'), coalesce(g_fecha, current_date), g_nota, g_pagadores
   )
   returning id into nuevo;
 
@@ -570,3 +576,13 @@ $$;
 -- Topes por categoría.
 --   alter table viajes add column topes jsonb check (jsonb_typeof(topes) = 'object');
 --   grant update (topes) on viajes to anon, authenticated;
+
+-- Gastos pagados entre varios.
+--   alter table gastos add column pagadores jsonb check (jsonb_typeof(pagadores) = 'object');
+--
+--   Las dos funciones de guardar gastos llevan un parámetro más. Hay que
+--   borrarlas antes, que si no Postgres deja las dos versiones a la vez:
+--   drop function crear_gasto(uuid, uuid, numeric, text, numeric, text, text, date, jsonb, text);
+--   drop function editar_gasto(uuid, uuid, numeric, text, numeric, text, text, date, jsonb, text);
+--
+--   Y pega los "create function crear_gasto" y "create function editar_gasto" de más arriba.

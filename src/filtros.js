@@ -5,6 +5,7 @@ import { importeDeGasto, participantesDeGasto } from "./calculos";
 import { hoy } from "./fechas";
 import { BOTE, esDelBote } from "./bote";
 import { categoriaDe } from "./categorias";
+import { nombreDeQuienPago, pagoEnElGasto } from "./pagadores";
 
 // Con menos gastos que estos, la barra de filtros estorba más que ayuda.
 export const MINIMO_PARA_FILTRAR = 4;
@@ -167,7 +168,7 @@ export function hayGastosDeHoy(gastos, dia = hoy()) {
 
 function quienPago(gasto, viajeros) {
   if (gasto.pagadorId === BOTE) return "bote";
-  return viajeros?.find((v) => v.id === gasto.pagadorId)?.nombre ?? "";
+  return nombreDeQuienPago(gasto, viajeros ?? []);
 }
 
 // Por persona valen los que pagó y en los que está: es lo que miras al repasar lo tuyo.
@@ -190,7 +191,7 @@ export function filtrarGastos(gastos, filtros, viajeros, monedaViaje) {
     if (filtros.deAlgunos && !deAlgunos(gasto, viajeros)) return false;
 
     if (filtros.viajeroId) {
-      const pago = gasto.pagadorId === filtros.viajeroId;
+      const pago = pagoEnElGasto(gasto, filtros.viajeroId);
       const esta = participantesDeGasto(gasto, viajeros).some((v) => v.id === filtros.viajeroId);
       if (!pago && !esta) return false;
     }

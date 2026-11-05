@@ -313,7 +313,7 @@ async function cargarContenido(viajeId) {
     supabase.from("viajeros").select("id, nombre, cobro, con_id").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
-      .select("id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha, ticket, nota, creado_en")
+      .select("id, pagador_id, pagadores, importe, moneda, importe_convertido, concepto, categoria, fecha, ticket, nota, creado_en")
       .eq("viaje_id", viajeId)
       .order("fecha")
       .order("creado_en"),
@@ -373,6 +373,8 @@ async function cargarContenido(viajeId) {
       id: gasto.id,
       // Sin pagador es que salió del bote.
       pagadorId: gasto.pagador_id ?? BOTE,
+      // Si lo pagaron entre varios, lo que puso cada uno. Los de antes no lo traen.
+      pagadores: gasto.pagadores ?? null,
       // En la base de datos es numeric, y llega como texto.
       importe: Number(gasto.importe),
       moneda: gasto.moneda ?? "EUR",
@@ -509,6 +511,7 @@ export function datosDelGasto(gasto) {
     g_categoria: gasto.categoria,
     g_fecha: gasto.fecha,
     g_nota: limpiarNota(gasto.nota),
+    g_pagadores: gasto.pagadores ?? null,
     g_participantes: gasto.participantes.map((viajeroId) => ({
       viajero_id: viajeroId,
       partes: gasto.partes?.[viajeroId] ?? 1,

@@ -25,6 +25,7 @@ describe("datosDelGasto", () => {
       g_categoria: "comida",
       g_fecha: "2026-09-29",
       g_nota: null,
+      g_pagadores: null,
       g_participantes: [
         { viajero_id: "a", partes: 2 },
         { viajero_id: "b", partes: 1 },

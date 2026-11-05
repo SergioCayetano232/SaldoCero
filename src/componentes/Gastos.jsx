@@ -25,6 +25,7 @@ import { pagadorPorDefecto } from "../pagador";
 import { pareceRaro } from "../raros";
 import { teSacaDelPresupuesto } from "../presupuesto";
 import { teSacaDelTope } from "../topes";
+import { pagadoresDeLoEscrito, pagadorPrincipal, loQueFaltaPorPagar, idsDeQuienPago, nombreDeQuienPago } from "../pagadores";
 import { fechaRara, fechaConAno } from "../fechaRara";
 import { porCabeza, porCabezaDelDia } from "../porCabeza";
 import { mensajeDeGasto } from "../avisarGasto";
@@ -93,6 +94,9 @@ function Gastos({
   const [nota, setNota] = useState(borrador?.nota ?? "");
   // Dinero que vuelve: se escribe en positivo y se guarda en negativo.
   const [devolucion, setDevolucion] = useState(borrador?.devolucion ?? false);
+  // Pagado entre varios: lo que puso cada uno, tal cual se escribe.
+  const [variosPagan, setVariosPagan] = useState(false);
+  const [pagos, setPagos] = useState({});
   const [notaAbierta, setNotaAbierta] = useState(Boolean(borrador?.nota));
   // Las partes de cada uno. Vacío = a partes iguales, que es lo normal.
   const [partes, setPartes] = useState({});
@@ -532,6 +536,8 @@ function Gastos({
     setNota("");
     setNotaAbierta(false);
     setDevolucion(false);
+    setVariosPagan(false);
+    setPagos({});
     setPartes({});
     setRepartoAbierto(false);
     setPorImportes(false);
@@ -560,6 +566,8 @@ function Gastos({
     setNota(f.nota);
     setNotaAbierta(Boolean(f.nota));
     setDevolucion(f.devolucion ?? false);
+    setVariosPagan(Object.keys(f.pagadores ?? {}).length > 1);
+    setPagos(f.pagadores ?? {});
     setFecha(f.fecha ?? hoy());
     setParticipantes(f.participantes);
     setPartes(f.partes);
@@ -631,8 +639,14 @@ function Gastos({
   const falta = conImportes && importeEscrito > 0 ? loQueFalta(importes, marcados, importeEscrito) : null;
   const conPlatos = repartoAbierto && porPlatos;
   const deLosPlatos = conPlatos ? repartoPorPlatos(platos, marcados, importeEscrito) : null;
+  // Con una devolución no hay "entre varios": lo recibe uno.
+  const entreVarios = variosPagan && !devolucion;
+  const pagadores = entreVarios ? pagadoresDeLoEscrito(pagos) : null;
+  const faltaPorPoner = entreVarios && importeEscrito > 0 ? loQueFaltaPorPagar(pagos, importeEscrito) : null;
   const descuadrado =
-    (conImportes && !cuadra(importes, marcados, importeEscrito)) || (conPlatos && !deLosPlatos?.importes);
+    (conImportes && !cuadra(importes, marcados, importeEscrito)) ||
+    (conPlatos && !deLosPlatos?.importes) ||
+    (entreVarios && (!pagadores || faltaPorPoner !== 0));
 
   // Cuánto sale para cada uno con las partes de ahora, para irlo viendo.
   function loQueLeToca(id) {
@@ -671,8 +685,9 @@ function Gastos({
 
   function guardar(aunqueSeParezca = false, aunqueSeaMucho = false, aunqueSeaOtraFecha = false) {
     const importeNumero = importeLeido;
+    const quienPaga = pagadores ? pagadorPrincipal(pagadores) : pagadorId;
 
-    if (pagadorId === "") return;
+    if (quienPaga === "") return;
     if (isNaN(importeNumero) || importeNumero <= 0) return;
     if (marcados.length === 0) return;
 
@@ -682,7 +697,8 @@ function Gastos({
 
     const signo = devolucion ? -1 : 1;
     const gasto = {
-      pagadorId,
+      pagadorId: quienPaga,
+      pagadores,
       importe: signo * importeNumero,
       moneda,
       // Lo guardamos ya convertido: si mañana cambia el cambio, este viaje no.
@@ -849,7 +865,7 @@ function Gastos({
                           <span>
                             {categoriaDe(g.categoria).emoji} {g.concepto}
                             <small>
-                              {" "}· {nombrePagador(g.pagadorId)}
+                              {" "}· {nombreDeQuienPago(g, viajeros)}
                               {g.participantes.length < viajeros.length &&
                                 ` · sin ${enLista(viajeros.filter((v) => !g.participantes.includes(v.id)).map((v) => v.nombre))}`}
                               {g.fecha !== hoy() && ` · ${comoTitulo(g.fecha)}`}
@@ -896,20 +912,62 @@ function Gastos({
 
               {!editando && <Dictado onDictado={alDictar} />}
 
-              <select
-                ref={campoPagador}
-                value={pagadorId}
-                onChange={(e) => setPagadorId(e.target.value)}
-              >
-                <option value="">{devolucion ? "¿Quién lo recibió?" : "¿Quién pagó?"}</option>
-                {viajeros.map((viajero) => (
-                  <option key={viajero.id} value={viajero.id}>
-                    {viajero.nombre}
-                  </option>
-                ))}
-                {/* Si editas uno del bote, que siga saliendo aunque ya no haya bote. */}
-                {(hayBote || pagadorId === BOTE) && <option value={BOTE}>🫙 Del bote</option>}
-              </select>
+              {!entreVarios && (
+                <select
+                  ref={campoPagador}
+                  value={pagadorId}
+                  onChange={(e) => setPagadorId(e.target.value)}
+                >
+                  <option value="">{devolucion ? "¿Quién lo recibió?" : "¿Quién pagó?"}</option>
+                  {viajeros.map((viajero) => (
+                    <option key={viajero.id} value={viajero.id}>
+                      {viajero.nombre}
+                    </option>
+                  ))}
+                  {/* Si editas uno del bote, que siga saliendo aunque ya no haya bote. */}
+                  {(hayBote || pagadorId === BOTE) && <option value={BOTE}>🫙 Del bote</option>}
+                </select>
+              )}
+
+              {entreVarios && (
+                <div className="partes pagaron-varios">
+                  <p className="partes-ayuda">Lo que puso cada uno, en {moneda}. El que no puso nada, en blanco.</p>
+                  {viajeros.map((viajero) => (
+                    <div className="fila-parte" key={viajero.id}>
+                      <span className="parte-nombre">{viajero.nombre}</span>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        className="parte-campo campo-importe"
+                        placeholder="0"
+                        aria-label={`Lo que puso ${viajero.nombre}`}
+                        value={pagos[viajero.id] ?? ""}
+                        onChange={(e) => setPagos({ ...pagos, [viajero.id]: e.target.value })}
+                      />
+                    </div>
+                  ))}
+                  {faltaPorPoner !== null && (
+                    <p className={`cuadre ${faltaPorPoner === 0 && pagadores ? "cuadre-bien" : "cuadre-mal"}`}>
+                      {faltaPorPoner !== 0
+                        ? faltaPorPoner > 0
+                          ? `Faltan ${conMoneda(faltaPorPoner, moneda)} por poner`
+                          : `Sobran ${conMoneda(-faltaPorPoner, moneda)}`
+                        : pagadores
+                          ? "✓ Cuadra con el importe"
+                          : "Si lo puso uno solo, dale a «lo pagó uno solo»"}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Dentro de un div: suelto, el estilo de los botones del formulario lo pintaría entero. */}
+              {!devolucion && viajeros.length > 1 && pagadorId !== BOTE && (
+                <div className="fila-varios">
+                  <button className="enlace" onClick={() => setVariosPagan(!variosPagan)}>
+                    {variosPagan ? "← lo pagó uno solo" : "¿pagaron entre varios?"}
+                  </button>
+                </div>
+              )}
 
               <div className="fila-importe">
                 {/* De texto y no number, que si no el "+" no se deja escribir. El
@@ -1864,7 +1922,11 @@ function Gastos({
                         )}
                         <br />
                         <small className="reparto">
-                          <Resaltado texto={nombrePagador(gasto.pagadorId)} buscado={buscado} /> · {textoReparto(gasto)}
+                          <Resaltado
+                            texto={idsDeQuienPago(gasto).length > 1 ? nombreDeQuienPago(gasto, viajeros) : nombrePagador(gasto.pagadorId)}
+                            buscado={buscado}
+                          />{" "}
+                          · {textoReparto(gasto)}
                           {/* Sin los títulos de los días, la fecha va en cada uno. */}
                           {ordenVigente !== POR_DIAS && gasto.fecha && ` · ${comoTitulo(gasto.fecha)}`}
                           {apuntadoHace(gasto.creadoEn, ahora) && (

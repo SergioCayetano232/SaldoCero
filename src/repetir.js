@@ -4,6 +4,7 @@ import { participantesDeGasto, esDevolucion } from "./calculos";
 import { POR_DEFECTO } from "./categorias";
 import { tasaDeGasto, tasaComoTexto } from "./monedas";
 import { vanPorImportes } from "./importes";
+import { idsDeQuienPago } from "./pagadores";
 
 export function gastoAlFormulario(gasto, viajeros, monedaViaje) {
   const moneda = gasto.moneda ?? monedaViaje;
@@ -32,6 +33,10 @@ export function gastoAlFormulario(gasto, viajeros, monedaViaje) {
       : {},
     porImportes,
     repartoAbierto: desigual,
+    // Lo que puso cada uno, como texto para los campos. Vacío si pagó uno solo.
+    pagadores: idsDeQuienPago(gasto).length > 1
+      ? Object.fromEntries(Object.entries(gasto.pagadores).map(([id, p]) => [id, String(p)]))
+      : {},
   };
 }
 
