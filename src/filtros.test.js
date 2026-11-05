@@ -497,6 +497,33 @@ describe("cuadraLaFecha", () => {
     expect(cuadraLaFecha(delDia("2025-10-15"), "15/10/26", hoyEs)).toBe(false);
   });
 
+  it("de un día a otro", () => {
+    const entre = (fecha, texto) => cuadraLaFecha(delDia(fecha), texto, hoyEs);
+    expect(entre("2026-10-12", "12/10-15/10")).toBe(true);
+    expect(entre("2026-10-14", "12/10-15/10")).toBe(true);
+    expect(entre("2026-10-15", "12/10-15/10")).toBe(true);
+    expect(entre("2026-10-16", "12/10-15/10")).toBe(false);
+    expect(entre("2026-10-11", "12/10-15/10")).toBe(false);
+  });
+
+  it("de un día a otro del mismo mes, con el mes una vez", () => {
+    expect(cuadraLaFecha(delDia("2026-10-13"), "12-15/10", hoyEs)).toBe(true);
+    expect(cuadraLaFecha(delDia("2026-11-13"), "12-15/10", hoyEs)).toBe(false);
+  });
+
+  it("de un mes al siguiente, y por Nochevieja", () => {
+    expect(cuadraLaFecha(delDia("2026-10-31"), "29/10-2/11", hoyEs)).toBe(true);
+    expect(cuadraLaFecha(delDia("2026-11-01"), "29/10-2/11", hoyEs)).toBe(true);
+    expect(cuadraLaFecha(delDia("2026-12-30"), "28/12-3/1", hoyEs)).toBe(true);
+    expect(cuadraLaFecha(delDia("2027-01-02"), "28/12-3/1", hoyEs)).toBe(true);
+    expect(cuadraLaFecha(delDia("2027-01-05"), "28/12-3/1", hoyEs)).toBe(false);
+  });
+
+  it("el guion de un día suelto sigue siendo un día", () => {
+    expect(cuadraLaFecha(delDia("2026-10-05"), "5-10", hoyEs)).toBe(true);
+    expect(cuadraLaFecha(delDia("2026-10-06"), "5-10", hoyEs)).toBe(false);
+  });
+
   it("un número solo no es una fecha, que es un importe", () => {
     expect(cuadraLaFecha(delDia("2026-10-15"), "15", hoyEs)).toBe(false);
   });

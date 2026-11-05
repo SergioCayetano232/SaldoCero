@@ -62,6 +62,17 @@ export function cuadraLaFecha(gasto, palabra, dia = hoy()) {
   const semana = DIAS_SEMANA.indexOf(palabra);
   if (semana !== -1) return new Date(Date.parse(gasto.fecha)).getUTCDay() === semana;
 
+  // "12/10-15/10" o "12-15/10", del 12 al 15 de octubre. Sin año: un viaje no
+  // dura tanto, y "28/12-3/1" se entiende que pasa por Nochevieja.
+  const tramo = palabra.match(/^(\d{1,2})(?:\/(\d{1,2}))?-(\d{1,2})\/(\d{1,2})$/);
+  if (tramo) {
+    const [, mes, diaDelMes] = gasto.fecha.split("-").map(Number);
+    const clave = mes * 100 + diaDelMes;
+    const desde = Number(tramo[2] ?? tramo[4]) * 100 + Number(tramo[1]);
+    const hasta = Number(tramo[4]) * 100 + Number(tramo[3]);
+    return desde <= hasta ? clave >= desde && clave <= hasta : clave >= desde || clave <= hasta;
+  }
+
   // "15/10", "15-10" o con el año, "15/10/2026" o "15/10/26".
   const partes = palabra.match(/^(\d{1,2})[/-](\d{1,2})(?:[/-](\d{2}|\d{4}))?$/);
   if (!partes) return false;
