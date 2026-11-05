@@ -154,6 +154,17 @@ describe("gastosEnCSV", () => {
     expect(lineas(gastosEnCSV({ gastos: [], viajeros, moneda: "EUR", nombre: "Lisboa" }))[0]).toBe("Lisboa;");
   });
 
+  it("si es solo lo filtrado, lo dice arriba", () => {
+    const taxi = { ...cena, id: "g2", fecha: "2026-09-11" };
+    const filas = lineas(gastosEnCSV({ gastos: [cena, taxi], viajeros, moneda: "EUR", nombre: "Lisboa", deCuantos: 7 }));
+    expect(filas[0]).toBe("Lisboa;del 2026-09-11 al 2026-09-13;Solo 2 de 7 gastos");
+  });
+
+  it("si lo filtrado es todo, como siempre", () => {
+    const filas = lineas(gastosEnCSV({ gastos: [cena], viajeros, moneda: "EUR", nombre: "Lisboa", deCuantos: 1 }));
+    expect(filas[0]).toBe("Lisboa;2026-09-13");
+  });
+
   it("sin gastos, sin fila de total", () => {
     expect(lineas(gastosEnCSV({ gastos: [], viajeros, moneda: "EUR" }))).toHaveLength(1);
   });

@@ -26,15 +26,17 @@ function diaDeLaSemana(fecha) {
 
 // El nombre del viaje y sus días, para que el archivo se entienda sin abrir la app.
 // Con una fila en blanco detrás, por lo mismo que la del total.
-function arriba(nombre, gastos) {
+function arriba(nombre, gastos, deCuantos) {
   if (!nombre) return [];
 
   const dias = gastos.map((g) => g.fecha).filter(Boolean).sort();
   const desde = dias[0];
   const hasta = dias.at(-1);
   const cuando = !desde ? "" : desde === hasta ? desde : `del ${desde} al ${hasta}`;
+  // Si es lo filtrado, que se diga: si no, parece el viaje entero.
+  const parte = deCuantos > gastos.length ? [`Solo ${gastos.length} de ${deCuantos} gastos`] : [];
 
-  return [[nombre, cuando], []];
+  return [[nombre, cuando, ...parte], []];
 }
 
 // Entre comillas si hace falta. Y si empieza por = + - @, Excel lo tomaría por
@@ -46,7 +48,7 @@ export function celda(valor) {
   return texto;
 }
 
-export function gastosEnCSV({ gastos, viajeros, moneda, nombre, pagos }) {
+export function gastosEnCSV({ gastos, viajeros, moneda, nombre, pagos, deCuantos }) {
   const cabecera = [
     "Fecha",
     "Día",
@@ -115,7 +117,7 @@ export function gastosEnCSV({ gastos, viajeros, moneda, nombre, pagos }) {
   ];
   const alFinal = gastos.length > 0 ? [[], total, puso, ...porCategoria(gastos, moneda), ...comoQuedan(pagos, moneda)] : [];
 
-  return [...arriba(nombre, gastos), cabecera, ...filas, ...alFinal].map((fila) => fila.map(celda).join(SEPARADOR)).join("\r\n");
+  return [...arriba(nombre, gastos, deCuantos), cabecera, ...filas, ...alFinal].map((fila) => fila.map(celda).join(SEPARADOR)).join("\r\n");
 }
 
 // Lo de cada categoría, ya sumado, que es lo primero que se hace con la columna.

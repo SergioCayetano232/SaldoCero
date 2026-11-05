@@ -28,6 +28,8 @@ import { fechaRara, fechaConAno } from "../fechaRara";
 import { porCabeza, porCabezaDelDia } from "../porCabeza";
 import { mensajeDeGasto } from "../avisarGasto";
 import { enlaceWhatsApp } from "../cobrar";
+import { gastosEnCSV } from "../exportar";
+import { descargarGastos } from "../compartir";
 import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
 import { esAtajoBuscar, esAtajoGuardar, esAtajoHoy, esAtajoLoMio, esAtajoNuevo, esAtajoOrden, esAtajoQuitarFiltros, esAtajoRepetir, esAtajoFoto, esAtajoNota, escapeEnBuscador, esMac, esOrdenador } from "../teclado";
 import Deslizable from "./Deslizable";
@@ -1739,6 +1741,21 @@ function Gastos({
                     {!cerrado && visibles.length > 1 && (
                       <button className="enlace quitar-varios" onClick={() => onQuitarVarios(visibles)}>
                         {textoQuitarVarios(visibles.length)}
+                      </button>
+                    )}
+                    {/* Sin quién paga a quién: eso es del viaje entero, no de lo filtrado. */}
+                    {visibles.length > 0 && (
+                      <button
+                        className="enlace"
+                        onClick={() =>
+                          descargarGastos(
+                            gastosEnCSV({ gastos: visibles, viajeros, moneda: monedaViaje, nombre: nombreViaje, deCuantos: gastos.length }),
+                            nombreViaje
+                          )
+                        }
+                        title="Bajar en una hoja de cálculo solo los gastos que se ven"
+                      >
+                        bajar en Excel
                       </button>
                     )}
                     <button
