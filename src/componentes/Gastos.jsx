@@ -24,6 +24,7 @@ import { arreglarConcepto, LARGO_CONCEPTO, quedanEnConcepto } from "../concepto"
 import { pagadorPorDefecto } from "../pagador";
 import { pareceRaro } from "../raros";
 import { teSacaDelPresupuesto } from "../presupuesto";
+import { teSacaDelTope } from "../topes";
 import { fechaRara, fechaConAno } from "../fechaRara";
 import { porCabeza, porCabezaDelDia } from "../porCabeza";
 import { mensajeDeGasto } from "../avisarGasto";
@@ -52,6 +53,7 @@ function Gastos({
   gastos,
   monedaViaje,
   presupuesto = null,
+  topes = {},
   recienLlegados,
   cerrado,
   onAnadir,
@@ -660,6 +662,12 @@ function Gastos({
     typeof tasa === "number" ? importeLeido * tasa : NaN,
     presupuesto,
   );
+  const pasoDelTope = teSacaDelTope(
+    gastos.filter((g) => g.id !== editando),
+    categoria,
+    typeof tasa === "number" ? importeLeido * tasa : NaN,
+    topes,
+  );
 
   function guardar(aunqueSeParezca = false, aunqueSeaMucho = false, aunqueSeaOtraFecha = false) {
     const importeNumero = importeLeido;
@@ -1027,6 +1035,13 @@ function Gastos({
                   </button>
                 ))}
               </div>
+
+              {/* Aquí y no junto al importe: hasta que no hay categoría, no se sabe de qué tope. */}
+              {pasoDelTope !== null && (
+                <p className="aviso-presupuesto" role="status">
+                  Con este os pasáis del tope de {categoriaDe(categoria).nombre.toLowerCase()} en {conMoneda(pasoDelTope, monedaViaje)}
+                </p>
+              )}
 
               {/* Solo en lo de comer, que es donde se deja. */}
               {categoria === "comida" && importeLeido > 0 && !devolucion && (

@@ -21,6 +21,7 @@ import { hayDiagrama } from "../diagrama";
 import DiagramaDeudas from "./DiagramaDeudas";
 import { gastosEnCSV } from "../exportar";
 import { juntarBalances, pagaYo, cobroYo } from "../juntos";
+import Topes from "./Topes";
 import { mensajeDeCobro, enlaceWhatsApp } from "../cobrar";
 import { cobroDe, cobroComoTexto, cantidadParaPegar } from "../cobro";
 import { BOTE, sinBote } from "../bote";
@@ -60,6 +61,7 @@ function Resumen({
   onQuitarParcial,
   onRedondear,
   onPresupuesto,
+  onTopes,
   cerrado,
   viaje,
   soy,
@@ -411,6 +413,8 @@ function Resumen({
           )}
         </>
       )}
+
+      <Topes gastos={gastos} topes={viaje?.topes ?? {}} moneda={monedaViaje} fijo={cerrado} onGuardar={onTopes} />
 
       <PorDias gastos={gastos} moneda={monedaViaje} onVerDia={onVerDia} />
 

@@ -10,6 +10,7 @@ import { limpiarNombre } from "./nombres";
 import { codigoDeTexto } from "./codigos";
 import { POR_DIAS } from "./ordenar";
 import { conCerrado, conNeto } from "./pasados";
+import { limpiarTopes } from "./topes";
 
 // Al usuario le decimos algo que entienda, pero el fallo de verdad lo dejamos
 // en la consola, que si no no hay quien averigüe qué ha pasado.
@@ -308,7 +309,7 @@ export async function abrirViaje(codigo) {
 async function cargarContenido(viajeId) {
   const [delViaje, viajeros, gastos, participantes, saldados, parciales, bote] = await Promise.all([
     // Lo del viaje otra vez, por si lo ha cambiado alguien desde otro móvil.
-    supabase.from("viajes").select("nombre, presupuesto, cerrado_en, redondear").eq("id", viajeId).single(),
+    supabase.from("viajes").select("nombre, presupuesto, cerrado_en, redondear, topes").eq("id", viajeId).single(),
     supabase.from("viajeros").select("id, nombre, cobro, con_id").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
@@ -348,6 +349,7 @@ async function cargarContenido(viajeId) {
     cerradoEn: delViaje.data.cerrado_en,
     // Los viajes de antes de esto no lo traen: con céntimos, como siempre.
     redondear: delViaje.data.redondear === true,
+    topes: limpiarTopes(delViaje.data.topes),
     viajeros: viajeros.data.map(({ con_id, ...v }) => ({ ...v, conId: con_id ?? null })),
     // Los marcados antes de guardar ids no los traen: esos van por nombre.
     saldados: saldados.data.map((p) => ({
@@ -446,6 +448,12 @@ export async function ponerPresupuesto(viajeId, presupuesto) {
     .select("id");
 
   if (error || !data.length) throw fallo(error, "No hemos podido guardar el presupuesto.");
+}
+
+// Todos de una vez, ya con el cambio hecho. Null si no queda ninguno.
+export async function ponerTopes(viajeId, topes) {
+  const { data, error } = await supabase.from("viajes").update({ topes }).eq("id", viajeId).select("id");
+  if (error || !data.length) throw fallo(error, "No hemos podido guardar el tope.");
 }
 
 export async function ponerRedondeo(viajeId, redondear) {

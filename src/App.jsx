@@ -552,6 +552,7 @@ function App() {
         gastos={gastos}
         monedaViaje={viaje.moneda ?? "EUR"}
         presupuesto={viaje.presupuesto}
+        topes={viaje.topes ?? {}}
         recienLlegados={novedad?.ids}
         cerrado={cerrado}
         soy={soy}
@@ -631,6 +632,7 @@ function App() {
           onDesaldar={(pago) => hacer(() => datos.desmarcarSaldado(viaje.id, pago))}
           cerrado={cerrado}
           onPresupuesto={(cantidad) => hacer(() => datos.ponerPresupuesto(viaje.id, cantidad))}
+          onTopes={(topes) => hacer(() => datos.ponerTopes(viaje.id, topes))}
           onRedondear={(redondear) => hacer(() => datos.ponerRedondeo(viaje.id, redondear))}
           parciales={parciales}
           aportaciones={aportaciones}
