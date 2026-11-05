@@ -833,7 +833,12 @@ function Gastos({
                         <li key={i}>
                           <span>
                             {categoriaDe(g.categoria).emoji} {g.concepto}
-                            <small> · {nombrePagador(g.pagadorId)}{g.fecha !== hoy() && ` · ${comoTitulo(g.fecha)}`}</small>
+                            <small>
+                              {" "}· {nombrePagador(g.pagadorId)}
+                              {g.participantes.length < viajeros.length &&
+                                ` · sin ${enLista(viajeros.filter((v) => !g.participantes.includes(v.id)).map((v) => v.nombre))}`}
+                              {g.fecha !== hoy() && ` · ${comoTitulo(g.fecha)}`}
+                            </small>
                           </span>
                           <strong>{conMoneda(g.importe, monedaViaje)}</strong>
                         </li>

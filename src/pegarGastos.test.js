@@ -79,6 +79,15 @@ describe("gastosDeLista", () => {
     expect(g.fecha).not.toBe(dia);
   });
 
+  it("menos alguno, sin confundirlo con el que pagó", () => {
+    const { gastos } = leer("cena 45 ana menos luis\ncopas 30 menos marta\nagua sin gas 2 ana", { pagadorId: "c" });
+    expect(gastos.map((g) => [g.pagadorId, g.concepto, g.participantes])).toEqual([
+      ["a", "Cena", ["a", "c"]],
+      ["c", "Copas", ["a", "b"]],
+      ["a", "Agua sin gas", ["a", "b", "c"]],
+    ]);
+  });
+
   it("sin concepto, el de la categoría", () => {
     const { gastos } = leer("45 ana\n12 luis");
     expect(gastos.map((g) => g.concepto)).toEqual(["Gasto", "Gasto"]);

@@ -65,6 +65,32 @@ describe("entenderDictado", () => {
     expect(entender("cena 90 entre todos").participantes).toEqual(["ana", "luis", "jm", "eva"]);
   });
 
+  it("menos alguno", () => {
+    expect(entender("cena 45 pagó Ana menos Luis")).toMatchObject({
+      participantes: ["ana", "jm", "eva"],
+      concepto: "cena",
+      pagadorId: "ana",
+    });
+    expect(entender("vino 20 sin Ana ni Eva").participantes).toEqual(["luis", "jm"]);
+    expect(entender("taxi 30 excepto a José María y Luis").participantes).toEqual(["ana", "eva"]);
+    expect(entender("cena 90 entre Ana, Luis y Eva menos Eva").participantes).toEqual(["ana", "luis"]);
+  });
+
+  it("menos yo, si sabe quién eres", () => {
+    expect(entender("copas 40 para todos menos yo", "eva")).toMatchObject({ participantes: ["ana", "luis", "jm"], concepto: "copas" });
+    expect(entender("copas 40 sin mí", "eva")).toMatchObject({ participantes: ["ana", "luis", "jm"], concepto: "copas" });
+    expect(entender("copas 40 menos yo").participantes).toBeNull();
+  });
+
+  it("el sin de un concepto se queda en el concepto", () => {
+    expect(entender("agua sin gas 2 euros")).toMatchObject({ concepto: "agua sin gas", participantes: null });
+    expect(entender("gasolina 50 sin mi tarjeta", "eva")).toMatchObject({ concepto: "gasolina sin mi tarjeta", participantes: null });
+  });
+
+  it("si no queda nadie, el reparto no se toca", () => {
+    expect(entender("museo 30 entre Ana y Luis menos Ana y Luis").participantes).toEqual(["ana", "luis"]);
+  });
+
   it("los números en letra solo con euros detrás", () => {
     expect(entender("cinco euros de pan").importe).toBe("5");
     expect(entender("dos cafés 3 euros")).toMatchObject({ importe: "3", concepto: "dos cafés" });

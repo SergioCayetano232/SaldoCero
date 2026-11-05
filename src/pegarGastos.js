@@ -1,7 +1,7 @@
 // Pegar de golpe lo que fuisteis apuntando en las notas del móvil:
 // "cena 45 ana", "taxi 12,50 luis"... Cada línea, un gasto. Se lee igual que el dictado.
 
-import { entenderDictado } from "./dictado";
+import { entenderDictado, MENOS } from "./dictado";
 import { leerImporte } from "./monedas";
 import { adivinarCategoria } from "./adivinar";
 import { POR_DEFECTO, conceptoSinEscribir } from "./categorias";
@@ -18,11 +18,29 @@ function lineas(texto) {
   return String(texto ?? "").split(/\r?\n/).map(limpiarLinea).filter(Boolean);
 }
 
+// "menos Ana y Luis" al final: esos nombres son los que no van, no el que pagó.
+function vaDetrasDeMenos(palabras, largo, viajeros) {
+  const nombres = new Set(viajeros.flatMap((v) => normalizar(v.nombre).split(/\s+/)));
+  for (let i = palabras.length - largo - 1; i >= 0; i--) {
+    const p = normalizar(palabras[i].replace(/[:,.]+$/, ""));
+    if (MENOS.has(p)) return true;
+    if (!nombres.has(p) && !["y", "ni", "a"].includes(p)) return false;
+  }
+  return false;
+}
+
 // En las notas nadie escribe "pagó Ana": va el nombre a secas, al final o al
 // principio. "cena 45 ana" o "ana: cena 45". Los más largos primero, que
 // "Ana María" no se quede en "Ana".
 function nombreSuelto(linea, viajeros) {
   const palabras = linea.split(/\s+/);
+  // "cena 45 ana menos luis": Luis es el que no va, el que pagó va antes del "menos".
+  const corte = palabras.findIndex((p, i) => i > 0 && MENOS.has(normalizar(p)));
+  if (corte > 0) {
+    const antes = nombreSuelto(palabras.slice(0, corte).join(" "), viajeros);
+    if (antes) return { id: antes.id, resto: [antes.resto, ...palabras.slice(corte)].join(" ") };
+  }
+
   const porLargo = [...viajeros].sort((a, b) => b.nombre.length - a.nombre.length);
 
   for (const v of porLargo) {
@@ -30,7 +48,7 @@ function nombreSuelto(linea, viajeros) {
     const buscado = normalizar(v.nombre);
     const quitar = (trozo) => normalizar(trozo.join(" ").replace(/[:,.]+$/, ""));
 
-    if (palabras.length > largo && quitar(palabras.slice(-largo)) === buscado) {
+    if (palabras.length > largo && quitar(palabras.slice(-largo)) === buscado && !vaDetrasDeMenos(palabras, largo, viajeros)) {
       return { id: v.id, resto: palabras.slice(0, -largo).join(" ") };
     }
     if (palabras.length > largo && quitar(palabras.slice(0, largo)) === buscado) {

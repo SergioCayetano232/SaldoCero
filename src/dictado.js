@@ -9,6 +9,7 @@ const DINERO = new Set(["euro", "euros", "eur", "€", "pavos", "pavo", "dolares
 const CENTIMOS = new Set(["centimos", "centimo", "centavos", "centavo"]);
 const PAGAR = new Set(["pago", "pagaste", "pague", "paga", "pagado", "pagao"]);
 const YO = new Set(["yo", "pague"]);
+export const MENOS = new Set(["menos", "sin", "excepto", "salvo", "quitando"]);
 // Lo que se cuela alrededor del concepto: "45 de cena" no es "de cena".
 const RELLENO = new Set(["de", "del", "la", "el", "los", "las", "en", "para", "por", "un", "una", "y", "al", "lo", "ha", "he", "que", "con"]);
 
@@ -132,6 +133,39 @@ function buscarEntre(p, viajeros) {
   return ids.length > 0 ? { ids, usadas } : null;
 }
 
+// "menos Luis", "sin Ana ni Eva", "todos menos yo". El "sin" solo cuenta con un
+// nombre detrás, que "agua sin gas" es un concepto.
+function buscarMenos(p, viajeros, soy) {
+  for (let i = 0; i < p.length; i++) {
+    if (!MENOS.has(p[i].norma)) continue;
+
+    const ids = [];
+    const usadas = [i];
+    // "todos menos Luis": el "todos" sobra, que no es parte del concepto.
+    if (p[i - 1]?.norma === "todos") usadas.push(i - 1);
+    let j = i + 1;
+    if (p[j]?.norma === "a") usadas.push(j++);
+    while (j < p.length) {
+      const encontrado = viajeroEn(p, j, viajeros);
+      // "sin mí" con su tilde: sin ella es "sin mi tarjeta".
+      const yo = soy && (p[j].norma === "yo" || p[j].original.toLowerCase() === "mí");
+      if (encontrado) {
+        ids.push(encontrado.viajero.id);
+        for (let k = 0; k < encontrado.largo; k++) usadas.push(j + k);
+        j += encontrado.largo;
+      } else if (yo) {
+        ids.push(soy);
+        usadas.push(j++);
+      } else if ((p[j].norma === "y" || p[j].norma === "ni") && ids.length > 0) {
+        usadas.push(j++);
+      } else break;
+    }
+
+    if (ids.length > 0) return { ids, usadas };
+  }
+  return null;
+}
+
 // "cena de ayer", "anoche", "antes de ayer". Lo de más atrás ya no se dice así,
 // eso se elige en el calendario.
 function buscarDia(p) {
@@ -166,6 +200,20 @@ export function entenderDictado(texto, viajeros, soy = null) {
     viajeros
   );
   if (entre) marcar(entre.usadas);
+  const menos = buscarMenos(
+    p.map((t, i) => (usadas.has(i) ? { ...t, norma: "" } : t)),
+    viajeros,
+    soy
+  );
+  let participantes = entre?.ids ?? null;
+  if (menos) {
+    const quedan = (participantes ?? viajeros.map((v) => v.id)).filter((id) => !menos.ids.includes(id));
+    // Si no queda nadie, algo se entendió mal: mejor no tocar el reparto.
+    if (quedan.length > 0) {
+      participantes = quedan;
+      marcar(menos.usadas);
+    }
+  }
   const dia = buscarDia(p.map((t, i) => (usadas.has(i) ? { ...t, norma: "" } : t)));
   if (dia) marcar(dia.usadas);
 
@@ -177,7 +225,7 @@ export function entenderDictado(texto, viajeros, soy = null) {
     importe: importe ? enTexto(importe.valor) : null,
     concepto: resto.map((t) => t.original).join(" "),
     pagadorId: pagador?.id ?? null,
-    participantes: entre?.ids ?? null,
+    participantes,
     fecha: dia?.fecha ?? null,
   };
 }
