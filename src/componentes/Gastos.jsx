@@ -13,6 +13,7 @@ import { costeGasolina, comoImporte, cocheGuardado, guardarCoche } from "../gaso
 import { presentesEseDia, ausentesEseDia } from "../estancia";
 import { apuntadoPor } from "../apuntadoPor";
 import { dudasParaMi, textoDuda, avisoDeDudas, DUDA_POR_DEFECTO, LARGO_DUDA } from "../dudas";
+import { limpiarLugar, lugaresDelViaje, lugarSugerido, mismoLugar, LARGO_LUGAR } from "../lugares";
 import { borradorQueVale, hayAlgoEscrito, hayAlgoQueBorrar } from "../borrador";
 import * as datos from "../datos";
 import { gastoAlFormulario, repetirGasto, ultimoApuntado } from "../repetir";
@@ -103,6 +104,10 @@ function Gastos({
   const [variosPagan, setVariosPagan] = useState(false);
   const [pagos, setPagos] = useState({});
   const [notaAbierta, setNotaAbierta] = useState(Boolean(borrador?.nota));
+  // El lugar. Mientras no lo toques, va el de donde estáis ese día.
+  const [lugar, setLugar] = useState("");
+  const [lugarTocado, setLugarTocado] = useState(false);
+  const [lugarAbierto, setLugarAbierto] = useState(false);
   // Las partes de cada uno. Vacío = a partes iguales, que es lo normal.
   const [partes, setPartes] = useState({});
   const [repartoAbierto, setRepartoAbierto] = useState(false);
@@ -554,6 +559,17 @@ function Gastos({
   }, [puedeFiltrar, ordenVigente, puedoVerLoMio, codigo]);
 
   const todosLosIds = viajeros.map((v) => v.id);
+
+  const lugaresYa = lugaresDelViaje(gastos);
+  const lugarPuesto = lugarTocado ? lugar : lugarSugerido(gastos, fecha) ?? "";
+  // En cuanto el viaje tiene alguno, el campo sale ya abierto.
+  const verLugar = lugarAbierto || lugaresYa.length > 0;
+  const otrosLugares = lugaresYa.filter((l) => !mismoLugar(l, lugarPuesto)).slice(0, 4);
+
+  function elegirLugar(texto) {
+    setLugar(texto);
+    setLugarTocado(true);
+  }
   // Mientras no toques las casillas, va entre todos los que están ese día.
   const marcados = participantes ?? presentesEseDia(viajeros, fecha);
   const faltanEseDia = participantes === null ? ausentesEseDia(viajeros, fecha) : [];
@@ -577,6 +593,9 @@ function Gastos({
     setCategoriaAMano(false);
     setNota("");
     setNotaAbierta(false);
+    setLugar("");
+    setLugarTocado(false);
+    setLugarAbierto(false);
     setGasolina(null);
     setDevolucion(false);
     setVariosPagan(false);
@@ -608,6 +627,9 @@ function Gastos({
     elegirCategoria(f.categoria);
     setNota(f.nota);
     setNotaAbierta(Boolean(f.nota));
+    // Al editar, el que tenía; al repetir, el de ese día, que puede ser otro sitio.
+    setLugar(f.lugar ?? "");
+    setLugarTocado(f.lugar !== undefined);
     setDevolucion(f.devolucion ?? false);
     setVariosPagan(Object.keys(f.pagadores ?? {}).length > 1);
     setPagos(f.pagadores ?? {});
@@ -750,6 +772,7 @@ function Gastos({
       categoria,
       fecha,
       nota,
+      lugar: limpiarLugar(lugarPuesto),
       participantes: marcados,
       // Solo mandamos las partes si de verdad hay reparto desigual.
       partes: !repartoAbierto
@@ -1346,6 +1369,12 @@ function Gastos({
                   </label>
                 )}
 
+                {!verLugar && (
+                  <button className="boton-foto" onClick={() => setLugarAbierto(true)}>
+                    📍 Lugar
+                  </button>
+                )}
+
                 {!notaAbierta && (
                   <button className="boton-foto" onClick={() => setNotaAbierta(true)} title={esOrdenador() ? "También con la U" : undefined}>
                     📝 Nota
@@ -1371,6 +1400,38 @@ function Gastos({
                   onTotal={escribirImporte}
                   onFecha={setFecha}
                 />
+              )}
+
+              {verLugar && (
+                <div className="campo-lugar">
+                  <span className="icono-lugar" aria-hidden="true">📍</span>
+                  <input
+                    type="text"
+                    placeholder="Ciudad (Roma, Florencia…)"
+                    aria-label="Dónde fue"
+                    autoCapitalize="words"
+                    enterKeyHint="done"
+                    maxLength={LARGO_LUGAR}
+                    value={lugarPuesto}
+                    autoFocus={lugarAbierto && !lugarTocado && lugaresYa.length === 0}
+                    onChange={(e) => elegirLugar(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        guardar();
+                      }
+                    }}
+                  />
+                  {otrosLugares.length > 0 && (
+                    <div className="lugares-rapidos">
+                      {otrosLugares.map((l) => (
+                        <button key={l} className="pastilla-interruptor" onClick={() => elegirLugar(l)}>
+                          {l}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
 
               {notaAbierta && (
@@ -2047,6 +2108,8 @@ function Gastos({
                             buscado={buscado}
                           />{" "}
                           · {textoReparto(gasto)}
+                          {/* Con una sola ciudad sería repetir lo mismo en todos. */}
+                          {gasto.lugar && lugaresYa.length > 1 && ` · 📍 ${gasto.lugar}`}
                           {/* Sin los títulos de los días, la fecha va en cada uno. */}
                           {ordenVigente !== POR_DIAS && gasto.fecha && ` · ${comoTitulo(gasto.fecha)}`}
                           {apuntadoPor(gasto, viajeros, soy) && (

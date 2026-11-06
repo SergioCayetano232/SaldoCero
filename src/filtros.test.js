@@ -101,6 +101,11 @@ describe("filtrarGastos", () => {
     expect(ids(filtrarGastos(gastos, con({ texto: "TAX" }), viajeros))).toEqual(["2"]);
   });
 
+  it("busca también en la ciudad", () => {
+    const conLugar = gastos.map((g) => (g.id === "3" ? { ...g, lugar: "Cádiz" } : g));
+    expect(ids(filtrarGastos(conLugar, con({ texto: "cadiz" }), viajeros))).toEqual(["3"]);
+  });
+
   it("busca también en la nota", () => {
     expect(ids(filtrarGastos(gastos, con({ texto: "propina" }), viajeros))).toEqual(["2"]);
   });

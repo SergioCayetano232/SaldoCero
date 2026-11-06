@@ -24,6 +24,7 @@ export function gastoAlFormulario(gasto, viajeros, monedaViaje) {
     tasaAMano: moneda === monedaViaje ? null : tasaComoTexto(tasaDeGasto(gasto)),
     concepto: gasto.concepto,
     nota: gasto.nota ?? "",
+    lugar: gasto.lugar ?? "",
     categoria: gasto.categoria ?? POR_DEFECTO,
     fecha: gasto.fecha,
     participantes: participantesDeGasto(gasto, viajeros).map((v) => v.id),
@@ -58,5 +59,6 @@ export function repetirGasto(gasto, viajeros, monedaViaje, dia) {
   // Sin los que ese día ya se han ido o aún no han llegado.
   const participantes = quienesSiguen(formulario.participantes, viajeros, dia);
   // La nota era de aquel gasto: "Luis no tomó postre" no vale para el de hoy.
-  return { ...formulario, fecha: dia, nota: "", participantes };
+  // El lugar tampoco: el desayuno de mañana puede ser ya en otra ciudad.
+  return { ...formulario, fecha: dia, nota: "", lugar: undefined, participantes };
 }

@@ -177,8 +177,8 @@ export function filtrarGastos(gastos, filtros, viajeros, monedaViaje) {
 
   return gastos.filter((gasto) => {
     // La nota también cuenta: "¿cuál era el de la propina?". Y quién pagó, que
-    // escribir "ana" es más rápido que ir al desplegable. Con la categoría, igual.
-    const dondeBuscar = normalizar(`${gasto.concepto} ${gasto.nota ?? ""} ${quienPago(gasto, viajeros)} ${categoriaDe(gasto.categoria).nombre}`);
+    // escribir "ana" es más rápido que ir al desplegable. Con la categoría y la ciudad, igual.
+    const dondeBuscar = normalizar(`${gasto.concepto} ${gasto.nota ?? ""} ${quienPago(gasto, viajeros)} ${categoriaDe(gasto.categoria).nombre} ${gasto.lugar ?? ""}`);
     if (!palabras.every((p) => dondeBuscar.includes(p) || cuadraElImporte(gasto, p) || cuadraLaFecha(gasto, p))) return false;
     if (filtros.categoria && (gasto.categoria ?? "otros") !== filtros.categoria) return false;
     if (filtros.fecha && gasto.fecha !== filtros.fecha) return false;

@@ -29,6 +29,7 @@ describe("gastoAlFormulario", () => {
       tasaAMano: null,
       concepto: "Desayuno",
       nota: "",
+      lugar: "",
       categoria: "comida",
       fecha: "2026-09-28",
       participantes: ["a", "b"],
@@ -93,6 +94,11 @@ describe("repetirGasto", () => {
     const seVa = viajeros.map((v) => (v.id === "b" ? { ...v, hasta: "2026-09-30" } : v));
     expect(repetirGasto(desayuno, seVa, "EUR", "2026-10-01").participantes).toEqual(["a"]);
     expect(repetirGasto(desayuno, seVa, "EUR", "2026-09-30").participantes).toEqual(["a", "b"]);
+  });
+
+  it("el lugar no se copia: lo pone el formulario según el día", () => {
+    expect(gastoAlFormulario({ ...desayuno, lugar: "Roma" }, viajeros, "EUR").lugar).toBe("Roma");
+    expect(repetirGasto({ ...desayuno, lugar: "Roma" }, viajeros, "EUR", "2026-10-01").lugar).toBeUndefined();
   });
 
   it("no toca el gasto original", () => {

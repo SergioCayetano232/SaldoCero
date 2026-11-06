@@ -26,6 +26,7 @@ describe("datosDelGasto", () => {
       g_fecha: "2026-09-29",
       g_nota: null,
       g_pagadores: null,
+      g_lugar: null,
       g_participantes: [
         { viajero_id: "a", partes: 2 },
         { viajero_id: "b", partes: 1 },
@@ -37,6 +38,13 @@ describe("datosDelGasto", () => {
   it("la nota va limpia, y en blanco no se manda", () => {
     expect(datosDelGasto({ ...gasto, nota: "  incluye\n la propina " }).g_nota).toBe("incluye la propina");
     expect(datosDelGasto({ ...gasto, nota: "   " }).g_nota).toBeNull();
+  });
+
+  it("el lugar: sin el campo se deja como estaba, vacío se quita", () => {
+    expect(datosDelGasto(gasto).g_lugar).toBeNull();
+    expect(datosDelGasto({ ...gasto, lugar: "  roma " }).g_lugar).toBe("Roma");
+    expect(datosDelGasto({ ...gasto, lugar: "" }).g_lugar).toBe("");
+    expect(datosDelGasto({ ...gasto, lugar: null }).g_lugar).toBe("");
   });
 
   it("a partes iguales si no hay partes", () => {

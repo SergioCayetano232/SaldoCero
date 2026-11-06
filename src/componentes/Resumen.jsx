@@ -32,6 +32,7 @@ import Cifra from "./Cifra";
 import Confeti from "./Confeti";
 import Avatar from "./Avatar";
 import Desglose from "./Desglose";
+import PorLugar from "./PorLugar";
 import PorDias from "./PorDias";
 import Evolucion from "./Evolucion";
 import PagosACuenta from "./PagosACuenta";
@@ -413,6 +414,8 @@ function Resumen({
           )}
         </>
       )}
+
+      <PorLugar gastos={gastos} moneda={monedaViaje} />
 
       <Topes gastos={gastos} topes={viaje?.topes ?? {}} moneda={monedaViaje} fijo={cerrado} onGuardar={onTopes} />
 

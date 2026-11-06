@@ -63,6 +63,8 @@ create table gastos (
   nota text check (char_length(nota) <= 200),
   -- Quién lo apuntó: el que se marcó como "yo" en ese móvil. Null si no se sabe.
   creado_por uuid references viajeros(id) on delete set null,
+  -- Dónde fue: "Roma", "Florencia"... Para los viajes de varias paradas.
+  lugar text check (char_length(lugar) <= 40),
   -- Una pregunta sobre el gasto, "¿esto qué es?", y quién la hizo. Null si no hay.
   duda text check (char_length(duda) <= 140),
   duda_por uuid references viajeros(id) on delete set null,
@@ -331,7 +333,9 @@ create function editar_gasto(
   g_participantes jsonb,
   -- Con valor por defecto, para que la versión de la web de antes siga guardando.
   g_nota text default null,
-  g_pagadores jsonb default null
+  g_pagadores jsonb default null,
+  -- Null es dejarlo como estaba, que las versiones de antes no lo mandan; '' es quitarlo.
+  g_lugar text default null
 )
 returns void
 language plpgsql
@@ -352,7 +356,8 @@ begin
     categoria = g_categoria,
     fecha = g_fecha,
     nota = g_nota,
-    pagadores = g_pagadores
+    pagadores = g_pagadores,
+    lugar = case when g_lugar is null then lugar else nullif(trim(g_lugar), '') end
   where id = g_id;
 
   -- Si no lo ve (no existe, o es de otro viaje), no ha tocado nada.
@@ -401,7 +406,8 @@ create function crear_gasto(
   g_participantes jsonb,
   g_nota text default null,
   g_pagadores jsonb default null,
-  g_creado_por uuid default null
+  g_creado_por uuid default null,
+  g_lugar text default null
 )
 returns uuid
 language plpgsql
@@ -415,13 +421,14 @@ begin
     raise exception 'Un gasto tiene que repartirse entre alguien';
   end if;
 
-  insert into gastos (viaje_id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha, nota, pagadores, creado_por)
+  insert into gastos (viaje_id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha, nota, pagadores, creado_por, lugar)
   values (
     g_viaje, g_pagador, g_importe,
     coalesce(g_moneda, 'EUR'), g_convertido, g_concepto,
     coalesce(g_categoria, 'otros'), coalesce(g_fecha, current_date), g_nota, g_pagadores,
     -- Solo si es de este viaje; si no, como si no se supiera.
-    (select id from viajeros where id = g_creado_por and viaje_id = g_viaje)
+    (select id from viajeros where id = g_creado_por and viaje_id = g_viaje),
+    nullif(trim(g_lugar), '')
   )
   returning id into nuevo;
 
@@ -706,3 +713,13 @@ create trigger actividad_saldados after insert on pagos_saldados
 -- Lo último que ha pasado.
 --   Pega entero el bloque "Lo último que ha pasado" de más arriba: la tabla, su
 --   regla, las dos funciones y los tres triggers.
+
+-- La ciudad de cada gasto.
+--   alter table gastos add column lugar text check (char_length(lugar) <= 40);
+--
+--   Las dos funciones de guardar gastos llevan un parámetro más. Hay que
+--   borrarlas antes, que si no Postgres deja las dos versiones a la vez:
+--   drop function crear_gasto(uuid, uuid, numeric, text, numeric, text, text, date, jsonb, text, jsonb, uuid);
+--   drop function editar_gasto(uuid, uuid, numeric, text, numeric, text, text, date, jsonb, text, jsonb);
+--
+--   Y pega los "create function crear_gasto" y "create function editar_gasto" de más arriba.

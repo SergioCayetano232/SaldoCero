@@ -13,6 +13,7 @@ import { conCerrado, conNeto } from "./pasados";
 import { limpiarTopes } from "./topes";
 import { limpiarEstancia } from "./estancia";
 import { limpiarDuda } from "./dudas";
+import { limpiarLugar } from "./lugares";
 
 // Al usuario le decimos algo que entienda, pero el fallo de verdad lo dejamos
 // en la consola, que si no no hay quien averigüe qué ha pasado.
@@ -359,7 +360,7 @@ async function cargarContenido(viajeId) {
     supabase.from("viajeros").select("id, nombre, cobro, con_id, desde, hasta").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
-      .select("id, pagador_id, pagadores, importe, moneda, importe_convertido, concepto, categoria, fecha, ticket, nota, creado_en, creado_por, duda, duda_por")
+      .select("id, pagador_id, pagadores, importe, moneda, importe_convertido, concepto, categoria, fecha, ticket, nota, creado_en, creado_por, duda, duda_por, lugar")
       .eq("viaje_id", viajeId)
       .order("fecha")
       .order("creado_en"),
@@ -458,6 +459,7 @@ async function cargarContenido(viajeId) {
       creadoEn: gasto.creado_en ?? null,
       // Los de antes no lo traen: no se sabe quién los apuntó.
       creadoPor: gasto.creado_por ?? null,
+      lugar: gasto.lugar ?? null,
       duda: gasto.duda ?? null,
       dudaPor: gasto.duda_por ?? null,
       participantes: participantes.data
@@ -595,6 +597,8 @@ export function datosDelGasto(gasto) {
     g_fecha: gasto.fecha,
     g_nota: limpiarNota(gasto.nota),
     g_pagadores: gasto.pagadores ?? null,
+    // Sin el campo, se queda el que tenía; vacío, se quita.
+    g_lugar: gasto.lugar === undefined ? null : limpiarLugar(gasto.lugar) ?? "",
     g_participantes: gasto.participantes.map((viajeroId) => ({
       viajero_id: viajeroId,
       partes: gasto.partes?.[viajeroId] ?? 1,
