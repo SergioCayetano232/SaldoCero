@@ -29,6 +29,7 @@ import Viajeros from "./componentes/Viajeros";
 import Bote from "./componentes/Bote";
 import Gastos from "./componentes/Gastos";
 import Resumen from "./componentes/Resumen";
+import Actividad from "./componentes/Actividad";
 import CargandoViaje from "./componentes/CargandoViaje";
 import CifrasViaje from "./componentes/CifrasViaje";
 import Atajos from "./componentes/Atajos";
@@ -57,6 +58,7 @@ function App() {
   const [editado, setEditado] = useState(null);
   // Cuál de los viajeros eres tú. Guardado en este navegador.
   const [soy, setSoy] = useState(null);
+  useEffect(() => datos.usarViajero(soy), [soy]);
   // El código del viaje que acabas de crear: lo siguiente es meter a la gente.
   const [recienCreado, setRecienCreado] = useState(null);
   // Mientras se crea el repetido, que dos toques no hagan dos viajes.
@@ -417,6 +419,8 @@ function App() {
       await borradoActual.current?.espera.ahora();
       const creado = await datos.repetirViaje(nombre, viaje.moneda ?? "EUR", genteParaRepetir(gente));
       const yo = quienEresEnElNuevo(soy, gente, creado.viajeros);
+      // Ya, que lo pendiente que se pase tiene que salir a tu nombre.
+      datos.usarViajero(yo);
       let aviso = creado.sinGente ? "Hemos creado el viaje, pero no hemos podido pasar a la gente. Añádela a mano." : "";
       if (pasar && !creado.sinGente) {
         const pares = gastosDeLoPendiente(pendientes, gente, creado.viajeros, { nombre: viaje.nombre, moneda: viaje.moneda ?? "EUR", dia: hoy() });
@@ -672,6 +676,8 @@ function App() {
           }
         />
       )}
+
+      <Actividad actividad={viaje.actividad} viajeros={viajeros} soy={soy} monedaViaje={viaje.moneda ?? "EUR"} />
 
       {(viajeros.length > 0 || gastos.length > 0) && (
         <div className="botones-final">

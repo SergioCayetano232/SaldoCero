@@ -433,6 +433,89 @@ begin
 end;
 $$;
 
+-- ---------- Lo último que ha pasado ----------
+--
+-- Lo apunta la base de datos sola, con triggers: así sale lo de todos, desde
+-- cualquier móvil, y no hay forma de que la app se olvide de apuntar algo.
+
+create table actividad (
+  id bigint generated always as identity primary key,
+  viaje_id uuid not null references viajes(id) on delete cascade,
+  -- Sin references a propósito: si alguien se quita a sí mismo, el apunte se
+  -- escribe cuando ya no está y la clave ajena no le dejaría borrarse.
+  quien uuid,
+  -- gasto_nuevo, gasto_cambiado, gasto_borrado, viajero_nuevo, viajero_quitado, pago_saldado
+  que text not null,
+  -- El concepto o el nombre tal y como era, que lo borrado ya no se puede mirar.
+  sobre text not null,
+  importe numeric(10, 2),
+  moneda text,
+  creado_en timestamptz not null default now()
+);
+
+create index on actividad (viaje_id, creado_en desc);
+alter table actividad enable row level security;
+-- Solo se lee. Escribe el trigger, que se salta las reglas.
+create policy "ver actividad" on actividad for select using (viaje_id = viaje_actual());
+
+-- Quién hace la petición: el que se marcó como "yo" en ese móvil, si es de este viaje.
+create function viajero_actual()
+returns uuid
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select w.id from viajeros w
+  where w.viaje_id = viaje_actual()
+    and w.id::text = coalesce(current_setting('request.headers', true)::json ->> 'x-viajero', '');
+$$;
+
+create function apuntar_actividad()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  fila record;
+begin
+  if tg_op = 'DELETE' then fila := old; else fila := new; end if;
+
+  if tg_table_name = 'gastos' then
+    -- Poner o quitar una pregunta o el ticket no es cambiar el gasto.
+    if tg_op = 'UPDATE'
+      and (old.importe, old.moneda, old.concepto, old.categoria, old.fecha, old.pagador_id, old.pagadores, old.nota)
+        is not distinct from (new.importe, new.moneda, new.concepto, new.categoria, new.fecha, new.pagador_id, new.pagadores, new.nota)
+    then
+      return null;
+    end if;
+
+    insert into actividad (viaje_id, quien, que, sobre, importe, moneda)
+    values (
+      fila.viaje_id, viajero_actual(),
+      case tg_op when 'INSERT' then 'gasto_nuevo' when 'UPDATE' then 'gasto_cambiado' else 'gasto_borrado' end,
+      fila.concepto, fila.importe, fila.moneda
+    );
+  elsif tg_table_name = 'viajeros' then
+    insert into actividad (viaje_id, quien, que, sobre)
+    values (fila.viaje_id, viajero_actual(), case tg_op when 'INSERT' then 'viajero_nuevo' else 'viajero_quitado' end, fila.nombre);
+  elsif tg_table_name = 'pagos_saldados' then
+    insert into actividad (viaje_id, quien, que, sobre)
+    values (fila.viaje_id, viajero_actual(), 'pago_saldado', fila.de_nombre || ' → ' || fila.a_nombre);
+  end if;
+
+  return null;
+end;
+$$;
+
+create trigger actividad_gastos after insert or update or delete on gastos
+  for each row execute function apuntar_actividad();
+create trigger actividad_viajeros after insert or delete on viajeros
+  for each row execute function apuntar_actividad();
+create trigger actividad_saldados after insert on pagos_saldados
+  for each row execute function apuntar_actividad();
+
 -- ---------- Si ya tenías la base de datos creada ----------
 --
 -- Lo de abajo llegó después. Si montaste las tablas antes, no hace falta
@@ -619,3 +702,7 @@ $$;
 --   alter table gastos
 --     add column duda text check (char_length(duda) <= 140),
 --     add column duda_por uuid references viajeros(id) on delete set null;
+
+-- Lo último que ha pasado.
+--   Pega entero el bloque "Lo último que ha pasado" de más arriba: la tabla, su
+--   regla, las dos funciones y los tres triggers.

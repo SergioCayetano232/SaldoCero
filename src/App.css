@@ -5546,3 +5546,64 @@ kbd {
     break-inside: avoid;
   }
 }
+
+/* ===== Lo último que ha pasado ===== */
+.actividad {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+}
+
+.actividad li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0 8px 14px;
+  border-bottom: 1px solid var(--linea);
+  font-size: 14px;
+  color: var(--tinta);
+  position: relative;
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
+}
+
+.actividad li:last-child {
+  border-bottom: none;
+}
+
+/* Un puntito de color según lo que fue: verde lo que entra, rojo lo que se va. */
+.actividad li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 15px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--teal-500);
+}
+
+.actividad li.actividad-pago_saldado::before {
+  background-color: var(--verde);
+}
+
+.actividad li.actividad-gasto_borrado::before,
+.actividad li.actividad-viajero_quitado::before {
+  background-color: var(--rojo);
+}
+
+.actividad li.actividad-gasto_cambiado::before {
+  background-color: var(--naranja-500);
+}
+
+.actividad-que {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.actividad-cuando {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--tinta-tenue);
+}

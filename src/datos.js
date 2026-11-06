@@ -2,7 +2,7 @@
 // Hacia fuera devuelve viajes con la misma forma de siempre:
 // { id, codigo, nombre, viajeros: [], gastos: [] }
 
-import { supabase, usarCodigo } from "./supabase";
+import { supabase, usarCodigo, usarViajero } from "./supabase";
 import { BOTE } from "./bote";
 import { rutaDelTicket } from "./tickets";
 import { limpiarNota } from "./notas";
@@ -347,9 +347,13 @@ export async function abrirViaje(codigo) {
   return { ...viaje, ...(await cargarContenido(viaje.id)) };
 }
 
+const CUANTA_ACTIVIDAD = 40;
+
+export { usarViajero };
+
 // Los viajeros y los gastos de un viaje ya abierto.
 async function cargarContenido(viajeId) {
-  const [delViaje, viajeros, gastos, participantes, saldados, parciales, bote] = await Promise.all([
+  const [delViaje, viajeros, gastos, participantes, saldados, parciales, bote, actividad] = await Promise.all([
     // Lo del viaje otra vez, por si lo ha cambiado alguien desde otro móvil.
     supabase.from("viajes").select("nombre, presupuesto, cerrado_en, redondear, topes").eq("id", viajeId).single(),
     supabase.from("viajeros").select("id, nombre, cobro, con_id, desde, hasta").eq("viaje_id", viajeId).order("creado_en"),
@@ -377,6 +381,12 @@ async function cargarContenido(viajeId) {
       .select("id, viajero_id, importe")
       .eq("viaje_id", viajeId)
       .order("creado_en"),
+    supabase
+      .from("actividad")
+      .select("id, quien, que, sobre, importe, moneda, creado_en")
+      .eq("viaje_id", viajeId)
+      .order("creado_en", { ascending: false })
+      .limit(CUANTA_ACTIVIDAD),
   ]);
 
   const error =
@@ -411,6 +421,18 @@ async function cargarContenido(viajeId) {
       aId: p.a_id,
       importe: Number(p.importe),
     })),
+    // Si falla esto no tiramos el viaje entero: sin "Lo último" se vive.
+    actividad: actividad.error
+      ? []
+      : actividad.data.map((f) => ({
+          id: f.id,
+          quien: f.quien,
+          que: f.que,
+          sobre: f.sobre,
+          importe: f.importe === null ? null : Number(f.importe),
+          moneda: f.moneda,
+          creadoEn: f.creado_en,
+        })),
     aportaciones: bote.data.map((a) => ({
       id: a.id,
       viajeroId: a.viajero_id,

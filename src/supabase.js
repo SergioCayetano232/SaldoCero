@@ -15,11 +15,20 @@ export function usarCodigo(codigo) {
   codigoViaje = codigo ?? "";
 }
 
+// Quién eres en ese viaje, para que en "Lo último" salga tu nombre. La base de
+// datos solo se lo cree si es de ese mismo viaje.
+let viajero = "";
+
+export function usarViajero(id) {
+  viajero = id ?? "";
+}
+
 // Metemos el código en cada petición sin tocar las cabeceras que ya pone
 // Supabase (la apikey, sin ir más lejos).
 function conElCodigo(input, init = {}) {
   const cabeceras = new Headers(init.headers);
   cabeceras.set("x-codigo-viaje", codigoViaje);
+  if (viajero) cabeceras.set("x-viajero", viajero);
 
   // Los borrados con keepalive, para que salgan aunque estés cerrando la pestaña.
   const keepalive = init.method === "DELETE";
