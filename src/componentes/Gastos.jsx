@@ -12,6 +12,7 @@ import { conPropina, PROPINAS } from "../propina";
 import { costeGasolina, comoImporte, cocheGuardado, guardarCoche } from "../gasolina";
 import { presentesEseDia, ausentesEseDia } from "../estancia";
 import { apuntadoPor } from "../apuntadoPor";
+import { dudasParaMi, textoDuda, avisoDeDudas, DUDA_POR_DEFECTO, LARGO_DUDA } from "../dudas";
 import { borradorQueVale, hayAlgoEscrito, hayAlgoQueBorrar } from "../borrador";
 import * as datos from "../datos";
 import { gastoAlFormulario, repetirGasto, ultimoApuntado } from "../repetir";
@@ -66,6 +67,7 @@ function Gastos({
   onQuitarVarios,
   onAnadirVarios,
   onQuitar,
+  onDuda,
   verTicket,
   soy = null,
   verDe = null,
@@ -300,6 +302,26 @@ function Gastos({
     }
   }
   const barraFiltros = useRef(null);
+
+  // De qué gasto estás preguntando, y lo que llevas escrito.
+  const [preguntando, setPreguntando] = useState(null);
+  const [pregunta, setPregunta] = useState("");
+  const paraMi = dudasParaMi(gastos, soy);
+
+  function abrirPregunta(gasto) {
+    setPreguntando(preguntando === gasto.id ? null : gasto.id);
+    setPregunta("");
+  }
+
+  function preguntar() {
+    onDuda(preguntando, pregunta);
+    setPreguntando(null);
+  }
+
+  function verDuda(gasto) {
+    setFiltros(SIN_FILTROS);
+    setSenalado(gasto.id);
+  }
 
   useEffect(() => {
     if (!verDe && !verDia) return;
@@ -844,6 +866,15 @@ function Gastos({
         <span className="icono">🧾</span> Gastos
         {gastos.length > 0 && <span className="titulo-cuantos">{gastos.length}</span>}
       </h2>
+
+      {!cerrado && paraMi.length > 0 && (
+        <p className="aviso-duda" role="status">
+          <span>❓ {avisoDeDudas(paraMi, viajeros)}</span>
+          <button className="enlace" onClick={() => verDuda(paraMi[0])}>
+            {paraMi.length > 1 ? "Ver la primera" : "Verlo"}
+          </button>
+        </p>
+      )}
 
       {viajeros.length === 0 ? (
         <p className="vacio">Primero añade viajeros para poder registrar gastos.</p>
@@ -2043,6 +2074,36 @@ function Gastos({
                             )}
                           </small>
                         )}
+                        {gasto.duda && (
+                          <small className="gasto-duda">
+                            {textoDuda(gasto, viajeros, soy)}
+                            {!cerrado && (
+                              <button className="enlace" onClick={() => onDuda(gasto.id, null)}>
+                                Resuelto
+                              </button>
+                            )}
+                          </small>
+                        )}
+                        {preguntando === gasto.id && (
+                          <span className="preguntar-gasto">
+                            <input
+                              type="text"
+                              autoFocus
+                              placeholder={DUDA_POR_DEFECTO}
+                              maxLength={LARGO_DUDA}
+                              value={pregunta}
+                              aria-label={`Qué quieres preguntar de ${gasto.concepto}`}
+                              onChange={(e) => setPregunta(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") preguntar();
+                                if (e.key === "Escape") setPreguntando(null);
+                              }}
+                            />
+                            <button className="boton-preguntar" onClick={preguntar}>
+                              Preguntar
+                            </button>
+                          </span>
+                        )}
                       </span>
 
                       <span className="gasto-importe">
@@ -2075,6 +2136,16 @@ function Gastos({
                           >
                             💬
                           </a>
+                          {!gasto.duda && (
+                            <button
+                              className="boton-duda"
+                              onClick={() => abrirPregunta(gasto)}
+                              title="Preguntar por este gasto"
+                              aria-label={`Preguntar por ${gasto.concepto}`}
+                            >
+                              ❓
+                            </button>
+                          )}
                           <button
                             className="boton-repetir"
                             onClick={() => repetir(gasto)}

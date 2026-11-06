@@ -63,6 +63,9 @@ create table gastos (
   nota text check (char_length(nota) <= 200),
   -- Quién lo apuntó: el que se marcó como "yo" en ese móvil. Null si no se sabe.
   creado_por uuid references viajeros(id) on delete set null,
+  -- Una pregunta sobre el gasto, "¿esto qué es?", y quién la hizo. Null si no hay.
+  duda text check (char_length(duda) <= 140),
+  duda_por uuid references viajeros(id) on delete set null,
   creado_en timestamptz not null default now()
 );
 
@@ -611,3 +614,8 @@ $$;
 --   drop function crear_gasto(uuid, uuid, numeric, text, numeric, text, text, date, jsonb, text, jsonb);
 --
 --   Y pega el "create function crear_gasto" de más arriba.
+
+-- Preguntar por un gasto.
+--   alter table gastos
+--     add column duda text check (char_length(duda) <= 140),
+--     add column duda_por uuid references viajeros(id) on delete set null;

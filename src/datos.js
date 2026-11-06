@@ -12,6 +12,7 @@ import { POR_DIAS } from "./ordenar";
 import { conCerrado, conNeto } from "./pasados";
 import { limpiarTopes } from "./topes";
 import { limpiarEstancia } from "./estancia";
+import { limpiarDuda } from "./dudas";
 
 // Al usuario le decimos algo que entienda, pero el fallo de verdad lo dejamos
 // en la consola, que si no no hay quien averigüe qué ha pasado.
@@ -284,6 +285,13 @@ export async function repetirViaje(nombre, moneda, gente) {
   return { ...nuevo, viajeros: data };
 }
 
+// Preguntar por un gasto. Con null en el texto, darla por resuelta.
+export async function ponerDuda(id, texto, por = null) {
+  const cambio = texto === null ? { duda: null, duda_por: null } : { duda: limpiarDuda(texto), duda_por: por };
+  const { data, error } = await supabase.from("gastos").update(cambio).eq("id", id).select("id");
+  if (error || !data.length) throw fallo(error, "No hemos podido guardar la pregunta.");
+}
+
 // Las deudas que quedaban, al viaje nuevo como gastos, y en el viejo dadas por
 // pagadas. Solo se marcan las que han llegado, que si no se perderían.
 export async function pasarLoPendiente(viejo, nuevo, pares, creadoPor = null) {
@@ -347,7 +355,7 @@ async function cargarContenido(viajeId) {
     supabase.from("viajeros").select("id, nombre, cobro, con_id, desde, hasta").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
-      .select("id, pagador_id, pagadores, importe, moneda, importe_convertido, concepto, categoria, fecha, ticket, nota, creado_en, creado_por")
+      .select("id, pagador_id, pagadores, importe, moneda, importe_convertido, concepto, categoria, fecha, ticket, nota, creado_en, creado_por, duda, duda_por")
       .eq("viaje_id", viajeId)
       .order("fecha")
       .order("creado_en"),
@@ -428,6 +436,8 @@ async function cargarContenido(viajeId) {
       creadoEn: gasto.creado_en ?? null,
       // Los de antes no lo traen: no se sabe quién los apuntó.
       creadoPor: gasto.creado_por ?? null,
+      duda: gasto.duda ?? null,
+      dudaPor: gasto.duda_por ?? null,
       participantes: participantes.data
         .filter((p) => p.gasto_id === gasto.id)
         .map((p) => p.viajero_id),

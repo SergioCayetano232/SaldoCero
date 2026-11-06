@@ -606,6 +606,7 @@ function App() {
           if (bien) setEditado({ texto: textoPasados(cambios.length, categoria), cambios, viajeId: viaje.id });
         }}
         // Uno detrás de otro, para que queden en la lista en el orden en que los pegaste.
+        onDuda={(id, texto) => hacer(() => datos.ponerDuda(id, texto, soy))}
         onAnadirVarios={(lista) =>
           hacer(async () => {
             for (const gasto of lista) propios.current.add((await datos.anadirGasto(viaje.id, gasto, soy)).id);

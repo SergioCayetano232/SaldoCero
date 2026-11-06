@@ -436,7 +436,8 @@ button:active {
 .lista li .boton-quitar,
 .lista li .boton-editar,
 .lista li .boton-repetir,
-.lista li .boton-avisar {
+.lista li .boton-avisar,
+.lista li .boton-duda {
   opacity: 0.25;
 }
 
@@ -447,7 +448,9 @@ button:active {
 .lista li:focus-within .boton-editar,
 .lista li:focus-within .boton-repetir,
 .lista li:hover .boton-avisar,
-.lista li:focus-within .boton-avisar {
+.lista li:focus-within .boton-avisar,
+.lista li:hover .boton-duda,
+.lista li:focus-within .boton-duda {
   opacity: 0.6;
 }
 
@@ -500,7 +503,8 @@ button:active {
   transform: scale(1.1);
 }
 
-.boton-avisar {
+.boton-avisar,
+.boton-duda {
   font-size: 14px;
   line-height: 1;
   padding: 6px 8px;
@@ -512,7 +516,8 @@ button:active {
   transition: transform var(--rapido) var(--curva-muelle);
 }
 
-.boton-avisar:hover {
+.boton-avisar:hover,
+.boton-duda:hover {
   background-color: var(--teal-50);
   opacity: 1 !important;
   transform: scale(1.1);
@@ -3267,6 +3272,77 @@ button.pago-cantidad:hover {
   overflow-wrap: anywhere;
 }
 
+/* En el color de los avisos: es algo que alguien está esperando que contestes. */
+.gasto-duda {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin-top: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radio-sm);
+  background-color: var(--naranja-100);
+  color: var(--tinta-suave);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.gasto-duda::before {
+  content: "❓";
+}
+
+.gasto-duda .enlace {
+  font-size: 12px;
+}
+
+.preguntar-gasto {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  animation: entrar-desde-abajo var(--medio) var(--curva-suave);
+}
+
+.preguntar-gasto input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.boton-preguntar {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: var(--radio-pastilla);
+  background-color: var(--teal-500);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.boton-preguntar:hover {
+  background-color: var(--teal-600);
+}
+
+:root[data-tema="oscuro"] .boton-preguntar {
+  color: var(--fondo);
+}
+
+.aviso-duda {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--naranja-400);
+  background-color: var(--naranja-100);
+  color: var(--tinta);
+  font-size: 14px;
+  animation: entrar-desde-abajo var(--medio) var(--curva-suave);
+}
+
 .gasto-nota a {
   color: var(--teal-600);
   text-decoration: underline;
@@ -4717,7 +4793,8 @@ kbd {
   .lista li .boton-quitar,
   .lista li .boton-editar,
   .lista li .boton-repetir,
-  .lista li .boton-avisar {
+  .lista li .boton-avisar,
+  .lista li .boton-duda {
     opacity: 0.6;
   }
 }
