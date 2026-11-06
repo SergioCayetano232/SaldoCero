@@ -284,6 +284,39 @@ export async function repetirViaje(nombre, moneda, gente) {
   return { ...nuevo, viajeros: data };
 }
 
+// Las deudas que quedaban, al viaje nuevo como gastos, y en el viejo dadas por
+// pagadas. Solo se marcan las que han llegado, que si no se perderían.
+export async function pasarLoPendiente(viejo, nuevo, pares) {
+  const llegados = [];
+  let fallado = null;
+  for (const { pago, gasto } of pares) {
+    try {
+      await anadirGasto(nuevo.id, gasto);
+      llegados.push(pago);
+    } catch (error) {
+      fallado = error;
+      break;
+    }
+  }
+
+  if (llegados.length) {
+    // Para marcarlas hay que volver un momento al código del viejo.
+    usarCodigo(viejo.codigo);
+    try {
+      await marcarVariosSaldados(viejo.id, llegados);
+    } catch {
+      fallado = new Error(`Lo pendiente ya está en "${nuevo.nombre}", pero en "${viejo.nombre}" sigue saliendo: márcalo allí como pagado.`);
+    } finally {
+      usarCodigo(nuevo.codigo);
+    }
+  }
+
+  if (fallado && llegados.length < pares.length) {
+    throw new Error(`Hemos creado "${nuevo.nombre}", pero no hemos podido pasar todo lo pendiente. Lo que falta sigue en "${viejo.nombre}".`);
+  }
+  if (fallado) throw fallado;
+}
+
 // Entrar a un viaje con su código y traerse todo lo suyo.
 export async function abrirViaje(codigo) {
   const limpio = codigoDeTexto(codigo);

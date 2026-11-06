@@ -12,6 +12,7 @@ import { turnos } from "./turnos";
 import { vibrar } from "./vibrar";
 import { avisoAlCerrar, estaCerrado, sugerirCerrar, ultimoApunte } from "./cerrar";
 import { pagosDelViaje } from "./calculos";
+import { hoy } from "./fechas";
 import { cuantosMios, ponerGlobito } from "./globito";
 import { reducirFoto } from "./tickets";
 import { avisoDeArranque, codigoQueAbrir, hayQueOlvidar } from "./arranque";
@@ -21,7 +22,7 @@ import { hayQueSubir } from "./arriba";
 import { esAtajoDeshacer, esAtajoTema } from "./teclado";
 import { queTrae, sinLoQueTrae, recogerTicket } from "./llegada";
 import { MINIMO_PARA_FILTRAR } from "./filtros";
-import { nombreDeLaRepeticion, genteParaRepetir, quienEresEnElNuevo } from "./repetirViaje";
+import { nombreDeLaRepeticion, genteParaRepetir, quienEresEnElNuevo, pendientesParaPasar, gastosDeLoPendiente, preguntaDePendientes } from "./repetirViaje";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
 import Viajeros from "./componentes/Viajeros";
@@ -32,6 +33,11 @@ import CargandoViaje from "./componentes/CargandoViaje";
 import CifrasViaje from "./componentes/CifrasViaje";
 import Atajos from "./componentes/Atajos";
 import { enLista } from "./nombres";
+
+// Fuera del componente: dentro, el linter no deja tocar window.location.
+function quitarEnlace() {
+  window.location.hash = "";
+}
 
 // El viaje que hay que abrir al arrancar: el del enlace compartido (#ABC123),
 // o el último en el que estuviste. Vacío si no hay ninguno.
@@ -399,22 +405,32 @@ function App() {
   async function repetirViaje(gente) {
     const nombre = nombreDeLaRepeticion(viaje.nombre);
     const quienes = enLista(gente.map((v) => v.nombre));
+    const pendientes = pendientesParaPasar(pagosDelViaje(balances, viaje));
     if (!window.confirm(`¿Crear "${nombre}" con ${quienes}? Empieza sin gastos.`)) return;
+    // Aceptar es pasarlas; cancelar, empezar de cero y dejarlas aquí.
+    const pasar = pendientes.length > 0 && window.confirm(preguntaDePendientes(pendientes, nombre, viaje.moneda ?? "EUR"));
 
     setRepitiendo(true);
     setError("");
     try {
       // Lo que estés borrando, antes de cambiar de código, como al salir.
       await borradoActual.current?.espera.ahora();
-      const nuevo = await datos.repetirViaje(nombre, viaje.moneda ?? "EUR", genteParaRepetir(gente));
-      const yo = quienEresEnElNuevo(soy, gente, nuevo.viajeros);
+      const creado = await datos.repetirViaje(nombre, viaje.moneda ?? "EUR", genteParaRepetir(gente));
+      const yo = quienEresEnElNuevo(soy, gente, creado.viajeros);
+      let aviso = creado.sinGente ? "Hemos creado el viaje, pero no hemos podido pasar a la gente. Añádela a mano." : "";
+      if (pasar && !creado.sinGente) {
+        const pares = gastosDeLoPendiente(pendientes, gente, creado.viajeros, { nombre: viaje.nombre, moneda: viaje.moneda ?? "EUR", dia: hoy() });
+        aviso = await datos.pasarLoPendiente(viaje, creado, pares).then(() => "", (fallo) => fallo.message);
+      }
+      // Lo que se haya pasado, aunque sea a medias, tiene que verse.
+      const nuevo = pasar && !creado.sinGente ? await datos.refrescarViaje(creado).catch(() => creado) : creado;
       datos.soyYo(nuevo.codigo, yo);
       // Si se queda el enlace del viaje viejo, al recargar te devolvería a él.
-      window.location.hash = "";
+      quitarEnlace();
       setViaje(nuevo);
       setSoy(yo);
       setRecienCreado(null);
-      if (nuevo.sinGente) setError("Hemos creado el viaje, pero no hemos podido pasar a la gente. Añádela a mano.");
+      if (aviso) setError(aviso);
       window.scrollTo({ top: 0 });
     } catch (fallo) {
       setError(fallo.message);
