@@ -286,12 +286,12 @@ export async function repetirViaje(nombre, moneda, gente) {
 
 // Las deudas que quedaban, al viaje nuevo como gastos, y en el viejo dadas por
 // pagadas. Solo se marcan las que han llegado, que si no se perderían.
-export async function pasarLoPendiente(viejo, nuevo, pares) {
+export async function pasarLoPendiente(viejo, nuevo, pares, creadoPor = null) {
   const llegados = [];
   let fallado = null;
   for (const { pago, gasto } of pares) {
     try {
-      await anadirGasto(nuevo.id, gasto);
+      await anadirGasto(nuevo.id, gasto, creadoPor);
       llegados.push(pago);
     } catch (error) {
       fallado = error;
@@ -347,7 +347,7 @@ async function cargarContenido(viajeId) {
     supabase.from("viajeros").select("id, nombre, cobro, con_id, desde, hasta").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
-      .select("id, pagador_id, pagadores, importe, moneda, importe_convertido, concepto, categoria, fecha, ticket, nota, creado_en")
+      .select("id, pagador_id, pagadores, importe, moneda, importe_convertido, concepto, categoria, fecha, ticket, nota, creado_en, creado_por")
       .eq("viaje_id", viajeId)
       .order("fecha")
       .order("creado_en"),
@@ -426,6 +426,8 @@ async function cargarContenido(viajeId) {
       nota: gasto.nota ?? null,
       // Cuándo se apuntó, que no es lo mismo que el día del gasto.
       creadoEn: gasto.creado_en ?? null,
+      // Los de antes no lo traen: no se sabe quién los apuntó.
+      creadoPor: gasto.creado_por ?? null,
       participantes: participantes.data
         .filter((p) => p.gasto_id === gasto.id)
         .map((p) => p.viajero_id),
@@ -536,14 +538,16 @@ export async function quitarViajero(id) {
 }
 
 // Apuntar un gasto con su reparto, en una sola llamada: o se guarda todo o nada.
-export async function anadirGasto(viajeId, gasto) {
+// Quién lo apunta va aparte: al editar no se toca, sigue siendo del primero.
+export async function anadirGasto(viajeId, gasto, creadoPor = null) {
   const { data, error } = await supabase.rpc("crear_gasto", {
     g_viaje: viajeId,
     ...datosDelGasto(gasto),
+    g_creado_por: creadoPor,
   });
 
   if (error) throw fallo(error, "No hemos podido añadir el gasto.");
-  return { ...gasto, id: data };
+  return { ...gasto, id: data, creadoPor };
 }
 
 // Lo que se les manda a crear_gasto y editar_gasto. El reparto va en una lista

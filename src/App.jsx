@@ -420,7 +420,7 @@ function App() {
       let aviso = creado.sinGente ? "Hemos creado el viaje, pero no hemos podido pasar a la gente. Añádela a mano." : "";
       if (pasar && !creado.sinGente) {
         const pares = gastosDeLoPendiente(pendientes, gente, creado.viajeros, { nombre: viaje.nombre, moneda: viaje.moneda ?? "EUR", dia: hoy() });
-        aviso = await datos.pasarLoPendiente(viaje, creado, pares).then(() => "", (fallo) => fallo.message);
+        aviso = await datos.pasarLoPendiente(viaje, creado, pares, yo).then(() => "", (fallo) => fallo.message);
       }
       // Lo que se haya pasado, aunque sea a medias, tiene que verse.
       const nuevo = pasar && !creado.sinGente ? await datos.refrescarViaje(creado).catch(() => creado) : creado;
@@ -583,7 +583,7 @@ function App() {
             // La foto se reduce antes de guardar nada: si no se puede leer, mejor
             // enterarse sin haber apuntado el gasto a medias.
             const foto = gasto.foto && (await reducirFoto(gasto.foto));
-            const nuevo = await datos.anadirGasto(viaje.id, gasto);
+            const nuevo = await datos.anadirGasto(viaje.id, gasto, soy);
             propios.current.add(nuevo.id);
             if (foto) await datos.ponerTicket(viaje.id, nuevo.id, foto);
           })
@@ -608,7 +608,7 @@ function App() {
         // Uno detrás de otro, para que queden en la lista en el orden en que los pegaste.
         onAnadirVarios={(lista) =>
           hacer(async () => {
-            for (const gasto of lista) propios.current.add((await datos.anadirGasto(viaje.id, gasto)).id);
+            for (const gasto of lista) propios.current.add((await datos.anadirGasto(viaje.id, gasto, soy)).id);
           })
         }
         onQuitarVarios={(quitados) =>

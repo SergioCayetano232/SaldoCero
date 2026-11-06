@@ -11,6 +11,7 @@ import { ordenarGastos, ordenGuardado, ordenesPara, POR_DIAS, siguienteOrden } f
 import { conPropina, PROPINAS } from "../propina";
 import { costeGasolina, comoImporte, cocheGuardado, guardarCoche } from "../gasolina";
 import { presentesEseDia, ausentesEseDia } from "../estancia";
+import { apuntadoPor } from "../apuntadoPor";
 import { borradorQueVale, hayAlgoEscrito, hayAlgoQueBorrar } from "../borrador";
 import * as datos from "../datos";
 import { gastoAlFormulario, repetirGasto, ultimoApuntado } from "../repetir";
@@ -2017,6 +2018,9 @@ function Gastos({
                           · {textoReparto(gasto)}
                           {/* Sin los títulos de los días, la fecha va en cada uno. */}
                           {ordenVigente !== POR_DIAS && gasto.fecha && ` · ${comoTitulo(gasto.fecha)}`}
+                          {apuntadoPor(gasto, viajeros, soy) && (
+                            <span className="gasto-hace"> · {apuntadoPor(gasto, viajeros, soy)}</span>
+                          )}
                           {apuntadoHace(gasto.creadoEn, ahora) && (
                             <span className="gasto-hace"> · {apuntadoHace(gasto.creadoEn, ahora)}</span>
                           )}

@@ -61,6 +61,8 @@ create table gastos (
   ticket text,
   -- Una aclaración corta: "incluye la propina", "Luis no tomó postre".
   nota text check (char_length(nota) <= 200),
+  -- Quién lo apuntó: el que se marcó como "yo" en ese móvil. Null si no se sabe.
+  creado_por uuid references viajeros(id) on delete set null,
   creado_en timestamptz not null default now()
 );
 
@@ -395,7 +397,8 @@ create function crear_gasto(
   g_fecha date,
   g_participantes jsonb,
   g_nota text default null,
-  g_pagadores jsonb default null
+  g_pagadores jsonb default null,
+  g_creado_por uuid default null
 )
 returns uuid
 language plpgsql
@@ -409,11 +412,13 @@ begin
     raise exception 'Un gasto tiene que repartirse entre alguien';
   end if;
 
-  insert into gastos (viaje_id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha, nota, pagadores)
+  insert into gastos (viaje_id, pagador_id, importe, moneda, importe_convertido, concepto, categoria, fecha, nota, pagadores, creado_por)
   values (
     g_viaje, g_pagador, g_importe,
     coalesce(g_moneda, 'EUR'), g_convertido, g_concepto,
-    coalesce(g_categoria, 'otros'), coalesce(g_fecha, current_date), g_nota, g_pagadores
+    coalesce(g_categoria, 'otros'), coalesce(g_fecha, current_date), g_nota, g_pagadores,
+    -- Solo si es de este viaje; si no, como si no se supiera.
+    (select id from viajeros where id = g_creado_por and viaje_id = g_viaje)
   )
   returning id into nuevo;
 
@@ -597,3 +602,12 @@ $$;
 --     add column hasta date,
 --     add constraint viajeros_estancia_check check (desde is null or hasta is null or desde <= hasta);
 --   grant update (desde, hasta) on viajeros to anon, authenticated;
+
+-- Quién apuntó cada gasto.
+--   alter table gastos add column creado_por uuid references viajeros(id) on delete set null;
+--
+--   crear_gasto lleva un parámetro más. Hay que borrarla antes, que si no
+--   Postgres deja las dos versiones a la vez:
+--   drop function crear_gasto(uuid, uuid, numeric, text, numeric, text, text, date, jsonb, text, jsonb);
+--
+--   Y pega el "create function crear_gasto" de más arriba.
