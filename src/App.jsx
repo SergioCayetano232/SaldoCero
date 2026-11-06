@@ -517,6 +517,7 @@ function App() {
         onRenombrar={(id, nombre) => hacer(() => datos.renombrarViajero(id, nombre))}
         onCobro={(id, cobro) => hacer(() => datos.ponerCobro(id, cobro))}
         onJuntar={(id, conId) => hacer(() => datos.juntarViajero(id, conId))}
+        onEstancia={(id, desde, hasta) => hacer(() => datos.ponerEstancia(id, desde, hasta))}
         onQuitar={(id, nombre) =>
           borrarConAviso(
             id,

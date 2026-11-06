@@ -1706,6 +1706,13 @@ button:active {
   gap: 8px;
 }
 
+.participantes-ausentes {
+  margin: -6px 0 10px;
+  font-size: 12px;
+  color: var(--tinta-tenue);
+  animation: entrar-desde-abajo var(--medio) var(--curva-suave);
+}
+
 .casillas {
   display: flex;
   flex-wrap: wrap;
@@ -4070,6 +4077,64 @@ button.pago-cantidad:hover {
 
 .editar-cobro .fila-formulario {
   margin-bottom: 6px;
+}
+
+.estancia-viajero {
+  flex-basis: 100%;
+  margin-top: -8px;
+  padding-left: 44px;
+  font-size: 12px;
+  color: var(--tinta-tenue);
+}
+
+.estancia-viajero::first-letter {
+  text-transform: uppercase;
+}
+
+.fila-estancia {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.fila-estancia label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--tinta-suave);
+}
+
+.fila-estancia input {
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.botones-estancia {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0 6px;
+  font-size: 13px;
+}
+
+/* Con clase, que el de dentro de .fila-formulario sería el grande. */
+.guardar-estancia {
+  padding: 6px 16px;
+  border-radius: var(--radio-pastilla);
+  background-color: var(--teal-500);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.guardar-estancia:hover {
+  background-color: var(--teal-600);
+}
+
+:root[data-tema="oscuro"] .guardar-estancia {
+  color: var(--fondo);
 }
 
 .editar-cobro input {

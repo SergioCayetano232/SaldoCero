@@ -10,6 +10,7 @@ import { adivinarCategoria } from "../adivinar";
 import { ordenarGastos, ordenGuardado, ordenesPara, POR_DIAS, siguienteOrden } from "../ordenar";
 import { conPropina, PROPINAS } from "../propina";
 import { costeGasolina, comoImporte, cocheGuardado, guardarCoche } from "../gasolina";
+import { presentesEseDia, ausentesEseDia } from "../estancia";
 import { borradorQueVale, hayAlgoEscrito, hayAlgoQueBorrar } from "../borrador";
 import * as datos from "../datos";
 import { gastoAlFormulario, repetirGasto, ultimoApuntado } from "../repetir";
@@ -530,8 +531,9 @@ function Gastos({
   }, [puedeFiltrar, ordenVigente, puedoVerLoMio, codigo]);
 
   const todosLosIds = viajeros.map((v) => v.id);
-  // Mientras no toques las casillas, el gasto va entre todos.
-  const marcados = participantes ?? todosLosIds;
+  // Mientras no toques las casillas, va entre todos los que están ese día.
+  const marcados = participantes ?? presentesEseDia(viajeros, fecha);
+  const faltanEseDia = participantes === null ? ausentesEseDia(viajeros, fecha) : [];
   const entreTodos = marcados.length === viajeros.length;
 
   function alternar(id) {
@@ -1425,6 +1427,11 @@ function Gastos({
                     </button>
                   )}
                 </p>
+                {faltanEseDia.length > 0 && (
+                  <p className="participantes-ausentes">
+                    Sin {enLista(faltanEseDia.map((v) => v.nombre))}, que ese día no {faltanEseDia.length === 1 ? "está" : "están"}
+                  </p>
+                )}
 
                 <div className="casillas">
                   {viajeros.map((viajero) => (

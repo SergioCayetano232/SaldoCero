@@ -5,6 +5,7 @@ import { enLista, nombreRepetido, nombreParecido, separarNombres, avisoDeRepetid
 import { leerCobro, cobroDe, cobroComoTexto } from "../cobro";
 import { esAtajoViajero, esOrdenador } from "../teclado";
 import { conQuienVa, losQueVanCon, conQuienPuedeIr, MINIMO_PARA_JUNTAR } from "../juntos";
+import { tieneEstancia, textoEstancia } from "../estancia";
 
 function Viajeros({
   viajeros,
@@ -16,6 +17,7 @@ function Viajeros({
   onQuitar,
   onCobro,
   onJuntar,
+  onEstancia,
   enfocar = false,
   soy,
   onSoyYo,
@@ -33,6 +35,10 @@ function Viajeros({
   const [cobroMal, setCobroMal] = useState(false);
   // De quién estás eligiendo con quién paga.
   const [juntando, setJuntando] = useState(null);
+  // De quién estás poniendo los días.
+  const [fechando, setFechando] = useState(null);
+  const [desde, setDesde] = useState("");
+  const [hasta, setHasta] = useState("");
   const campo = useRef(null);
 
   useEffect(() => {
@@ -55,6 +61,19 @@ function Viajeros({
     setCobrando(viajero.id);
     setTextoCobro(cobroComoTexto(cobroDe(viajero)));
     setCobroMal(false);
+  }
+
+  function abrirEstancia(viajero) {
+    if (fechando === viajero.id) return setFechando(null);
+    setFechando(viajero.id);
+    setDesde(viajero.desde ?? "");
+    setHasta(viajero.hasta ?? "");
+  }
+
+  function guardarEstancia(d, h) {
+    const viajero = viajeros.find((v) => v.id === fechando);
+    setFechando(null);
+    if (viajero && ((viajero.desde ?? "") !== d || (viajero.hasta ?? "") !== h)) onEstancia(viajero.id, d, h);
   }
 
   function guardarCobro() {
@@ -203,7 +222,7 @@ function Viajeros({
               key={viajero.id}
               className={`${viajero.id === soy ? "soy-yo" : ""} ${
                 recienLlegados?.has(viajero.id) ? "recien-llegado" : ""
-              } ${cobrando === viajero.id || juntando === viajero.id ? "con-cobro" : ""}`}
+              } ${cobrando === viajero.id || juntando === viajero.id || fechando === viajero.id || tieneEstancia(viajero) ? "con-cobro" : ""}`}
             >
               <span className="viajero-quien">
                 <Avatar nombre={viajero.nombre} color={colores?.get(viajero.nombre)} />
@@ -229,6 +248,16 @@ function Viajeros({
                   title={`Con quién paga ${viajero.nombre} al saldar`}
                 >
                   👫
+                </button>
+              )}
+
+              {!cerrado && (
+                <button
+                  className={`boton-cobro ${tieneEstancia(viajero) ? "tiene-cobro" : ""}`}
+                  onClick={() => abrirEstancia(viajero)}
+                  title={`Qué días está ${viajero.nombre}`}
+                >
+                  📅
                 </button>
               )}
 
@@ -289,6 +318,52 @@ function Viajeros({
                       </p>
                     </>
                   )}
+                </div>
+              )}
+
+              {/* En su propia línea: al lado del nombre, en el móvil no cabía. */}
+              {tieneEstancia(viajero) && fechando !== viajero.id && (
+                <span className="estancia-viajero">{textoEstancia(viajero)}</span>
+              )}
+
+              {fechando === viajero.id && (
+                <div className="editar-cobro">
+                  <div className="fila-estancia">
+                    <label>
+                      Llega
+                      <input
+                        type="date"
+                        autoFocus
+                        value={desde}
+                        max={hasta || undefined}
+                        onChange={(e) => setDesde(e.target.value)}
+                        onKeyDown={(e) => e.key === "Escape" && setFechando(null)}
+                      />
+                    </label>
+                    <label>
+                      Se va
+                      <input
+                        type="date"
+                        value={hasta}
+                        min={desde || undefined}
+                        onChange={(e) => setHasta(e.target.value)}
+                        onKeyDown={(e) => e.key === "Escape" && setFechando(null)}
+                      />
+                    </label>
+                  </div>
+                  <div className="botones-estancia">
+                    {tieneEstancia(viajero) && (
+                      <button className="enlace" onClick={() => guardarEstancia("", "")}>
+                        Está todo el viaje
+                      </button>
+                    )}
+                    <button className="guardar-estancia" onClick={() => guardarEstancia(desde, hasta)}>
+                      Guardar
+                    </button>
+                  </div>
+                  <p className="cobro-ayuda">
+                    Los gastos nuevos de los días que no está no le tocan. Los que ya están apuntados no cambian.
+                  </p>
                 </div>
               )}
 

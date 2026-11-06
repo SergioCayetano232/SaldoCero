@@ -8,6 +8,7 @@ import { POR_DEFECTO, conceptoSinEscribir } from "./categorias";
 import { arreglarConcepto } from "./concepto";
 import { hoy } from "./fechas";
 import { normalizar } from "./filtros";
+import { presentesEseDia } from "./estancia";
 
 // Las notas traen guiones, puntos o números delante: "- cena 45", "2) taxi 12".
 function limpiarLinea(linea) {
@@ -97,7 +98,7 @@ export function gastosDeLista(texto, viajeros, { pagadorId = "", moneda = "EUR",
       categoria,
       fecha: dicho.fecha ?? dia,
       nota: null,
-      participantes: dicho.participantes ?? viajeros.map((v) => v.id),
+      participantes: dicho.participantes ?? presentesEseDia(viajeros, dicho.fecha ?? dia),
       partes: null,
     });
   }

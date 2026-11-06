@@ -11,6 +11,7 @@ import { codigoDeTexto } from "./codigos";
 import { POR_DIAS } from "./ordenar";
 import { conCerrado, conNeto } from "./pasados";
 import { limpiarTopes } from "./topes";
+import { limpiarEstancia } from "./estancia";
 
 // Al usuario le decimos algo que entienda, pero el fallo de verdad lo dejamos
 // en la consola, que si no no hay quien averigüe qué ha pasado.
@@ -310,7 +311,7 @@ async function cargarContenido(viajeId) {
   const [delViaje, viajeros, gastos, participantes, saldados, parciales, bote] = await Promise.all([
     // Lo del viaje otra vez, por si lo ha cambiado alguien desde otro móvil.
     supabase.from("viajes").select("nombre, presupuesto, cerrado_en, redondear, topes").eq("id", viajeId).single(),
-    supabase.from("viajeros").select("id, nombre, cobro, con_id").eq("viaje_id", viajeId).order("creado_en"),
+    supabase.from("viajeros").select("id, nombre, cobro, con_id, desde, hasta").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
       .select("id, pagador_id, pagadores, importe, moneda, importe_convertido, concepto, categoria, fecha, ticket, nota, creado_en")
@@ -350,7 +351,12 @@ async function cargarContenido(viajeId) {
     // Los viajes de antes de esto no lo traen: con céntimos, como siempre.
     redondear: delViaje.data.redondear === true,
     topes: limpiarTopes(delViaje.data.topes),
-    viajeros: viajeros.data.map(({ con_id, ...v }) => ({ ...v, conId: con_id ?? null })),
+    // Los de antes no traen los días: esos están todo el viaje.
+    viajeros: viajeros.data.map(({ con_id, desde, hasta, ...v }) => ({
+      ...v,
+      conId: con_id ?? null,
+      ...limpiarEstancia(desde, hasta),
+    })),
     // Los marcados antes de guardar ids no los traen: esos van por nombre.
     saldados: saldados.data.map((p) => ({
       deId: idDeSaldado(p.de_id, p.de_nombre, p.a_id),
@@ -426,6 +432,14 @@ export async function renombrarViajero(id, nombre) {
 export async function juntarViajero(id, conId) {
   const { data, error } = await supabase.from("viajeros").update({ con_id: conId }).eq("id", id).select("id");
   if (error || !data.length) throw fallo(error, "No hemos podido guardarlo.");
+}
+
+// Los días que está. Null en los dos, todo el viaje.
+export async function ponerEstancia(id, desde, hasta) {
+  const estancia = limpiarEstancia(desde, hasta);
+  const { data, error } = await supabase.from("viajeros").update(estancia).eq("id", id).select("id");
+  if (error || !data.length) throw fallo(error, "No hemos podido guardar sus días.");
+  return estancia;
 }
 
 // El Bizum o el IBAN, ya limpio. Vacío para quitarlo.

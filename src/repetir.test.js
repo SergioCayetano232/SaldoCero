@@ -89,6 +89,12 @@ describe("repetirGasto", () => {
     expect(repetirGasto(conNota, viajeros, "EUR", "2026-10-01").nota).toBe("");
   });
 
+  it("sin los que ese día ya se han ido", () => {
+    const seVa = viajeros.map((v) => (v.id === "b" ? { ...v, hasta: "2026-09-30" } : v));
+    expect(repetirGasto(desayuno, seVa, "EUR", "2026-10-01").participantes).toEqual(["a"]);
+    expect(repetirGasto(desayuno, seVa, "EUR", "2026-09-30").participantes).toEqual(["a", "b"]);
+  });
+
   it("no toca el gasto original", () => {
     repetirGasto(desayuno, viajeros, "EUR", "2026-10-01");
     expect(desayuno.fecha).toBe("2026-09-28");

@@ -31,6 +31,14 @@ describe("gastosDeLista", () => {
     ]);
   });
 
+  it("sin los que ese día no están", () => {
+    const llegaTarde = viajeros.map((v) => (v.id === "c" ? { ...v, desde: "2026-11-03" } : v));
+    const { gastos } = gastosDeLista("cena 45 ana", llegaTarde, { dia });
+    expect(gastos[0].participantes).toEqual(["a", "b"]);
+    const otroDia = gastosDeLista("cena 45 ana", llegaTarde, { dia: "2026-11-03" });
+    expect(otroDia.gastos[0].participantes).toEqual(["a", "b", "c"]);
+  });
+
   it("quita los guiones y números de las notas", () => {
     const { gastos } = leer("- cena 45 ana\n2) taxi 12 luis\n• museo 20 marta");
     expect(gastos.map((g) => g.concepto)).toEqual(["Cena", "Taxi", "Museo"]);

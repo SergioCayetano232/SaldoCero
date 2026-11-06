@@ -5,6 +5,7 @@ import { POR_DEFECTO } from "./categorias";
 import { tasaDeGasto, tasaComoTexto } from "./monedas";
 import { vanPorImportes } from "./importes";
 import { idsDeQuienPago } from "./pagadores";
+import { quienesSiguen } from "./estancia";
 
 export function gastoAlFormulario(gasto, viajeros, monedaViaje) {
   const moneda = gasto.moneda ?? monedaViaje;
@@ -53,6 +54,9 @@ export function ultimoApuntado(gastos) {
 
 // Lo mismo, pero es otro gasto: el de hoy, no el de aquel día.
 export function repetirGasto(gasto, viajeros, monedaViaje, dia) {
+  const formulario = gastoAlFormulario(gasto, viajeros, monedaViaje);
+  // Sin los que ese día ya se han ido o aún no han llegado.
+  const participantes = quienesSiguen(formulario.participantes, viajeros, dia);
   // La nota era de aquel gasto: "Luis no tomó postre" no vale para el de hoy.
-  return { ...gastoAlFormulario(gasto, viajeros, monedaViaje), fecha: dia, nota: "" };
+  return { ...formulario, fecha: dia, nota: "", participantes };
 }

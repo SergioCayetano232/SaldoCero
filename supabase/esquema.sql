@@ -29,6 +29,10 @@ create table viajeros (
   cobro text check (char_length(cobro) <= 40),
   -- Con quién lleva la cuenta al saldar, si van en pareja o en familia.
   con_id uuid references viajeros(id) on delete set null,
+  -- Los días que está, si no viene a todo. Null es desde el principio o hasta el final.
+  desde date,
+  hasta date,
+  check (desde is null or hasta is null or desde <= hasta),
   creado_en timestamptz not null default now()
 );
 
@@ -176,7 +180,7 @@ alter table aportaciones_bote enable row level security;
 revoke update on viajes from anon, authenticated;
 grant update (nombre, presupuesto, cerrado_en, redondear, topes) on viajes to anon, authenticated;
 revoke update on viajeros from anon, authenticated;
-grant update (nombre, con_id) on viajeros to anon, authenticated;
+grant update (nombre, con_id, desde, hasta) on viajeros to anon, authenticated;
 
 -- Un viaje solo se ve si traes su código. Nunca se listan todos.
 create policy "ver mi viaje" on viajes for select using (id = viaje_actual());
@@ -586,3 +590,10 @@ $$;
 --   drop function editar_gasto(uuid, uuid, numeric, text, numeric, text, text, date, jsonb, text);
 --
 --   Y pega los "create function crear_gasto" y "create function editar_gasto" de más arriba.
+
+-- Los días de cada viajero.
+--   alter table viajeros
+--     add column desde date,
+--     add column hasta date,
+--     add constraint viajeros_estancia_check check (desde is null or hasta is null or desde <= hasta);
+--   grant update (desde, hasta) on viajeros to anon, authenticated;
