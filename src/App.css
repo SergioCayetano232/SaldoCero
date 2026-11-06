@@ -976,6 +976,75 @@ button:active {
   font-weight: 600;
 }
 
+.gasolina {
+  font-size: 13px;
+}
+
+.calculo-gasolina {
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-sm);
+  background-color: var(--papel-hundido);
+  animation: entrar-desde-abajo var(--medio) var(--curva-suave);
+}
+
+.datos-gasolina {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.datos-gasolina label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--tinta-suave);
+}
+
+.datos-gasolina input {
+  padding: 9px 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pie-gasolina {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin-top: 10px;
+}
+
+.coste-gasolina {
+  flex: 1;
+  font-weight: 600;
+  color: var(--teal-600);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Con clase y no por debajo del formulario, que lo pintaría como el de Añadir. */
+.poner-gasolina {
+  padding: 6px 14px;
+  border-radius: var(--radio-pastilla);
+  background-color: var(--teal-500);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.poner-gasolina:hover:not(:disabled) {
+  background-color: var(--teal-600);
+}
+
+.poner-gasolina:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+:root[data-tema="oscuro"] .poner-gasolina {
+  color: var(--fondo);
+}
+
 .resultado-suma {
   margin-top: -2px;
   font-size: 13px;

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { calcularTotal, gastoMasCaro, importeDeGasto, mediaPorGasto, participantesDeGasto, esDevolucion } from "../calculos";
-import { MONEDAS, cambio, cambioDelGasto, conMoneda, leerTasa, monedaDelSiguiente, monedasEnOrden, tasaComoTexto } from "../monedas";
+import { MONEDAS, cambio, cambioDelGasto, conMoneda, leerTasa, monedaDelSiguiente, monedasEnOrden, simboloDe, tasaComoTexto } from "../monedas";
 import { enLista } from "../nombres";
 import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
 import { alternarHoy, alternarLoMio, filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayTickets, hayGastosDelBote, cuantosDe, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia, textoSinResultados } from "../filtros";
@@ -9,6 +9,7 @@ import { sugerirConceptos, importeSugerido } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
 import { ordenarGastos, ordenGuardado, ordenesPara, POR_DIAS, siguienteOrden } from "../ordenar";
 import { conPropina, PROPINAS } from "../propina";
+import { costeGasolina, comoImporte, cocheGuardado, guardarCoche } from "../gasolina";
 import { borradorQueVale, hayAlgoEscrito, hayAlgoQueBorrar } from "../borrador";
 import * as datos from "../datos";
 import { gastoAlFormulario, repetirGasto, ultimoApuntado } from "../repetir";
@@ -143,6 +144,22 @@ function Gastos({
   function escribirImporte(texto) {
     setImporte(texto);
     setPropina(null);
+  }
+
+  // La gasolina, sin sacar la calculadora. El coche y el litro, de la última vez.
+  const [gasolina, setGasolina] = useState(null);
+  const costeDeLaGasolina = gasolina ? costeGasolina(gasolina) : null;
+
+  function abrirGasolina() {
+    setGasolina(gasolina ? null : { km: "", idaYVuelta: false, ...cocheGuardado() });
+  }
+
+  function ponerGasolina() {
+    if (!costeDeLaGasolina) return;
+    escribirImporte(comoImporte(costeDeLaGasolina));
+    if (!concepto.trim()) escribirConcepto("Gasolina");
+    guardarCoche(gasolina);
+    setGasolina(null);
   }
 
   function alternarPropina(porcentaje) {
@@ -535,6 +552,7 @@ function Gastos({
     setCategoriaAMano(false);
     setNota("");
     setNotaAbierta(false);
+    setGasolina(null);
     setDevolucion(false);
     setVariosPagan(false);
     setPagos({});
@@ -1115,6 +1133,69 @@ function Gastos({
                       +{p} %
                     </button>
                   ))}
+                </div>
+              )}
+
+              {categoria === "transporte" && !devolucion && (
+                <div className="gasolina">
+                  <button className="enlace" onClick={abrirGasolina} aria-expanded={Boolean(gasolina)}>
+                    {gasolina ? "← no, lo escribo yo" : "⛽ ¿calcular la gasolina?"}
+                  </button>
+                  {gasolina && (
+                    <div className="calculo-gasolina">
+                      <div className="datos-gasolina">
+                        <label>
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            placeholder="0"
+                            value={gasolina.km}
+                            onChange={(e) => setGasolina({ ...gasolina, km: e.target.value })}
+                            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), ponerGasolina())}
+                            autoFocus
+                          />
+                          <span>km</span>
+                        </label>
+                        <label>
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            placeholder="6"
+                            value={gasolina.consumo}
+                            onChange={(e) => setGasolina({ ...gasolina, consumo: e.target.value })}
+                            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), ponerGasolina())}
+                          />
+                          <span>l/100 km</span>
+                        </label>
+                        <label>
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            placeholder="1,60"
+                            value={gasolina.precio}
+                            onChange={(e) => setGasolina({ ...gasolina, precio: e.target.value })}
+                            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), ponerGasolina())}
+                          />
+                          <span>{simboloDe(moneda)}/litro</span>
+                        </label>
+                      </div>
+                      <div className="pie-gasolina">
+                        <button
+                          className="pastilla-interruptor"
+                          onClick={() => setGasolina({ ...gasolina, idaYVuelta: !gasolina.idaYVuelta })}
+                          aria-pressed={gasolina.idaYVuelta}
+                        >
+                          Ida y vuelta
+                        </button>
+                        <span className="coste-gasolina" role="status">
+                          {costeDeLaGasolina ? `= ${conMoneda(costeDeLaGasolina, moneda)}` : "Pon los km, el consumo y el litro"}
+                        </span>
+                        <button className="poner-gasolina" onClick={ponerGasolina} disabled={!costeDeLaGasolina}>
+                          Ponerlo
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
