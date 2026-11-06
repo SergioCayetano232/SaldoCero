@@ -4,6 +4,7 @@ import { conMoneda } from "./monedas";
 import { importeDeGasto } from "./calculos";
 import { BOTE } from "./bote";
 import { nombreDeQuienPago } from "./pagadores";
+import { t } from "./idioma";
 
 // Solo lo que ha llegado nuevo, y que no hayas puesto tú desde este móvil.
 // Lo borrado y lo editado no se avisa: tus propios borrados llegan igual por
@@ -28,14 +29,14 @@ export function textoDeNovedades({ gastos, viajeros }, todos, moneda) {
   if (gastos.length === 1) {
     const [g] = gastos;
     const quien = nombreDeQuienPago(g, todos);
-    const pago = g.pagadorId === BOTE ? " (del bote)" : quien ? ` (pagó ${quien})` : "";
-    partes.push(`Nuevo gasto: ${g.concepto} · ${conMoneda(importeDeGasto(g), moneda)}${pago}`);
+    const pago = g.pagadorId === BOTE ? ` ${t("(del bote)")}` : quien ? ` ${t("(pagó {quien})", { quien })}` : "";
+    partes.push(`${t("Nuevo gasto: {concepto} · {cifra}", { concepto: g.concepto, cifra: conMoneda(importeDeGasto(g), moneda) })}${pago}`);
   } else if (gastos.length > 1) {
-    partes.push(`${gastos.length} gastos nuevos`);
+    partes.push(t("{n} gastos nuevos", { n: gastos.length }));
   }
 
-  if (viajeros.length === 1) partes.push(`Se ha unido ${viajeros[0].nombre}`);
-  else if (viajeros.length > 1) partes.push(`${viajeros.length} viajeros nuevos`);
+  if (viajeros.length === 1) partes.push(t("Se ha unido {nombre}", { nombre: viajeros[0].nombre }));
+  else if (viajeros.length > 1) partes.push(t("{n} viajeros nuevos", { n: viajeros.length }));
 
   return partes.length ? partes.join(" · ") : null;
 }

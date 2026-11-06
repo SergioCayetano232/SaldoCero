@@ -3,6 +3,7 @@
 
 import { enCorto } from "./fechas";
 import { enLista } from "./nombres";
+import { t } from "./idioma";
 
 const DIA = 86400000;
 
@@ -31,8 +32,8 @@ export function diasSinGastos(gastos, descartados = []) {
 // Hasta tres días se dicen uno a uno. Más ya es una lista que nadie lee.
 export function textoHuecos(huecos) {
   if (huecos.length === 0) return null;
-  if (huecos.length > 3) return `Hay ${huecos.length} días sin nada apuntado, el primero el ${enCorto(huecos[0])}.`;
+  if (huecos.length > 3) return t("Hay {n} días sin nada apuntado, el primero el {dia}.", { n: huecos.length, dia: enCorto(huecos[0]) });
 
-  const dias = enLista(huecos.map((f) => `el ${enCorto(f)}`));
-  return `${dias[0].toUpperCase()}${dias.slice(1)} no hay nada apuntado.`;
+  const dias = enLista(huecos.map((f) => t("el {dia}", { dia: enCorto(f) })));
+  return t("{dias} no hay nada apuntado.", { dias: `${dias[0].toUpperCase()}${dias.slice(1)}` });
 }

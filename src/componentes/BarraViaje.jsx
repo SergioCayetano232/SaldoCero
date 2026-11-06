@@ -5,6 +5,7 @@ import { textoCerrado } from "../cerrar";
 import { textoDuracion } from "../duracion";
 import { hoy } from "../fechas";
 import { esAtajoCopiarCodigo, esAtajoInvitar, esAtajoSalir, esOrdenador } from "../teclado";
+import { t } from "../idioma";
 
 // La librería del QR pesa, y casi nadie lo abre: se baja solo al pulsar.
 const QRViaje = lazy(() => import("./QRViaje"));
@@ -87,7 +88,7 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir }) {
             className="viaje-nombre"
             nombre={viaje.nombre}
             onGuardar={onRenombrar}
-            titulo="Cambiar el nombre del viaje"
+            titulo={t("Cambiar el nombre del viaje")}
           />
         )}
         {duracion && <span className="viaje-dia">{duracion}</span>}
@@ -95,7 +96,7 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir }) {
         <button
           className="boton-salir"
           onClick={onSalir}
-          title={esOrdenador() ? "Salir del viaje (también con la Q)" : "Salir del viaje"}
+          title={esOrdenador() ? t("Salir del viaje (también con la Q)") : t("Salir del viaje")}
           aria-keyshortcuts="q"
         >
           ✕
@@ -108,11 +109,11 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir }) {
             🔒
           </span>
           <p>
-            <strong>{textoCerrado(viaje.cerradoEn)}.</strong> Los gastos ya no cambian; las
-            deudas se pueden seguir marcando como pagadas.
+            <strong>{textoCerrado(viaje.cerradoEn)}.</strong>{" "}
+            {t("Los gastos ya no cambian; las deudas se pueden seguir marcando como pagadas.")}
           </p>
           <button className="enlace" onClick={onReabrir}>
-            Reabrir
+            {t("Reabrir")}
           </button>
         </div>
       )}
@@ -121,25 +122,24 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir }) {
         <button
           className={`codigo ${codigoCopiado ? "copiado" : ""}`}
           onClick={copiarCodigo}
-          title={esOrdenador() ? "Copiar el código (o pulsa K)" : "Copiar el código"}
+          title={esOrdenador() ? t("Copiar el código (o pulsa K)") : t("Copiar el código")}
           aria-keyshortcuts="K"
         >
-          {codigoCopiado ? "¡Copiado!" : viaje.codigo}
+          {codigoCopiado ? t("¡Copiado!") : viaje.codigo}
         </button>
         <button className="boton-invitar" onClick={alInvitar}>
           <span className="invitar-icono" aria-hidden="true">
             ↗
           </span>
-          {TEXTO_INVITAR[invitado] ?? "Invitar"}
+          {t(TEXTO_INVITAR[invitado] ?? "Invitar")}
         </button>
-        <button className="boton-qr" onClick={() => setConQR(true)} title="Enseñar el QR" aria-keyshortcuts="i">
+        <button className="boton-qr" onClick={() => setConQR(true)} title={t("Enseñar el QR")} aria-keyshortcuts="i">
           <span aria-hidden="true">▦</span> QR
         </button>
       </div>
 
       <p className="vacio aviso-codigo">
-        Invítalos con el enlace, o pásales el código y entran a este mismo viaje.
-        Guárdalo tú también: es la única forma de volver desde otro móvil.
+        {t("Invítalos con el enlace, o pásales el código y entran a este mismo viaje. Guárdalo tú también: es la única forma de volver desde otro móvil.")}
       </p>
 
       {conQR && (

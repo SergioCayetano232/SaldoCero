@@ -2,6 +2,7 @@ import { useId } from "react";
 import { diagramaDeDeudas, caminoDeFlecha, RADIO } from "../diagrama";
 import { inicial } from "../avatares";
 import { conMoneda } from "../monedas";
+import { t } from "../idioma";
 
 const SIN_COLOR = "var(--tinta-tenue)";
 
@@ -16,7 +17,7 @@ function DiagramaDeudas({ pagos, colores, moneda, soy = null }) {
     .map((f) => {
       const de = d.deben.find((p) => p.id === f.deId).nombre;
       const a = d.cobran.find((p) => p.id === f.aId).nombre;
-      return `${de} le paga ${conMoneda(f.cantidad, moneda)} a ${a}`;
+      return t("{de} le paga {cifra} a {a}", { de, a, cifra: conMoneda(f.cantidad, moneda) });
     })
     .join(". ");
 

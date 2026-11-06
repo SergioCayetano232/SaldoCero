@@ -4,6 +4,7 @@ import { hoy, enCorto } from "../fechas";
 import { leerFoto } from "../ocr";
 import { conMoneda } from "../monedas";
 import { esAtajoLeer } from "../teclado";
+import { t } from "../idioma";
 
 // El botón de leer el total de la foto, y lo que va saliendo. No guarda nada:
 // pone el importe en su campo, y el día si lo ve, y tú lo miras antes de apuntarlo.
@@ -59,7 +60,7 @@ function LeerTotal({ foto, moneda, onTotal, onFecha }) {
   if (estado === "leyendo") {
     return (
       <div className="leer-total leyendo" role="status">
-        <span>🔍 Leyendo el ticket… {Math.round(avance * 100)} %</span>
+        <span>🔍 {t("Leyendo el ticket…")} {Math.round(avance * 100)} %</span>
         <span className="leer-total-barra" aria-hidden="true">
           <span style={{ transform: `scaleX(${avance})` }} />
         </span>
@@ -70,23 +71,23 @@ function LeerTotal({ foto, moneda, onTotal, onFecha }) {
   return (
     <div className="leer-total">
       <button className="boton-foto" aria-keyshortcuts="L" onClick={leer}>
-        🔍 {estado === "quieto" ? "Leer el total" : "Leer otra vez"}
+        🔍 {estado === "quieto" ? t("Leer el total") : t("Leer otra vez")}
       </button>
       {estado === "leido" && (
         <span className="leer-total-bien" role="status">
           ✓ {conMoneda(leido, moneda)}
-          {dia && `, del ${enCorto(dia)}`}. Revísalo antes de apuntarlo.
+          {dia && `, ${t("del {dia}", { dia: enCorto(dia) })}`}. {t("Revísalo antes de apuntarlo.")}
         </span>
       )}
       {estado === "nada" && (
         <span className="leer-total-mal" role="status">
-          No encuentro el total. Escríbelo tú.
-          {dia && ` El día sí: ${enCorto(dia)}.`}
+          {t("No encuentro el total. Escríbelo tú.")}
+          {dia && ` ${t("El día sí: {dia}.", { dia: enCorto(dia) })}`}
         </span>
       )}
       {estado === "fallo" && (
         <span className="leer-total-mal" role="alert">
-          No he podido leerlo. La primera vez hace falta conexión.
+          {t("No he podido leerlo. La primera vez hace falta conexión.")}
         </span>
       )}
     </div>

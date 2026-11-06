@@ -5,6 +5,7 @@ import { balancesConBote } from "./bote";
 import { pagosDelViaje } from "./calculos";
 import { miSaldo } from "./miSaldo";
 import { conMoneda } from "./monedas";
+import { t } from "./idioma";
 
 export const TITULO_SIN_VIAJE = "SaldoCero · Reparte los gastos del viaje";
 
@@ -17,8 +18,8 @@ export function cuentaEnTitulo(saldo, moneda = "EUR") {
 // Lo neto ya hecho, que es lo que se guarda en "Tus viajes".
 export function cuentaDeNeto(neto, moneda = "EUR") {
   if (typeof neto !== "number") return null;
-  if (neto <= -0.005) return `debes ${conMoneda(-neto, moneda)}`;
-  if (neto >= 0.005) return `te deben ${conMoneda(neto, moneda)}`;
+  if (neto <= -0.005) return t("debes {cifra}", { cifra: conMoneda(-neto, moneda) });
+  if (neto >= 0.005) return t("te deben {cifra}", { cifra: conMoneda(neto, moneda) });
   return null;
 }
 

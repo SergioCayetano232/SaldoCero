@@ -2,6 +2,10 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+import { usarIdioma, idiomaGuardado, idiomaDelMovil } from './idioma'
+
+// Antes de pintar nada, que no se vea un momento en el otro idioma.
+usarIdioma(idiomaGuardado() ?? idiomaDelMovil(navigator.languages))
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

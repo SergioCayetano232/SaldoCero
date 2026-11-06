@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { urlParaBajar } from "../tickets";
+import { t } from "../idioma";
 
 // La foto del ticket a pantalla completa. Se cierra con la X, con Escape o
 // tocando fuera. Va en el body: dentro de una tarjeta, su backdrop-filter hace
@@ -33,16 +34,16 @@ function VisorTicket({ ruta, concepto, cargar, onCerrar }) {
   }, [onCerrar]);
 
   return createPortal(
-    <div className="visor-ticket" role="dialog" aria-modal="true" aria-label={`Ticket de ${concepto}`} onClick={onCerrar}>
+    <div className="visor-ticket" role="dialog" aria-modal="true" aria-label={t("Ticket de {concepto}", { concepto })} onClick={onCerrar}>
       <div className="visor-caja" onClick={(e) => e.stopPropagation()}>
         <div className="visor-cabecera">
           <span>🧾 {concepto}</span>
           {cargada && (
-            <a className="visor-bajar" href={urlParaBajar(url, concepto)} title="Descargar la foto" aria-label="Descargar la foto">
+            <a className="visor-bajar" href={urlParaBajar(url, concepto)} title={t("Descargar la foto")} aria-label={t("Descargar la foto")}>
               ↓
             </a>
           )}
-          <button className="visor-cerrar" onClick={onCerrar} aria-label="Cerrar" autoFocus>
+          <button className="visor-cerrar" onClick={onCerrar} aria-label={t("Cerrar")} autoFocus>
             ✕
           </button>
         </div>
@@ -51,15 +52,15 @@ function VisorTicket({ ruta, concepto, cargar, onCerrar }) {
           <p className="error">{error}</p>
         ) : (
           <>
-            {!cargada && <p className="visor-cargando">Cargando la foto…</p>}
+            {!cargada && <p className="visor-cargando">{t("Cargando la foto…")}</p>}
             {url && (
               <img
                 src={url}
-                alt={`Ticket de ${concepto}`}
+                alt={t("Ticket de {concepto}", { concepto })}
                 decoding="async"
                 className={cargada ? "" : "sin-cargar"}
                 onLoad={() => setCargada(true)}
-                onError={() => setError("No hemos podido bajar la foto. Revisa tu conexión.")}
+                onError={() => setError(t("No hemos podido bajar la foto. Revisa tu conexión."))}
               />
             )}
           </>

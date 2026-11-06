@@ -2,20 +2,27 @@
 // Lo escribe la base de datos sola, así que llega lo de todos, no solo lo tuyo.
 
 import { conMoneda } from "./monedas";
+import { t } from "./idioma";
 
 // Lo que hacen de golpe (vaciar el viaje, pegar una lista) va en una sola línea.
 const JUNTOS_SI_EN = 2 * 60 * 1000;
 
+// La frase entera y no solo el verbo, que en inglés el orden es otro.
 const VERBOS = {
-  gasto_nuevo: ["apuntó", "apuntaste"],
-  gasto_cambiado: ["cambió", "cambiaste"],
-  gasto_borrado: ["borró", "borraste"],
-  viajero_nuevo: ["añadió a", "añadiste a"],
-  viajero_quitado: ["quitó a", "quitaste a"],
-  pago_saldado: ["dio por pagado", "diste por pagado"],
+  gasto_nuevo: ["{quien} apuntó {que}", "Tú apuntaste {que}"],
+  gasto_cambiado: ["{quien} cambió {que}", "Tú cambiaste {que}"],
+  gasto_borrado: ["{quien} borró {que}", "Tú borraste {que}"],
+  viajero_nuevo: ["{quien} añadió a {que}", "Tú añadiste a {que}"],
+  viajero_quitado: ["{quien} quitó a {que}", "Tú quitaste a {que}"],
+  pago_saldado: ["{quien} dio por pagado {que}", "Tú diste por pagado {que}"],
 };
 
-const EN_PLURAL = { gasto_nuevo: "gastos", gasto_borrado: "gastos", viajero_nuevo: "viajeros", viajero_quitado: "viajeros" };
+const EN_PLURAL = {
+  gasto_nuevo: "{n} gastos",
+  gasto_borrado: "{n} gastos",
+  viajero_nuevo: "{n} viajeros",
+  viajero_quitado: "{n} viajeros",
+};
 
 // Las que no conocemos (de una versión más nueva) no se enseñan.
 export function filasQueSeEntienden(filas) {
@@ -46,15 +53,17 @@ export function agrupar(filas) {
 
 function deQue(fila, monedaViaje) {
   // La base de datos lo guarda como "Luis → Ana"; dicho, se entiende mejor así.
-  if (fila.que === "pago_saldado") return `lo de ${fila.sobre.replace(" → ", " a ")}`;
+  if (fila.que === "pago_saldado") {
+    const [de, a] = fila.sobre.split(" → ");
+    return t("lo de {de} a {a}", { de, a });
+  }
   if (fila.importe === null || fila.importe === undefined) return fila.sobre;
   return `${fila.sobre} (${conMoneda(Number(fila.importe), fila.moneda ?? monedaViaje)})`;
 }
 
 export function frase(grupo, viajeros, soy, monedaViaje = "EUR") {
   const esYo = Boolean(soy) && grupo.quien === soy;
-  const quien = esYo ? "Tú" : viajeros.find((v) => v.id === grupo.quien)?.nombre ?? "Alguien";
-  const verbo = VERBOS[grupo.que][esYo ? 1 : 0];
-  const que = grupo.filas.length > 1 ? `${grupo.filas.length} ${EN_PLURAL[grupo.que]}` : deQue(grupo.filas[0], monedaViaje);
-  return `${quien} ${verbo} ${que}`;
+  const quien = viajeros.find((v) => v.id === grupo.quien)?.nombre ?? t("Alguien");
+  const que = grupo.filas.length > 1 ? t(EN_PLURAL[grupo.que], { n: grupo.filas.length }) : deQue(grupo.filas[0], monedaViaje);
+  return t(VERBOS[grupo.que][esYo ? 1 : 0], { quien, que });
 }

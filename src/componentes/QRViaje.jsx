@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import { qrDelEnlace } from "../qr";
 import { mantenerEncendida } from "../pantalla";
+import { t } from "../idioma";
 
 // El margen blanco alrededor. Sin él, muchas cámaras no lo encuentran.
 const MARGEN = 4;
@@ -56,10 +57,10 @@ function QRViaje({ enlace, codigo, nombre, onCerrar }) {
         className="ventana-qr"
         role="dialog"
         aria-modal="true"
-        aria-label={`Código QR para entrar en ${nombre}`}
+        aria-label={t("Código QR para entrar en {nombre}", { nombre })}
         onClick={(e) => e.stopPropagation()}
       >
-        <button className="boton-salir ventana-cerrar" onClick={onCerrar} ref={cerrar} title="Cerrar">
+        <button className="boton-salir ventana-cerrar" onClick={onCerrar} ref={cerrar} title={t("Cerrar")}>
           ✕
         </button>
 
@@ -71,7 +72,7 @@ function QRViaje({ enlace, codigo, nombre, onCerrar }) {
         </svg>
 
         <p className="qr-codigo">{codigo}</p>
-        <p className="vacio">Que lo apunten con la cámara del móvil y entran directos.</p>
+        <p className="vacio">{t("Que lo apunten con la cámara del móvil y entran directos.")}</p>
       </div>
     </div>,
     document.body

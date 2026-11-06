@@ -2,6 +2,7 @@ import { useState } from "react";
 import { conMoneda, leerImporte } from "../monedas";
 import { trozosDeDeuda } from "../aCuenta";
 import Avatar from "./Avatar";
+import { t } from "../idioma";
 
 // Lo que se va pagando de las deudas a trozos: "Luis le ha dado 20 € a Ana".
 function PagosACuenta({ viajeros, pagos, parciales, colores, moneda, onAnadir, onQuitar }) {
@@ -43,7 +44,7 @@ function PagosACuenta({ viajeros, pagos, parciales, colores, moneda, onAnadir, o
     <div className="a-cuenta">
       {visibles.length > 0 && (
         <>
-          <h4>Pagado a cuenta</h4>
+          <h4>{t("Pagado a cuenta")}</h4>
           <ul className="lista-parciales">
             {visibles.map((p) => (
               <li key={p.id} className="parcial">
@@ -55,7 +56,7 @@ function PagosACuenta({ viajeros, pagos, parciales, colores, moneda, onAnadir, o
                 <button
                   className="boton-quitar"
                   onClick={() => onQuitar(p, nombre(p.deId), nombre(p.aId))}
-                  title="Quitar este pago"
+                  title={t("Quitar este pago")}
                 >
                   ✕
                 </button>
@@ -68,8 +69,8 @@ function PagosACuenta({ viajeros, pagos, parciales, colores, moneda, onAnadir, o
       {abierto ? (
         <div className="formulario-parcial" onKeyDown={(e) => e.key === "Escape" && setAbierto(false)}>
           <div className="fila-parcial">
-            <select value={deId} onChange={(e) => setDeId(e.target.value)} aria-label="Quién paga">
-              <option value="">¿Quién paga?</option>
+            <select value={deId} onChange={(e) => setDeId(e.target.value)} aria-label={t("Quién paga")}>
+              <option value="">{t("¿Quién paga?")}</option>
               {viajeros.map((v) => (
                 <option key={v.id} value={v.id}>
                   {v.nombre}
@@ -77,8 +78,8 @@ function PagosACuenta({ viajeros, pagos, parciales, colores, moneda, onAnadir, o
               ))}
             </select>
             <span className="pago-flecha">→</span>
-            <select value={aId} onChange={(e) => setAId(e.target.value)} aria-label="A quién">
-              <option value="">¿A quién?</option>
+            <select value={aId} onChange={(e) => setAId(e.target.value)} aria-label={t("A quién")}>
+              <option value="">{t("¿A quién?")}</option>
               {viajeros
                 .filter((v) => v.id !== deId)
                 .map((v) => (
@@ -93,32 +94,32 @@ function PagosACuenta({ viajeros, pagos, parciales, colores, moneda, onAnadir, o
             <input
               type="text"
               inputMode="decimal"
-              placeholder={deuda ? `De ${conMoneda(deuda.cantidad, moneda)}` : "Cuánto"}
+              placeholder={deuda ? t("De {cifra}", { cifra: conMoneda(deuda.cantidad, moneda) }) : t("Cuánto")}
               enterKeyHint="done"
               value={importe}
               onFocus={(e) => e.target.select()}
               onChange={(e) => setImporte(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && apuntar()}
-              aria-label="Cuánto ha pagado"
+              aria-label={t("Cuánto ha pagado")}
             />
             <button onClick={apuntar} disabled={!vale}>
-              Apuntar
+              {t("Apuntar")}
             </button>
             <button className="boton-cancelar" onClick={() => setAbierto(false)}>
-              Cancelar
+              {t("Cancelar")}
             </button>
           </div>
 
           {deuda && (
             <div className="trozos-deuda">
-              {trozosDeDeuda(deuda.cantidad).map((t) => (
+              {trozosDeDeuda(deuda.cantidad).map((trozo) => (
                 <button
-                  key={t.nombre}
+                  key={trozo.nombre}
                   className="pastilla-interruptor"
-                  onClick={() => setImporte(t.texto)}
-                  aria-pressed={cantidad === leerImporte(t.texto)}
+                  onClick={() => setImporte(trozo.texto)}
+                  aria-pressed={cantidad === leerImporte(trozo.texto)}
                 >
-                  {t.nombre}
+                  {t(trozo.nombre)}
                 </button>
               ))}
             </div>
@@ -126,14 +127,14 @@ function PagosACuenta({ viajeros, pagos, parciales, colores, moneda, onAnadir, o
 
           {deuda && cantidad > deuda.cantidad + 0.005 && (
             <p className="aviso">
-              Es más de lo que le debe: el resto pasará a debérselo {nombre(aId)}.
+              {t("Es más de lo que le debe: el resto pasará a debérselo {nombre}.", { nombre: nombre(aId) })}
             </p>
           )}
         </div>
       ) : (
         pendientes.length > 0 && (
           <button className="enlace" onClick={abrir}>
-            ¿Alguien ha pagado una parte?
+            {t("¿Alguien ha pagado una parte?")}
           </button>
         )
       )}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from "react";
 import "./App.css";
 import * as datos from "./datos";
 import { hayConexion, usarCodigo } from "./supabase";
@@ -34,6 +34,7 @@ import CargandoViaje from "./componentes/CargandoViaje";
 import CifrasViaje from "./componentes/CifrasViaje";
 import Atajos from "./componentes/Atajos";
 import { enLista } from "./nombres";
+import { t, idiomaActual, alCambiarIdioma, usarIdioma, guardarIdioma, otroIdioma, IDIOMAS } from "./idioma";
 
 // Fuera del componente: dentro, el linter no deja tocar window.location.
 function quitarEnlace() {
@@ -48,6 +49,11 @@ function codigoDeArranque() {
 }
 
 function App() {
+  // Al cambiar de idioma se repinta todo desde aquí.
+  const idioma = useSyncExternalStore(alCambiarIdioma, idiomaActual);
+  useEffect(() => {
+    document.documentElement.lang = idioma;
+  }, [idioma]);
   const [viaje, setViaje] = useState(null); // null = todavía no has entrado en ninguno
   // Solo salimos cargando si de verdad hay un viaje que recuperar.
   const [cargando, setCargando] = useState(() => codigoDeArranque() !== "");
@@ -389,7 +395,7 @@ function App() {
 
   function vaciarViaje() {
     const confirmado = window.confirm(
-      `¿Seguro que quieres vaciar "${viaje.nombre}"? Se borran sus viajeros y gastos para todos.`
+      t('¿Seguro que quieres vaciar "{nombre}"? Se borran sus viajeros y gastos para todos.', { nombre: viaje.nombre })
     );
     if (!confirmado) return;
 
@@ -408,7 +414,7 @@ function App() {
     const nombre = nombreDeLaRepeticion(viaje.nombre);
     const quienes = enLista(gente.map((v) => v.nombre));
     const pendientes = pendientesParaPasar(pagosDelViaje(balances, viaje));
-    if (!window.confirm(`¿Crear "${nombre}" con ${quienes}? Empieza sin gastos.`)) return;
+    if (!window.confirm(t('¿Crear "{nombre}" con {quienes}? Empieza sin gastos.', { nombre, quienes }))) return;
     // Aceptar es pasarlas; cancelar, empezar de cero y dejarlas aquí.
     const pasar = pendientes.length > 0 && window.confirm(preguntaDePendientes(pendientes, nombre, viaje.moneda ?? "EUR"));
 
@@ -601,7 +607,7 @@ function App() {
             else if (gasto.quitarFoto) await datos.quitarTicket(id, gasto.ticketAnterior);
           });
           if (bien && antes) {
-            setEditado({ texto: `Has cambiado "${gasto.concepto}"`, cambios: [{ id, antes }], viajeId: viaje.id });
+            setEditado({ texto: t('Has cambiado "{concepto}"', { concepto: gasto.concepto }), cambios: [{ id, antes }], viajeId: viaje.id });
           }
           return bien;
         }}
@@ -683,18 +689,18 @@ function App() {
         <div className="botones-final">
           {!cerrado && gastos.length > 0 && (
             <button className="boton-cerrar-viaje" onClick={cerrarViaje}>
-              🔒 Cerrar el viaje
+              🔒 {t("Cerrar el viaje")}
             </button>
           )}
           {/* Con uno solo no hay grupo que repetir. */}
           {viajeros.length > 1 && (
             <button className="boton-repetir-viaje" onClick={() => repetirViaje(viajeros)} disabled={repitiendo}>
-              {repitiendo ? "Creando…" : "🔁 Repetir con la misma gente"}
+              {repitiendo ? t("Creando…") : `🔁 ${t("Repetir con la misma gente")}`}
             </button>
           )}
           {!cerrado && (
             <button className="boton-reiniciar" onClick={vaciarViaje}>
-              Vaciar este viaje
+              {t("Vaciar este viaje")}
             </button>
           )}
         </div>
@@ -709,9 +715,9 @@ function App() {
 
       {borrado && (
         <div className="deshacer">
-          <span>Has quitado {borrado.que}</span>
-          <button onClick={deshacerBorrado} title="También con Ctrl+Z (⌘Z en Mac)">
-            Deshacer
+          <span>{t("Has quitado {que}", { que: borrado.que })}</span>
+          <button onClick={deshacerBorrado} title={t("También con Ctrl+Z (⌘Z en Mac)")}>
+            {t("Deshacer")}
           </button>
         </div>
       )}
@@ -719,8 +725,8 @@ function App() {
       {!borrado && editado?.viajeId === viaje.id && (
         <div className="deshacer">
           <span>{editado.texto}</span>
-          <button onClick={deshacerEditado} title="También con Ctrl+Z (⌘Z en Mac)">
-            Deshacer
+          <button onClick={deshacerEditado} title={t("También con Ctrl+Z (⌘Z en Mac)")}>
+            {t("Deshacer")}
           </button>
         </div>
       )}
@@ -861,7 +867,7 @@ function BotonArriba() {
   }
 
   return (
-    <button className="boton-arriba" onClick={subir} aria-label="Volver arriba" title="Volver arriba">
+    <button className="boton-arriba" onClick={subir} aria-label={t("Volver arriba")} title={t("Volver arriba")}>
       ↑
     </button>
   );
@@ -874,21 +880,22 @@ function Pie({ enViaje = false }) {
     <footer className="pie">
       <span className="pie-marca">SaldoCero</span>
       <span className="pie-punto">·</span>
-      <span>Sin cuentas ni contraseñas</span>
+      <span>{t("Sin cuentas ni contraseñas")}</span>
       <span className="pie-punto">·</span>
-      <span>Solo entra quien tiene el código</span>
+      <span>{t("Solo entra quien tiene el código")}</span>
       <span className="pie-firma">
-        Hecho por Sergio Cayetano ·{" "}
+        {t("Hecho por Sergio Cayetano")} ·{" "}
         <a
           className="pie-enlace"
           href="https://github.com/SergioCayetano232/SaldoCero"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Código en GitHub
+          {t("Código en GitHub")}
         </a>
       </span>
       <BotonTema />
+      <BotonIdioma />
       {enViaje && <Atajos />}
     </footer>
   );
@@ -944,8 +951,24 @@ function BotonTema() {
   const { icono, nombre } = temaDe(tema);
 
   return (
-    <button className="pie-tema" onClick={cambiar} title="Cambiar el tema" aria-keyshortcuts="t">
-      <span aria-hidden="true">{icono}</span> Tema: {nombre.toLowerCase()}
+    <button className="pie-tema" onClick={cambiar} title={t("Cambiar el tema")} aria-keyshortcuts="t">
+      <span aria-hidden="true">{icono}</span> {t("Tema: {nombre}", { nombre: t(nombre).toLowerCase() })}
+    </button>
+  );
+}
+
+// Dice el idioma al que pasas, escrito en ese idioma: quien no lee el de ahora lo encuentra.
+function BotonIdioma() {
+  const otro = IDIOMAS.find((i) => i.id === otroIdioma());
+
+  function cambiar() {
+    usarIdioma(otro.id);
+    guardarIdioma(otro.id);
+  }
+
+  return (
+    <button className="pie-tema" onClick={cambiar} lang={otro.id}>
+      <span aria-hidden="true">🌐</span> {otro.nombre}
     </button>
   );
 }
@@ -957,7 +980,7 @@ function Cabecera() {
         <span className="saldo">Saldo</span>
         <span className="cero">Cero</span>
       </h1>
-      <p>Repartimos los gastos del viaje entre todos.</p>
+      <p>{t("Repartimos los gastos del viaje entre todos.")}</p>
     </header>
   );
 }

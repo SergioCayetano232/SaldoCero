@@ -6,6 +6,7 @@ import { leerCobro, cobroDe, cobroComoTexto } from "../cobro";
 import { esAtajoViajero, esOrdenador } from "../teclado";
 import { conQuienVa, losQueVanCon, conQuienPuedeIr, MINIMO_PARA_JUNTAR } from "../juntos";
 import { tieneEstancia, textoEstancia } from "../estancia";
+import { t } from "../idioma";
 
 function Viajeros({
   viajeros,
@@ -147,7 +148,7 @@ function Viajeros({
   return (
     <section className="tarjeta">
       <h2>
-        <span className="icono">🧳</span> Viajeros
+        <span className="icono">🧳</span> {t("Viajeros")}
         {viajeros.length > 0 && <span className="titulo-cuantos">{viajeros.length}</span>}
       </h2>
 
@@ -156,9 +157,9 @@ function Viajeros({
           <input
             ref={campo}
             type="text"
-            placeholder="Nombre, o varios: Ana, Luis…"
+            placeholder={t("Nombre, o varios: Ana, Luis…")}
             aria-keyshortcuts="a"
-            title={esOrdenador() ? "También con la A" : undefined}
+            title={esOrdenador() ? t("También con la A") : undefined}
             autoCapitalize="words"
             autoComplete="off"
             spellCheck={false}
@@ -190,7 +191,7 @@ function Viajeros({
             }}
           />
           <button onClick={anadir} disabled={!nombre.trim()}>
-            Añadir
+            {t("Añadir")}
           </button>
         </div>
       )}
@@ -204,17 +205,17 @@ function Viajeros({
           <p>{avisoDeParecidos(dudas.parecidos)}</p>
           <div className="nombre-parecido-botones">
             <button className="enlace" onClick={anadirIgual}>
-              Añadir igual
+              {t("Añadir igual")}
             </button>
             <button className="enlace no-es-otro" onClick={eraElMismo}>
-              {dudas.parecidos.length === 1 ? "Es la misma persona" : "Son las mismas"}
+              {dudas.parecidos.length === 1 ? t("Es la misma persona") : t("Son las mismas")}
             </button>
           </div>
         </div>
       )}
 
       {viajeros.length === 0 ? (
-        <p className="vacio">Aún no hay viajeros. Añade al menos dos para empezar.</p>
+        <p className="vacio">{t("Aún no hay viajeros. Añade al menos dos para empezar.")}</p>
       ) : (
         <ul className="lista">
           {viajeros.map((viajero) => (
@@ -232,12 +233,12 @@ function Viajeros({
                   <NombreEditable
                     nombre={viajero.nombre}
                     onGuardar={(nuevo) => renombrar(viajero, nuevo)}
-                    titulo={`Cambiar el nombre de ${viajero.nombre}`}
+                    titulo={t("Cambiar el nombre de {nombre}", { nombre: viajero.nombre })}
                   />
                 )}
-                {viajero.id === soy && <span className="etiqueta-tu">tú</span>}
+                {viajero.id === soy && <span className="etiqueta-tu">{t("tú")}</span>}
                 {suGrupo(viajero).length > 0 && (
-                  <span className="etiqueta-con">con {enLista(suGrupo(viajero).map((v) => v.nombre))}</span>
+                  <span className="etiqueta-con">{t("con {quienes}", { quienes: enLista(suGrupo(viajero).map((v) => v.nombre)) })}</span>
                 )}
               </span>
 
@@ -245,7 +246,7 @@ function Viajeros({
                 <button
                   className={`boton-cobro ${suGrupo(viajero).length > 0 ? "tiene-cobro" : ""}`}
                   onClick={() => setJuntando(juntando === viajero.id ? null : viajero.id)}
-                  title={`Con quién paga ${viajero.nombre} al saldar`}
+                  title={t("Con quién paga {nombre} al saldar", { nombre: viajero.nombre })}
                 >
                   👫
                 </button>
@@ -255,7 +256,7 @@ function Viajeros({
                 <button
                   className={`boton-cobro ${tieneEstancia(viajero) ? "tiene-cobro" : ""}`}
                   onClick={() => abrirEstancia(viajero)}
-                  title={`Qué días está ${viajero.nombre}`}
+                  title={t("Qué días está {nombre}", { nombre: viajero.nombre })}
                 >
                   📅
                 </button>
@@ -265,7 +266,7 @@ function Viajeros({
               <button
                 className={`boton-cobro ${cobroDe(viajero) ? "tiene-cobro" : ""}`}
                 onClick={() => abrirCobro(viajero)}
-                title={`Bizum o IBAN de ${viajero.nombre}`}
+                title={t("Bizum o IBAN de {nombre}", { nombre: viajero.nombre })}
               >
                 {cobroDe(viajero)?.tipo === "iban" ? "🏦" : "📲"}
               </button>
@@ -273,16 +274,16 @@ function Viajeros({
               <button
                 className="boton-soy"
                 onClick={() => onSoyYo(viajero.id)}
-                title={viajero.id === soy ? "Ya no soy yo" : "Este soy yo"}
+                title={viajero.id === soy ? t("Ya no soy yo") : t("Este soy yo")}
               >
-                {viajero.id === soy ? "✓" : "¿yo?"}
+                {viajero.id === soy ? "✓" : t("¿yo?")}
               </button>
 
               {!cerrado && (
                 <button
                   className="boton-quitar"
                   onClick={() => onQuitar(viajero.id, viajero.nombre)}
-                  title={`Quitar a ${viajero.nombre}`}
+                  title={t("Quitar a {nombre}", { nombre: viajero.nombre })}
                 >
                   ✕
                 </button>
@@ -292,8 +293,10 @@ function Viajeros({
                 <div className="editar-cobro">
                   {conQuienPuedeIr(viajero, viajeros).length === 0 ? (
                     <p className="cobro-ayuda">
-                      {viajero.nombre} lleva la cuenta de {enLista(suGrupo(viajero).map((v) => v.nombre))}. Para
-                      separarlos, cámbialo desde ellos.
+                      {t("{nombre} lleva la cuenta de {quienes}. Para separarlos, cámbialo desde ellos.", {
+                        nombre: viajero.nombre,
+                        quienes: enLista(suGrupo(viajero).map((v) => v.nombre)),
+                      })}
                     </p>
                   ) : (
                     <>
@@ -303,18 +306,18 @@ function Viajeros({
                           value={conQuienVa(viajero, viajeros)?.id ?? ""}
                           onChange={(e) => juntar(viajero, e.target.value || null)}
                           onKeyDown={(e) => e.key === "Escape" && setJuntando(null)}
-                          aria-label={`Con quién paga ${viajero.nombre}`}
+                          aria-label={t("Con quién paga {nombre}", { nombre: viajero.nombre })}
                         >
-                          <option value="">Paga por su cuenta</option>
+                          <option value="">{t("Paga por su cuenta")}</option>
                           {conQuienPuedeIr(viajero, viajeros).map((v) => (
                             <option key={v.id} value={v.id}>
-                              Paga con {v.nombre}
+                              {t("Paga con {nombre}", { nombre: v.nombre })}
                             </option>
                           ))}
                         </select>
                       </div>
                       <p className="cobro-ayuda">
-                        Al saldar, los que van juntos hacen un solo pago. Lo de cada uno se sigue viendo por separado.
+                        {t("Al saldar, los que van juntos hacen un solo pago. Lo de cada uno se sigue viendo por separado.")}
                       </p>
                     </>
                   )}
@@ -330,7 +333,7 @@ function Viajeros({
                 <div className="editar-cobro">
                   <div className="fila-estancia">
                     <label>
-                      Llega
+                      {t("Llega")}
                       <input
                         type="date"
                         autoFocus
@@ -341,7 +344,7 @@ function Viajeros({
                       />
                     </label>
                     <label>
-                      Se va
+                      {t("Se va")}
                       <input
                         type="date"
                         value={hasta}
@@ -354,15 +357,15 @@ function Viajeros({
                   <div className="botones-estancia">
                     {tieneEstancia(viajero) && (
                       <button className="enlace" onClick={() => guardarEstancia("", "")}>
-                        Está todo el viaje
+                        {t("Está todo el viaje")}
                       </button>
                     )}
                     <button className="guardar-estancia" onClick={() => guardarEstancia(desde, hasta)}>
-                      Guardar
+                      {t("Guardar")}
                     </button>
                   </div>
                   <p className="cobro-ayuda">
-                    Los gastos nuevos de los días que no está no le tocan. Los que ya están apuntados no cambian.
+                    {t("Los gastos nuevos de los días que no está no le tocan. Los que ya están apuntados no cambian.")}
                   </p>
                 </div>
               )}
@@ -373,7 +376,7 @@ function Viajeros({
                     <input
                       type="text"
                       autoFocus
-                      placeholder="Móvil de Bizum o IBAN"
+                      placeholder={t("Móvil de Bizum o IBAN")}
                       className={cobroMal ? "campo-mal" : ""}
                       value={textoCobro}
                       onChange={(e) => {
@@ -385,12 +388,12 @@ function Viajeros({
                         if (e.key === "Escape") setCobrando(null);
                       }}
                     />
-                    <button onClick={guardarCobro}>Guardar</button>
+                    <button onClick={guardarCobro}>{t("Guardar")}</button>
                   </div>
                   <p className={cobroMal ? "cobro-ayuda cobro-mal" : "cobro-ayuda"}>
                     {cobroMal
-                      ? "Eso no es un móvil español ni un IBAN válido."
-                      : `Para que sepan dónde pagarle a ${viajero.nombre}. Lo ve todo el que tenga el código.`}
+                      ? t("Eso no es un móvil español ni un IBAN válido.")
+                      : t("Para que sepan dónde pagarle a {nombre}. Lo ve todo el que tenga el código.", { nombre: viajero.nombre })}
                   </p>
                 </div>
               )}
@@ -400,12 +403,12 @@ function Viajeros({
       )}
 
       {viajeros.length === 1 && !cerrado && (
-        <p className="vacio aviso-falta-otro">Con uno solo no hay nada que repartir: añade a otro más.</p>
+        <p className="vacio aviso-falta-otro">{t("Con uno solo no hay nada que repartir: añade a otro más.")}</p>
       )}
 
       {viajeros.length > 0 && !soy && (
         <p className="vacio aviso-quien-soy">
-          Marca quién eres tú y te lo resaltamos en las cuentas.
+          {t("Marca quién eres tú y te lo resaltamos en las cuentas.")}
         </p>
       )}
     </section>

@@ -7,6 +7,7 @@
 import { conMoneda } from "./monedas";
 import { calcularTotal } from "./calculos";
 import { limpiarNota } from "./notas";
+import { t } from "./idioma";
 
 export const ESPERA = 5000;
 
@@ -103,5 +104,5 @@ export function queSeVaConGastos(gastos, moneda = "EUR") {
 }
 
 export function textoQuitarVarios(cuantos) {
-  return cuantos === 2 ? "quitar los dos" : `quitar los ${cuantos}`;
+  return cuantos === 2 ? t("quitar los dos") : t("quitar los {n}", { n: cuantos });
 }

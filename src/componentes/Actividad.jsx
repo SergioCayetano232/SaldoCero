@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { agrupar, frase } from "../actividad";
 import { apuntadoHace, haceCuanto } from "../fechas";
+import { t } from "../idioma";
 
 const AL_PRINCIPIO = 5;
 const COMO_MUCHO = 20;
@@ -19,7 +20,7 @@ function Actividad({ actividad = [], viajeros, soy, monedaViaje }) {
   return (
     <section className="tarjeta">
       <h2>
-        <span className="icono">🕒</span> Lo último
+        <span className="icono">🕒</span> {t("Lo último")}
       </h2>
 
       <ul className="actividad">
@@ -33,7 +34,7 @@ function Actividad({ actividad = [], viajeros, soy, monedaViaje }) {
 
       {grupos.length > AL_PRINCIPIO && (
         <button className="enlace" onClick={() => setTodo(!todo)}>
-          {todo ? "Ver menos" : "Ver más"}
+          {todo ? t("Ver menos") : t("Ver más")}
         </button>
       )}
     </section>

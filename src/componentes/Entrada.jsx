@@ -7,6 +7,7 @@ import { codigoDelPortapapeles } from "../codigos";
 import { monedaEnLista, seOlvidanTodos, avisoOlvidarTodos, seBuscanViajes, buscarViajes } from "../pasados";
 import { cuentaDeNeto } from "../titulo";
 import { esOrdenador, viajeDeLaTecla } from "../teclado";
+import { t } from "../idioma";
 
 // Primera pantalla: o creas un viaje o entras en el de alguien con su código.
 function Entrada({ onCrear, onEntrar, cargando, error }) {
@@ -59,12 +60,12 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
   return (
     <>
       <section className="tarjeta">
-        <h2><span className="icono">🗺️</span> Empezar un viaje</h2>
+        <h2><span className="icono">🗺️</span> {t("Empezar un viaje")}</h2>
 
         <div className="fila-formulario">
           <input
             type="text"
-            placeholder="Nombre del viaje (Lisboa, Fallas...)"
+            placeholder={t("Nombre del viaje (Lisboa, Fallas...)")}
             maxLength={LARGO_MAXIMO}
             autoCapitalize="sentences"
             enterKeyHint="go"
@@ -80,7 +81,7 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
             value={moneda}
             onChange={(e) => setMoneda(e.target.value)}
             disabled={cargando}
-            title="Moneda del viaje"
+            title={t("Moneda del viaje")}
           >
             {MONEDAS.map((m) => (
               <option key={m.codigo} value={m.codigo}>
@@ -89,24 +90,21 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
             ))}
           </select>
           <button onClick={() => onCrear(nombre, moneda)} disabled={cargando}>
-            Crear
+            {t("Crear")}
           </button>
         </div>
 
-        <p className="vacio">
-          Te daremos un código para pasárselo a los demás. Las cuentas se harán en{" "}
-          {moneda}.
-        </p>
+        <p className="vacio">{t("Te daremos un código para pasárselo a los demás. Las cuentas se harán en {moneda}.", { moneda })}</p>
       </section>
 
       <section className="tarjeta">
-        <h2><span className="icono">🔑</span> Entrar en uno</h2>
+        <h2><span className="icono">🔑</span> {t("Entrar en uno")}</h2>
 
         <div className="fila-formulario">
           <input
             type="text"
             className="campo-codigo"
-            placeholder="Código del viaje"
+            placeholder={t("Código del viaje")}
             // Que el corrector del móvil no convierta el código en una palabra.
             autoCapitalize="characters"
             autoComplete="off"
@@ -128,15 +126,15 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
             disabled={cargando}
           />
           <button onClick={() => onEntrar(codigo)} disabled={cargando || !codigo.trim()}>
-            Entrar
+            {t("Entrar")}
           </button>
         </div>
 
         <p className="vacio">
-          {nadaCopiado ? "No hay ningún código copiado. " : "El que te haya pasado quien creó el viaje. "}
+          {nadaCopiado ? t("No hay ningún código copiado.") : t("El que te haya pasado quien creó el viaje.")}{" "}
           {sePuedePegar && !codigo && (
             <button className="boton-pegar" onClick={pegar} disabled={cargando}>
-              📋 Pegar el que te han mandado
+              📋 {t("Pegar el que te han mandado")}
             </button>
           )}
         </p>
@@ -147,7 +145,7 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
       {pasados.length > 0 && (
         <section className="tarjeta">
           <h2>
-            <span className="icono">🕘</span> Tus viajes
+            <span className="icono">🕘</span> {t("Tus viajes")}
             <span className="titulo-cuantos">{pasados.length}</span>
           </h2>
 
@@ -156,8 +154,8 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
               type="search"
               className="filtro-buscar buscar-viajes"
               autoComplete="off"
-              placeholder="Buscar por nombre o código"
-              aria-label="Buscar en tus viajes"
+              placeholder={t("Buscar por nombre o código")}
+              aria-label={t("Buscar en tus viajes")}
               enterKeyHint="search"
               value={buscado}
               onChange={(e) => setBuscado(e.target.value)}
@@ -165,7 +163,7 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
             />
           )}
 
-          {visibles.length === 0 && <p className="vacio">Ningún viaje con "{buscado.trim()}".</p>}
+          {visibles.length === 0 && <p className="vacio">{t('Ningún viaje con "{texto}".', { texto: buscado.trim() })}</p>}
 
           <ul className="lista">
             {visibles.map((viaje, i) => (
@@ -175,7 +173,7 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
                   onClick={() => onEntrar(viaje.codigo)}
                   disabled={cargando}
                   aria-keyshortcuts={i < 9 ? String(i + 1) : undefined}
-                  title={esOrdenador() && i < 9 ? `También con el ${i + 1}` : undefined}
+                  title={esOrdenador() && i < 9 ? t("También con el {n}", { n: i + 1 }) : undefined}
                 >
                   <span className="viaje-pasado-nombre">{viaje.nombre}</span>
                   <small className="reparto">
@@ -184,7 +182,7 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
                       <span className="viaje-pasado-cuando">· {monedaEnLista(viaje.moneda, deCasa)}</span>
                     )}
                     {viaje.visto && <span className="viaje-pasado-cuando">· {haceCuanto(viaje.visto)}</span>}
-                    {viaje.cerrado && <span className="viaje-pasado-cuando">· 🔒 cerrado</span>}
+                    {viaje.cerrado && <span className="viaje-pasado-cuando">· 🔒 {t("cerrado")}</span>}
                     {cuentaDeNeto(viaje.neto, viaje.moneda) && (
                       <span className={`viaje-pasado-cuando viaje-pasado-saldo ${viaje.neto > 0 ? "le-deben" : "debe"}`}>
                         · {cuentaDeNeto(viaje.neto, viaje.moneda)}
@@ -195,7 +193,7 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
                 <button
                   className="boton-quitar"
                   onClick={() => olvidar(viaje.codigo)}
-                  title="Quitar de la lista"
+                  title={t("Quitar de la lista")}
                 >
                   ✕
                 </button>
@@ -209,22 +207,21 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
                 <p>{avisoOlvidarTodos(pasados.length)}</p>
                 <div className="aviso-repetido-botones">
                   <button className="aviso-si" onClick={olvidarTodos}>
-                    Sí, quitarlos
+                    {t("Sí, quitarlos")}
                   </button>
                   <button className="aviso-no" onClick={() => setOlvidandoTodos(false)} autoFocus>
-                    No
+                    {t("No")}
                   </button>
                 </div>
               </div>
             ) : (
               <button className="enlace olvidar-todos" onClick={() => setOlvidandoTodos(true)}>
-                Quitarlos todos de la lista
+                {t("Quitarlos todos de la lista")}
               </button>
             ))}
 
           <p className="vacio">
-            Solo se guardan en este móvil. Si borras los datos del navegador o
-            entras desde otro sitio, vuelves con el código.
+            {t("Solo se guardan en este móvil. Si borras los datos del navegador o entras desde otro sitio, vuelves con el código.")}
           </p>
         </section>
       )}
@@ -232,15 +229,15 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
       <ul className="como-va">
         <li>
           <span className="paso-num">1</span>
-          Creas el viaje y les pasas el código
+          {t("Creas el viaje y les pasas el código")}
         </li>
         <li>
           <span className="paso-num">2</span>
-          Cada uno apunta lo que va pagando
+          {t("Cada uno apunta lo que va pagando")}
         </li>
         <li>
           <span className="paso-num">3</span>
-          Al volver, te decimos quién le debe a quién
+          {t("Al volver, te decimos quién le debe a quién")}
         </li>
       </ul>
     </>

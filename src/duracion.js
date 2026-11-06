@@ -1,6 +1,8 @@
 // En qué día del viaje estáis, o cuánto duró. Sale de las fechas de los gastos:
 // el viaje no tiene fecha de inicio ni de fin.
 
+import { t, tn } from "./idioma";
+
 // Si el último gasto es de hace más, el viaje ya acabó aunque nadie lo cerrase.
 // Un "Día 40" no le dice nada a nadie.
 const DIAS_SIN_GASTOS = 2;
@@ -11,7 +13,7 @@ function diasEntre(desde, hasta) {
 }
 
 function enDias(n) {
-  return n === 1 ? "1 día" : `${n} días`;
+  return tn(n, "{n} día", "{n} días");
 }
 
 // null si no hay ningún gasto con fecha.
@@ -24,5 +26,5 @@ export function textoDuracion(gastos, hoy, cerrado = false) {
   const terminado = cerrado || diasEntre(ultimo, hoy) > DIAS_SIN_GASTOS;
 
   if (terminado) return enDias(diasEntre(primero, ultimo) + 1);
-  return `Día ${Math.max(diasEntre(primero, hoy) + 1, 1)}`;
+  return t("Día {n}", { n: Math.max(diasEntre(primero, hoy) + 1, 1) });
 }

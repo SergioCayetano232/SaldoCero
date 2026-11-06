@@ -1,4 +1,5 @@
 import { monedaConBandera } from "./monedas";
+import { t } from "./idioma";
 import { normalizar } from "./filtros";
 
 // La lista de "Tus viajes" con el candado puesto o quitado en uno de ellos.
@@ -34,7 +35,7 @@ export function seOlvidanTodos(lista) {
 
 // Se pide confirmar: sin el código no hay forma de volver a entrar.
 export function avisoOlvidarTodos(cuantos) {
-  return `¿Quitar los ${cuantos}? Los viajes siguen ahí, pero sin el código no podrás volver a entrar.`;
+  return t("¿Quitar los {n}? Los viajes siguen ahí, pero sin el código no podrás volver a entrar.", { n: cuantos });
 }
 
 // Con pocos se ven todos de un vistazo, el buscador solo estorbaría.

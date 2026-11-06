@@ -1,5 +1,7 @@
 // Las fechas de los gastos.
 
+import { t, tn, formatoFechas } from "./idioma";
+
 // "2026-09-11", que es como las guarda la base de datos.
 export function hoy() {
   return new Date().toLocaleDateString("sv-SE");
@@ -23,15 +25,15 @@ function haceDias(cuantos) {
 // Anteayer también, que a la vuelta se apunta lo del sábado el lunes.
 export function diasRapidos() {
   return [
-    { nombre: "Hoy", fecha: hoy() },
-    { nombre: "Ayer", fecha: ayer() },
-    { nombre: "Anteayer", fecha: anteayer() },
+    { nombre: t("Hoy"), fecha: hoy() },
+    { nombre: t("Ayer"), fecha: ayer() },
+    { nombre: t("Anteayer"), fecha: anteayer() },
   ];
 }
 
 // Un día suelto, en corto: "vie, 11 sept".
 export function enCorto(fecha) {
-  return new Date(`${fecha}T12:00:00`).toLocaleDateString("es-ES", {
+  return new Date(`${fecha}T12:00:00`).toLocaleDateString(formatoFechas(), {
     weekday: "short",
     day: "numeric",
     month: "short",
@@ -63,8 +65,8 @@ export function cuandoFue(fechas) {
 // El título de cada grupo de la lista: "Hoy", "Ayer" o el día entero.
 // Si es de otro año, con el año: si no, un gasto del año pasado no se distingue.
 export function comoTitulo(fecha) {
-  if (fecha === hoy()) return "Hoy";
-  if (fecha === ayer()) return "Ayer";
+  if (fecha === hoy()) return t("Hoy");
+  if (fecha === ayer()) return t("Ayer");
 
   const ano = fecha.slice(0, 4);
   return ano === hoy().slice(0, 4) ? enCorto(fecha) : `${enCorto(fecha)} ${ano}`;
@@ -88,7 +90,7 @@ export function porDias(gastos) {
 
 // Lo que lleva cada día, al lado de su título.
 export function cuantosGastos(n) {
-  return n === 1 ? "1 gasto" : `${n} gastos`;
+  return tn(n, "{n} gasto", "{n} gastos");
 }
 
 // Cuándo entraste por última vez en un viaje: "hoy", "ayer", "hace 3 días"...
@@ -100,12 +102,12 @@ export function haceCuanto(momento, ahora = new Date()) {
   const dias = Math.round((aMediodia(ahora) - aMediodia(momento)) / 86400000);
 
   // Con el reloj del móvil cambiado puede salir del futuro. Se queda en hoy.
-  if (dias <= 0) return "hoy";
-  if (dias === 1) return "ayer";
-  if (dias < 7) return `hace ${dias} días`;
-  if (dias < 30) return Math.floor(dias / 7) === 1 ? "hace una semana" : `hace ${Math.floor(dias / 7)} semanas`;
-  if (dias < 365) return Math.floor(dias / 30) === 1 ? "hace un mes" : `hace ${Math.floor(dias / 30)} meses`;
-  return "hace más de un año";
+  if (dias <= 0) return t("hoy");
+  if (dias === 1) return t("ayer");
+  if (dias < 7) return t("hace {n} días", { n: dias });
+  if (dias < 30) return tn(Math.floor(dias / 7), "hace una semana", "hace {n} semanas");
+  if (dias < 365) return tn(Math.floor(dias / 30), "hace un mes", "hace {n} meses");
+  return t("hace más de un año");
 }
 
 // Cuándo se apuntó un gasto, para ver qué es nuevo: "hace 5 min", "hace 3 h".
@@ -115,8 +117,8 @@ export function apuntadoHace(momento, ahora = Date.now()) {
   if (!Number.isFinite(minutos)) return null;
 
   // Con el reloj del móvil adelantado puede salir del futuro.
-  if (minutos < 1) return "ahora mismo";
-  if (minutos < 60) return `hace ${minutos} min`;
-  if (minutos < 24 * 60) return `hace ${Math.floor(minutos / 60)} h`;
+  if (minutos < 1) return t("ahora mismo");
+  if (minutos < 60) return t("hace {n} min", { n: minutos });
+  if (minutos < 24 * 60) return t("hace {n} h", { n: Math.floor(minutos / 60) });
   return null;
 }

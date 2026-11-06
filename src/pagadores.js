@@ -3,6 +3,7 @@
 import { BOTE } from "./bote";
 import { enLista } from "./nombres";
 import { leerImporte } from "./monedas";
+import { t } from "./idioma";
 
 // Los que pusieron algo, de más a menos. Si no lo pagaron entre varios, el de siempre.
 export function idsDeQuienPago(gasto) {
@@ -19,7 +20,7 @@ export function pagoEnElGasto(gasto, viajeroId) {
 
 // "Ana y Luis", "el bote" o el nombre. Los que ya no están no salen.
 export function nombreDeQuienPago(gasto, viajeros) {
-  if (gasto.pagadorId === BOTE) return "el bote";
+  if (gasto.pagadorId === BOTE) return t("el bote");
   const nombres = idsDeQuienPago(gasto)
     .map((id) => viajeros.find((v) => v.id === id)?.nombre)
     .filter(Boolean);

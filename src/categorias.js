@@ -1,5 +1,7 @@
 // En qué se va el dinero de un viaje.
 
+import { t } from "./idioma";
+
 // Pocas y claras, que elegir sea un vistazo y no una lista interminable.
 export const CATEGORIAS = [
   { id: "comida", emoji: "🍽️", nombre: "Comida", color: "#e8862e" },
@@ -21,7 +23,7 @@ export function categoriaDe(id) {
 // así que esos se quedan en "Gasto" como siempre.
 export function conceptoSinEscribir(categoria) {
   const c = categoriaDe(categoria);
-  return c.id === POR_DEFECTO ? "Gasto" : c.nombre;
+  return c.id === POR_DEFECTO ? t("Gasto") : t(c.nombre);
 }
 
 // Cuánto se ha ido en cada cosa, de más a menos.

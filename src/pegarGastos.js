@@ -9,6 +9,7 @@ import { arreglarConcepto } from "./concepto";
 import { hoy } from "./fechas";
 import { normalizar } from "./filtros";
 import { presentesEseDia } from "./estancia";
+import { tn } from "./idioma";
 
 // Las notas traen guiones, puntos o números delante: "- cena 45", "2) taxi 12".
 function limpiarLinea(linea) {
@@ -107,5 +108,5 @@ export function gastosDeLista(texto, viajeros, { pagadorId = "", moneda = "EUR",
 }
 
 export function textoApuntarLista(cuantos) {
-  return cuantos === 1 ? "Apuntar 1 gasto" : `Apuntar los ${cuantos} gastos`;
+  return tn(cuantos, "Apuntar 1 gasto", "Apuntar los {n} gastos");
 }

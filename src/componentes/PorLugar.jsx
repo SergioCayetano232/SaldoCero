@@ -1,5 +1,6 @@
 import { porLugar } from "../lugares";
 import { conMoneda } from "../monedas";
+import { t } from "../idioma";
 
 // Cuánto se fue en cada ciudad. Solo sale si hay al menos dos.
 function PorLugar({ gastos, moneda }) {
@@ -10,11 +11,11 @@ function PorLugar({ gastos, moneda }) {
 
   return (
     <div className="por-lugar">
-      <h3>📍 Por ciudad</h3>
+      <h3>📍 {t("Por ciudad")}</h3>
       <ul>
         {filas.map((f) => (
           <li key={f.lugar ?? "sin-lugar"} className={f.lugar ? "" : "sin-lugar"}>
-            <span className="por-lugar-nombre">{f.lugar ?? "Sin ciudad"}</span>
+            <span className="por-lugar-nombre">{f.lugar ?? t("Sin ciudad")}</span>
             <span className="por-lugar-barra" aria-hidden="true">
               <span style={{ width: `${mayor > 0 ? Math.max(0, (f.total / mayor) * 100) : 0}%` }} />
             </span>

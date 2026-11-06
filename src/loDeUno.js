@@ -5,6 +5,7 @@ import { pagoEnElGasto } from "./pagadores";
 import { conMoneda } from "./monedas";
 import { enCorto } from "./fechas";
 import { enlaceDelViaje } from "./compartir";
+import { t } from "./idioma";
 
 export function cuentaDe(gastos, viajeroId, viajeros) {
   let pagado = 0;
@@ -22,15 +23,15 @@ export function cuentaDe(gastos, viajeroId, viajeros) {
 export function textoCuentaDe(cuenta, nombre, esYo, moneda) {
   const pago = conMoneda(cuenta.pagado, moneda);
   const toca = conMoneda(cuenta.leToca, moneda);
-  return esYo ? `Pagaste ${pago} · te tocan ${toca}` : `${nombre} pagó ${pago} · le tocan ${toca}`;
+  return esYo ? t("Pagaste {pago} · te tocan {toca}", { pago, toca }) : t("{nombre} pagó {pago} · le tocan {toca}", { nombre, pago, toca });
 }
 
 // Lo que sale al lado de cada gasto. Si lo pagó pero no iba en él, se dice,
 // que si no parece que no tiene nada que ver.
 export function textoParteDe(gasto, viajeroId, viajeros, esYo, moneda) {
   const parte = parteDe(gasto, viajeroId, viajeros);
-  if (parte > 0) return `${esYo ? "te tocan" : "le tocan"} ${conMoneda(parte, moneda)}`;
-  return esYo ? "lo pagaste, no ibas" : "lo pagó, no iba";
+  if (parte > 0) return esYo ? t("te tocan {cifra}", { cifra: conMoneda(parte, moneda) }) : t("le tocan {cifra}", { cifra: conMoneda(parte, moneda) });
+  return esYo ? t("lo pagaste, no ibas") : t("lo pagó, no iba");
 }
 
 // Sus cuentas gasto a gasto, para mandárselas al que no se cree lo que debe.

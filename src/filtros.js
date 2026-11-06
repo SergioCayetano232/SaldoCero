@@ -6,6 +6,7 @@ import { hoy } from "./fechas";
 import { BOTE, esDelBote } from "./bote";
 import { categoriaDe } from "./categorias";
 import { nombreDeQuienPago, pagoEnElGasto } from "./pagadores";
+import { t } from "./idioma";
 
 // Con menos gastos que estos, la barra de filtros estorba más que ayuda.
 export const MINIMO_PARA_FILTRAR = 4;
@@ -113,10 +114,10 @@ export function hayFiltros(filtros) {
 // Lo que sale cuando no queda nada. Con lo buscado delante, que a veces es solo una errata.
 export function textoSinResultados(filtros) {
   const texto = (filtros.texto ?? "").trim();
-  if (!texto) return "Ningún gasto encaja con eso.";
+  if (!texto) return t("Ningún gasto encaja con eso.");
 
   const conOtros = hayFiltros({ ...filtros, texto: "" });
-  return conOtros ? `Nada con «${texto}» con estos filtros.` : `Nada con «${texto}».`;
+  return conOtros ? t("Nada con «{texto}» con estos filtros.", { texto }) : t("Nada con «{texto}».", { texto });
 }
 
 // Si no hay ni una foto, el botón de los tickets sobra.

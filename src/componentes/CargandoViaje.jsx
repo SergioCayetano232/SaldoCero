@@ -1,5 +1,7 @@
 // Lo que se ve mientras llega el viaje: la forma de las tarjetas, sin los datos.
 
+import { t } from "../idioma";
+
 function Caja({ ancho, alto = 12, redonda = false }) {
   return (
     <span
@@ -20,7 +22,7 @@ const GASTOS = [
 function CargandoViaje() {
   return (
     <>
-      <section className="tarjeta" role="status" aria-label="Cargando el viaje">
+      <section className="tarjeta" role="status" aria-label={t("Cargando el viaje")}>
         <div className="esqueleto-fila">
           <Caja ancho={26} alto={26} redonda />
           <Caja ancho="45%" alto={20} />

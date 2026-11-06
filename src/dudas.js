@@ -2,6 +2,7 @@
 
 import { BOTE } from "./bote";
 import { idsDeQuienPago } from "./pagadores";
+import { t } from "./idioma";
 
 export const LARGO_DUDA = 140;
 export const DUDA_POR_DEFECTO = "¿Esto qué es?";
@@ -9,7 +10,7 @@ export const DUDA_POR_DEFECTO = "¿Esto qué es?";
 // Vacío vale: con darle al botón ya se entiende la pregunta.
 export function limpiarDuda(texto) {
   const limpio = String(texto ?? "").replace(/\s+/g, " ").trim().slice(0, LARGO_DUDA);
-  return limpio || DUDA_POR_DEFECTO;
+  return limpio || t(DUDA_POR_DEFECTO);
 }
 
 // Se le pregunta al que lo apuntó. Si no se sabe, al que pagó, si fue uno solo.
@@ -27,16 +28,16 @@ export function dudasParaMi(gastos, soy) {
 
 export function textoDuda(gasto, viajeros, soy) {
   if (!gasto.duda) return null;
-  if (gasto.dudaPor && gasto.dudaPor === soy) return `Has preguntado: ${gasto.duda}`;
-  const quien = viajeros.find((v) => v.id === gasto.dudaPor)?.nombre ?? "Alguien";
-  return `${quien} pregunta: ${gasto.duda}`;
+  if (gasto.dudaPor && gasto.dudaPor === soy) return t("Has preguntado: {duda}", { duda: gasto.duda });
+  const quien = viajeros.find((v) => v.id === gasto.dudaPor)?.nombre ?? t("Alguien");
+  return t("{quien} pregunta: {duda}", { quien, duda: gasto.duda });
 }
 
 export function avisoDeDudas(dudas, viajeros) {
   if (dudas.length === 0) return null;
-  if (dudas.length > 1) return `Te han preguntado por ${dudas.length} gastos`;
+  if (dudas.length > 1) return t("Te han preguntado por {n} gastos", { n: dudas.length });
 
   const [g] = dudas;
-  const quien = viajeros.find((v) => v.id === g.dudaPor)?.nombre ?? "Alguien";
-  return `${quien} te pregunta por "${g.concepto}": ${g.duda}`;
+  const quien = viajeros.find((v) => v.id === g.dudaPor)?.nombre ?? t("Alguien");
+  return t('{quien} te pregunta por "{concepto}": {duda}', { quien, concepto: g.concepto, duda: g.duda });
 }

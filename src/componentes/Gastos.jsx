@@ -14,6 +14,7 @@ import { presentesEseDia, ausentesEseDia } from "../estancia";
 import { apuntadoPor } from "../apuntadoPor";
 import { dudasParaMi, textoDuda, avisoDeDudas, DUDA_POR_DEFECTO, LARGO_DUDA } from "../dudas";
 import { limpiarLugar, lugaresDelViaje, lugarSugerido, mismoLugar, LARGO_LUGAR } from "../lugares";
+import { t, tn, idiomaActual } from "../idioma";
 import { borradorQueVale, hayAlgoEscrito, hayAlgoQueBorrar } from "../borrador";
 import * as datos from "../datos";
 import { gastoAlFormulario, repetirGasto, ultimoApuntado } from "../repetir";
@@ -166,7 +167,7 @@ function Gastos({
   function ponerGasolina() {
     if (!costeDeLaGasolina) return;
     escribirImporte(comoImporte(costeDeLaGasolina));
-    if (!concepto.trim()) escribirConcepto("Gasolina");
+    if (!concepto.trim()) escribirConcepto(t("Gasolina"));
     guardarCoche(gasolina);
     setGasolina(null);
   }
@@ -864,7 +865,7 @@ function Gastos({
   }
 
   function nombrePagador(id) {
-    if (id === BOTE) return "🫙 Del bote";
+    if (id === BOTE) return `🫙 ${t("Del bote")}`;
     const viajero = viajeros.find((v) => v.id === id);
     return viajero ? viajero.nombre : "¿?";
   }
@@ -873,20 +874,20 @@ function Gastos({
   function textoReparto(gasto) {
     const suyos = participantesDeGasto(gasto, viajeros);
     // Puede quedarse sin nadie si borras a los que iban en él.
-    if (suyos.length === 0) return "sin nadie a quien repartirlo";
+    if (suyos.length === 0) return t("sin nadie a quien repartirlo");
     // Si va repartido desigual, se dice: si no, engaña ver "entre todos".
     const desigual = Object.values(gasto.partes ?? {}).some((p) => p !== 1);
-    const comoSeParte = desigual ? ", a partes distintas" : "";
+    const comoSeParte = desigual ? t(", a partes distintas") : "";
 
-    if (suyos.length === viajeros.length) return `entre todos${comoSeParte}`;
+    if (suyos.length === viajeros.length) return `${t("entre todos")}${comoSeParte}`;
 
-    return `entre ${enLista(suyos.map((v) => v.nombre))}${comoSeParte}`;
+    return `${t("entre {quienes}", { quienes: enLista(suyos.map((v) => v.nombre)) })}${comoSeParte}`;
   }
 
   return (
     <section className="tarjeta">
       <h2>
-        <span className="icono">🧾</span> Gastos
+        <span className="icono">🧾</span> {t("Gastos")}
         {gastos.length > 0 && <span className="titulo-cuantos">{gastos.length}</span>}
       </h2>
 
@@ -894,13 +895,13 @@ function Gastos({
         <p className="aviso-duda" role="status">
           <span>❓ {avisoDeDudas(paraMi, viajeros)}</span>
           <button className="enlace" onClick={() => verDuda(paraMi[0])}>
-            {paraMi.length > 1 ? "Ver la primera" : "Verlo"}
+            {paraMi.length > 1 ? t("Ver la primera") : t("Verlo")}
           </button>
         </p>
       )}
 
       {viajeros.length === 0 ? (
-        <p className="vacio">Primero añade viajeros para poder registrar gastos.</p>
+        <p className="vacio">{t("Primero añade viajeros para poder registrar gastos.")}</p>
       ) : (
         <>
           {/* Cerrado, ya no se apuntan gastos. */}
@@ -918,9 +919,9 @@ function Gastos({
             >
               {recuperado && (
                 <p className="borrador-recuperado" role="status">
-                  ✍️ Lo dejaste a medias.
+                  ✍️ {t("Lo dejaste a medias.")}
                   <button className="enlace" onClick={cancelar}>
-                    Descartar
+                    {t("Descartar")}
                   </button>
                 </p>
               )}
@@ -930,8 +931,8 @@ function Gastos({
                   <p>
                     📋{" "}
                     {deLaLista.gastos.length === 0
-                      ? "De lo que has pegado no sale ningún gasto."
-                      : `De lo que has pegado salen ${deLaLista.gastos.length === 1 ? "1 gasto" : `${deLaLista.gastos.length} gastos`}:`}
+                      ? t("De lo que has pegado no sale ningún gasto.")
+                      : tn(deLaLista.gastos.length, "De lo que has pegado sale 1 gasto:", "De lo que has pegado salen {n} gastos:")}
                   </p>
                   {deLaLista.gastos.length > 0 && (
                     <ul>
@@ -942,7 +943,7 @@ function Gastos({
                             <small>
                               {" "}· {nombreDeQuienPago(g, viajeros)}
                               {g.participantes.length < viajeros.length &&
-                                ` · sin ${enLista(viajeros.filter((v) => !g.participantes.includes(v.id)).map((v) => v.nombre))}`}
+                                ` · ${t("sin {quienes}", { quienes: enLista(viajeros.filter((v) => !g.participantes.includes(v.id)).map((v) => v.nombre)) })}`}
                               {g.fecha !== hoy() && ` · ${comoTitulo(g.fecha)}`}
                             </small>
                           </span>
@@ -954,7 +955,7 @@ function Gastos({
                   {deLaLista.sinEntender.length > 0 && (
                     <p className="lista-pegada-fuera">
                       {/* Lo normal es que falte quién pagó: con el de arriba elegido, entran. */}
-                      Se quedan fuera, sin importe o sin quién pagó: {deLaLista.sinEntender.map((l) => `«${l}»`).join(", ")}
+                      {t("Se quedan fuera, sin importe o sin quién pagó:")} {deLaLista.sinEntender.map((l) => `«${l}»`).join(", ")}
                     </p>
                   )}
                   <div className="lista-pegada-botones">
@@ -962,7 +963,7 @@ function Gastos({
                       <button className="apuntar-lista" onClick={apuntarLista}>{textoApuntarLista(deLaLista.gastos.length)}</button>
                     )}
                     <button className="enlace" onClick={() => setPegado(null)}>
-                      Cancelar
+                      {t("Cancelar")}
                     </button>
                   </div>
                 </div>
@@ -972,20 +973,21 @@ function Gastos({
                 <div className="dias-sin-gastos" role="status">
                   <span aria-hidden="true">📅</span>
                   <p>
-                    {textoHuecos(huecos)} <strong>¿Se os olvidó algo?</strong>
+                    {textoHuecos(huecos)} <strong>{t("¿Se os olvidó algo?")}</strong>
                   </p>
                   <div className="dias-sin-gastos-botones">
                     <button className="enlace" onClick={apuntarHueco}>
-                      Apuntar{huecos.length > 1 ? " el primero" : ""}
+                      {huecos.length > 1 ? t("Apuntar el primero") : t("Apuntar")}
                     </button>
                     <button className="enlace no-se-gasto" onClick={noSeGasto}>
-                      No gastamos
+                      {t("No gastamos")}
                     </button>
                   </div>
                 </div>
               )}
 
-              {!editando && <Dictado onDictado={alDictar} />}
+              {/* Lo dicho se entiende solo en español: en inglés no se ofrece. */}
+              {!editando && idiomaActual() === "es" && <Dictado onDictado={alDictar} />}
 
               {!entreVarios && (
                 <select
@@ -993,20 +995,20 @@ function Gastos({
                   value={pagadorId}
                   onChange={(e) => setPagadorId(e.target.value)}
                 >
-                  <option value="">{devolucion ? "¿Quién lo recibió?" : "¿Quién pagó?"}</option>
+                  <option value="">{devolucion ? t("¿Quién lo recibió?") : t("¿Quién pagó?")}</option>
                   {viajeros.map((viajero) => (
                     <option key={viajero.id} value={viajero.id}>
                       {viajero.nombre}
                     </option>
                   ))}
                   {/* Si editas uno del bote, que siga saliendo aunque ya no haya bote. */}
-                  {(hayBote || pagadorId === BOTE) && <option value={BOTE}>🫙 Del bote</option>}
+                  {(hayBote || pagadorId === BOTE) && <option value={BOTE}>🫙 {t("Del bote")}</option>}
                 </select>
               )}
 
               {entreVarios && (
                 <div className="partes pagaron-varios">
-                  <p className="partes-ayuda">Lo que puso cada uno, en {moneda}. El que no puso nada, en blanco.</p>
+                  <p className="partes-ayuda">{t("Lo que puso cada uno, en {moneda}. El que no puso nada, en blanco.", { moneda })}</p>
                   {viajeros.map((viajero) => (
                     <div className="fila-parte" key={viajero.id}>
                       <span className="parte-nombre">{viajero.nombre}</span>
@@ -1015,7 +1017,7 @@ function Gastos({
                         inputMode="decimal"
                         className="parte-campo campo-importe"
                         placeholder="0"
-                        aria-label={`Lo que puso ${viajero.nombre}`}
+                        aria-label={t("Lo que puso {nombre}", { nombre: viajero.nombre })}
                         value={pagos[viajero.id] ?? ""}
                         onChange={(e) => setPagos({ ...pagos, [viajero.id]: e.target.value })}
                       />
@@ -1025,11 +1027,11 @@ function Gastos({
                     <p className={`cuadre ${faltaPorPoner === 0 && pagadores ? "cuadre-bien" : "cuadre-mal"}`}>
                       {faltaPorPoner !== 0
                         ? faltaPorPoner > 0
-                          ? `Faltan ${conMoneda(faltaPorPoner, moneda)} por poner`
-                          : `Sobran ${conMoneda(-faltaPorPoner, moneda)}`
+                          ? t("Faltan {cifra} por poner", { cifra: conMoneda(faltaPorPoner, moneda) })
+                          : t("Sobran {cifra}", { cifra: conMoneda(-faltaPorPoner, moneda) })
                         : pagadores
-                          ? "✓ Cuadra con el importe"
-                          : "Si lo puso uno solo, dale a «lo pagó uno solo»"}
+                          ? `✓ ${t("Cuadra con el importe")}`
+                          : t("Si lo puso uno solo, dale a «lo pagó uno solo»")}
                     </p>
                   )}
                 </div>
@@ -1039,7 +1041,7 @@ function Gastos({
               {!devolucion && viajeros.length > 1 && pagadorId !== BOTE && (
                 <div className="fila-varios">
                   <button className="enlace" onClick={() => setVariosPagan(!variosPagan)}>
-                    {variosPagan ? "← lo pagó uno solo" : "¿pagaron entre varios?"}
+                    {variosPagan ? `← ${t("lo pagó uno solo")}` : t("¿pagaron entre varios?")}
                   </button>
                 </div>
               )}
@@ -1054,9 +1056,9 @@ function Gastos({
                     inputMode="decimal"
                     // "Importe" no cabía en el móvil; la moneda ya va al lado.
                     placeholder="0,00"
-                    aria-label="Importe"
+                    aria-label={t("Importe")}
                     aria-keyshortcuts="N"
-                    title={esOrdenador() ? "Importe (pulsa N para venir aquí)" : undefined}
+                    title={esOrdenador() ? t("Importe (pulsa N para venir aquí)") : undefined}
                     enterKeyHint="done"
                     value={importe}
                     // Para corregirlo escribes encima, sin borrar antes.
@@ -1077,8 +1079,8 @@ function Gastos({
                         className="boton-sumar boton-porciento"
                         onPointerDown={(e) => e.preventDefault()}
                         onClick={porciento}
-                        title="Que sea un porcentaje"
-                        aria-label="Que sea un porcentaje"
+                        title={t("Que sea un porcentaje")}
+                        aria-label={t("Que sea un porcentaje")}
                       >
                         %
                       </button>
@@ -1088,8 +1090,8 @@ function Gastos({
                         className="boton-sumar"
                         onPointerDown={(e) => e.preventDefault()}
                         onClick={() => otroSumando("÷")}
-                        title="Dividirlo"
-                        aria-label="Dividirlo"
+                        title={t("Dividirlo")}
+                        aria-label={t("Dividirlo")}
                       >
                         ÷
                       </button>
@@ -1099,8 +1101,8 @@ function Gastos({
                         className="boton-sumar"
                         onPointerDown={(e) => e.preventDefault()}
                         onClick={() => otroSumando("×")}
-                        title="Multiplicarlo"
-                        aria-label="Multiplicarlo"
+                        title={t("Multiplicarlo")}
+                        aria-label={t("Multiplicarlo")}
                       >
                         ×
                       </button>
@@ -1110,8 +1112,8 @@ function Gastos({
                         className="boton-sumar"
                         onPointerDown={(e) => e.preventDefault()}
                         onClick={() => otroSumando("-")}
-                        title="Restarle algo"
-                        aria-label="Restarle algo"
+                        title={t("Restarle algo")}
+                        aria-label={t("Restarle algo")}
                       >
                         −
                       </button>
@@ -1121,8 +1123,8 @@ function Gastos({
                         className="boton-sumar"
                         onPointerDown={(e) => e.preventDefault()}
                         onClick={() => otroSumando("+")}
-                        title="Sumarle otro importe"
-                        aria-label="Sumarle otro importe"
+                        title={t("Sumarle otro importe")}
+                        aria-label={t("Sumarle otro importe")}
                       >
                         +
                       </button>
@@ -1136,7 +1138,7 @@ function Gastos({
                     setMoneda(e.target.value);
                     setTasaAMano(null);
                   }}
-                  title="¿En qué moneda se pagó?"
+                  title={t("¿En qué moneda se pagó?")}
                 >
                   {monedasEnOrden(gastos, monedaViaje).map((m) => (
                     <option key={m.codigo} value={m.codigo}>
@@ -1152,7 +1154,7 @@ function Gastos({
                   value={fecha}
                   max={hoy()}
                   onChange={(e) => setFecha(e.target.value || hoy())}
-                  title="¿Qué día fue?"
+                  title={t("¿Qué día fue?")}
                 />
               </div>
 
@@ -1172,14 +1174,14 @@ function Gastos({
               {/* Aquí y no junto al importe: hasta que no hay categoría, no se sabe de qué tope. */}
               {pasoDelTope !== null && (
                 <p className="aviso-presupuesto" role="status">
-                  Con este os pasáis del tope de {categoriaDe(categoria).nombre.toLowerCase()} en {conMoneda(pasoDelTope, monedaViaje)}
+                  {t("Con este os pasáis del tope de {categoria} en {cifra}", { categoria: t(categoriaDe(categoria).nombre).toLowerCase(), cifra: conMoneda(pasoDelTope, monedaViaje) })}
                 </p>
               )}
 
               {/* Solo en lo de comer, que es donde se deja. */}
               {categoria === "comida" && importeLeido > 0 && !devolucion && (
                 <div className="propinas">
-                  <span>Propina</span>
+                  <span>{t("Propina")}</span>
                   {PROPINAS.map((p) => (
                     <button
                       key={p}
@@ -1196,7 +1198,7 @@ function Gastos({
               {categoria === "transporte" && !devolucion && (
                 <div className="gasolina">
                   <button className="enlace" onClick={abrirGasolina} aria-expanded={Boolean(gasolina)}>
-                    {gasolina ? "← no, lo escribo yo" : "⛽ ¿calcular la gasolina?"}
+                    {gasolina ? `← ${t("no, lo escribo yo")}` : `⛽ ${t("¿calcular la gasolina?")}`}
                   </button>
                   {gasolina && (
                     <div className="calculo-gasolina">
@@ -1233,7 +1235,7 @@ function Gastos({
                             onChange={(e) => setGasolina({ ...gasolina, precio: e.target.value })}
                             onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), ponerGasolina())}
                           />
-                          <span>{simboloDe(moneda)}/litro</span>
+                          <span>{t("{simbolo}/litro", { simbolo: simboloDe(moneda) })}</span>
                         </label>
                       </div>
                       <div className="pie-gasolina">
@@ -1242,13 +1244,13 @@ function Gastos({
                           onClick={() => setGasolina({ ...gasolina, idaYVuelta: !gasolina.idaYVuelta })}
                           aria-pressed={gasolina.idaYVuelta}
                         >
-                          Ida y vuelta
+                          {t("Ida y vuelta")}
                         </button>
                         <span className="coste-gasolina" role="status">
-                          {costeDeLaGasolina ? `= ${conMoneda(costeDeLaGasolina, moneda)}` : "Pon los km, el consumo y el litro"}
+                          {costeDeLaGasolina ? `= ${conMoneda(costeDeLaGasolina, moneda)}` : t("Pon los km, el consumo y el litro")}
                         </span>
                         <button className="poner-gasolina" onClick={ponerGasolina} disabled={!costeDeLaGasolina}>
-                          Ponerlo
+                          {t("Ponerlo")}
                         </button>
                       </div>
                     </div>
@@ -1259,10 +1261,10 @@ function Gastos({
               {esSuma(importe) && (
                 <p className={`resultado-suma ${!(importeLeido > 0) ? "suma-mal" : ""}`} role="status">
                   {isNaN(importeLeido)
-                    ? "Esa cuenta no se entiende: solo números, +, −, ×, ÷ y %"
+                    ? t("Esa cuenta no se entiende: solo números, +, −, ×, ÷ y %")
                     : importeLeido > 0
                       ? `= ${conMoneda(importeLeido, moneda)}`
-                      : "Así no queda nada que pagar"}
+                      : t("Así no queda nada que pagar")}
                 </p>
               )}
 
@@ -1271,7 +1273,7 @@ function Gastos({
                   {aMano ? (
                     <>
                       {sinCambio && tasaAMano === null && (
-                        <span className="aviso">No sabemos el cambio de {moneda}, ponlo tú. </span>
+                        <span className="aviso">{t("No sabemos el cambio de {moneda}, ponlo tú.", { moneda })} </span>
                       )}
                       <label className="cambio-a-mano">
                         1 {moneda} =
@@ -1281,30 +1283,30 @@ function Gastos({
                           placeholder="0,00"
                           value={tasaAMano ?? ""}
                           onChange={(e) => setTasaAMano(e.target.value)}
-                          aria-label={`Cuántos ${monedaViaje} es 1 ${moneda}`}
+                          aria-label={t("Cuántos {viaje} es 1 {moneda}", { viaje: monedaViaje, moneda })}
                         />
                         {monedaViaje}
                       </label>
                       {tasa && importeLeido > 0 && (
-                        <> · Son <strong>{conMoneda(importeLeido * tasa, monedaViaje)}</strong></>
+                        <> · {t("Son")} <strong>{conMoneda(importeLeido * tasa, monedaViaje)}</strong></>
                       )}
                       {typeof cambioTraido?.tasa === "number" && cambioTraido.moneda === moneda && (
                         <button className="enlace" onClick={() => setTasaAMano(null)}>
-                          Usar el del día
+                          {t("Usar el del día")}
                         </button>
                       )}
                     </>
                   ) : tasa === undefined ? (
-                    <>Mirando a cuánto está el cambio…</>
+                    <>{t("Mirando a cuánto está el cambio…")}</>
                   ) : (
                     <>
                       {importeLeido > 0 && (
-                        <>Son <strong>{conMoneda(importeLeido * tasa, monedaViaje)}</strong> · </>
+                        <>{t("Son")} <strong>{conMoneda(importeLeido * tasa, monedaViaje)}</strong> · </>
                       )}
                       1 {moneda} = {tasa.toFixed(4)} {monedaViaje}
                       {/* El banco no siempre te cobra el del día. */}
                       <button className="enlace" onClick={() => setTasaAMano(tasaComoTexto(tasa))}>
-                        Cambiar
+                        {t("Cambiar")}
                       </button>
                     </>
                   )}
@@ -1313,13 +1315,13 @@ function Gastos({
 
               {pasoDelPresupuesto !== null && (
                 <p className="aviso-presupuesto" role="status">
-                  Con este os pasáis del presupuesto en {conMoneda(pasoDelPresupuesto, monedaViaje)}
+                  {t("Con este os pasáis del presupuesto en {cifra}", { cifra: conMoneda(pasoDelPresupuesto, monedaViaje) })}
                 </p>
               )}
 
               <input
                 type="text"
-                placeholder="Concepto (cena, hotel...)"
+                placeholder={t("Concepto (cena, hotel...)")}
                 // La lista del navegador taparía nuestras sugerencias.
                 autoComplete="off"
                 autoCapitalize="sentences"
@@ -1337,7 +1339,7 @@ function Gastos({
               />
               {quedanEnConcepto(concepto) !== null && (
                 <small className={`nota-quedan ${quedanEnConcepto(concepto) === 0 ? "tope" : ""}`} aria-live="polite">
-                  {quedanEnConcepto(concepto) === 0 ? "No cabe más" : `Quedan ${quedanEnConcepto(concepto)} letras`}
+                  {quedanEnConcepto(concepto) === 0 ? t("No cabe más") : t("Quedan {n} letras", { n: quedanEnConcepto(concepto) })}
                 </small>
               )}
 
@@ -1345,39 +1347,39 @@ function Gastos({
                 {foto ? (
                   <span className="ticket-elegido">
                     📷 <span className="ticket-nombre">{foto.name}</span>
-                    <button className="boton-quitar" onClick={() => setFoto(null)} aria-label="No poner esta foto">
+                    <button className="boton-quitar" onClick={() => setFoto(null)} aria-label={t("No poner esta foto")}>
                       ✕
                     </button>
                   </span>
                 ) : ticketActual && !quitarFoto ? (
                   <span className="ticket-elegido">
                     <button className="enlace" onClick={() => setViendo({ ticket: ticketActual, concepto })}>
-                      🧾 Tiene foto
+                      🧾 {t("Tiene foto")}
                     </button>
                     <label className="enlace">
-                      Cambiar
+                      {t("Cambiar")}
                       <input ref={campoFoto} type="file" accept="image/*" aria-keyshortcuts="F" onChange={elegirFoto} hidden />
                     </label>
                     <button className="enlace" onClick={() => setQuitarFoto(true)}>
-                      Quitar
+                      {t("Quitar")}
                     </button>
                   </span>
                 ) : (
                   <label className="boton-foto">
-                    📷 {quitarFoto ? "Se quitará la foto · poner otra" : "Foto del ticket"}
+                    📷 {quitarFoto ? t("Se quitará la foto · poner otra") : t("Foto del ticket")}
                     <input ref={campoFoto} type="file" accept="image/*" aria-keyshortcuts="F" onChange={elegirFoto} hidden />
                   </label>
                 )}
 
                 {!verLugar && (
                   <button className="boton-foto" onClick={() => setLugarAbierto(true)}>
-                    📍 Lugar
+                    📍 {t("Lugar")}
                   </button>
                 )}
 
                 {!notaAbierta && (
                   <button className="boton-foto" onClick={() => setNotaAbierta(true)} title={esOrdenador() ? "También con la U" : undefined}>
-                    📝 Nota
+                    📝 {t("Nota")}
                   </button>
                 )}
 
@@ -1385,9 +1387,9 @@ function Gastos({
                   className={`boton-foto ${devolucion ? "boton-devolucion" : ""}`}
                   aria-pressed={devolucion}
                   onClick={() => setDevolucion(!devolucion)}
-                  title="Dinero que os devuelven: una fianza, un reembolso…"
+                  title={t("Dinero que os devuelven: una fianza, un reembolso…")}
                 >
-                  ↩️ {devolucion ? "Es una devolución" : "Devolución"}
+                  ↩️ {devolucion ? t("Es una devolución") : t("Devolución")}
                 </button>
               </div>
 
@@ -1407,8 +1409,8 @@ function Gastos({
                   <span className="icono-lugar" aria-hidden="true">📍</span>
                   <input
                     type="text"
-                    placeholder="Ciudad (Roma, Florencia…)"
-                    aria-label="Dónde fue"
+                    placeholder={t("Ciudad (Roma, Florencia…)")}
+                    aria-label={t("Dónde fue")}
                     autoCapitalize="words"
                     enterKeyHint="done"
                     maxLength={LARGO_LUGAR}
@@ -1441,7 +1443,7 @@ function Gastos({
                     type="text"
                     className="campo-nota"
                     aria-keyshortcuts="U"
-                    placeholder="Nota (incluye la propina...)"
+                    placeholder={t("Nota (incluye la propina...)")}
                     autoCapitalize="sentences"
                     enterKeyHint="done"
                     maxLength={LARGO_NOTA}
@@ -1458,7 +1460,7 @@ function Gastos({
                   />
                   {quedanEnNota(nota) !== null && (
                     <small className={`nota-quedan ${quedanEnNota(nota) === 0 ? "tope" : ""}`} aria-live="polite">
-                      {quedanEnNota(nota) === 0 ? "No cabe más" : `Quedan ${quedanEnNota(nota)} letras`}
+                      {quedanEnNota(nota) === 0 ? t("No cabe más") : t("Quedan {n} letras", { n: quedanEnNota(nota) })}
                     </small>
                   )}
                 </>
@@ -1495,11 +1497,11 @@ function Gastos({
                     key={c.id}
                     className={`pastilla-categoria ${categoria === c.id ? "elegida" : ""}`}
                     onClick={() => elegirCategoria(c.id)}
-                    title={c.nombre}
+                    title={t(c.nombre)}
                     style={{ "--color-categoria": c.color }}
                   >
                     <span className="pastilla-emoji">{c.emoji}</span>
-                    {c.nombre}
+                    {t(c.nombre)}
                   </button>
                 ))}
               </div>
@@ -1507,22 +1509,22 @@ function Gastos({
               <div className="participantes">
                 <p className="participantes-titulo">
                   {marcados.length === 0 ? (
-                    <span className="aviso">Marca al menos a uno para repartir el gasto</span>
+                    <span className="aviso">{t("Marca al menos a uno para repartir el gasto")}</span>
                   ) : (
                     <>
-                      Se reparte entre{" "}
-                      {entreTodos ? <strong>todos</strong> : <strong>{marcados.length}</strong>}
+                      {t("Se reparte entre")}{" "}
+                      {entreTodos ? <strong>{t("todos")}</strong> : <strong>{marcados.length}</strong>}
                     </>
                   )}
                   {!entreTodos && (
                     <button className="enlace" onClick={() => setParticipantes(todosLosIds)}>
-                      marcar todos
+                      {t("marcar todos")}
                     </button>
                   )}
                 </p>
                 {faltanEseDia.length > 0 && (
                   <p className="participantes-ausentes">
-                    Sin {enLista(faltanEseDia.map((v) => v.nombre))}, que ese día no {faltanEseDia.length === 1 ? "está" : "están"}
+                    {tn(faltanEseDia.length, "Sin {quienes}, que ese día no está", "Sin {quienes}, que ese día no están", { quienes: enLista(faltanEseDia.map((v) => v.nombre)) })}
                   </p>
                 )}
 
@@ -1550,7 +1552,7 @@ function Gastos({
                     className="enlace enlace-reparto"
                     onClick={() => setRepartoAbierto(!repartoAbierto)}
                   >
-                    {repartoAbierto ? "← volver a partes iguales" : "¿unos más que otros?"}
+                    {repartoAbierto ? `← ${t("volver a partes iguales")}` : t("¿unos más que otros?")}
                   </button>
                 )}
 
@@ -1564,13 +1566,13 @@ function Gastos({
                           setPorPlatos(false);
                         }}
                       >
-                        Por partes
+                        {t("Por partes")}
                       </button>
                       <button
                         className={porImportes && !porPlatos ? "activo" : ""}
                         onClick={() => !porImportes && pasarAImportes()}
                       >
-                        Por importe
+                        {t("Por importe")}
                       </button>
                       <button
                         className={porPlatos ? "activo" : ""}
@@ -1579,16 +1581,16 @@ function Gastos({
                           setPorImportes(false);
                         }}
                       >
-                        Por platos
+                        {t("Por platos")}
                       </button>
                     </div>
 
                     <p className="partes-ayuda">
                       {porPlatos
-                        ? `Cada plato, en ${moneda}, y de quién es. Lo que no pongas, como el pan o la propina, va entre todos.`
+                        ? t("Cada plato, en {moneda}, y de quién es. Lo que no pongas, como el pan o la propina, va entre todos.", { moneda })
                         : porImportes
-                          ? `Lo que pone cada uno, en ${moneda}. Tiene que sumar el importe.`
-                          : "Cuántas partes paga cada uno. Con 2 y 1, el primero paga el doble."}
+                          ? t("Lo que pone cada uno, en {moneda}. Tiene que sumar el importe.", { moneda })
+                          : t("Cuántas partes paga cada uno. Con 2 y 1, el primero paga el doble.")}
                     </p>
 
                     {porPlatos && (
@@ -1600,7 +1602,7 @@ function Gastos({
                               inputMode="decimal"
                               className="parte-campo campo-importe"
                               placeholder="0"
-                              aria-label={`Lo que costó el plato ${i + 1}`}
+                              aria-label={t("Lo que costó el plato {n}", { n: i + 1 })}
                               value={plato.importe}
                               onChange={(e) => cambiarPlato(i, { ...plato, importe: e.target.value })}
                             />
@@ -1622,8 +1624,8 @@ function Gastos({
                             {platos.length > 1 && (
                               <button
                                 className="plato-quitar"
-                                aria-label="Quitar el plato"
-                                title="Quitar el plato"
+                                aria-label={t("Quitar el plato")}
+                                title={t("Quitar el plato")}
                                 onClick={() => setPlatos(platos.filter((_, j) => j !== i))}
                               >
                                 ×
@@ -1632,7 +1634,7 @@ function Gastos({
                           </div>
                         ))}
                         <button className="enlace" onClick={() => setPlatos([...platos, platoNuevo()])}>
-                          + otro plato
+                          + {t("otro plato")}
                         </button>
                       </div>
                     )}
@@ -1686,20 +1688,20 @@ function Gastos({
                         }`}
                       >
                         {deLosPlatos.entreTodos < 0
-                          ? `Los platos se pasan en ${conMoneda(-deLosPlatos.entreTodos, moneda)}`
+                          ? t("Los platos se pasan en {cifra}", { cifra: conMoneda(-deLosPlatos.entreTodos, moneda) })
                           : deLosPlatos.entreTodos === 0
-                            ? "✓ Cuadra con el importe"
-                            : `${conMoneda(deLosPlatos.entreTodos, moneda)} van entre todos`}
+                            ? `✓ ${t("Cuadra con el importe")}`
+                            : t("{cifra} van entre todos", { cifra: conMoneda(deLosPlatos.entreTodos, moneda) })}
                       </p>
                     )}
 
                     {falta !== null && (
                       <p className={`cuadre ${falta === 0 ? "cuadre-bien" : "cuadre-mal"}`}>
                         {falta === 0
-                          ? "✓ Cuadra con el importe"
+                          ? `✓ ${t("Cuadra con el importe")}`
                           : falta > 0
-                            ? `Faltan ${conMoneda(falta, moneda)} por repartir`
-                            : `Sobran ${conMoneda(-falta, moneda)}`}
+                            ? t("Faltan {cifra} por repartir", { cifra: conMoneda(falta, moneda) })
+                            : t("Sobran {cifra}", { cifra: conMoneda(-falta, moneda) })}
                       </p>
                     )}
                   </div>
@@ -1709,10 +1711,10 @@ function Gastos({
               {editando ? (
                 <div className="fila-botones">
                   <button onClick={() => guardar()} disabled={marcados.length === 0 || typeof tasa !== "number" || descuadrado}>
-                    Guardar cambios
+                    {t("Guardar cambios")}
                   </button>
                   <button className="boton-cancelar" onClick={cancelar}>
-                    Cancelar
+                    {t("Cancelar")}
                   </button>
                 </div>
               ) : (
@@ -1720,12 +1722,12 @@ function Gastos({
                   {avisoRaro && (
                     <div className="aviso-repetido" role="alert">
                       <p>
-                        🤔 <strong>{conMoneda(avisoRaro.convertido, monedaViaje)}</strong> es mucho más de lo que
-                        se suele gastar en este viaje. ¿Está bien?
+                        🤔 <strong>{conMoneda(avisoRaro.convertido, monedaViaje)}</strong>{" "}
+                        {t("es mucho más de lo que se suele gastar en este viaje. ¿Está bien?")}
                       </p>
                       <div className="aviso-repetido-botones">
                         <button className="aviso-si" onClick={() => guardar(false, true)}>
-                          Sí, está bien
+                          {t("Sí, está bien")}
                         </button>
                         <button
                           className="aviso-no"
@@ -1734,7 +1736,7 @@ function Gastos({
                             campoImporte.current?.focus();
                           }}
                         >
-                          Corregir
+                          {t("Corregir")}
                         </button>
                       </div>
                     </div>
@@ -1743,12 +1745,12 @@ function Gastos({
                   {avisoFecha && (
                     <div className="aviso-repetido" role="alert">
                       <p>
-                        🤔 El <strong>{fechaConAno(avisoFecha)}</strong> queda muy lejos{" "}
-                        {gastos.some((g) => g.fecha) ? "del resto de gastos del viaje" : "de hoy"}. ¿Es ese día?
+                        🤔 {t("El")} <strong>{fechaConAno(avisoFecha)}</strong>{" "}
+                        {gastos.some((g) => g.fecha) ? t("queda muy lejos del resto de gastos del viaje. ¿Es ese día?") : t("queda muy lejos de hoy. ¿Es ese día?")}
                       </p>
                       <div className="aviso-repetido-botones">
                         <button className="aviso-si" onClick={() => guardar(false, true, true)}>
-                          Sí, ese día
+                          {t("Sí, ese día")}
                         </button>
                         <button
                           className="aviso-no"
@@ -1757,7 +1759,7 @@ function Gastos({
                             campoFecha.current?.focus();
                           }}
                         >
-                          Corregir
+                          {t("Corregir")}
                         </button>
                       </div>
                     </div>
@@ -1766,17 +1768,16 @@ function Gastos({
                   {avisoRepetido && (
                     <div className="aviso-repetido" role="alert">
                       <p>
-                        🤔 {avisoRepetido.pagadorId === BOTE ? "Del bote ya salió" : `${nombrePagador(avisoRepetido.pagadorId)} ya apuntó`}{" "}
-                        <strong>{avisoRepetido.concepto}</strong> de{" "}
-                        <strong>{conMoneda(importeDeGasto(avisoRepetido), monedaViaje)}</strong> ese mismo día.
-                        ¿Es otro gasto?
+                        🤔 {avisoRepetido.pagadorId === BOTE ? t("Del bote ya salió") : t("{nombre} ya apuntó", { nombre: nombrePagador(avisoRepetido.pagadorId) })}{" "}
+                        <strong>{avisoRepetido.concepto}</strong> {t("de")}{" "}
+                        <strong>{conMoneda(importeDeGasto(avisoRepetido), monedaViaje)}</strong> {t("ese mismo día. ¿Es otro gasto?")}
                       </p>
                       <div className="aviso-repetido-botones">
                         <button className="aviso-si" onClick={() => guardar(true, true, true)}>
-                          Sí, apuntarlo
+                          {t("Sí, apuntarlo")}
                         </button>
                         <button className="aviso-no" onClick={cancelar}>
-                          No, ya estaba
+                          {t("No, ya estaba")}
                         </button>
                       </div>
                     </div>
@@ -1787,7 +1788,7 @@ function Gastos({
                     hayAlgoQueBorrar({ importe, concepto, nota, foto, participantes, repartoAbierto, fecha }, hoy()) && (
                       <p className="borrar-escrito">
                         <button className="enlace" onClick={cancelar}>
-                          Borrar lo escrito
+                          {t("Borrar lo escrito")}
                         </button>
                       </p>
                     )}
@@ -1797,7 +1798,7 @@ function Gastos({
                     className={hecho ? "hecho" : ""}
                     onClick={() => guardar()}
                     aria-keyshortcuts="Control+Enter Meta+Enter"
-                    title={esOrdenador() ? `También con ${esMac() ? "⌘" : "Ctrl"}+Enter` : undefined}
+                    title={esOrdenador() ? t("También con {tecla}+Enter", { tecla: esMac() ? "⌘" : "Ctrl" }) : undefined}
                     disabled={marcados.length === 0 || typeof tasa !== "number" || descuadrado || Boolean(avisoRepetido) || Boolean(avisoRaro) || Boolean(avisoFecha)}
                   >
                     {textoAlGuardar(hecho)}
@@ -1817,9 +1818,9 @@ function Gastos({
                   // Si no, el navegador saca encima lo que buscaste otras veces y tapa los resultados.
                   autoComplete="off"
                   // El atajo solo se cuenta donde hay teclado.
-                  placeholder={esOrdenador() ? "Concepto, importe, quién o qué día (pulsa /)" : "Concepto, importe, quién o día"}
+                  placeholder={esOrdenador() ? t("Concepto, importe, quién o qué día (pulsa /)") : t("Concepto, importe, quién o día")}
                   aria-keyshortcuts="/"
-                  aria-label="Buscar un gasto"
+                  aria-label={t("Buscar un gasto")}
                   enterKeyHint="search"
                   value={filtros.texto}
                   onChange={(e) => filtrar({ texto: e.target.value })}
@@ -1841,9 +1842,9 @@ function Gastos({
                     onClick={() => filtrar({ viajeroId: esYo ? "" : soy })}
                     aria-pressed={esYo}
                     aria-keyshortcuts="m"
-                    title={esOrdenador() ? "También con la M" : undefined}
+                    title={esOrdenador() ? t("También con la M") : undefined}
                   >
-                    Solo lo mío
+                    {t("Solo lo mío")}
                   </button>
                 )}
 
@@ -1852,11 +1853,11 @@ function Gastos({
                     className={`filtro-mio ${filtros.fecha === hoy() ? "activo" : ""}`}
                     onClick={() => filtrar({ fecha: filtros.fecha === hoy() ? "" : hoy() })}
                     aria-pressed={filtros.fecha === hoy()}
-                    aria-label="Solo lo de hoy"
+                    aria-label={t("Solo lo de hoy")}
                     aria-keyshortcuts="h"
-                    title={esOrdenador() ? "Solo lo de hoy (también con la H)" : undefined}
+                    title={esOrdenador() ? t("Solo lo de hoy (también con la H)") : undefined}
                   >
-                    Hoy
+                    {t("Hoy")}
                   </button>
                 )}
 
@@ -1865,10 +1866,10 @@ function Gastos({
                     className={`filtro-mio ${filtros.conTicket ? "activo" : ""}`}
                     onClick={() => filtrar({ conTicket: !filtros.conTicket })}
                     aria-pressed={filtros.conTicket}
-                    aria-label="Solo con ticket"
-                    title="Solo los que tienen foto del ticket"
+                    aria-label={t("Solo con ticket")}
+                    title={t("Solo los que tienen foto del ticket")}
                   >
-                    📷<span className="filtro-palabra"> Tickets</span>
+                    📷<span className="filtro-palabra"> {t("Tickets")}</span>
                   </button>
                 )}
 
@@ -1877,10 +1878,10 @@ function Gastos({
                     className={`filtro-mio ${filtros.conNota ? "activo" : ""}`}
                     onClick={() => filtrar({ conNota: !filtros.conNota })}
                     aria-pressed={filtros.conNota}
-                    aria-label="Solo con nota"
-                    title="Solo los que tienen nota"
+                    aria-label={t("Solo con nota")}
+                    title={t("Solo los que tienen nota")}
                   >
-                    📝<span className="filtro-palabra"> Notas</span>
+                    📝<span className="filtro-palabra"> {t("Notas")}</span>
                   </button>
                 )}
 
@@ -1889,10 +1890,10 @@ function Gastos({
                     className={`filtro-mio ${filtros.otraMoneda ? "activo" : ""}`}
                     onClick={() => filtrar({ otraMoneda: !filtros.otraMoneda })}
                     aria-pressed={filtros.otraMoneda}
-                    aria-label="Solo en otra moneda"
-                    title={`Solo los que no se pagaron en ${monedaViaje}`}
+                    aria-label={t("Solo en otra moneda")}
+                    title={t("Solo los que no se pagaron en {moneda}", { moneda: monedaViaje })}
                   >
-                    💱<span className="filtro-palabra"> Monedas</span>
+                    💱<span className="filtro-palabra"> {t("Monedas")}</span>
                   </button>
                 )}
 
@@ -1901,10 +1902,10 @@ function Gastos({
                     className={`filtro-mio ${filtros.deAlgunos ? "activo" : ""}`}
                     onClick={() => filtrar({ deAlgunos: !filtros.deAlgunos })}
                     aria-pressed={filtros.deAlgunos}
-                    aria-label="Solo los que no son de todos"
-                    title="Solo los que no se reparten entre todos"
+                    aria-label={t("Solo los que no son de todos")}
+                    title={t("Solo los que no se reparten entre todos")}
                   >
-                    👥<span className="filtro-palabra"> No de todos</span>
+                    👥<span className="filtro-palabra"> {t("No de todos")}</span>
                   </button>
                 )}
               </div>
@@ -1913,28 +1914,28 @@ function Gastos({
                 <select
                   value={filtros.viajeroId}
                   onChange={(e) => filtrar({ viajeroId: e.target.value })}
-                  aria-label="Filtrar por persona"
+                  aria-label={t("Filtrar por persona")}
                 >
-                  <option value="">Todos</option>
+                  <option value="">{t("Todos")}</option>
                   {viajeros.map((v) => (
                     <option key={v.id} value={v.id}>
                       {v.nombre} ({cuantosDe(gastos, v.id, viajeros)})
                     </option>
                   ))}
                   {(hayGastosDelBote(gastos) || filtros.viajeroId === BOTE) && (
-                    <option value={BOTE}>🫙 Del bote ({cuantosDe(gastos, BOTE, viajeros)})</option>
+                    <option value={BOTE}>🫙 {t("Del bote")} ({cuantosDe(gastos, BOTE, viajeros)})</option>
                   )}
                 </select>
 
                 <select
                   value={filtros.categoria}
                   onChange={(e) => filtrar({ categoria: e.target.value })}
-                  aria-label="Filtrar por categoría"
+                  aria-label={t("Filtrar por categoría")}
                 >
-                  <option value="">Todo</option>
+                  <option value="">{t("Todo")}</option>
                   {categoriasUsadas.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.emoji} {c.nombre}
+                      {c.emoji} {t(c.nombre)}
                     </option>
                   ))}
                 </select>
@@ -1946,13 +1947,13 @@ function Gastos({
                     setOrden(e.target.value);
                     datos.guardarOrden(codigo, e.target.value);
                   }}
-                  aria-label="Ordenar gastos"
+                  aria-label={t("Ordenar gastos")}
                   aria-keyshortcuts="o"
-                  title={esOrdenador() ? "Ordenar gastos (también con la O)" : undefined}
+                  title={esOrdenador() ? t("Ordenar gastos (también con la O)") : undefined}
                 >
                   {ordenesPara(puedoVerLoMio).map((o) => (
                     <option key={o.id} value={o.id}>
-                      {o.nombre}
+                      {t(o.nombre)}
                     </option>
                   ))}
                 </select>
@@ -1961,15 +1962,15 @@ function Gastos({
               {filtrando && (
                 <p className="filtro-resumen" role="status">
                   <span>
-                    {visibles.length} de {gastos.length} gastos
-                    {filtros.fecha && ` del ${enCorto(filtros.fecha)}`}
-                    {filtros.conTicket && " con ticket"}
-                    {filtros.conNota && (filtros.conTicket ? " y nota" : " con nota")}
-                    {filtros.otraMoneda && " en otra moneda"}
-                    {filtros.deAlgunos && " que no son de todos"} · suman{" "}
+                    {t("{n} de {total} gastos", { n: visibles.length, total: gastos.length })}
+                    {filtros.fecha && ` ${t("del {dia}", { dia: enCorto(filtros.fecha) })}`}
+                    {filtros.conTicket && ` ${t("con ticket")}`}
+                    {filtros.conNota && ` ${filtros.conTicket ? t("y nota") : t("con nota")}`}
+                    {filtros.otraMoneda && ` ${t("en otra moneda")}`}
+                    {filtros.deAlgunos && ` ${t("que no son de todos")}`} · {t("suman")}{" "}
                     <strong>{conMoneda(calcularTotal(visibles), monedaViaje)}</strong>
                     {mediaPorGasto(visibles) !== null && (
-                      <span className="sin-partir"> · {conMoneda(mediaPorGasto(visibles), monedaViaje)} de media</span>
+                      <span className="sin-partir"> · {t("{cifra} de media", { cifra: conMoneda(mediaPorGasto(visibles), monedaViaje) })}</span>
                     )}
                     {deQuien && (
                       <span className="filtro-cuenta">
@@ -1985,7 +1986,7 @@ function Gastos({
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          {esYo ? "mandar" : "mandárselo"}
+                          {esYo ? t("mandar") : t("mandárselo")}
                         </a>
                       </span>
                     )}
@@ -1997,12 +1998,12 @@ function Gastos({
                         className="pasar-a"
                         value=""
                         onChange={(e) => onCambiarCategoria(aOtraCategoria(visibles, e.target.value), e.target.value)}
-                        aria-label={`Cambiar la categoría de los ${visibles.length} gastos`}
+                        aria-label={t("Cambiar la categoría de los {n} gastos", { n: visibles.length })}
                       >
                         <option value="">{textoPasarA(visibles.length)}</option>
                         {categoriasDestino(visibles).map((c) => (
                           <option key={c.id} value={c.id}>
-                            {c.emoji} {c.nombre}
+                            {c.emoji} {t(c.nombre)}
                           </option>
                         ))}
                       </select>
@@ -2022,18 +2023,18 @@ function Gastos({
                             nombreViaje
                           )
                         }
-                        title="Bajar en una hoja de cálculo solo los gastos que se ven"
+                        title={t("Bajar en una hoja de cálculo solo los gastos que se ven")}
                       >
-                        bajar en Excel
+                        {t("bajar en Excel")}
                       </button>
                     )}
                     <button
                       className="enlace"
                       onClick={() => setFiltros(SIN_FILTROS)}
                       aria-keyshortcuts="x"
-                      title={esOrdenador() ? "También con la X" : undefined}
+                      title={esOrdenador() ? t("También con la X") : undefined}
                     >
-                      quitar filtros
+                      {t("quitar filtros")}
                     </button>
                   </span>
                 </p>
@@ -2042,7 +2043,7 @@ function Gastos({
           )}
 
           {gastos.length === 0 ? (
-            <p className="vacio">Todavía no hay gastos. Apunta el primero aquí arriba.</p>
+            <p className="vacio">{t("Todavía no hay gastos. Apunta el primero aquí arriba.")}</p>
           ) : visibles.length === 0 ? (
             <p className="vacio">{textoSinResultados(filtros)}</p>
           ) : (
@@ -2052,7 +2053,7 @@ function Gastos({
                 {dias.length > 1 && (
                   <p className="dia-titulo">
                     <span>
-                      {dia.fecha ? comoTitulo(dia.fecha) : "Sin fecha"}
+                      {dia.fecha ? comoTitulo(dia.fecha) : t("Sin fecha")}
                       <span className="dia-cuantos"> · {cuantosGastos(dia.gastos.length)}</span>
                     </span>
                     <span className="dia-total">
@@ -2060,7 +2061,7 @@ function Gastos({
                       {/* Con filtros la lista no es el día entero, y la media engañaría. */}
                       {!filtrando && porCabezaDelDia(dia.gastos, viajeros.length) !== null && (
                         <span className="dia-por-cabeza">
-                          {" "}· {conMoneda(porCabezaDelDia(dia.gastos, viajeros.length), monedaViaje)} c/u
+                          {" "}· {conMoneda(porCabezaDelDia(dia.gastos, viajeros.length), monedaViaje)} {t("c/u")}
                         </span>
                       )}
                     </span>
@@ -2080,7 +2081,7 @@ function Gastos({
                     >
                       <span
                         className="gasto-icono"
-                        title={categoriaDe(gasto.categoria).nombre}
+                        title={t(categoriaDe(gasto.categoria).nombre)}
                       >
                         {categoriaDe(gasto.categoria).emoji}
                       </span>
@@ -2089,14 +2090,14 @@ function Gastos({
                         <span className="gasto-concepto">
                           <Resaltado texto={gasto.concepto} buscado={buscado} />
                         </span>
-                        {gasto.id === masCaro?.id && <span className="etiqueta-mas-caro">el más caro</span>}
-                        {esDevolucion(gasto) && <span className="etiqueta-devolucion">devolución</span>}
+                        {gasto.id === masCaro?.id && <span className="etiqueta-mas-caro">{t("el más caro")}</span>}
+                        {esDevolucion(gasto) && <span className="etiqueta-devolucion">{t("devolución")}</span>}
                         {gasto.ticket && (
                           <button
                             className="boton-ticket"
                             onClick={() => setViendo(gasto)}
-                            title="Ver el ticket"
-                            aria-label={`Ver el ticket de ${gasto.concepto}`}
+                            title={t("Ver el ticket")}
+                            aria-label={t("Ver el ticket de {concepto}", { concepto: gasto.concepto })}
                           >
                             🧾
                           </button>
@@ -2142,7 +2143,7 @@ function Gastos({
                             {textoDuda(gasto, viajeros, soy)}
                             {!cerrado && (
                               <button className="enlace" onClick={() => onDuda(gasto.id, null)}>
-                                Resuelto
+                                {t("Resuelto")}
                               </button>
                             )}
                           </small>
@@ -2152,10 +2153,10 @@ function Gastos({
                             <input
                               type="text"
                               autoFocus
-                              placeholder={DUDA_POR_DEFECTO}
+                              placeholder={t(DUDA_POR_DEFECTO)}
                               maxLength={LARGO_DUDA}
                               value={pregunta}
-                              aria-label={`Qué quieres preguntar de ${gasto.concepto}`}
+                              aria-label={t("Qué quieres preguntar de {concepto}", { concepto: gasto.concepto })}
                               onChange={(e) => setPregunta(e.target.value)}
                               onKeyDown={(e) => {
                                 if (e.key === "Enter") preguntar();
@@ -2163,7 +2164,7 @@ function Gastos({
                               }}
                             />
                             <button className="boton-preguntar" onClick={preguntar}>
-                              Preguntar
+                              {t("Preguntar")}
                             </button>
                           </span>
                         )}
@@ -2180,7 +2181,7 @@ function Gastos({
                         {/* Con "lo de uno" abierto ya sale lo suyo, y esto sobraría. */}
                         {!deQuien && porCabeza(gasto, viajeros) !== null && (
                           <small className="gasto-por-cabeza">
-                            {conMoneda(porCabeza(gasto, viajeros), monedaViaje)} c/u
+                            {conMoneda(porCabeza(gasto, viajeros), monedaViaje)} {t("c/u")}
                           </small>
                         )}
                       </span>
@@ -2194,8 +2195,8 @@ function Gastos({
                             )}
                             target="_blank"
                             rel="noopener noreferrer"
-                            title="Contarlo por WhatsApp"
-                            aria-label={`Contar ${gasto.concepto} por WhatsApp`}
+                            title={t("Contarlo por WhatsApp")}
+                            aria-label={t("Contar {concepto} por WhatsApp", { concepto: gasto.concepto })}
                           >
                             💬
                           </a>
@@ -2203,8 +2204,8 @@ function Gastos({
                             <button
                               className="boton-duda"
                               onClick={() => abrirPregunta(gasto)}
-                              title="Preguntar por este gasto"
-                              aria-label={`Preguntar por ${gasto.concepto}`}
+                              title={t("Preguntar por este gasto")}
+                              aria-label={t("Preguntar por {concepto}", { concepto: gasto.concepto })}
                             >
                               ❓
                             </button>
@@ -2212,22 +2213,22 @@ function Gastos({
                           <button
                             className="boton-repetir"
                             onClick={() => repetir(gasto)}
-                            title="Apuntar otro igual"
-                            aria-label="Apuntar otro igual"
+                            title={t("Apuntar otro igual")}
+                            aria-label={t("Apuntar otro igual")}
                           >
                             ⧉
                           </button>
                           <button
                             className="boton-editar"
                             onClick={() => editar(gasto)}
-                            title={esOrdenador() ? "Editar gasto (o doble clic en él)" : "Editar gasto"}
+                            title={esOrdenador() ? t("Editar gasto (o doble clic en él)") : t("Editar gasto")}
                           >
                             ✏️
                           </button>
                           <button
                             className="boton-quitar"
                             onClick={() => onQuitar(gasto.id, gasto.concepto, gasto.ticket)}
-                            title={`Borrar ${gasto.concepto}`}
+                            title={t("Borrar {concepto}", { concepto: gasto.concepto })}
                           >
                             ✕
                           </button>

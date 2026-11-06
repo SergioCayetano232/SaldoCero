@@ -1,5 +1,7 @@
 // Poner nombre a un viajero o al viaje.
 
+import { t, tn, idiomaActual } from "./idioma";
+
 // Más largo ya no cabe en las filas del resumen.
 export const LARGO_MAXIMO = 40;
 
@@ -89,9 +91,12 @@ export function avisoDeParecidos(parecidos) {
   if (parecidos.length === 0) return null;
   if (parecidos.length === 1) {
     const [{ nombre, conQuien }] = parecidos;
-    return `¿${nombre} es otra persona? Se parece a ${conQuien}, que ya está en el viaje.`;
+    return t("¿{nombre} es otra persona? Se parece a {conQuien}, que ya está en el viaje.", { nombre, conQuien });
   }
-  return `¿${enLista(parecidos.map((p) => p.nombre))} son otras personas? Se parecen a ${enLista([...new Set(parecidos.map((p) => p.conQuien))])}.`;
+  return t("¿{nombres} son otras personas? Se parecen a {conQuienes}.", {
+    nombres: enLista(parecidos.map((p) => p.nombre)),
+    conQuienes: enLista([...new Set(parecidos.map((p) => p.conQuien))]),
+  });
 }
 
 // En el campo de añadir caben varios, "Ana, Luis, Marta", así que va más largo.
@@ -133,6 +138,7 @@ export function enUnaLinea(texto) {
 export function enLista(cosas) {
   if (cosas.length < 2) return cosas.join("");
   const ultima = cosas.at(-1);
+  if (idiomaActual() === "en") return `${cosas.slice(0, -1).join(", ")} and ${ultima}`;
   const y = /^h?[iíIÍ](?![aeouáéóú])/i.test(ultima) ? "e" : "y";
   return `${cosas.slice(0, -1).join(", ")} ${y} ${ultima}`;
 }
@@ -142,7 +148,10 @@ export function avisoDeRepetidos(nombres) {
   const unicos = [...new Set(nombres)];
   if (unicos.length === 0) return null;
 
-  const quienes = enLista(unicos);
-  const verbo = unicos.length === 1 ? "ya está" : "ya están";
-  return `${quienes} ${verbo} en el viaje. Ponle la inicial del apellido para no liaros.`;
+  return tn(
+    unicos.length,
+    "{quienes} ya está en el viaje. Ponle la inicial del apellido para no liaros.",
+    "{quienes} ya están en el viaje. Ponle la inicial del apellido para no liaros.",
+    { quienes: enLista(unicos) }
+  );
 }

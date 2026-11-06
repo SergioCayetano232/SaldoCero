@@ -2,6 +2,7 @@
 // están en Otros, y los pasas a Comida de una vez.
 
 import { categoriaDe, CATEGORIAS, POR_DEFECTO } from "./categorias";
+import { t } from "./idioma";
 
 // Solo los que cambian de verdad. Los que ya estaban en esa ni se tocan.
 export function aOtraCategoria(gastos, categoria) {
@@ -17,7 +18,7 @@ export function categoriasDestino(gastos) {
 }
 
 export function textoPasarA(cuantos) {
-  return cuantos === 2 ? "Pasar los dos a…" : `Pasar los ${cuantos} a…`;
+  return cuantos === 2 ? t("Pasar los dos a…") : t("Pasar los {n} a…", { n: cuantos });
 }
 
 export function textoPasados(cuantos, categoria) {

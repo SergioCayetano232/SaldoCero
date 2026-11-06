@@ -2,6 +2,7 @@
 // Sin desde ni hasta, está todo el viaje, que es como van los de antes.
 
 import { enCorto } from "./fechas";
+import { t } from "./idioma";
 
 const FECHA = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -53,8 +54,12 @@ export function tieneEstancia(viajero) {
 // "del sáb, 12 sept al dom, 13 sept", "desde el sáb, 12 sept"... Null si está todo el viaje.
 export function textoEstancia(viajero) {
   const { desde, hasta } = viajero;
-  if (desde && hasta) return desde === hasta ? `solo el ${enCorto(desde)}` : `del ${enCorto(desde)} al ${enCorto(hasta)}`;
-  if (desde) return `desde el ${enCorto(desde)}`;
-  if (hasta) return `hasta el ${enCorto(hasta)}`;
+  if (desde && hasta) {
+    return desde === hasta
+      ? t("solo el {dia}", { dia: enCorto(desde) })
+      : t("del {desde} al {hasta}", { desde: enCorto(desde), hasta: enCorto(hasta) });
+  }
+  if (desde) return t("desde el {dia}", { dia: enCorto(desde) });
+  if (hasta) return t("hasta el {dia}", { dia: enCorto(hasta) });
   return null;
 }

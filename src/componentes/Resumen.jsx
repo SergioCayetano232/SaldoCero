@@ -46,6 +46,7 @@ import { porcentajes } from "../donut";
 import { vibrar } from "../vibrar";
 import { miSaldo, textoMiSaldo, estadoMiSaldo } from "../miSaldo";
 import { esAtajoBajarResumen, esAtajoCompartir, esAtajoExcel, esAtajoCuentas, esOrdenador } from "../teclado";
+import { t } from "../idioma";
 
 function Resumen({
   balances,
@@ -434,11 +435,16 @@ function Resumen({
       {leTocaPagar && !cerrado && (
         <div className="le-toca">
           {leTocaPagar.igualados ? (
-            <>✅ Está todo igualado, puede pagar cualquiera.</>
+            <>✅ {t("Está todo igualado, puede pagar cualquiera.")}</>
           ) : (
             <>
-              👉 {leTocaPagar.id === soy ? "Te" : "Le"} toca pagar a{" "}
-              <strong>{leTocaPagar.id === soy ? "ti" : leTocaPagar.nombre}</strong>
+              👉 {leTocaPagar.id === soy ? (
+                <strong>{t("Te toca pagar a ti")}</strong>
+              ) : (
+                <>
+                  {t("Le toca pagar a")} <strong>{leTocaPagar.nombre}</strong>
+                </>
+              )}
             </>
           )}
         </div>
@@ -468,7 +474,7 @@ function Resumen({
                     <button
                       className="balance-ver"
                       onClick={() => onVerGastos(viajero.id)}
-                      title={`Ver los gastos de ${viajero.nombre}`}
+                      title={t("Ver los gastos de {nombre}", { nombre: viajero.nombre })}
                     >
                       {viajero.nombre}
                       <span className="balance-ver-flecha" aria-hidden="true">›</span>
@@ -476,7 +482,7 @@ function Resumen({
                   ) : (
                     viajero.nombre
                   )}
-                  {viajero.id === soy && <span className="etiqueta-tu">tú</span>}
+                  {viajero.id === soy && <span className="etiqueta-tu">{t("tú")}</span>}
                 </div>
                 <div className="barra">
                   <div
@@ -486,21 +492,21 @@ function Resumen({
                 </div>
                 <small className="reparto">
                   <span className="sin-partir">
-                    puso {conMoneda(viajero.puesto, monedaViaje)}
+                    {t("puso {cifra}", { cifra: conMoneda(viajero.puesto, monedaViaje) })}
                     {variosPusieron && viajero.puesto > 0 && <span className="reparto-tanto"> ({tantoPuesto[i]} %)</span>}
                   </span>{" "}
                   {pagados && <span className="sin-partir">{pagados} </span>}
                   ·{" "}
-                  <span className="sin-partir">le tocan {conMoneda(viajero.tocaPagar, monedaViaje)}</span>
+                  <span className="sin-partir">{t("le tocan {cifra}", { cifra: conMoneda(viajero.tocaPagar, monedaViaje) })}</span>
                   {/* Si no, puso y le tocan no cuadran con lo que debe. */}
                   {viajero.dado > 0 && (
-                    <> · <span className="sin-partir">dio {conMoneda(viajero.dado, monedaViaje)}</span></>
+                    <> · <span className="sin-partir">{t("dio {cifra}", { cifra: conMoneda(viajero.dado, monedaViaje) })}</span></>
                   )}
                   {viajero.alBote > 0 && (
-                    <> · <span className="sin-partir">al bote {conMoneda(viajero.alBote, monedaViaje)}</span></>
+                    <> · <span className="sin-partir">{t("al bote {cifra}", { cifra: conMoneda(viajero.alBote, monedaViaje) })}</span></>
                   )}
                   {viajero.recibido > 0 && (
-                    <> · <span className="sin-partir">recibió {conMoneda(viajero.recibido, monedaViaje)}</span></>
+                    <> · <span className="sin-partir">{t("recibió {cifra}", { cifra: conMoneda(viajero.recibido, monedaViaje) })}</span></>
                   )}
                 </small>
               </div>
@@ -511,7 +517,7 @@ function Resumen({
                   <Cifra valor={Math.abs(viajero.balance)} moneda={monedaViaje} />
                 </div>
                 <div className="balance-texto">
-                  {estado === "le-deben" ? "le deben" : estado === "debe" ? "debe" : "en paz"}
+                  {estado === "le-deben" ? t("le deben") : estado === "debe" ? t("debe") : t("en paz")}
                 </div>
               </div>
             </li>
@@ -521,25 +527,25 @@ function Resumen({
 
       <div className="saldar" ref={zonaSaldar}>
         <h3>
-          Cómo saldar cuentas
+          {t("Cómo saldar cuentas")}
           {pendiente > 0 && (
             <span className="pendiente">
-              quedan <Cifra valor={pendiente} moneda={monedaViaje} />
+              {t("quedan")} <Cifra valor={pendiente} moneda={monedaViaje} />
             </span>
           )}
         </h3>
 
         {pagos.length === 0 ? (
-          <p className="saldadas">🎉 Cuentas saldadas. Nadie debe nada.</p>
+          <p className="saldadas">🎉 {t("Cuentas saldadas. Nadie debe nada.")}</p>
         ) : (
           <>
             {todoPagado && (
-              <p className="saldadas">🎉 Todo pagado. Ya estáis a cero.</p>
+              <p className="saldadas">🎉 {t("Todo pagado. Ya estáis a cero.")}</p>
             )}
 
             {tasaACasa && pendiente > 0 && (
               <p className="en-casa">
-                En {casa}, al cambio de hoy ({textoCambioACasa(tasaACasa, monedaViaje, casa)}).
+                {t("En {casa}, al cambio de hoy ({cambio}).", { casa, cambio: textoCambioACasa(tasaACasa, monedaViaje, casa) })}
               </p>
             )}
 
@@ -558,10 +564,10 @@ function Resumen({
                   key={`${pago.deId}-${pago.aId}`}
                 >
                   <AvatarDe id={pago.deId} nombre={pago.de} colores={colores} />
-                  <strong>{pago.de}</strong>
+                  <strong>{pago.deId === BOTE ? t("Bote") : pago.de}</strong>
                   <span className="pago-flecha">→</span>
                   <AvatarDe id={pago.aId} nombre={pago.a} colores={colores} />
-                  <strong>{pago.a}</strong>
+                  <strong>{pago.aId === BOTE ? t("Bote") : pago.a}</strong>
                   <span className="pago-final">
                     {pago.saldado ? (
                       <span className="pago-cantidad">{conMoneda(pago.cantidad, monedaViaje)}</span>
@@ -569,10 +575,10 @@ function Resumen({
                       <button
                         className="pago-cantidad"
                         onClick={() => copiarCantidad(pago)}
-                        title="Copiar la cifra"
+                        title={t("Copiar la cifra")}
                       >
                         {cantidadCopiada === `${pago.deId}-${pago.aId}`
-                          ? "✓ copiado"
+                          ? `✓ ${t("copiado")}`
                           : conMoneda(pago.cantidad, monedaViaje)}
                       </button>
                     )}
@@ -597,8 +603,8 @@ function Resumen({
                         )}
                         target="_blank"
                         rel="noopener noreferrer"
-                        title={`Pedírselo a ${pago.de} por WhatsApp`}
-                        aria-label={`Pedírselo a ${pago.de} por WhatsApp`}
+                        title={t("Pedírselo a {nombre} por WhatsApp", { nombre: pago.de })}
+                        aria-label={t("Pedírselo a {nombre} por WhatsApp", { nombre: pago.de })}
                       >
                         💬
                       </a>
@@ -607,7 +613,7 @@ function Resumen({
                     <button
                       className="boton-saldar"
                       onClick={() => (pago.saldado ? onDesaldar(pago) : saldar(pago))}
-                      title={pago.saldado ? "Marcar como pendiente" : "Marcar como pagado"}
+                      title={pago.saldado ? t("Marcar como pendiente") : t("Marcar como pagado")}
                     >
                       {pago.saldado ? "↩︎" : "✓"}
                     </button>
@@ -617,7 +623,7 @@ function Resumen({
                     <button
                       className="pago-cobro"
                       onClick={() => copiarCobro(pago, cobro)}
-                      title="Copiar"
+                      title={t("Copiar")}
                     >
                       <span className="pago-cobro-tipo">
                         {cobro.tipo === "bizum" ? "📲 Bizum" : "🏦 IBAN"}
@@ -626,7 +632,7 @@ function Resumen({
                         {cobroComoTexto(cobro)}
                       </span>
                       <span className="pago-cobro-copiar">
-                        {cobroCopiado === `${pago.deId}-${pago.aId}` ? "✓ copiado" : "copiar"}
+                        {cobroCopiado === `${pago.deId}-${pago.aId}` ? `✓ ${t("copiado")}` : t("copiar")}
                       </span>
                     </button>
                   )}
@@ -643,9 +649,9 @@ function Resumen({
                 key={deudor.deId ?? deudor.de}
                 className="pastilla-interruptor"
                 onClick={() => saldarTodoDe(deudor)}
-                title={`Marcar como pagadas sus ${deudor.pagos.length} deudas`}
+                title={t("Marcar como pagadas sus {n} deudas", { n: deudor.pagos.length })}
               >
-                ✓ {pagaYo(deudor, soy) ? "Lo he pagado todo" : `${deudor.de} lo ha pagado todo`} ·{" "}
+                ✓ {pagaYo(deudor, soy) ? t("Lo he pagado todo") : t("{nombre} lo ha pagado todo", { nombre: deudor.de })} ·{" "}
                 {conMoneda(deudor.cantidad, monedaViaje)}
               </button>
             ))}
@@ -657,9 +663,9 @@ function Resumen({
             className="pastilla-interruptor boton-redondeo"
             onClick={() => onRedondear(!redondear)}
             aria-pressed={redondear}
-            title="Para todo el viaje"
+            title={t("Para todo el viaje")}
           >
-            {redondear ? "✓ Sin céntimos" : "Quitar los céntimos"}
+            {redondear ? `✓ ${t("Sin céntimos")}` : t("Quitar los céntimos")}
           </button>
         )}
 
