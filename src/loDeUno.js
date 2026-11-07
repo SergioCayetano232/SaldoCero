@@ -38,7 +38,10 @@ export function textoParteDe(gasto, viajeroId, viajeros, esYo, moneda) {
 // Si eres tú, en primera persona: es para enseñárselo tú a otro.
 export function mensajeDeCuenta({ gastos, viajero, viajeros, esYo, nombreViaje, moneda, codigo, base }) {
   const suyos = gastos.filter((g) => pagoEnElGasto(g, viajero.id) || parteDe(g, viajero.id, viajeros) > 0);
-  const lineas = [esYo ? `Mis cuentas de *${nombreViaje}* 🧾` : `Hola ${viajero.nombre}! Tus cuentas de *${nombreViaje}* 🧾`, ""];
+  const lineas = [
+    esYo ? t("Mis cuentas de *{viaje}* 🧾", { viaje: nombreViaje }) : t("Hola {nombre}! Tus cuentas de *{viaje}* 🧾", { nombre: viajero.nombre, viaje: nombreViaje }),
+    "",
+  ];
 
   for (const gasto of suyos) {
     const parte = parteDe(gasto, viajero.id, viajeros);
@@ -46,10 +49,11 @@ export function mensajeDeCuenta({ gastos, viajero, viajeros, esYo, nombreViaje, 
     const cuanto = conMoneda(importeDeGasto(gasto), moneda);
     const cuando = gasto.fecha ? `, ${enCorto(gasto.fecha)}` : "";
 
+    const cifra = conMoneda(parte, moneda);
     let suyo;
-    if (pago && parte > 0) suyo = `${esYo ? "lo pagué" : "lo pagaste"}, ${esYo ? "me tocan" : "te tocan"} ${conMoneda(parte, moneda)}`;
-    else if (pago) suyo = esYo ? "lo pagué, no iba" : "lo pagaste, no ibas";
-    else suyo = `${esYo ? "me tocan" : "te tocan"} ${conMoneda(parte, moneda)}`;
+    if (pago && parte > 0) suyo = esYo ? t("lo pagué, me tocan {cifra}", { cifra }) : t("lo pagaste, te tocan {cifra}", { cifra });
+    else if (pago) suyo = esYo ? t("lo pagué, no iba") : t("lo pagaste, no ibas");
+    else suyo = esYo ? t("me tocan {cifra}", { cifra }) : t("te tocan {cifra}", { cifra });
 
     lineas.push(`· ${gasto.concepto}${cuando} (${cuanto}): ${suyo}`);
   }
@@ -58,11 +62,11 @@ export function mensajeDeCuenta({ gastos, viajero, viajeros, esYo, nombreViaje, 
   lineas.push("");
   lineas.push(
     esYo
-      ? `En total pagué *${conMoneda(pagado, moneda)}* y me tocan *${conMoneda(leToca, moneda)}*`
-      : `En total pagaste *${conMoneda(pagado, moneda)}* y te tocan *${conMoneda(leToca, moneda)}*`
+      ? t("En total pagué *{pagado}* y me tocan *{toca}*", { pagado: conMoneda(pagado, moneda), toca: conMoneda(leToca, moneda) })
+      : t("En total pagaste *{pagado}* y te tocan *{toca}*", { pagado: conMoneda(pagado, moneda), toca: conMoneda(leToca, moneda) })
   );
 
-  if (codigo) lineas.push("", `Las cuentas, aquí: ${enlaceDelViaje(codigo, base)}`);
+  if (codigo) lineas.push("", t("Las cuentas, aquí: {enlace}", { enlace: enlaceDelViaje(codigo, base) }));
 
   return lineas.join("\n");
 }

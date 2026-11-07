@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import { usarIdioma } from "./idioma";
 import { cuentaDe, textoCuentaDe, textoParteDe, mensajeDeCuenta } from "./loDeUno";
 import { enCorto } from "./fechas";
 import { BOTE } from "./bote";
@@ -65,6 +66,8 @@ describe("textoParteDe", () => {
 });
 
 describe("mensajeDeCuenta", () => {
+  afterEach(() => usarIdioma("es"));
+
   const gente = [{ id: "a", nombre: "Ana" }, { id: "b", nombre: "Luis" }, { id: "c", nombre: "Marta" }];
   const delViaje = [
     { pagadorId: "a", importe: 90, concepto: "Cena", fecha: "2026-10-17", participantes: ["a", "b", "c"] },
@@ -90,6 +93,17 @@ describe("mensajeDeCuenta", () => {
     expect(texto).toContain("(40.00 €): lo pagaste, no ibas");
     expect(texto).toContain("(90.00 €): lo pagaste, te tocan 30.00 €");
     expect(texto).toContain("En total pagaste *130.00 €* y te tocan *30.00 €*");
+  });
+
+  it("en inglés, las dos personas", () => {
+    usarIdioma("en");
+    const otro = mensajeDeCuenta({ ...datos, viajero: gente[0], esYo: false });
+    expect(otro).toContain("Hi Ana! Your numbers for *Lisboa*");
+    expect(otro).toContain("(90.00 €): you paid, your share is 30.00 €");
+    expect(otro).toContain("In total you paid *130.00 €* and your share is *30.00 €*");
+    const yo = mensajeDeCuenta({ ...datos, viajero: gente[0], esYo: true });
+    expect(yo).toContain("I paid, I wasn't in it");
+    expect(yo).toContain("In total I paid *130.00 €* and my share is *30.00 €*");
   });
 
   it("si eres tú, en primera persona", () => {

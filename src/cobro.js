@@ -1,5 +1,7 @@
 // Dónde le pagan a cada uno: su Bizum o su IBAN.
 
+import { t } from "./idioma";
+
 // Se escribe de mil formas: "+34 612 34 56 78", "es91-2100...". Lo dejamos pegado.
 function compactar(texto) {
   return String(texto ?? "").replace(/[\s.\-/]/g, "").toUpperCase();
@@ -49,7 +51,7 @@ export function cobroDe(viajero) {
 export function lineaDeCobro(cobro, nombre = null) {
   if (!cobro) return null;
   const tipo = cobro.tipo === "bizum" ? "Bizum" : "IBAN";
-  const como = nombre ? `${tipo} ${tipo === "Bizum" ? "a" : "de"} ${nombre}` : `Mi ${tipo}`;
+  const como = !nombre ? t("Mi {tipo}", { tipo }) : tipo === "Bizum" ? t("Bizum a {nombre}", { nombre }) : t("IBAN de {nombre}", { nombre });
   return `${como}: ${cobroComoTexto(cobro)}`;
 }
 

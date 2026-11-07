@@ -1,4 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { usarIdioma } from "./idioma";
 import { resumenEnTexto, enQueSeFue, enlaceDelViaje, invitacion, invitar, nombreDeArchivo, compartirImagen, copiarAlPortapapeles } from "./compartir";
 import { PATRONES } from "./vibrar";
 
@@ -356,5 +357,26 @@ describe("compartirImagen", () => {
       },
     };
     expect(await compartirImagen(imagen, "Lisboa.png", nav)).toBe("cancelado");
+  });
+});
+
+describe("en inglés", () => {
+  afterEach(() => usarIdioma("es"));
+
+  it("el resumen para el grupo", () => {
+    usarIdioma("en");
+    const texto = resumenEnTexto(viaje);
+    expect(texto).toContain("💰 Trip total: *326.50 €* · 108.83 € per person");
+    expect(texto).toContain("*What everyone put in*");
+    expect(texto).toContain("*Who pays whom*");
+    expect(texto).toContain("Tracked with SaldoCero · code *ABC12345*");
+    expect(texto).not.toMatch(/Quién|cada uno|código/);
+  });
+
+  it("la invitación", () => {
+    usarIdioma("en");
+    expect(invitacion({ nombre: "Lisboa", codigo: "ABC12345" }, "https://x.app/").text).toBe(
+      'Add what you pay for in "Lisboa" here. If it asks for a code: ABC12345'
+    );
   });
 });

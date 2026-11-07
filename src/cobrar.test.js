@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import { usarIdioma } from "./idioma";
 import { mensajeDeCobro, enlaceWhatsApp } from "./cobrar";
 
 const pago = { de: "Marta", a: "Ana", deId: "m", aId: "a", cantidad: 108.83 };
@@ -67,5 +68,17 @@ describe("enlaceWhatsApp", () => {
 
     expect(enlace).not.toMatch(/[\n #]/);
     expect(decodeURIComponent(enlace.split("text=")[1])).toBe("a\nb 🙏 #X");
+  });
+});
+
+describe("en inglés", () => {
+  afterEach(() => usarIdioma("es"));
+
+  it("el mensaje, en las dos personas", () => {
+    usarIdioma("en");
+    expect(mensaje({ soy: "a" })).toContain("Hi Marta! From *Lisboa* you owe me *108.83 €* 🙏");
+    expect(mensaje()).toContain("Hi Marta! From *Lisboa* you need to pay Ana *108.83 €* 🙏");
+    expect(mensaje({ cobro: { tipo: "bizum", valor: "612345678" } })).toContain("Ana's Bizum: 612 345 678");
+    expect(mensaje({ cobro: { tipo: "bizum", valor: "612345678" }, soy: "a" })).toContain("My Bizum: 612 345 678");
   });
 });

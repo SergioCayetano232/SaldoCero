@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import { usarIdioma } from "./idioma";
 import { gastosEnCSV, celda } from "./exportar";
 import { BOTE } from "./bote";
 
@@ -209,5 +210,23 @@ describe("celda", () => {
 
   it("vacío si no hay nada", () => {
     expect(celda(undefined)).toBe("");
+  });
+});
+
+describe("en inglés", () => {
+  afterEach(() => usarIdioma("es"));
+
+  it("con comas y punto, que es como lo abre el Excel en inglés", () => {
+    usarIdioma("en");
+    const [cabecera, fila] = gastosEnCSV({ gastos: [cena], viajeros, moneda: "EUR" }).split("\r\n");
+    expect(cabecera).toBe("Date,Day,What for,Category,Paid by,Amount,Currency,Amount in EUR,Note,Receipt,Added,Ana,Luis");
+    expect(fila).toBe("2026-09-13,Sunday,Cena,Food,Ana,30.00,EUR,30.00,,No,,15.00,15.00");
+  });
+
+  it("una coma dentro va entre comillas", () => {
+    usarIdioma("en");
+    const conComa = { ...cena, concepto: "Cena, copas" };
+    const [, fila] = gastosEnCSV({ gastos: [conComa], viajeros, moneda: "EUR" }).split("\r\n");
+    expect(fila).toContain(',"Cena, copas",');
   });
 });

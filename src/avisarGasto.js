@@ -9,12 +9,16 @@ import { BOTE } from "./bote";
 import { enlaceDelViaje } from "./compartir";
 import { enLista } from "./nombres";
 import { nombreDeQuienPago, idsDeQuienPago } from "./pagadores";
+import { t } from "./idioma";
 
 export function mensajeDeGasto({ gasto, viajeros, moneda, codigo, base }) {
+  const quien = nombreDeQuienPago(gasto, viajeros) || t("alguien");
   const pagador =
     gasto.pagadorId === BOTE
-      ? "del bote"
-      : `${idsDeQuienPago(gasto).length > 1 ? "pagaron" : "pagó"} ${nombreDeQuienPago(gasto, viajeros) || "alguien"}`;
+      ? t("del bote")
+      : idsDeQuienPago(gasto).length > 1
+        ? t("pagaron {quien}", { quien })
+        : t("pagó {quien}", { quien });
 
   // Si se pagó en otra moneda, las dos: la de verdad y la que cuenta.
   const otraMoneda = gasto.moneda && gasto.moneda !== moneda;
@@ -28,8 +32,8 @@ export function mensajeDeGasto({ gasto, viajeros, moneda, codigo, base }) {
   const cadaUno = porCabeza(gasto, viajeros);
 
   if (cadaUno !== null) {
-    const entre = suyos.length === viajeros.length ? "entre todos" : `entre ${enLista(suyos.map((v) => v.nombre))}`;
-    lineas.push(`Sale a *${conMoneda(cadaUno, moneda)}* cada uno, ${entre}`);
+    const entre = suyos.length === viajeros.length ? t("entre todos") : t("entre {quienes}", { quienes: enLista(suyos.map((v) => v.nombre)) });
+    lineas.push(t("Sale a *{cifra}* cada uno, {entre}", { cifra: conMoneda(cadaUno, moneda), entre }));
   } else if (suyos.length > 1) {
     // A partes distintas no hay una cifra para todos: la de cada uno.
     const reparto = repartoDeGasto(gasto, suyos);
@@ -37,7 +41,7 @@ export function mensajeDeGasto({ gasto, viajeros, moneda, codigo, base }) {
   }
 
   if (gasto.nota) lineas.push(`_${gasto.nota}_`);
-  if (codigo) lineas.push("", `Las cuentas, aquí: ${enlaceDelViaje(codigo, base)}`);
+  if (codigo) lineas.push("", t("Las cuentas, aquí: {enlace}", { enlace: enlaceDelViaje(codigo, base) }));
 
   return lineas.join("\n");
 }

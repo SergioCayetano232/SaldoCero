@@ -4,6 +4,7 @@
 
 import { ANCHO, ALTO_FILA, altoDeTarjeta, recortar } from "./tarjeta";
 import { inicial } from "./avatares";
+import { t, tn } from "./idioma";
 
 const TINTA = "#14262c";
 const TINTA_SUAVE = "#47616b";
@@ -144,7 +145,7 @@ function pintarCabecera(ctx, datos) {
   ctx.font = fuente(600, 26);
   ctx.fillStyle = TEAL;
   ctx.letterSpacing = "3px";
-  ctx.fillText("TOTAL DEL VIAJE", x, 440);
+  ctx.fillText(t("Total del viaje").toUpperCase(), x, 440);
   ctx.letterSpacing = "0px";
 
   ctx.font = fuente(700, 104, "Outfit");
@@ -166,7 +167,7 @@ function pintarPagos(ctx, datos, colores) {
   ctx.textAlign = "left";
   ctx.font = fuente(600, 40, "Outfit");
   ctx.fillStyle = TINTA;
-  ctx.fillText(datos.estado === "pendiente" ? "Quién paga a quién" : "Cuentas", x, 720);
+  ctx.fillText(datos.estado === "pendiente" ? t("Quién paga a quién") : t("Cuentas"), x, 720);
 
   if (datos.estado !== "pendiente") {
     fila(ctx, 760, "#e6f4ec");
@@ -174,7 +175,7 @@ function pintarPagos(ctx, datos, colores) {
     ctx.textAlign = "left";
     ctx.font = fuente(600, 36);
     ctx.fillStyle = VERDE;
-    ctx.fillText(datos.estado === "pagado" ? "Todo pagado, estáis a cero" : "Nadie debe nada", x + 104, 760 + 59);
+    ctx.fillText(datos.estado === "pagado" ? t("Todo pagado, estáis a cero") : t("Nadie debe nada"), x + 104, 760 + 59);
     return;
   }
 
@@ -222,8 +223,8 @@ function pintarPagos(ctx, datos, colores) {
     ctx.font = fuente(500, 30);
     ctx.textAlign = "left";
     ctx.fillStyle = TINTA_TENUE;
-    const otros = datos.masPagos === 1 ? "y 1 pago más" : `y ${datos.masPagos} pagos más`;
-    ctx.fillText(`${otros}, en la app`, x + 8, 760 + datos.pagos.length * ALTO_FILA + 30);
+    const otros = tn(datos.masPagos, "y {n} pago más, en la app", "y {n} pagos más, en la app");
+    ctx.fillText(otros, x + 8, 760 + datos.pagos.length * ALTO_FILA + 30);
   }
 }
 

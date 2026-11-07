@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import { usarIdioma } from "./idioma";
 import { datosDeTarjeta, altoDeTarjeta, recortar, MAX_PAGOS, ANCHO, ALTO_FILA } from "./tarjeta";
 
 const personas = [
@@ -88,5 +89,16 @@ describe("recortar", () => {
 
   it("no parte los emojis", () => {
     expect(recortar("🏖️🏖️🏖️🏖️", 30, medir)).not.toContain("�");
+  });
+});
+
+describe("en inglés", () => {
+  afterEach(() => usarIdioma("es"));
+
+  it("lo que va en la imagen", () => {
+    usarIdioma("en");
+    const d = datos([]);
+    expect(d.cuando).toBe("From 3 to 5 July 2026");
+    expect(d.detalle).toBe("2 expenses · 3 people · 30.00 € per person");
   });
 });

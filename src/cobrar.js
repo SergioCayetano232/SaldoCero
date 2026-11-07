@@ -4,6 +4,7 @@ import { conMoneda } from "./monedas";
 import { enlaceDelViaje } from "./compartir";
 import { lineaDeCobro } from "./cobro";
 import { cobroYo as cobroEsMio } from "./juntos";
+import { t } from "./idioma";
 
 // Si eres tú quien cobra, el mensaje va en primera persona. Si no, lo manda
 // alguien de fuera de la deuda y queda raro decir "me debes".
@@ -13,8 +14,8 @@ export function mensajeDeCobro({ pago, soy, nombreViaje, codigo, moneda, base, c
 
   const lineas = [
     cobroYo
-      ? `Hola ${pago.de}! De *${nombreViaje}* me debes *${cantidad}* 🙏`
-      : `Hola ${pago.de}! De *${nombreViaje}* te toca pagarle *${cantidad}* a ${pago.a} 🙏`,
+      ? t("Hola {de}! De *{viaje}* me debes *{cantidad}* 🙏", { de: pago.de, viaje: nombreViaje, cantidad })
+      : t("Hola {de}! De *{viaje}* te toca pagarle *{cantidad}* a {a} 🙏", { de: pago.de, viaje: nombreViaje, cantidad, a: pago.a }),
   ];
 
   // Si sabemos dónde, que no tenga ni que preguntarlo.
@@ -22,7 +23,7 @@ export function mensajeDeCobro({ pago, soy, nombreViaje, codigo, moneda, base, c
   if (donde) lineas.push("", donde);
 
   if (codigo) {
-    lineas.push("", `Las cuentas, aquí: ${enlaceDelViaje(codigo, base)}`);
+    lineas.push("", t("Las cuentas, aquí: {enlace}", { enlace: enlaceDelViaje(codigo, base) }));
   }
 
   return lineas.join("\n");

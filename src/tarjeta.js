@@ -4,6 +4,7 @@
 import { conMoneda } from "./monedas";
 import { cuandoFue } from "./fechas";
 import { porCabeza } from "./compartir";
+import { tn } from "./idioma";
 
 // Más de esto no se lee en una foto del móvil. El resto, "y 3 más".
 export const MAX_PAGOS = 6;
@@ -11,8 +12,8 @@ export const MAX_PAGOS = 6;
 export function datosDeTarjeta({ nombre, total, personas, pagos, moneda, gastos }) {
   const pendientes = pagos.filter((p) => !p.saldado);
   const visibles = pendientes.slice(0, MAX_PAGOS);
-  const cuantos = gastos.length === 1 ? "1 gasto" : `${gastos.length} gastos`;
-  const quienes = personas.length === 1 ? "1 viajero" : `${personas.length} viajeros`;
+  const cuantos = tn(gastos.length, "{n} gasto", "{n} gastos");
+  const quienes = tn(personas.length, "{n} viajero", "{n} viajeros");
 
   return {
     nombre,

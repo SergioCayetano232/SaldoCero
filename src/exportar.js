@@ -4,12 +4,16 @@ import { importeDeGasto, parteDe, calcularTotal, loQuePuso } from "./calculos";
 import { nombreDeQuienPago } from "./pagadores";
 import { categoriaDe, gastoPorCategoria } from "./categorias";
 import { BOTE } from "./bote";
+import { t, idiomaActual, formatoFechas } from "./idioma";
 
 // Punto y coma y coma decimal: así es como lo abre bien el Excel en español.
-const SEPARADOR = ";";
+// El de inglés quiere comas y punto, o te mete la fila entera en una celda.
+export function formatoCSV(idioma = idiomaActual()) {
+  return idioma === "es" ? { separador: ";", decimal: "," } : { separador: ",", decimal: "." };
+}
 
 function cifra(numero) {
-  return numero.toFixed(2).replace(".", ",");
+  return numero.toFixed(2).replace(".", formatoCSV().decimal);
 }
 
 // "2026-10-17 20:30", en la hora de aquí, como las fechas de los gastos.
@@ -22,7 +26,7 @@ function momento(iso) {
 // que a medianoche un cambio de hora te lo pasa al día anterior.
 function diaDeLaSemana(fecha) {
   if (!fecha) return "";
-  return new Date(`${fecha}T12:00:00`).toLocaleDateString("es-ES", { weekday: "long" });
+  return new Date(`${fecha}T12:00:00`).toLocaleDateString(formatoFechas(), { weekday: "long" });
 }
 
 // El nombre del viaje y sus días, para que el archivo se entienda sin abrir la app.
@@ -33,35 +37,35 @@ function arriba(nombre, gastos, deCuantos) {
   const dias = gastos.map((g) => g.fecha).filter(Boolean).sort();
   const desde = dias[0];
   const hasta = dias.at(-1);
-  const cuando = !desde ? "" : desde === hasta ? desde : `del ${desde} al ${hasta}`;
+  const cuando = !desde ? "" : desde === hasta ? desde : t("del {desde} al {hasta}", { desde, hasta });
   // Si es lo filtrado, que se diga: si no, parece el viaje entero.
-  const parte = deCuantos > gastos.length ? [`Solo ${gastos.length} de ${deCuantos} gastos`] : [];
+  const parte = deCuantos > gastos.length ? [t("Solo {n} de {de} gastos", { n: gastos.length, de: deCuantos })] : [];
 
   return [[nombre, cuando, ...parte], []];
 }
 
 // Entre comillas si hace falta. Y si empieza por = + - @, Excel lo tomaría por
 // una fórmula: con un apóstrofo delante se queda en texto.
-export function celda(valor) {
+export function celda(valor, separador = ";") {
   let texto = String(valor ?? "");
   if (/^[=+\-@]/.test(texto)) texto = `'${texto}`;
-  if (/[;"\n\r]/.test(texto)) texto = `"${texto.replaceAll('"', '""')}"`;
+  if (texto.includes(separador) || /["\n\r]/.test(texto)) texto = `"${texto.replaceAll('"', '""')}"`;
   return texto;
 }
 
 export function gastosEnCSV({ gastos, viajeros, moneda, nombre, pagos, deCuantos }) {
   const cabecera = [
-    "Fecha",
-    "Día",
-    "Concepto",
-    "Categoría",
-    "Pagó",
-    "Importe",
-    "Moneda",
-    `Importe en ${moneda}`,
-    "Nota",
-    "Ticket",
-    "Apuntado",
+    t("Fecha"),
+    t("Día"),
+    t("Concepto"),
+    t("Categoría"),
+    t("Pagó"),
+    t("Importe"),
+    t("Moneda"),
+    t("Importe en {moneda}", { moneda }),
+    t("Nota"),
+    t("Ticket"),
+    t("Apuntado"),
     // Lo que le toca a cada uno de cada gasto, para poder rehacer las cuentas.
     ...viajeros.map((v) => v.nombre),
   ];
@@ -72,14 +76,14 @@ export function gastosEnCSV({ gastos, viajeros, moneda, nombre, pagos, deCuantos
       g.fecha ?? "",
       diaDeLaSemana(g.fecha),
       g.concepto,
-      categoriaDe(g.categoria).nombre,
-      g.pagadorId === BOTE ? "Bote" : nombreDeQuienPago(g, viajeros),
+      t(categoriaDe(g.categoria).nombre),
+      g.pagadorId === BOTE ? t("Bote") : nombreDeQuienPago(g, viajeros),
       cifra(g.importe),
       g.moneda ?? moneda,
       cifra(importeDeGasto(g)),
       g.nota ?? "",
       // La foto no cabe en un Excel, pero así sabes cuáles tienen justificante.
-      g.ticket ? "Sí" : "No",
+      g.ticket ? t("Sí") : t("No"),
       // Los gastos de antes no lo guardaban.
       momento(g.creadoEn),
       ...viajeros.map((v) => cifra(parteDe(g, v.id, viajeros))),
@@ -90,7 +94,7 @@ export function gastosEnCSV({ gastos, viajeros, moneda, nombre, pagos, deCuantos
   const total = [
     "",
     "",
-    "Total",
+    t("Total"),
     "",
     "",
     "",
@@ -99,13 +103,13 @@ export function gastosEnCSV({ gastos, viajeros, moneda, nombre, pagos, deCuantos
     "",
     "",
     "",
-    ...viajeros.map((v) => cifra(gastos.reduce((t, g) => t + parteDe(g, v.id, viajeros), 0))),
+    ...viajeros.map((v) => cifra(gastos.reduce((suma, g) => suma + parteDe(g, v.id, viajeros), 0))),
   ];
   // Lo pagado del bote no sale aquí, que no lo puso nadie de su bolsillo.
   const puso = [
     "",
     "",
-    "Puso",
+    t("Puso"),
     "",
     "",
     "",
@@ -114,11 +118,14 @@ export function gastosEnCSV({ gastos, viajeros, moneda, nombre, pagos, deCuantos
     "",
     "",
     "",
-    ...viajeros.map((v) => cifra(gastos.reduce((t, g) => t + (loQuePuso(g, viajeros).get(v.id) ?? 0), 0))),
+    ...viajeros.map((v) => cifra(gastos.reduce((suma, g) => suma + (loQuePuso(g, viajeros).get(v.id) ?? 0), 0))),
   ];
   const alFinal = gastos.length > 0 ? [[], total, puso, ...porCategoria(gastos, moneda), ...comoQuedan(pagos, moneda)] : [];
 
-  return [...arriba(nombre, gastos, deCuantos), cabecera, ...filas, ...alFinal].map((fila) => fila.map(celda).join(SEPARADOR)).join("\r\n");
+  const { separador } = formatoCSV();
+  return [...arriba(nombre, gastos, deCuantos), cabecera, ...filas, ...alFinal]
+    .map((fila) => fila.map((valor) => celda(valor, separador)).join(separador))
+    .join("\r\n");
 }
 
 // Lo de cada categoría, ya sumado, que es lo primero que se hace con la columna.
@@ -127,13 +134,13 @@ function porCategoria(gastos, moneda) {
   const categorias = gastoPorCategoria(gastos, importeDeGasto);
   if (categorias.length < 2) return [];
 
-  const suma = categorias.reduce((t, c) => t + c.total, 0);
+  const suma = categorias.reduce((total, c) => total + c.total, 0);
   return [
     [],
     [],
-    ["En qué se fue"],
-    ["Categoría", `Importe en ${moneda}`, "% del total"],
-    ...categorias.map((c) => [c.nombre, cifra(c.total), Math.round((c.total / suma) * 100)]),
+    [t("En qué se fue")],
+    [t("Categoría"), t("Importe en {moneda}", { moneda }), t("% del total")],
+    ...categorias.map((c) => [t(c.nombre), cifra(c.total), Math.round((c.total / suma) * 100)]),
   ];
 }
 
@@ -141,13 +148,13 @@ function porCategoria(gastos, moneda) {
 // tabla y si no el Excel la junta con la de arriba.
 function comoQuedan(pagos, moneda) {
   if (!pagos) return [];
-  if (pagos.length === 0) return [[], [], ["Quién paga a quién"], ["Nadie debe nada"]];
+  if (pagos.length === 0) return [[], [], [t("Quién paga a quién")], [t("Nadie debe nada")]];
 
   return [
     [],
     [],
-    ["Quién paga a quién"],
-    ["Paga", "Cobra", `Cantidad en ${moneda}`, "Estado"],
-    ...pagos.map((p) => [p.de, p.a, cifra(p.cantidad), p.saldado ? "Pagado" : "Pendiente"]),
+    [t("Quién paga a quién")],
+    [t("Paga"), t("Cobra"), t("Cantidad en {moneda}", { moneda }), t("Estado")],
+    ...pagos.map((p) => [p.de, p.a, cifra(p.cantidad), p.saldado ? t("Pagado") : t("Pendiente")]),
   ];
 }

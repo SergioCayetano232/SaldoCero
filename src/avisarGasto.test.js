@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import { usarIdioma } from "./idioma";
 import { mensajeDeGasto } from "./avisarGasto";
 import { BOTE } from "./bote";
 
@@ -59,5 +60,19 @@ describe("mensajeDeGasto", () => {
   it("de uno solo no hay reparto que contar", () => {
     const gasto = { pagadorId: "a", importe: 12, concepto: "Souvenir", participantes: ["a"] };
     expect(mensajeDeGasto({ gasto, viajeros, moneda: "EUR" }).split("\n")).toHaveLength(1);
+  });
+});
+
+describe("mensajeDeGasto en inglés", () => {
+  afterEach(() => usarIdioma("es"));
+
+  it("el gasto contado en inglés", () => {
+    usarIdioma("en");
+    const gasto = { pagadorId: "a", importe: 60, concepto: "Cena", categoria: "comida" };
+    expect(mensajeDeGasto({ gasto, viajeros, moneda: "EUR", codigo: "ABCD1234", base })).toBe(
+      ["🍽️ *Cena*: 60.00 €, paid by Ana", "That's *15.00 €* each, between everyone", "", "The numbers are here: https://saldo.app/#ABCD1234"].join("\n")
+    );
+    const delBote = { ...gasto, pagadorId: BOTE };
+    expect(mensajeDeGasto({ gasto: delBote, viajeros, moneda: "EUR" })).toContain("60.00 €, from the kitty");
   });
 });

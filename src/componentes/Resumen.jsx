@@ -185,7 +185,7 @@ function Resumen({
   }, []);
 
   function elResumen(conCifras = false) {
-    const nombre = viaje?.nombre ?? "El viaje";
+    const nombre = viaje?.nombre ?? t("El viaje");
     const conBote = personas.map((v) => ({ ...v, puesto: v.puesto + (v.alBote ?? 0) }));
     const cifras = conCifras && cerrado ? cifrasDelViaje(gastos, conBote, monedaViaje) : null;
 
@@ -253,10 +253,10 @@ function Resumen({
 
   async function mandarImagen() {
     setImagen("haciendo");
-    const nombre = viaje?.nombre ?? "El viaje";
+    const nombre = viaje?.nombre ?? t("El viaje");
     try {
       const datos = datosDeTarjeta({ nombre, total, personas, pagos, moneda: monedaViaje, gastos });
-      const png = await tarjetaEnImagen(datos, colores, `Apuntado con SaldoCero · ${window.location.host}`);
+      const png = await tarjetaEnImagen(datos, colores, t("Apuntado con SaldoCero · {web}", { web: window.location.host }));
       await compartirImagen(png, nombreDeArchivo(nombre, "png"));
       setImagen("");
     } catch (fallo) {
@@ -293,7 +293,7 @@ function Resumen({
           <button
             className="boton-compartir"
             ref={botonGuardar}
-            onClick={() => descargarResumen(elResumen(true), viaje?.nombre ?? "viaje")}
+            onClick={() => descargarResumen(elResumen(true), viaje?.nombre ?? t("viaje"))}
             title={esOrdenador() ? t("Bajarlo en un archivo (también con la G)") : t("Bajarlo en un archivo")}
             aria-keyshortcuts="g"
           >
@@ -305,7 +305,7 @@ function Resumen({
             onClick={() =>
               descargarGastos(
                 gastosEnCSV({ gastos, viajeros: personas, moneda: monedaViaje, nombre: viaje?.nombre, pagos }),
-                viaje?.nombre ?? "viaje"
+                viaje?.nombre ?? t("viaje")
               )
             }
             ref={botonExcel}
