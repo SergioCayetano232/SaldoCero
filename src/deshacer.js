@@ -53,11 +53,11 @@ export function borradoConEspera(borrar, alTerminar) {
 // borra en cascada). Que se diga, que si no parece que solo se va el nombre.
 export function queSeVaConViajero(viajero, gastos, moneda = "EUR") {
   const suyos = gastos.filter((g) => g.pagadorId === viajero.id);
-  if (suyos.length === 0) return `a ${viajero.nombre}`;
+  if (suyos.length === 0) return t("a {nombre}", { nombre: viajero.nombre });
 
   const total = conMoneda(calcularTotal(suyos), moneda);
-  if (suyos.length === 1) return `a ${viajero.nombre} y el gasto que pagó (${total})`;
-  return `a ${viajero.nombre} y los ${suyos.length} gastos que pagó (${total})`;
+  if (suyos.length === 1) return t("a {nombre} y el gasto que pagó ({total})", { nombre: viajero.nombre, total });
+  return t("a {nombre} y los {n} gastos que pagó ({total})", { nombre: viajero.nombre, n: suyos.length, total });
 }
 
 // Lo que hay que volver a guardar para dejar un gasto como estaba antes de

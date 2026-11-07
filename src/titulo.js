@@ -25,7 +25,7 @@ export function cuentaDeNeto(neto, moneda = "EUR") {
 
 export function tituloDePestana(nombreDelViaje, cuenta = null) {
   const nombre = nombreDelViaje?.trim();
-  if (!nombre) return TITULO_SIN_VIAJE;
+  if (!nombre) return t(TITULO_SIN_VIAJE);
   return cuenta ? `${nombre} · ${cuenta} · SaldoCero` : `${nombre} · SaldoCero`;
 }
 
@@ -39,6 +39,6 @@ export function miNeto(viaje, soy) {
 }
 
 export function tituloDelViaje(viaje, soy) {
-  if (!viaje) return TITULO_SIN_VIAJE;
+  if (!viaje) return t(TITULO_SIN_VIAJE);
   return tituloDePestana(viaje.nombre, cuentaDeNeto(miNeto(viaje, soy), viaje.moneda ?? "EUR"));
 }

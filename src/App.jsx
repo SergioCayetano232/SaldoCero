@@ -90,7 +90,7 @@ function App() {
     // Hasta que no entras en un viaje, la foto espera aquí.
     recogerTicket()
       .then((foto) => foto && setLlegada({ que: "ticket", foto }))
-      .catch(() => setError("No hemos podido coger la foto que has compartido."));
+      .catch(() => setError(t("No hemos podido coger la foto que has compartido.")));
   }, []);
 
   useEffect(() => {
@@ -427,7 +427,7 @@ function App() {
       const yo = quienEresEnElNuevo(soy, gente, creado.viajeros);
       // Ya, que lo pendiente que se pase tiene que salir a tu nombre.
       datos.usarViajero(yo);
-      let aviso = creado.sinGente ? "Hemos creado el viaje, pero no hemos podido pasar a la gente. Añádela a mano." : "";
+      let aviso = creado.sinGente ? t("Hemos creado el viaje, pero no hemos podido pasar a la gente. Añádela a mano.") : "";
       if (pasar && !creado.sinGente) {
         const pares = gastosDeLoPendiente(pendientes, gente, creado.viajeros, { nombre: viaje.nombre, moneda: viaje.moneda ?? "EUR", dia: hoy() });
         aviso = await datos.pasarLoPendiente(viaje, creado, pares, yo).then(() => "", (fallo) => fallo.message);
@@ -450,7 +450,7 @@ function App() {
   }
 
   function reabrirViaje() {
-    if (!window.confirm(`¿Reabrir "${viaje.nombre}"? Se podrán volver a tocar los gastos.`)) return;
+    if (!window.confirm(t('¿Reabrir "{nombre}"? Se podrán volver a tocar los gastos.', { nombre: viaje.nombre }))) return;
     // Si lo reabres es para tocar algo: que no te sugiera cerrarlo nada más abrirlo.
     datos.guardarAunNoCerrar(viaje.codigo, ultimoApunte(viaje.gastos));
     hacer(() => datos.cerrarViaje(viaje.id, false));
@@ -563,7 +563,7 @@ function App() {
           cerrado={cerrado}
           onPoner={(lista) => hacer(() => datos.ponerEnElBote(viaje.id, lista))}
           onQuitar={(a, nombre) =>
-            borrarConAviso(a.id, `lo que puso ${nombre} en el bote`, () => datos.quitarDelBote(a.id))
+            borrarConAviso(a.id, t("lo que puso {nombre} en el bote", { nombre }), () => datos.quitarDelBote(a.id))
           }
         />
       )}
@@ -666,7 +666,7 @@ function App() {
           aportaciones={aportaciones}
           onParcial={(parcial) => hacer(() => datos.anadirParcial(viaje.id, parcial))}
           onQuitarParcial={(parcial, de, a) =>
-            borrarConAviso(parcial.id, `el pago de ${de} a ${a}`, () => datos.quitarParcial(parcial.id))
+            borrarConAviso(parcial.id, t("el pago de {de} a {a}", { de, a }), () => datos.quitarParcial(parcial.id))
           }
           viaje={viaje}
           onVerGastos={
@@ -773,7 +773,7 @@ function BotonInstalar() {
   return (
     <button className="boton-instalar" onClick={instalar}>
       <span className="instalar-icono">⬇</span>
-      Instalar en el móvil
+      {t("Instalar en el móvil")}
     </button>
   );
 }
@@ -795,15 +795,15 @@ function SugerirCerrar({ codigo, gastos, cerrado, onCerrar }) {
         🏁
       </span>
       <p>
-        <strong>¿Habéis vuelto ya?</strong> Hace {dias} días que nadie apunta nada. Cerrado, los gastos
-        ya no cambian.
+        <strong>{t("¿Habéis vuelto ya?")}</strong>{" "}
+        {t("Hace {n} días que nadie apunta nada. Cerrado, los gastos ya no cambian.", { n: dias })}
       </p>
       <div className="sugerir-cerrar-botones">
         <button className="enlace" onClick={onCerrar}>
-          Cerrar
+          {t("Cerrar")}
         </button>
         <button className="enlace aun-no" onClick={aunNo}>
-          Aún no
+          {t("Aún no")}
         </button>
       </div>
     </div>

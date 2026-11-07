@@ -49,7 +49,7 @@ export async function tarjetaEnImagen(datos, colores, pie) {
   ctx.fillText(pie, ANCHO / 2, alto - 60);
 
   return new Promise((bien, mal) =>
-    lienzo.toBlob((imagen) => (imagen ? bien(imagen) : mal(new Error("No hemos podido hacer la imagen."))), "image/png")
+    lienzo.toBlob((imagen) => (imagen ? bien(imagen) : mal(new Error(t("No hemos podido hacer la imagen.")))), "image/png")
   );
 }
 

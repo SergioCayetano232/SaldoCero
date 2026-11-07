@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import { usarIdioma } from "./idioma";
 import { tituloDePestana, tituloDelViaje, cuentaEnTitulo, cuentaDeNeto, miNeto, TITULO_SIN_VIAJE } from "./titulo";
 
 describe("tituloDePestana", () => {
@@ -109,5 +110,14 @@ describe("cuentaDeNeto", () => {
     expect(cuentaDeNeto(0)).toBeNull();
     expect(cuentaDeNeto(null)).toBeNull();
     expect(cuentaDeNeto(undefined)).toBeNull();
+  });
+});
+
+describe("el título en inglés", () => {
+  afterEach(() => usarIdioma("es"));
+
+  it("sin viaje", () => {
+    usarIdioma("en");
+    expect(tituloDePestana(null)).toBe("SaldoCero · Split your trip expenses");
   });
 });

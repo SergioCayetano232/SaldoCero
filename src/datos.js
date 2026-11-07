@@ -10,6 +10,7 @@ import { limpiarNombre } from "./nombres";
 import { codigoDeTexto } from "./codigos";
 import { POR_DIAS } from "./ordenar";
 import { conCerrado, conNeto } from "./pasados";
+import { t } from "./idioma";
 import { limpiarTopes } from "./topes";
 import { limpiarEstancia } from "./estancia";
 import { limpiarDuda } from "./dudas";
@@ -17,9 +18,10 @@ import { limpiarLugar } from "./lugares";
 
 // Al usuario le decimos algo que entienda, pero el fallo de verdad lo dejamos
 // en la consola, que si no no hay quien averigüe qué ha pasado.
+// En la consola en español, que es quien lo arregla; al que usa la app, en el suyo.
 function fallo(error, mensaje) {
   console.error(mensaje, error);
-  return new Error(mensaje);
+  return new Error(t(mensaje));
 }
 
 // El código del último viaje, para reabrirlo al volver a entrar.
@@ -314,14 +316,14 @@ export async function pasarLoPendiente(viejo, nuevo, pares, creadoPor = null) {
     try {
       await marcarVariosSaldados(viejo.id, llegados);
     } catch {
-      fallado = new Error(`Lo pendiente ya está en "${nuevo.nombre}", pero en "${viejo.nombre}" sigue saliendo: márcalo allí como pagado.`);
+      fallado = new Error(t('Lo pendiente ya está en "{nuevo}", pero en "{viejo}" sigue saliendo: márcalo allí como pagado.', { nuevo: nuevo.nombre, viejo: viejo.nombre }));
     } finally {
       usarCodigo(nuevo.codigo);
     }
   }
 
   if (fallado && llegados.length < pares.length) {
-    throw new Error(`Hemos creado "${nuevo.nombre}", pero no hemos podido pasar todo lo pendiente. Lo que falta sigue en "${viejo.nombre}".`);
+    throw new Error(t('Hemos creado "{nuevo}", pero no hemos podido pasar todo lo pendiente. Lo que falta sigue en "{viejo}".', { nuevo: nuevo.nombre, viejo: viejo.nombre }));
   }
   if (fallado) throw fallado;
 }
@@ -329,12 +331,12 @@ export async function pasarLoPendiente(viejo, nuevo, pares, creadoPor = null) {
 // Entrar a un viaje con su código y traerse todo lo suyo.
 export async function abrirViaje(codigo) {
   const limpio = codigoDeTexto(codigo);
-  if (limpio === "") throw new Error("Escribe el código del viaje.");
+  if (limpio === "") throw new Error(t("Escribe el código del viaje."));
 
   const { data, error } = await supabase.rpc("abrir_viaje", { codigo_buscado: limpio });
   if (error) throw fallo(error, "No hemos podido conectar. Revisa tu conexión.");
   if (!data.length) {
-    const noExiste = new Error("Ese código no existe. Míralo otra vez.");
+    const noExiste = new Error(t("Ese código no existe. Míralo otra vez."));
     noExiste.noExiste = true;
     throw noExiste;
   }
@@ -766,7 +768,7 @@ export async function vaciarViaje(viajeId) {
     .single();
 
   if (errorViaje) throw fallo(errorViaje, "No hemos podido vaciar el viaje.");
-  if (viaje.cerrado_en) throw new Error("El viaje está cerrado. Reábrelo para poder vaciarlo.");
+  if (viaje.cerrado_en) throw new Error(t("El viaje está cerrado. Reábrelo para poder vaciarlo."));
 
   // Las fotos primero, que luego ya no sabríamos cuáles eran.
   const { data: fotos } = await supabase.storage.from(TICKETS).list(viajeId, { limit: 1000 });

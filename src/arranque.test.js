@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import { usarIdioma } from "./idioma";
 import { avisoDeArranque, codigoQueAbrir, hayQueOlvidar } from "./arranque";
 
 function noExiste() {
@@ -57,5 +58,17 @@ describe("hayQueOlvidar", () => {
 
   it("con un enlace malo tampoco: lo guardado es otro viaje", () => {
     expect(hayQueOlvidar(noExiste(), true)).toBe(false);
+  });
+});
+
+describe("avisoDeArranque en inglés", () => {
+  afterEach(() => usarIdioma("es"));
+
+  it("el enlace y el último viaje", () => {
+    usarIdioma("en");
+    const fallo = Object.assign(new Error("x"), { noExiste: true });
+    expect(avisoDeArranque(fallo, true)).toMatch(/^That link doesn't lead to any trip/);
+    expect(avisoDeArranque(fallo, false)).toBe("The last trip you were in doesn't exist any more.");
+    expect(avisoDeArranque(null, false)).toBe("We couldn't open the trip.");
   });
 });

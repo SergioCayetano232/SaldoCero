@@ -1,5 +1,7 @@
 // La foto del ticket de un gasto.
 
+import { t } from "./idioma";
+
 // Una foto del móvil son 4 MB. A 1600 px el ticket se lee igual y ocupa unos
 // 200 KB, que el Storage gratis es de 1 GB.
 export const LADO_MAXIMO = 1600;
@@ -32,7 +34,7 @@ export async function reducirFoto(archivo) {
     imagen = await createImageBitmap(archivo, { imageOrientation: "from-image" });
   } catch {
     // Pasa con las HEIC del iPhone en un navegador que no las sabe abrir.
-    throw new Error("No hemos podido leer la foto. Prueba con otra o hazle una captura.");
+    throw new Error(t("No hemos podido leer la foto. Prueba con otra o hazle una captura."));
   }
   const { ancho, alto } = medidaReducida(imagen.width, imagen.height);
 
@@ -44,7 +46,7 @@ export async function reducirFoto(archivo) {
 
   return new Promise((resolver, fallar) =>
     lienzo.toBlob(
-      (blob) => (blob ? resolver(blob) : fallar(new Error("No hemos podido leer la foto. Prueba con otra o hazle una captura."))),
+      (blob) => (blob ? resolver(blob) : fallar(new Error(t("No hemos podido leer la foto. Prueba con otra o hazle una captura.")))),
       "image/jpeg",
       CALIDAD
     )

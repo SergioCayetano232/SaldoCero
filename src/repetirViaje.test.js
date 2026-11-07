@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import { usarIdioma } from "./idioma";
 import { nombreDeLaRepeticion, genteParaRepetir, quienEresEnElNuevo, pendientesParaPasar, gastosDeLoPendiente, preguntaDePendientes } from "./repetirViaje";
 import { calcularBalances } from "./calculos";
 
@@ -123,5 +124,16 @@ describe("lo pendiente al repetir", () => {
       'Queda una deuda sin pagar: Luis le debe 20.00 € a Ana. ¿La pasamos a "Ibiza 2"? Allí saldrá como un gasto y aquí se dará por pagada.'
     );
     expect(preguntaDePendientes([deLuis, deMarta], "Ibiza 2", "EUR")).toMatch(/^Quedan 2 deudas sin pagar, 32\.35 € en total\./);
+  });
+});
+
+describe("preguntaDePendientes en inglés", () => {
+  afterEach(() => usarIdioma("es"));
+
+  it("con una y con varias", () => {
+    usarIdioma("en");
+    const uno = { de: "Luis", a: "Ana", cantidad: 20 };
+    expect(preguntaDePendientes([uno], "Ibiza 2", "EUR")).toMatch(/^There's one unpaid debt: Luis owes Ana 20\.00 €\. Move it to "Ibiza 2"\?/);
+    expect(preguntaDePendientes([uno, { ...uno, de: "Marta" }], "Ibiza 2", "EUR")).toMatch(/^There are 2 unpaid debts, 40\.00 € in total\./);
   });
 });

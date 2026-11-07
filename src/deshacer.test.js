@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { usarIdioma } from "./idioma";
 import { borradoConEspera, ESPERA, queSeVaConViajero, deshacerEdicion, queSeVaConGastos, textoQuitarVarios } from "./deshacer";
 
 // Controlamos el reloj, que si no habría que esperar de verdad.
@@ -194,5 +195,17 @@ describe("textoQuitarVarios", () => {
   it("con dos se dice de otra forma", () => {
     expect(textoQuitarVarios(2)).toBe("quitar los dos");
     expect(textoQuitarVarios(5)).toBe("quitar los 5");
+  });
+});
+
+describe("queSeVaConViajero en inglés", () => {
+  afterEach(() => usarIdioma("es"));
+
+  it("el nombre y lo que pagó", () => {
+    usarIdioma("en");
+    const luis = { id: "l", nombre: "Luis" };
+    expect(queSeVaConViajero(luis, [])).toBe("Luis");
+    expect(queSeVaConViajero(luis, [{ pagadorId: "l", importe: 30 }])).toBe("Luis and the expense they paid (30.00 €)");
+    expect(queSeVaConViajero(luis, [{ pagadorId: "l", importe: 30 }, { pagadorId: "l", importe: 12 }])).toBe("Luis and the 2 expenses they paid (42.00 €)");
   });
 });

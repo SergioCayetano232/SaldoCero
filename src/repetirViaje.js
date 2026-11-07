@@ -3,6 +3,7 @@
 import { BOTE } from "./bote";
 import { POR_DEFECTO } from "./categorias";
 import { conMoneda } from "./monedas";
+import { t } from "./idioma";
 
 // "Ibiza" → "Ibiza 2", "Ibiza 2" → "Ibiza 3". Y si acaba en un año, el siguiente,
 // que "Ibiza 2026 2" no lo escribe nadie.
@@ -59,10 +60,10 @@ export function gastosDeLoPendiente(pendientes, viejos, nuevos, { nombre, moneda
       importe,
       moneda,
       importeConvertido: importe,
-      concepto: `Lo que quedó de ${nombre}`,
+      concepto: t("Lo que quedó de {nombre}", { nombre }),
       categoria: POR_DEFECTO,
       fecha: dia,
-      nota: `${pago.de} le debía esto a ${pago.a}`,
+      nota: t("{de} le debía esto a {a}", { de: pago.de, a: pago.a }),
       participantes: [deudor],
       partes: null,
     };
@@ -73,10 +74,10 @@ export function gastosDeLoPendiente(pendientes, viejos, nuevos, { nombre, moneda
 export function preguntaDePendientes(pendientes, nombreNuevo, moneda) {
   if (pendientes.length === 1) {
     const [p] = pendientes;
-    return `Queda una deuda sin pagar: ${p.de} le debe ${conMoneda(enCentimos(p.cantidad), moneda)} a ${p.a}. ¿La pasamos a "${nombreNuevo}"? Allí saldrá como un gasto y aquí se dará por pagada.`;
+    return t('Queda una deuda sin pagar: {de} le debe {cifra} a {a}. ¿La pasamos a "{viaje}"? Allí saldrá como un gasto y aquí se dará por pagada.', { de: p.de, a: p.a, cifra: conMoneda(enCentimos(p.cantidad), moneda), viaje: nombreNuevo });
   }
 
   // Con lo redondeado, que es lo que pasa al nuevo.
-  const total = pendientes.reduce((t, p) => t + enCentimos(p.cantidad), 0);
-  return `Quedan ${pendientes.length} deudas sin pagar, ${conMoneda(total, moneda)} en total. ¿Las pasamos a "${nombreNuevo}"? Allí saldrán como gastos y aquí se darán por pagadas.`;
+  const total = pendientes.reduce((suma, p) => suma + enCentimos(p.cantidad), 0);
+  return t('Quedan {n} deudas sin pagar, {cifra} en total. ¿Las pasamos a "{viaje}"? Allí saldrán como gastos y aquí se darán por pagadas.', { n: pendientes.length, cifra: conMoneda(total, moneda), viaje: nombreNuevo });
 }

@@ -22,6 +22,6 @@ export function textoPasarA(cuantos) {
 }
 
 export function textoPasados(cuantos, categoria) {
-  const nombre = categoriaDe(categoria).nombre;
-  return cuantos === 1 ? `Has pasado 1 gasto a ${nombre}` : `Has pasado ${cuantos} gastos a ${nombre}`;
+  const nombre = t(categoriaDe(categoria).nombre);
+  return cuantos === 1 ? t("Has pasado 1 gasto a {nombre}", { nombre }) : t("Has pasado {n} gastos a {nombre}", { n: cuantos, nombre });
 }

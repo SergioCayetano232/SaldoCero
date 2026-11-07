@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import { usarIdioma } from "./idioma";
 import { aOtraCategoria, categoriasDestino, textoPasarA, textoPasados } from "./recategorizar";
 
 const gasto = (id, categoria) => ({ id, concepto: "Café", importe: 2, categoria });
@@ -47,5 +48,15 @@ describe("textos", () => {
   it("lo que se ha hecho", () => {
     expect(textoPasados(7, "comida")).toBe("Has pasado 7 gastos a Comida");
     expect(textoPasados(1, "ocio")).toBe("Has pasado 1 gasto a Ocio");
+  });
+});
+
+describe("textoPasados en inglés", () => {
+  afterEach(() => usarIdioma("es"));
+
+  it("con la categoría traducida", () => {
+    usarIdioma("en");
+    expect(textoPasados(7, "comida")).toBe("You moved 7 expenses to Food");
+    expect(textoPasados(1, "ocio")).toBe("You moved 1 expense to Activities");
   });
 });
