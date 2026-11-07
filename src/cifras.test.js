@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import { usarIdioma } from "./idioma";
 import { cifrasDelViaje, cifrasEnTexto, diaDeLaSemana, elMasTrasnochado, findeContraSemana, cuantasVeces, laMitadEn, horaDeApuntar, elGordoDeCadaUno, elDiaDeCadaUno, elGordoDeFuera, categoriaMasVeces } from "./cifras";
 import { BOTE } from "./bote";
 
@@ -747,5 +748,33 @@ describe("categoriaMasVeces", () => {
     expect(categoriaMasVeces(gastos.slice(0, 2), null)).toBeNull();
     const empate = [...gastos, { ...gastos[4], concepto: "Bus" }];
     expect(categoriaMasVeces(empate, null)).toBeNull();
+  });
+});
+
+describe("en inglés", () => {
+  afterEach(() => usarIdioma("es"));
+
+  it("el texto para el grupo", () => {
+    usarIdioma("en");
+    const texto = cifrasEnTexto(cifrasDelViaje(gastos, personas), "Lisboa", "EUR");
+    expect(texto).toContain("*Lisboa* in numbers");
+    expect(texto).toContain("240.00 € on 5 expenses (48.00 € on average)");
+    expect(texto).toContain("Biggest expense: Hotel, 120.00 € (Ana)");
+    expect(texto).not.toMatch(/gasto|de media/);
+  });
+
+  it("cuántas veces, con el punto", () => {
+    usarIdioma("en");
+    expect(cuantasVeces(2)).toBe("twice as much");
+    expect(cuantasVeces(1.8)).toBe("1.8 times as much");
+  });
+
+  it("el día de la semana y lo del bote", () => {
+    usarIdioma("en");
+    const dia = (fecha, total) => ({ fecha, total });
+    const dias = [dia("2026-10-30", 50), dia("2026-10-31", 120), dia("2026-11-06", 60), dia("2026-11-07", 160)];
+    expect(diaDeLaSemana(dias).dia).toBe("Saturdays");
+    const delBote = [{ pagadorId: BOTE, importe: 50, concepto: "Super", categoria: "comida", fecha: "2026-09-10" }];
+    expect(cifrasDelViaje(delBote, personas).gastoMasGrande.quien).toBe("the kitty");
   });
 });

@@ -9,6 +9,7 @@ import { historiasDelViaje } from "../historias";
 import { esAtajoHistorias, esOrdenador } from "../teclado";
 import Cifra from "./Cifra";
 import Historias from "./Historias";
+import { t, tn } from "../idioma";
 
 // Al cerrar el viaje, lo que dio de sí. Para enseñarlo en el grupo.
 function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHistorias = false, onHistorias }) {
@@ -45,9 +46,9 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
   return (
     <section className="tarjeta cifras">
       <h2>
-        <span className="icono">🏁</span> El viaje en cifras
-        <button className="boton-compartir" onClick={compartir} title="Copiar las cifras">
-          {copiado === "bien" ? "✓ Copiado" : copiado === "mal" ? "No se ha podido" : "Compartir"}
+        <span className="icono">🏁</span> {t("El viaje en cifras")}
+        <button className="boton-compartir" onClick={compartir} title={t("Copiar las cifras")}>
+          {copiado === "bien" ? t("✓ Copiado") : copiado === "mal" ? t("No se ha podido") : t("Compartir")}
         </button>
       </h2>
 
@@ -55,9 +56,9 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
         className="boton-historias"
         onClick={() => onHistorias?.(true)}
         aria-keyshortcuts="v"
-        title={esOrdenador() ? "También con la V" : undefined}
+        title={esOrdenador() ? t("También con la V") : undefined}
       >
-        <span aria-hidden="true">▶</span> Verlo en historias
+        <span aria-hidden="true">▶</span> {t("Verlo en historias")}
       </button>
 
       {verHistorias && (
@@ -72,9 +73,9 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
           <Cifra valor={cifras.total} moneda={moneda} />
         </span>
         <span className="cifras-pie">
-          en {cifras.gastos} {cifras.gastos === 1 ? "gasto" : "gastos"}
-          {cifras.dias > 1 && ` y ${cifras.dias} días`}
-          {cifras.media !== null && `, ${conMoneda(cifras.media, moneda)} de media`}
+          {tn(cifras.gastos, "en {n} gasto", "en {n} gastos")}
+          {cifras.dias > 1 && ` ${t("y {n} días", { n: cifras.dias })}`}
+          {cifras.media !== null && `, ${t("{cifra} de media", { cifra: conMoneda(cifras.media, moneda) })}`}
         </span>
       </div>
 
@@ -83,73 +84,75 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
           <li>
             <span className="cifras-emoji">🧍</span>
             <strong>{conMoneda(porPersonaYDia, moneda)}</strong>
-            <span>por persona y día</span>
+            <span>{t("por persona y día")}</span>
           </li>
         )}
         {quienMasPuso && (
           <li>
             <span className="cifras-emoji">🏆</span>
             <strong>{quienMasPuso.nombre}</strong>
-            <span>el que más puso, {conMoneda(quienMasPuso.puesto, moneda)}</span>
+            <span>{t("el que más puso, {cifra}", { cifra: conMoneda(quienMasPuso.puesto, moneda) })}</span>
           </li>
         )}
         {quienMenosPuso && (
           <li>
             <span className="cifras-emoji">🤏</span>
             <strong>{quienMenosPuso.nombre}</strong>
-            <span>el que menos puso, {conMoneda(quienMenosPuso.puesto, moneda)}</span>
+            <span>{t("el que menos puso, {cifra}", { cifra: conMoneda(quienMenosPuso.puesto, moneda) })}</span>
           </li>
         )}
         {quienMasGasto && (
           <li>
             <span className="cifras-emoji">🍽️</span>
             <strong>{quienMasGasto.nombre}</strong>
-            <span>el que más gastó, {conMoneda(quienMasGasto.tocaPagar, moneda)}</span>
+            <span>{t("el que más gastó, {cifra}", { cifra: conMoneda(quienMasGasto.tocaPagar, moneda) })}</span>
           </li>
         )}
         {quienMasVeces && (
           <li>
             <span className="cifras-emoji">💳</span>
             <strong>{quienMasVeces.nombre}</strong>
-            <span>el que más veces pagó, {quienMasVeces.veces} veces</span>
+            <span>{t("el que más veces pagó, {n} veces", { n: quienMasVeces.veces })}</span>
           </li>
         )}
         {diaMasCaro && (
           <li>
             <span className="cifras-emoji">📅</span>
             <strong>{enCorto(diaMasCaro.fecha)}</strong>
-            <span>el día más caro, {conMoneda(diaMasCaro.total, moneda)}</span>
+            <span>{t("el día más caro, {cifra}", { cifra: conMoneda(diaMasCaro.total, moneda) })}</span>
           </li>
         )}
         {diaMasBarato && (
           <li>
             <span className="cifras-emoji">🧘</span>
             <strong>{enCorto(diaMasBarato.fecha)}</strong>
-            <span>el día más tranquilo, {conMoneda(diaMasBarato.total, moneda)}</span>
+            <span>{t("el día más tranquilo, {cifra}", { cifra: conMoneda(diaMasBarato.total, moneda) })}</span>
           </li>
         )}
         {diaMasMovido && (
           <li>
             <span className="cifras-emoji">🐝</span>
             <strong>{enCorto(diaMasMovido.fecha)}</strong>
-            <span>el día más movido, {diaMasMovido.gastos} gastos</span>
+            <span>{t("el día más movido, {n} gastos", { n: diaMasMovido.gastos })}</span>
           </li>
         )}
         {diaDeLaSemana && (
           <li>
             <span className="cifras-emoji">🗓️</span>
-            <strong>Los {diaDeLaSemana.dia}</strong>
-            <span>es cuando más gastáis, {conMoneda(diaDeLaSemana.media, moneda)} de media</span>
+            <strong>{t("Los {dia}", { dia: diaDeLaSemana.dia })}</strong>
+            <span>{t("es cuando más gastáis, {cifra} de media", { cifra: conMoneda(diaDeLaSemana.media, moneda) })}</span>
           </li>
         )}
         {findeContraSemana && (
           <li>
             <span className="cifras-emoji">🎉</span>
-            <strong>{findeContraSemana.gana === "finde" ? "Los findes" : "Entre semana"}</strong>
+            <strong>{findeContraSemana.gana === "finde" ? t("Los findes") : t("Entre semana")}</strong>
             <span>
-              gastáis {cuantasVeces(findeContraSemana.veces)},{" "}
-              {conMoneda(findeContraSemana.gana === "finde" ? findeContraSemana.finde : findeContraSemana.semana, moneda)} al
-              día contra {conMoneda(findeContraSemana.gana === "finde" ? findeContraSemana.semana : findeContraSemana.finde, moneda)}
+              {t("gastáis {veces}, {mas} al día contra {menos}", {
+                veces: cuantasVeces(findeContraSemana.veces),
+                mas: conMoneda(findeContraSemana.gana === "finde" ? findeContraSemana.finde : findeContraSemana.semana, moneda),
+                menos: conMoneda(findeContraSemana.gana === "finde" ? findeContraSemana.semana : findeContraSemana.finde, moneda),
+              })}
             </span>
           </li>
         )}
@@ -157,7 +160,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
           <li>
             <span className="cifras-emoji">{horaDeApuntar.emoji}</span>
             <strong>{horaDeApuntar.franja[0].toUpperCase() + horaDeApuntar.franja.slice(1)}</strong>
-            <span>es cuando más apuntáis, {horaDeApuntar.veces} de {horaDeApuntar.de} gastos</span>
+            <span>{t("es cuando más apuntáis, {veces} de {de} gastos", { veces: horaDeApuntar.veces, de: horaDeApuntar.de })}</span>
           </li>
         )}
         {trasnochado && (
@@ -165,7 +168,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
             <span className="cifras-emoji">🦉</span>
             <strong>{trasnochado.concepto}</strong>
             <span>
-              lo más trasnochado, a las {trasnochado.hora}
+              {t("lo más trasnochado, a las {hora}", { hora: trasnochado.hora })}
               {trasnochado.quien && ` (${trasnochado.quien})`}
             </span>
           </li>
@@ -174,7 +177,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
           <span className="cifras-emoji">💸</span>
           <strong>{gastoMasGrande.concepto}</strong>
           <span>
-            el gasto más gordo, {conMoneda(gastoMasGrande.importe, moneda)}
+            {t("el gasto más gordo, {cifra}", { cifra: conMoneda(gastoMasGrande.importe, moneda) })}
             {gastoMasGrande.quien && ` (${gastoMasGrande.quien})`}
           </span>
         </li>
@@ -183,19 +186,19 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
             <li>
               <span className="cifras-emoji">🚀</span>
               <strong>{primerGasto.concepto}</strong>
-              <span>lo primero, {conMoneda(primerGasto.importe, moneda)}</span>
+              <span>{t("lo primero, {cifra}", { cifra: conMoneda(primerGasto.importe, moneda) })}</span>
             </li>
             <li>
               <span className="cifras-emoji">🏁</span>
               <strong>{ultimoGasto.concepto}</strong>
-              <span>lo último, {conMoneda(ultimoGasto.importe, moneda)}</span>
+              <span>{t("lo último, {cifra}", { cifra: conMoneda(ultimoGasto.importe, moneda) })}</span>
             </li>
           </>
         )}
         {gordoDeCadaUno && (
           <li>
             <span className="cifras-emoji">🎯</span>
-            <strong>Lo más gordo de cada uno</strong>
+            <strong>{t("Lo más gordo de cada uno")}</strong>
             <span>
               {gordoDeCadaUno
                 .map((c) => `${c.nombre}, ${c.concepto} (${conMoneda(c.importe, moneda)})`)
@@ -206,7 +209,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
         {diaDeCadaUno && (
           <li>
             <span className="cifras-emoji">📆</span>
-            <strong>El día más caro de cada uno</strong>
+            <strong>{t("El día más caro de cada uno")}</strong>
             <span>
               {diaDeCadaUno.map((c) => `${c.nombre}: ${enCorto(c.fecha)} (${conMoneda(c.total, moneda)})`).join(" · ")}
             </span>
@@ -217,7 +220,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
             <span className="cifras-emoji">🪙</span>
             <strong>{gastoMasPequeno.concepto}</strong>
             <span>
-              el más pequeño, {conMoneda(gastoMasPequeno.importe, moneda)}
+              {t("el más pequeño, {cifra}", { cifra: conMoneda(gastoMasPequeno.importe, moneda) })}
               {gastoMasPequeno.quien && ` (${gastoMasPequeno.quien})`}
             </span>
           </li>
@@ -227,18 +230,18 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
             <span className="cifras-emoji">👤</span>
             <strong>{masCaroPorCabeza.concepto}</strong>
             <span>
-              lo más caro por cabeza, {conMoneda(masCaroPorCabeza.porCabeza, moneda)} cada uno (entre{" "}
-              {masCaroPorCabeza.cuantos})
+              {t("lo más caro por cabeza, {cifra} cada uno (entre {n})", {
+                cifra: conMoneda(masCaroPorCabeza.porCabeza, moneda),
+                n: masCaroPorCabeza.cuantos,
+              })}
             </span>
           </li>
         )}
         {laMitadEn && (
           <li>
             <span className="cifras-emoji">⚖️</span>
-            <strong>
-              {laMitadEn.gastos} de {laMitadEn.de} gastos
-            </strong>
-            <span>se llevaron la mitad del dinero</span>
+            <strong>{t("{n} de {de} gastos", { n: laMitadEn.gastos, de: laMitadEn.de })}</strong>
+            <span>{t("se llevaron la mitad del dinero")}</span>
           </li>
         )}
         {masRepetido && (
@@ -246,7 +249,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
             <span className="cifras-emoji">🔁</span>
             <strong>{masRepetido.concepto}</strong>
             <span>
-              lo que más se repitió, {masRepetido.veces} veces ({conMoneda(masRepetido.total, moneda)})
+              {t("lo que más se repitió, {n} veces ({cifra})", { n: masRepetido.veces, cifra: conMoneda(masRepetido.total, moneda) })}
             </span>
           </li>
         )}
@@ -255,15 +258,17 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
             <span className="cifras-emoji">🫙</span>
             <strong>{conMoneda(delBote.total, moneda)}</strong>
             <span>
-              salieron del bote, en {delBote.gastos} {delBote.gastos === 1 ? "gasto" : "gastos"} (el {delBote.porcentaje} %)
+              {tn(delBote.gastos, "salieron del bote, en {n} gasto (el {tanto} %)", "salieron del bote, en {n} gastos (el {tanto} %)", {
+                tanto: delBote.porcentaje,
+              })}
             </span>
           </li>
         )}
         {monedas && (
           <li>
             <span className="cifras-emoji">🌍</span>
-            <strong>{monedas.length} monedas</strong>
-            <span>en las que pagasteis: {enLista(monedas)}</span>
+            <strong>{t("{n} monedas", { n: monedas.length })}</strong>
+            <span>{t("en las que pagasteis: {cuales}", { cuales: enLista(monedas) })}</span>
           </li>
         )}
         {gordoDeFuera && (
@@ -271,59 +276,58 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
             <span className="cifras-emoji">💵</span>
             <strong>{gordoDeFuera.concepto}</strong>
             <span>
-              lo más caro en otra moneda, {conMoneda(gordoDeFuera.pagado, gordoDeFuera.moneda)} (
-              {conMoneda(gordoDeFuera.importe, moneda)})
+              {t("lo más caro en otra moneda, {pagado} ({cifra})", {
+                pagado: conMoneda(gordoDeFuera.pagado, gordoDeFuera.moneda),
+                cifra: conMoneda(gordoDeFuera.importe, moneda),
+              })}
             </span>
           </li>
         )}
         {deAlgunos && (
           <li>
             <span className="cifras-emoji">👥</span>
-            <strong>
-              {deAlgunos.deAlgunos} {deAlgunos.deAlgunos === 1 ? "gasto" : "gastos"}
-            </strong>
+            <strong>{tn(deAlgunos.deAlgunos, "{n} gasto", "{n} gastos")}</strong>
             <span>
-              de los {deAlgunos.gastos} no {deAlgunos.deAlgunos === 1 ? "fue" : "fueron"} entre todos
+              {tn(deAlgunos.deAlgunos, "de los {de} no fue entre todos", "de los {de} no fueron entre todos", { de: deAlgunos.gastos })}
             </span>
           </li>
         )}
         {tickets && (
           <li>
             <span className="cifras-emoji">🧾</span>
-            <strong>
-              {tickets.conTicket} de {tickets.gastos}
-            </strong>
-            <span>{tickets.gastos === 1 ? "gasto" : "gastos"} con su ticket</span>
+            <strong>{t("{n} de {de}", { n: tickets.conTicket, de: tickets.gastos })}</strong>
+            <span>{tickets.gastos === 1 ? t("gasto con su ticket") : t("gastos con su ticket")}</span>
           </li>
         )}
         {redondos && (
           <li>
             <span className="cifras-emoji">💯</span>
-            <strong>{redondos.redondos === redondos.gastos ? "Todos" : `${redondos.redondos} de ${redondos.gastos}`}</strong>
-            <span>{redondos.redondos === redondos.gastos ? "los gastos" : "gastos"} sin céntimos</span>
+            <strong>
+              {/* "Todos" a secas ya es "Everyone" en el filtro, y aquí son gastos: "All". */}
+              {redondos.redondos === redondos.gastos ? t("Todos{gastos}", { gastos: "" }) : t("{n} de {de}", { n: redondos.redondos, de: redondos.gastos })}
+            </strong>
+            <span>{redondos.redondos === redondos.gastos ? t("los gastos sin céntimos") : t("gastos sin céntimos")}</span>
           </li>
         )}
         {notas && (
           <li>
             <span className="cifras-emoji">🗒️</span>
-            <strong>
-              {notas.conNota} de {notas.gastos}
-            </strong>
-            <span>{notas.gastos === 1 ? "gasto" : "gastos"} con su nota</span>
+            <strong>{t("{n} de {de}", { n: notas.conNota, de: notas.gastos })}</strong>
+            <span>{notas.gastos === 1 ? t("gasto con su nota") : t("gastos con su nota")}</span>
           </li>
         )}
         {categoria && (
           <li>
             <span className="cifras-emoji">{categoria.emoji}</span>
-            <strong>{categoria.porcentaje} %</strong>
-            <span>se fue en {categoria.nombre.toLowerCase()}</span>
+            <strong>{t("{n} %", { n: categoria.porcentaje })}</strong>
+            <span>{t("se fue en {categoria}", { categoria: t(categoria.nombre).toLowerCase() })}</span>
           </li>
         )}
         {categoriaMasVeces && (
           <li>
             <span className="cifras-emoji">{categoriaMasVeces.emoji}</span>
-            <strong>{categoriaMasVeces.veces} gastos</strong>
-            <span>de {categoriaMasVeces.nombre.toLowerCase()}, la categoría estrella</span>
+            <strong>{t("{n} gastos", { n: categoriaMasVeces.veces })}</strong>
+            <span>{t("de {categoria}, la categoría estrella", { categoria: t(categoriaMasVeces.nombre).toLowerCase() })}</span>
           </li>
         )}
       </ul>

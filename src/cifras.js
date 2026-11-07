@@ -9,13 +9,14 @@ import { enLista } from "./nombres";
 import { BOTE, esDelBote } from "./bote";
 import { normalizar, deAlgunos } from "./filtros";
 import { conceptoSinEscribir } from "./categorias";
+import { t, tn, formatoFechas } from "./idioma";
 
 function resumenDeGasto(gasto, personas) {
   const pagador = personas.find((p) => p.id === gasto.pagadorId);
   return {
     concepto: gasto.concepto,
     importe: importeDeGasto(gasto),
-    quien: gasto.pagadorId === BOTE ? "el bote" : (pagador?.nombre ?? null),
+    quien: gasto.pagadorId === BOTE ? t("el bote") : (pagador?.nombre ?? null),
   };
 }
 
@@ -36,9 +37,9 @@ export function horaDeApuntar(gastos) {
   if (horas.length < 3) return null;
 
   const franjas = [
-    { franja: "por la mañana", emoji: "☀️", veces: horas.filter((h) => h >= 6 && h < 14).length },
-    { franja: "por la tarde", emoji: "🌇", veces: horas.filter((h) => h >= 14 && h < 21).length },
-    { franja: "por la noche", emoji: "🌙", veces: horas.filter((h) => h >= 21 || h < 6).length },
+    { franja: t("por la mañana"), emoji: "☀️", veces: horas.filter((h) => h >= 6 && h < 14).length },
+    { franja: t("por la tarde"), emoji: "🌇", veces: horas.filter((h) => h >= 14 && h < 21).length },
+    { franja: t("por la noche"), emoji: "🌙", veces: horas.filter((h) => h >= 21 || h < 6).length },
   ];
   const mas = Math.max(...franjas.map((f) => f.veces));
   const ganadoras = franjas.filter((f) => f.veces === mas);
@@ -219,7 +220,7 @@ export function diaDeLaSemana(dias) {
   }
   if (porDia.size < 2) return null;
 
-  const medias = [...porDia].map(([semana, { total, veces }]) => ({ dia: EN_PLURAL[semana], media: total / veces, veces }));
+  const medias = [...porDia].map(([semana, { total, veces }]) => ({ dia: t(EN_PLURAL[semana]), media: total / veces, veces }));
   const max = Math.max(...medias.map((m) => m.media));
   // Por debajo del céntimo es empate.
   const ganadores = medias.filter((m) => max - m.media < 0.005);
@@ -264,9 +265,9 @@ export function findeContraSemana(dias) {
 
 // 2 → "el doble", 1.8 → "1,8 veces más".
 export function cuantasVeces(veces) {
-  if (veces === 2) return "el doble";
-  if (veces === 3) return "el triple";
-  return `${String(veces).replace(".", ",")} veces más`;
+  if (veces === 2) return t("el doble");
+  if (veces === 3) return t("el triple");
+  return t("{n} veces más", { n: veces.toLocaleString(formatoFechas()) });
 }
 
 export function cifrasDelViaje(todos, personas, monedaViaje) {
@@ -358,115 +359,122 @@ export function cifrasDelViaje(todos, personas, monedaViaje) {
 
 // Lo mismo, para pegarlo en el grupo.
 export function cifrasEnTexto(cifras, nombre, moneda) {
-  const lineas = [`*${nombre}* en cifras 📊`, ""];
+  const lineas = [t("*{nombre}* en cifras 📊", { nombre }), ""];
+  const dinero = (cantidad) => conMoneda(cantidad, moneda);
+  const de = (quien) => (quien ? ` (${quien})` : "");
 
-  const media = cifras.media !== null ? ` (${conMoneda(cifras.media, moneda)} de media)` : "";
-  lineas.push(`💰 ${conMoneda(cifras.total, moneda)} en ${cifras.gastos} ${cifras.gastos === 1 ? "gasto" : "gastos"}${media}`);
+  const total = tn(cifras.gastos, "{cifra} en {n} gasto", "{cifra} en {n} gastos", { cifra: dinero(cifras.total) });
+  const media = cifras.media !== null ? ` ${t("({cifra} de media)", { cifra: dinero(cifras.media) })}` : "";
+  lineas.push(`💰 ${total}${media}`);
   if (cifras.porPersonaYDia !== null) {
-    lineas.push(`🧍 ${conMoneda(cifras.porPersonaYDia, moneda)} por persona y día`);
+    lineas.push(`🧍 ${t("{cifra} por persona y día", { cifra: dinero(cifras.porPersonaYDia) })}`);
   }
   if (cifras.quienMasPuso) {
-    lineas.push(`🏆 El que más puso: ${cifras.quienMasPuso.nombre}, ${conMoneda(cifras.quienMasPuso.puesto, moneda)}`);
+    lineas.push(`🏆 ${t("El que más puso: {nombre}, {cifra}", { nombre: cifras.quienMasPuso.nombre, cifra: dinero(cifras.quienMasPuso.puesto) })}`);
   }
   if (cifras.quienMenosPuso) {
-    lineas.push(`🤏 El que menos puso: ${cifras.quienMenosPuso.nombre}, ${conMoneda(cifras.quienMenosPuso.puesto, moneda)}`);
+    lineas.push(`🤏 ${t("El que menos puso: {nombre}, {cifra}", { nombre: cifras.quienMenosPuso.nombre, cifra: dinero(cifras.quienMenosPuso.puesto) })}`);
   }
   if (cifras.quienMasGasto) {
-    lineas.push(`🍽️ El que más gastó: ${cifras.quienMasGasto.nombre}, ${conMoneda(cifras.quienMasGasto.tocaPagar, moneda)}`);
+    lineas.push(`🍽️ ${t("El que más gastó: {nombre}, {cifra}", { nombre: cifras.quienMasGasto.nombre, cifra: dinero(cifras.quienMasGasto.tocaPagar) })}`);
   }
   if (cifras.quienMasVeces) {
-    lineas.push(`💳 El que más veces pagó: ${cifras.quienMasVeces.nombre}, ${cifras.quienMasVeces.veces} veces`);
+    lineas.push(`💳 ${t("El que más veces pagó: {nombre}, {n} veces", { nombre: cifras.quienMasVeces.nombre, n: cifras.quienMasVeces.veces })}`);
   }
   if (cifras.diaMasCaro) {
-    lineas.push(`📅 El día más caro: ${enCorto(cifras.diaMasCaro.fecha)}, ${conMoneda(cifras.diaMasCaro.total, moneda)}`);
+    lineas.push(`📅 ${t("El día más caro: {dia}, {cifra}", { dia: enCorto(cifras.diaMasCaro.fecha), cifra: dinero(cifras.diaMasCaro.total) })}`);
   }
   if (cifras.diaMasBarato) {
-    lineas.push(`🧘 El día más tranquilo: ${enCorto(cifras.diaMasBarato.fecha)}, ${conMoneda(cifras.diaMasBarato.total, moneda)}`);
+    lineas.push(`🧘 ${t("El día más tranquilo: {dia}, {cifra}", { dia: enCorto(cifras.diaMasBarato.fecha), cifra: dinero(cifras.diaMasBarato.total) })}`);
   }
   if (cifras.diaMasMovido) {
-    lineas.push(`🐝 El día más movido: ${enCorto(cifras.diaMasMovido.fecha)}, ${cifras.diaMasMovido.gastos} gastos`);
+    lineas.push(`🐝 ${t("El día más movido: {dia}, {n} gastos", { dia: enCorto(cifras.diaMasMovido.fecha), n: cifras.diaMasMovido.gastos })}`);
   }
   if (cifras.diaDeLaSemana) {
     const d = cifras.diaDeLaSemana;
-    lineas.push(`🗓️ Cuando más gastáis: los ${d.dia}, ${conMoneda(d.media, moneda)} de media`);
+    lineas.push(`🗓️ ${t("Cuando más gastáis: los {dia}, {cifra} de media", { dia: d.dia, cifra: dinero(d.media) })}`);
   }
   if (cifras.findeContraSemana) {
     const f = cifras.findeContraSemana;
-    const [quien, que, deMas, deMenos] =
-      f.gana === "finde" ? ["Los findes", "entre semana", f.finde, f.semana] : ["Entre semana", "los findes", f.semana, f.finde];
-    lineas.push(`🎉 ${quien} gastáis ${cuantasVeces(f.veces)} que ${que}: ${conMoneda(deMas, moneda)} al día contra ${conMoneda(deMenos, moneda)}`);
+    const datos = { veces: cuantasVeces(f.veces) };
+    const frase =
+      f.gana === "finde"
+        ? t("Los findes gastáis {veces} que entre semana: {mas} al día contra {menos}", { ...datos, mas: dinero(f.finde), menos: dinero(f.semana) })
+        : t("Entre semana gastáis {veces} que los findes: {mas} al día contra {menos}", { ...datos, mas: dinero(f.semana), menos: dinero(f.finde) });
+    lineas.push(`🎉 ${frase}`);
   }
   if (cifras.horaDeApuntar) {
     const h = cifras.horaDeApuntar;
-    lineas.push(`${h.emoji} Apuntáis más ${h.franja}: ${h.veces} de ${h.de} gastos`);
+    lineas.push(`${h.emoji} ${t("Apuntáis más {franja}: {veces} de {de} gastos", { franja: h.franja, veces: h.veces, de: h.de })}`);
   }
   if (cifras.trasnochado) {
-    const t = cifras.trasnochado;
-    lineas.push(`🦉 Lo más trasnochado: ${t.concepto}, apuntado a las ${t.hora}${t.quien ? ` (${t.quien})` : ""}`);
+    const noche = cifras.trasnochado;
+    lineas.push(`🦉 ${t("Lo más trasnochado: {concepto}, apuntado a las {hora}", { concepto: noche.concepto, hora: noche.hora })}${de(noche.quien)}`);
   }
   const g = cifras.gastoMasGrande;
-  lineas.push(`💸 El gasto más gordo: ${g.concepto}, ${conMoneda(g.importe, moneda)}${g.quien ? ` (${g.quien})` : ""}`);
+  lineas.push(`💸 ${t("El gasto más gordo: {concepto}, {cifra}", { concepto: g.concepto, cifra: dinero(g.importe) })}${de(g.quien)}`);
   const p = cifras.gastoMasPequeno;
   if (p) {
-    lineas.push(`🪙 El más pequeño: ${p.concepto}, ${conMoneda(p.importe, moneda)}${p.quien ? ` (${p.quien})` : ""}`);
+    lineas.push(`🪙 ${t("El más pequeño: {concepto}, {cifra}", { concepto: p.concepto, cifra: dinero(p.importe) })}${de(p.quien)}`);
   }
   if (cifras.masCaroPorCabeza) {
     const c = cifras.masCaroPorCabeza;
-    lineas.push(`👤 Lo más caro por cabeza: ${c.concepto}, ${conMoneda(c.porCabeza, moneda)} cada uno (entre ${c.cuantos})`);
+    lineas.push(`👤 ${t("Lo más caro por cabeza: {concepto}, {cifra} cada uno (entre {n})", { concepto: c.concepto, cifra: dinero(c.porCabeza), n: c.cuantos })}`);
   }
   if (cifras.primerGasto) {
-    lineas.push(`🚀 Empezasteis con: ${cifras.primerGasto.concepto}, ${conMoneda(cifras.primerGasto.importe, moneda)}`);
-    lineas.push(`🏁 Y acabasteis con: ${cifras.ultimoGasto.concepto}, ${conMoneda(cifras.ultimoGasto.importe, moneda)}`);
+    lineas.push(`🚀 ${t("Empezasteis con: {concepto}, {cifra}", { concepto: cifras.primerGasto.concepto, cifra: dinero(cifras.primerGasto.importe) })}`);
+    lineas.push(`🏁 ${t("Y acabasteis con: {concepto}, {cifra}", { concepto: cifras.ultimoGasto.concepto, cifra: dinero(cifras.ultimoGasto.importe) })}`);
   }
   if (cifras.gordoDeCadaUno) {
-    const cada = cifras.gordoDeCadaUno.map((c) => `${c.nombre}, ${c.concepto} (${conMoneda(c.importe, moneda)})`);
-    lineas.push(`🎯 Lo más gordo de cada uno: ${cada.join(" · ")}`);
+    const cada = cifras.gordoDeCadaUno.map((c) => `${c.nombre}, ${c.concepto} (${dinero(c.importe)})`);
+    lineas.push(`🎯 ${t("Lo más gordo de cada uno:")} ${cada.join(" · ")}`);
   }
   if (cifras.laMitadEn) {
-    lineas.push(`⚖️ La mitad del dinero se fue en ${cifras.laMitadEn.gastos} de ${cifras.laMitadEn.de} gastos`);
+    lineas.push(`⚖️ ${t("La mitad del dinero se fue en {n} de {de} gastos", { n: cifras.laMitadEn.gastos, de: cifras.laMitadEn.de })}`);
   }
   if (cifras.diaDeCadaUno) {
-    const cada = cifras.diaDeCadaUno.map((c) => `${c.nombre}: ${enCorto(c.fecha)} (${conMoneda(c.total, moneda)})`);
-    lineas.push(`📆 El día más caro de cada uno: ${cada.join(" · ")}`);
+    const cada = cifras.diaDeCadaUno.map((c) => `${c.nombre}: ${enCorto(c.fecha)} (${dinero(c.total)})`);
+    lineas.push(`📆 ${t("El día más caro de cada uno:")} ${cada.join(" · ")}`);
   }
   if (cifras.masRepetido) {
     const r = cifras.masRepetido;
-    lineas.push(`🔁 Lo que más se repitió: ${r.concepto}, ${r.veces} veces (${conMoneda(r.total, moneda)})`);
+    lineas.push(`🔁 ${t("Lo que más se repitió: {concepto}, {n} veces ({cifra})", { concepto: r.concepto, n: r.veces, cifra: dinero(r.total) })}`);
   }
   if (cifras.delBote) {
     const b = cifras.delBote;
-    lineas.push(`🫙 Del bote salieron ${conMoneda(b.total, moneda)} en ${b.gastos} ${b.gastos === 1 ? "gasto" : "gastos"}, el ${b.porcentaje} %`);
+    lineas.push(`🫙 ${tn(b.gastos, "Del bote salieron {cifra} en {n} gasto, el {tanto} %", "Del bote salieron {cifra} en {n} gastos, el {tanto} %", { cifra: dinero(b.total), tanto: b.porcentaje })}`);
   }
   if (cifras.monedas) {
-    lineas.push(`🌍 Pagasteis en ${cifras.monedas.length} monedas: ${enLista(cifras.monedas)}`);
+    lineas.push(`🌍 ${t("Pagasteis en {n} monedas: {cuales}", { n: cifras.monedas.length, cuales: enLista(cifras.monedas) })}`);
   }
   if (cifras.gordoDeFuera) {
     const f = cifras.gordoDeFuera;
-    lineas.push(`💵 Lo más caro en otra moneda: ${f.concepto}, ${conMoneda(f.pagado, f.moneda)} (${conMoneda(f.importe, moneda)})`);
+    lineas.push(`💵 ${t("Lo más caro en otra moneda: {concepto}, {pagado} ({cifra})", { concepto: f.concepto, pagado: conMoneda(f.pagado, f.moneda), cifra: dinero(f.importe) })}`);
   }
   if (cifras.deAlgunos) {
     const a = cifras.deAlgunos;
-    lineas.push(`👥 ${a.deAlgunos} de ${a.gastos} ${a.gastos === 1 ? "gasto" : "gastos"} no ${a.deAlgunos === 1 ? "fue" : "fueron"} de todos`);
+    lineas.push(`👥 ${tn(a.deAlgunos, "{n} de {de} gastos no fue de todos", "{n} de {de} gastos no fueron de todos", { de: a.gastos })}`);
   }
   if (cifras.tickets) {
-    const t = cifras.tickets;
-    lineas.push(`🧾 ${t.conTicket} de ${t.gastos} ${t.gastos === 1 ? "gasto" : "gastos"} con ticket`);
+    const conTicket = cifras.tickets;
+    lineas.push(`🧾 ${tn(conTicket.gastos, "{veces} de {n} gasto con ticket", "{veces} de {n} gastos con ticket", { veces: conTicket.conTicket })}`);
   }
   if (cifras.redondos) {
     const r = cifras.redondos;
-    lineas.push(`💯 ${r.redondos === r.gastos ? "Todos los" : `${r.redondos} de ${r.gastos}`} gastos, sin céntimos`);
+    lineas.push(`💯 ${r.redondos === r.gastos ? t("Todos los gastos, sin céntimos") : t("{n} de {de} gastos, sin céntimos", { n: r.redondos, de: r.gastos })}`);
   }
   if (cifras.notas) {
     const n = cifras.notas;
-    lineas.push(`🗒️ ${n.conNota} de ${n.gastos} ${n.gastos === 1 ? "gasto" : "gastos"} con nota`);
+    lineas.push(`🗒️ ${tn(n.gastos, "{veces} de {n} gasto con nota", "{veces} de {n} gastos con nota", { veces: n.conNota })}`);
   }
   if (cifras.categoria) {
-    lineas.push(`${cifras.categoria.emoji} Donde más se fue: ${cifras.categoria.nombre.toLowerCase()}, el ${cifras.categoria.porcentaje} %`);
+    const c = cifras.categoria;
+    lineas.push(`${c.emoji} ${t("Donde más se fue: {categoria}, el {tanto} %", { categoria: t(c.nombre).toLowerCase(), tanto: c.porcentaje })}`);
   }
 
   if (cifras.categoriaMasVeces) {
     const c = cifras.categoriaMasVeces;
-    lineas.push(`${c.emoji} La categoría estrella: ${c.nombre.toLowerCase()}, en ${c.veces} gastos`);
+    lineas.push(`${c.emoji} ${t("La categoría estrella: {categoria}, en {n} gastos", { categoria: t(c.nombre).toLowerCase(), n: c.veces })}`);
   }
 
   return lineas.join("\n");
