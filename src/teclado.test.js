@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import { usarIdioma } from "./idioma";
 import { esOrdenador, esAtajoBuscar, esAtajoDeshacer, esAtajoNuevo, esAtajoCuentas, esAtajoDictar, esAtajoLoMio, esAtajoHoy, esAtajoQuitarFiltros, esAtajoOrden, esAtajoRepetir, esAtajoFoto, esAtajoLeer, esAtajoNota, esAtajoCopiarCodigo, viajeDeLaTecla, esAtajoSalir, esAtajoPresupuesto, esAtajoCompartir, esAtajoViajero, esAtajoHistorias, esAtajoBote, esAtajoBajarResumen, esAtajoExcel, esAtajoTema, esAtajoInvitar, esAtajoAyuda, esAtajoGuardar, esAtajoParar, esAtajoOtraVez, escapeEnBuscador, esMac, listaDeAtajos } from "./teclado";
 
 const con = (matches) => ({ matchMedia: () => ({ matches }) });
@@ -731,5 +732,16 @@ describe("listaDeAtajos", () => {
     const teclas = listaDeAtajos().map((a) => a.teclas.at(-1));
     expect(teclas).toEqual(["A", "N", "R", "F", "L", "U", "/", "M", "H", "X", "O", "C", "P", "B", "S", "G", "E", "I", "K", "V", "T", "Q", "Enter", "Z", "Esc", "?"]);
     expect(listaDeAtajos(false, true).map((a) => a.teclas.at(-1))).toEqual(["A", "N", "R", "F", "L", "U", "D", "/", "M", "H", "X", "O", "C", "P", "B", "S", "G", "E", "I", "K", "V", "T", "Q", "Enter", "Z", "Esc", "?"]);
+  });
+});
+
+describe("listaDeAtajos en inglés", () => {
+  afterEach(() => usarIdioma("es"));
+
+  it("lo que hace cada una, traducido", () => {
+    usarIdioma("en");
+    const lista = listaDeAtajos(false, true);
+    expect(lista.find((a) => a.teclas.includes("N")).que).toBe("Add a new expense");
+    expect(lista.find((a) => a.teclas.includes("?")).que).toBe("Show these shortcuts");
   });
 });

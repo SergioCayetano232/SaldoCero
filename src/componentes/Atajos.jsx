@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { esAtajoAyuda, esMac, esOrdenador, listaDeAtajos } from "../teclado";
 import { reconocedorDeVoz } from "../dictado";
+import { t, idiomaActual } from "../idioma";
 
 // El enlace del pie y la ventana con los atajos. Solo en el ordenador: en el
 // móvil no hay teclado con el que usarlos.
@@ -23,7 +24,7 @@ function Atajos() {
     <>
       {esOrdenador() && (
         <button className="pie-tema" onClick={() => setAbierta(true)} aria-keyshortcuts="?">
-          Atajos de teclado
+          {t("Atajos de teclado")}
         </button>
       )}
       {abierta && <VentanaAtajos onCerrar={() => setAbierta(false)} />}
@@ -52,21 +53,22 @@ function VentanaAtajos({ onCerrar }) {
         className="ventana-qr ventana-atajos"
         role="dialog"
         aria-modal="true"
-        aria-label="Atajos de teclado"
+        aria-label={t("Atajos de teclado")}
         onClick={(e) => e.stopPropagation()}
       >
-        <button className="boton-salir ventana-cerrar" onClick={onCerrar} ref={cerrar} title="Cerrar">
+        <button className="boton-salir ventana-cerrar" onClick={onCerrar} ref={cerrar} title={t("Cerrar")}>
           ✕
         </button>
 
-        <h3 className="ventana-titulo">Atajos de teclado</h3>
+        <h3 className="ventana-titulo">{t("Atajos de teclado")}</h3>
 
         <dl className="atajos">
-          {listaDeAtajos(esMac(), Boolean(reconocedorDeVoz(window))).map((atajo) => (
+          {/* El dictado solo entiende español: en inglés ni sale, así que su tecla tampoco. */}
+          {listaDeAtajos(esMac(), Boolean(reconocedorDeVoz(window)) && idiomaActual() === "es").map((atajo) => (
             <div className="atajo" key={atajo.que}>
               <dt>
-                {atajo.teclas.map((t) => (
-                  <kbd key={t}>{t}</kbd>
+                {atajo.teclas.map((tecla) => (
+                  <kbd key={tecla}>{tecla}</kbd>
                 ))}
               </dt>
               <dd>{atajo.que}</dd>

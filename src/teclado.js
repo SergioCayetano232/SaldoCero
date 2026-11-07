@@ -1,3 +1,5 @@
+import { t } from "./idioma";
+
 // Con ratón y teclado de verdad. En el móvil, poner el foco en un campo saca el
 // teclado y te tapa media pantalla, así que allí no se hace.
 export function esOrdenador(ventana = typeof window === "undefined" ? undefined : window) {
@@ -231,5 +233,5 @@ export function listaDeAtajos(mac = false, conDictado = false) {
     { teclas: [mac ? "⌘" : "Ctrl", "Z"], que: "Deshacer lo último que has quitado o cambiado" },
     { teclas: ["Esc"], que: "Dejar de editar, salir del buscador o cerrar una ventana" },
     { teclas: ["?"], que: "Ver estos atajos" },
-  ];
+  ].map((atajo) => ({ ...atajo, que: t(atajo.que) }));
 }
