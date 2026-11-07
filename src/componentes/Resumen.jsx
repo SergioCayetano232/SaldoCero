@@ -491,7 +491,7 @@ function Resumen({
                 <small className="reparto">
                   <span className="sin-partir">
                     {t("puso {cifra}", { cifra: conMoneda(viajero.puesto, monedaViaje) })}
-                    {variosPusieron && viajero.puesto > 0 && <span className="reparto-tanto"> ({tantoPuesto[i]} %)</span>}
+                    {variosPusieron && viajero.puesto > 0 && <span className="reparto-tanto"> ({t("{n} %", { n: tantoPuesto[i] })})</span>}
                   </span>{" "}
                   {pagados && <span className="sin-partir">{pagados} </span>}
                   ·{" "}
