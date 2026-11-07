@@ -46,7 +46,7 @@ import { porcentajes } from "../donut";
 import { vibrar } from "../vibrar";
 import { miSaldo, textoMiSaldo, estadoMiSaldo } from "../miSaldo";
 import { esAtajoBajarResumen, esAtajoCompartir, esAtajoExcel, esAtajoCuentas, esOrdenador } from "../teclado";
-import { t } from "../idioma";
+import { t, tn } from "../idioma";
 
 function Resumen({
   balances,
@@ -269,35 +269,35 @@ function Resumen({
   return (
     <section className="tarjeta">
       <h2>
-        <span className="icono">📊</span> Resumen
+        <span className="icono">📊</span> {t("Resumen")}
         <span className="acciones-resumen">
           <button
             className="boton-compartir"
             ref={botonCompartir}
             onClick={compartir}
-            title={esOrdenador() ? "Compartir el resumen (también con la S)" : "Compartir el resumen"}
+            title={esOrdenador() ? t("Compartir el resumen (también con la S)") : t("Compartir el resumen")}
             aria-keyshortcuts="s"
           >
-            {copiado === "bien" ? "¡Copiado!" : copiado === "mal" ? "No se pudo" : "Compartir"}
+            {copiado === "bien" ? t("¡Copiado!") : copiado === "mal" ? t("No se pudo") : t("Compartir")}
           </button>
 
           <button
             className="boton-compartir"
             onClick={mandarImagen}
             disabled={imagen === "haciendo"}
-            title="Mandar quién paga a quién en una imagen"
+            title={t("Mandar quién paga a quién en una imagen")}
           >
-            {imagen === "haciendo" ? "Haciendo…" : imagen === "mal" ? "No se pudo" : "Imagen"}
+            {imagen === "haciendo" ? t("Haciendo…") : imagen === "mal" ? t("No se pudo") : t("Imagen")}
           </button>
 
           <button
             className="boton-compartir"
             ref={botonGuardar}
             onClick={() => descargarResumen(elResumen(true), viaje?.nombre ?? "viaje")}
-            title={esOrdenador() ? "Bajarlo en un archivo (también con la G)" : "Bajarlo en un archivo"}
+            title={esOrdenador() ? t("Bajarlo en un archivo (también con la G)") : t("Bajarlo en un archivo")}
             aria-keyshortcuts="g"
           >
-            Guardar
+            {t("Guardar")}
           </button>
 
           <button
@@ -309,16 +309,16 @@ function Resumen({
               )
             }
             ref={botonExcel}
-            title={esOrdenador() ? "Bajar los gastos en una hoja de cálculo (también con la E)" : "Bajar los gastos en una hoja de cálculo"}
+            title={esOrdenador() ? t("Bajar los gastos en una hoja de cálculo (también con la E)") : t("Bajar los gastos en una hoja de cálculo")}
             aria-keyshortcuts="e"
           >
-            Excel
+            {t("Excel")}
           </button>
         </span>
       </h2>
 
       <div className="total-destacado">
-        <div className="total-etiqueta">Total del viaje</div>
+        <div className="total-etiqueta">{t("Total del viaje")}</div>
         {/* La que cuenta no se anuncia: el lector iría cantando cada número
             de la cuenta. Se lee la de al lado, que ya es la final. */}
         <div className="total-cifra">
@@ -330,16 +330,15 @@ function Resumen({
           </span>
         </div>
         <div className="total-detalle">
-          {gastos.length} {gastos.length === 1 ? "gasto" : "gastos"} · {personas.length}{" "}
-          {personas.length === 1 ? "viajero" : "viajeros"}
+          {tn(gastos.length, "{n} gasto", "{n} gastos")} · {tn(personas.length, "{n} viajero", "{n} viajeros")}
           {media !== null && (
-            <> · <span className="sin-partir">{conMoneda(media, monedaViaje)} de media</span></>
+            <> · <span className="sin-partir">{t("{cifra} de media", { cifra: conMoneda(media, monedaViaje) })}</span></>
           )}
         </div>
         {masCaro && (
           <div className="total-detalle">
-            El más caro:{" "}
-            <button className="total-mas-caro" onClick={() => onVerGasto?.(masCaro.id)} title="Verlo en la lista">
+            {t("El más caro:")}{" "}
+            <button className="total-mas-caro" onClick={() => onVerGasto?.(masCaro.id)} title={t("Verlo en la lista")}>
               {masCaro.concepto}
             </button>
             ,{" "}
@@ -347,14 +346,13 @@ function Resumen({
           </div>
         )}
         {alDia !== null && (
-          <div className="total-detalle">Sale a {conMoneda(alDia, monedaViaje)} por cabeza y día</div>
+          <div className="total-detalle">{t("Sale a {cifra} por cabeza y día", { cifra: conMoneda(alDia, monedaViaje) })}</div>
         )}
         {deHoy && (
           <div className="total-detalle">
-            Hoy lleváis <span className="sin-partir">{conMoneda(deHoy.total, monedaViaje)}</span> en{" "}
-            <span className="sin-partir">{deHoy.gastos} {deHoy.gastos === 1 ? "gasto" : "gastos"}</span>
+            {tn(deHoy.gastos, "Hoy lleváis {cifra} en {n} gasto", "Hoy lleváis {cifra} en {n} gastos", { cifra: conMoneda(deHoy.total, monedaViaje) })}
             {comoAyer && <span className="sin-partir">, {comoAyer}</span>}
-            {miParte && <>. <span className="sin-partir">Te tocan {conMoneda(miParte, monedaViaje)}</span></>}
+            {miParte && <>. <span className="sin-partir">{t("Te tocan {cifra}", { cifra: conMoneda(miParte, monedaViaje) })}</span></>}
           </div>
         )}
         {loMio && gastos.length > 0 && (
@@ -376,13 +374,13 @@ function Resumen({
       {delViaje.length > 1 && (
         <>
           {personas.length > 1 && (
-            <div className="desglose-quien" role="group" aria-label="De quién">
+            <div className="desglose-quien" role="group" aria-label={t("De quién")}>
               <button
                 className={`pastilla-categoria ${deQuien ? "" : "elegida"}`}
                 style={{ "--color-categoria": "var(--teal-500)" }}
                 onClick={() => setPersona(null)}
               >
-                Todos
+                {t("Todos")}
               </button>
               {personas.map((v) => (
                 <button
@@ -393,7 +391,7 @@ function Resumen({
                 >
                   <span className="desglose-punto" style={{ backgroundColor: "var(--color-categoria)" }} />
                   {v.nombre}
-                  {v.id === soy && <span className="etiqueta-tu">tú</span>}
+                  {v.id === soy && <span className="etiqueta-tu">{t("tú")}</span>}
                 </button>
               ))}
             </div>
@@ -401,9 +399,9 @@ function Resumen({
 
           {deQuien && porCategoria.length > 0 && (
             <p className="desglose-de">
-              A {deQuien.nombre} le tocan{" "}
-              <strong>{conMoneda(deQuien.tocaPagar, monedaViaje)}</strong> de los{" "}
-              {conMoneda(total, monedaViaje)}
+              {t("A {nombre} le tocan", { nombre: deQuien.nombre })}{" "}
+              <strong>{conMoneda(deQuien.tocaPagar, monedaViaje)}</strong>{" "}
+              {t("de los {total}", { total: conMoneda(total, monedaViaje) })}
             </p>
           )}
 
@@ -411,7 +409,7 @@ function Resumen({
             // Con key, el donut vuelve a dibujarse al cambiar de persona.
             <Desglose key={persona ?? "todos"} porCategoria={porCategoria} moneda={monedaViaje} />
           ) : (
-            <p className="vacio">{deQuien.nombre} no va en ningún gasto.</p>
+            <p className="vacio">{t("{nombre} no va en ningún gasto.", { nombre: deQuien.nombre })}</p>
           )}
         </>
       )}

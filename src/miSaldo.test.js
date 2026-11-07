@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import { usarIdioma } from "./idioma";
 import { miSaldo, textoMiSaldo, estadoMiSaldo } from "./miSaldo";
 
 const pagos = [
@@ -46,5 +47,18 @@ describe("miSaldo", () => {
     const saldo = miSaldo(cruzados, "a");
     expect(textoMiSaldo(saldo, "EUR")).toBe("Debes 10.00 € y te deben 25.00 €");
     expect(estadoMiSaldo(saldo)).toBe("le-deben");
+  });
+});
+
+describe("en inglés", () => {
+  afterEach(() => usarIdioma("es"));
+
+  it("lo tuyo", () => {
+    usarIdioma("en");
+    expect(textoMiSaldo({ debes: 30, teDeben: 0, tenias: true }, "USD")).toBe("You owe $30.00");
+    expect(textoMiSaldo({ debes: 0, teDeben: 45, tenias: true }, "USD")).toBe("You're owed $45.00");
+    expect(textoMiSaldo({ debes: 10, teDeben: 5, tenias: true }, "USD")).toBe("You owe $10.00 and you're owed $5.00");
+    expect(textoMiSaldo({ debes: 0, teDeben: 0, tenias: true }, "USD")).toBe("Yours is all paid");
+    expect(textoMiSaldo({ debes: 0, teDeben: 0, tenias: false }, "USD")).toBe("You're all square");
   });
 });

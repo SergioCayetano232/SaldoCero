@@ -3,6 +3,7 @@ import { evolucionDeSaldos, conSigno, diaEn } from "../evolucion";
 import { conMoneda } from "../monedas";
 import { enCorto } from "../fechas";
 import Avatar from "./Avatar";
+import { t } from "../idioma";
 
 // Medidas del dibujo de cada fila. Se estira a lo ancho, el trazo no.
 const ANCHO = 200;
@@ -33,14 +34,14 @@ function Evolucion({ viajeros, gastos, aportaciones, colores, moneda, soy }) {
   return (
     <div className="evolucion">
       <div className="evolucion-cabecera">
-        <span className="evolucion-titulo">Cómo han ido las cuentas</span>
+        <span className="evolucion-titulo">{t("Cómo han ido las cuentas")}</span>
         <span className="evolucion-dia" aria-live="polite">
-          {dia === null ? "al final" : enCorto(e.dias[dia])}
+          {dia === null ? t("al final") : enCorto(e.dias[dia])}
         </span>
       </div>
       <p className="evolucion-ayuda">
-        <span className="evolucion-clave le-deben" aria-hidden="true" /> le deben
-        <span className="evolucion-clave debe" aria-hidden="true" /> debe
+        <span className="evolucion-clave le-deben" aria-hidden="true" /> {t("le deben")}
+        <span className="evolucion-clave debe" aria-hidden="true" /> {t("debe")}
       </p>
 
       <ul className="evolucion-filas">
@@ -53,7 +54,7 @@ function Evolucion({ viajeros, gastos, aportaciones, colores, moneda, soy }) {
             <li
               key={s.id}
               className={`evolucion-fila ${s.id === soy ? "es-mio" : ""}`}
-              aria-label={`${s.nombre}: el primer día ${dinero(s.saldos[0])}, al final ${dinero(s.saldos[n - 1])}`}
+              aria-label={t("{nombre}: el primer día {inicio}, al final {fin}", { nombre: s.nombre, inicio: dinero(s.saldos[0]), fin: dinero(s.saldos[n - 1]) })}
             >
               <span className="evolucion-quien">
                 <Avatar nombre={s.nombre} color={colores?.get(s.nombre)} pequeno />
@@ -99,7 +100,7 @@ function Evolucion({ viajeros, gastos, aportaciones, colores, moneda, soy }) {
       </ul>
 
       <button className="enlace evolucion-ver-tabla" onClick={() => setTabla(!tabla)} aria-expanded={tabla}>
-        {tabla ? "Ocultar los números" : "Ver los números"}
+        {tabla ? t("Ocultar los números") : t("Ver los números")}
       </button>
 
       {tabla && (
@@ -107,7 +108,7 @@ function Evolucion({ viajeros, gastos, aportaciones, colores, moneda, soy }) {
           <table>
             <thead>
               <tr>
-                <th scope="col">Día</th>
+                <th scope="col">{t("Día")}</th>
                 {e.series.map((s) => (
                   <th key={s.id} scope="col">
                     {s.nombre}

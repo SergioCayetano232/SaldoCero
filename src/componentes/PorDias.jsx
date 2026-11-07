@@ -3,6 +3,7 @@ import { gastoPorDia, topeRedondo, etiquetasConHoy } from "../barras";
 import { ritmoDeGasto } from "../presupuesto";
 import { conMoneda } from "../monedas";
 import { enCorto, hoy } from "../fechas";
+import { t, tn } from "../idioma";
 
 // Lo que se gastó cada día, en barras, con la media del viaje de referencia.
 function PorDias({ gastos, moneda, onVerDia }) {
@@ -62,11 +63,11 @@ function PorDias({ gastos, moneda, onVerDia }) {
   return (
     <div className={`por-dias ${visto ? "con-elegido" : ""}`}>
       <div className="por-dias-cabecera">
-        <span className="por-dias-titulo">Día a día</span>
+        <span className="por-dias-titulo">{t("Día a día")}</span>
         {ritmo && (
           <span className="por-dias-media">
             <span className="por-dias-clave" aria-hidden="true" />
-            media {conMoneda(ritmo.porDia, moneda)}
+            {t("media {cifra}", { cifra: conMoneda(ritmo.porDia, moneda) })}
           </span>
         )}
       </div>
@@ -96,7 +97,7 @@ function PorDias({ gastos, moneda, onVerDia }) {
                   sePuedeVer(i) ? "se-puede-ver" : ""
                 }`}
                 tabIndex={0}
-                aria-label={`${i === iHoy ? "Hoy" : enCorto(d.fecha)}: ${conMoneda(d.total, moneda)}`}
+                aria-label={`${i === iHoy ? t("Hoy") : enCorto(d.fecha)}: ${conMoneda(d.total, moneda)}`}
                 style={{ "--orden": i }}
                 {...mirar(i)}
               >
@@ -127,13 +128,11 @@ function PorDias({ gastos, moneda, onVerDia }) {
               <span>{enCorto(visto.fecha)}</span>
               <strong>{conMoneda(visto.total, moneda)}</strong>
               <small>
-                {visto.gastos === 0
-                  ? "sin gastos"
-                  : `${visto.gastos} ${visto.gastos === 1 ? "gasto" : "gastos"}`}
+                {visto.gastos === 0 ? t("sin gastos") : tn(visto.gastos, "{n} gasto", "{n} gastos")}
               </small>
               {conDedo && sePuedeVer(elegido) && (
                 <button className="enlace por-dias-ver" ref={botonVer} onClick={() => verDia(elegido)}>
-                  Ver gastos
+                  {t("Ver gastos")}
                 </button>
               )}
             </div>
@@ -144,7 +143,7 @@ function PorDias({ gastos, moneda, onVerDia }) {
       <div className="por-dias-fechas" aria-hidden="true">
         {dias.map((d, i) => (
           <span key={d.fecha} className={i === iHoy ? "por-dias-hoy" : undefined}>
-            {i === iHoy ? "hoy" : conEtiqueta.has(i) ? enCorto(d.fecha).replace(/^\S+ /, "") : ""}
+            {i === iHoy ? t("hoy") : conEtiqueta.has(i) ? enCorto(d.fecha).replace(/^\S+ /, "") : ""}
           </span>
         ))}
       </div>

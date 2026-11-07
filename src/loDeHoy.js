@@ -3,6 +3,7 @@
 import { calcularTotal, parteDe } from "./calculos";
 import { hoy } from "./fechas";
 import { conMoneda } from "./monedas";
+import { t } from "./idioma";
 
 // null si hoy no hay nada, o si todo es de hoy: entonces ya lo dice el total.
 export function gastadoHoy(gastos, dia = hoy()) {
@@ -33,8 +34,9 @@ export function miParteDeHoy(gastos, soy, viajeros, dia = hoy()) {
 
 export function textoFrenteAAyer(diferencia, moneda) {
   if (diferencia === null) return null;
-  if (diferencia === 0) return "lo mismo que ayer";
-  return `${conMoneda(Math.abs(diferencia), moneda)} ${diferencia > 0 ? "más" : "menos"} que ayer`;
+  if (diferencia === 0) return t("lo mismo que ayer");
+  const cifra = conMoneda(Math.abs(diferencia), moneda);
+  return diferencia > 0 ? t("{cifra} más que ayer", { cifra }) : t("{cifra} menos que ayer", { cifra });
 }
 
 // En UTC para que el cambio de hora no se coma un día.

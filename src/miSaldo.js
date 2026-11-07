@@ -3,6 +3,7 @@
 
 import { conMoneda } from "./monedas";
 import { pagaYo, cobroYo } from "./juntos";
+import { t } from "./idioma";
 
 export function miSaldo(pagos, soy) {
   if (!soy) return null;
@@ -28,11 +29,11 @@ export function textoMiSaldo(saldo, moneda) {
 
   const { debes, teDeben, tenias } = saldo;
   if (debes > 0 && teDeben > 0) {
-    return `Debes ${conMoneda(debes, moneda)} y te deben ${conMoneda(teDeben, moneda)}`;
+    return t("Debes {debes} y te deben {teDeben}", { debes: conMoneda(debes, moneda), teDeben: conMoneda(teDeben, moneda) });
   }
-  if (debes > 0) return `Debes ${conMoneda(debes, moneda)}`;
-  if (teDeben > 0) return `Te deben ${conMoneda(teDeben, moneda)}`;
-  return tenias ? "Lo tuyo ya está pagado" : "Estás en paz";
+  if (debes > 0) return t("Debes {cifra}", { cifra: conMoneda(debes, moneda) });
+  if (teDeben > 0) return t("Te deben {cifra}", { cifra: conMoneda(teDeben, moneda) });
+  return tenias ? t("Lo tuyo ya está pagado") : t("Estás en paz");
 }
 
 export function estadoMiSaldo(saldo) {

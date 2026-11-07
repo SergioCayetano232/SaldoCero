@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { porcentajes, trozosDelDonut, puntoMedio } from "../donut";
 import { conMoneda } from "../monedas";
+import { t } from "../idioma";
 
 const TAMANO = 140;
 const CENTRO = TAMANO / 2;
@@ -46,7 +47,7 @@ function Desglose({ porCategoria, moneda }) {
           viewBox={`0 0 ${TAMANO} ${TAMANO}`}
           role="img"
           aria-label={porCategoria
-            .map((c, i) => `${c.nombre} ${tantos[i]}%`)
+            .map((c, i) => `${t(c.nombre)} ${tantos[i]}%`)
             .join(", ")}
         >
           <circle className="donut-pista" cx={CENTRO} cy={CENTRO} r={RADIO} strokeWidth={GROSOR} />
@@ -92,7 +93,7 @@ function Desglose({ porCategoria, moneda }) {
         {/* Va encima del SVG y no dentro: en HTML el texto se maqueta mejor. */}
         <div className="donut-centro" key={destacada.id}>
           <span className="donut-porcentaje">{tantos[enMedio]}%</span>
-          <span className="donut-nombre">{destacada.nombre}</span>
+          <span className="donut-nombre">{t(destacada.nombre)}</span>
         </div>
       </div>
 
@@ -112,7 +113,7 @@ function Desglose({ porCategoria, moneda }) {
           >
             <span className="desglose-punto" style={{ backgroundColor: c.color }} />
             <span className="desglose-nombre">
-              {c.emoji} {c.nombre}
+              {c.emoji} {t(c.nombre)}
             </span>
             <strong>{conMoneda(c.total, moneda)}</strong>
             <small className="desglose-tanto">{tantos[i]}%</small>

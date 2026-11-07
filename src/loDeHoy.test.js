@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import { usarIdioma } from "./idioma";
 import { gastadoHoy, frenteAAyer, miParteDeHoy, textoFrenteAAyer } from "./loDeHoy";
 
 const dia = "2026-10-14";
@@ -126,5 +127,16 @@ describe("miParteDeHoy", () => {
 
   it("si no has dicho quién eres, nada", () => {
     expect(miParteDeHoy([{ fecha: dia, importe: 30 }], null, viajeros, dia)).toBeNull();
+  });
+});
+
+describe("en inglés", () => {
+  afterEach(() => usarIdioma("es"));
+
+  it("frente a ayer", () => {
+    usarIdioma("en");
+    expect(textoFrenteAAyer(15, "EUR")).toMatch(/^15\.00\s€ more than yesterday$/);
+    expect(textoFrenteAAyer(-30, "EUR")).toMatch(/^30\.00\s€ less than yesterday$/);
+    expect(textoFrenteAAyer(0, "EUR")).toBe("same as yesterday");
   });
 });
