@@ -3,6 +3,7 @@ import { conMoneda, leerImporte } from "../monedas";
 import { enElBote, hayBote } from "../bote";
 import { esAtajoBote, esOrdenador } from "../teclado";
 import Avatar from "./Avatar";
+import { t } from "../idioma";
 
 // Lo que pone cada uno en el bote, y lo que queda dentro.
 function Bote({ viajeros, aportaciones, gastos, colores, moneda, cerrado, onPoner, onQuitar }) {
@@ -51,18 +52,19 @@ function Bote({ viajeros, aportaciones, gastos, colores, moneda, cerrado, onPone
   return (
     <section className="tarjeta bote">
       <h2>
-        <span className="icono">🫙</span> Bote común
+        <span className="icono">🫙</span> {t("Bote común")}
         {hay && (
           <span className={`bote-queda ${queda < -0.005 ? "en-rojo" : ""}`}>
-            {queda < -0.005 ? `faltan ${conMoneda(-queda, moneda)}` : `quedan ${conMoneda(queda, moneda)}`}
+            {queda < -0.005
+              ? t("faltan {cifra}", { cifra: conMoneda(-queda, moneda) })
+              : t("quedan {cifra}", { cifra: conMoneda(queda, moneda) })}
           </span>
         )}
       </h2>
 
       {!hay && !abierto && (
         <p className="vacio bote-explica">
-          ¿Ponéis dinero entre todos? Apuntad aquí lo que mete cada uno y luego pagad los
-          gastos “del bote”.
+          {t("¿Ponéis dinero entre todos? Apuntad aquí lo que mete cada uno y luego pagad los gastos “del bote”.")}
         </p>
       )}
 
@@ -77,7 +79,7 @@ function Bote({ viajeros, aportaciones, gastos, colores, moneda, cerrado, onPone
                 <button
                   className="boton-quitar"
                   onClick={() => onQuitar(a, nombre(a.viajeroId))}
-                  title="Quitarlo del bote"
+                  title={t("Quitarlo del bote")}
                 >
                   ✕
                 </button>
@@ -89,7 +91,7 @@ function Bote({ viajeros, aportaciones, gastos, colores, moneda, cerrado, onPone
 
       {queda < -0.005 && (
         <p className="aviso">
-          Habéis pagado del bote más de lo que había. Lo que falta sale en las cuentas.
+          {t("Habéis pagado del bote más de lo que había. Lo que falta sale en las cuentas.")}
         </p>
       )}
 
@@ -98,8 +100,8 @@ function Bote({ viajeros, aportaciones, gastos, colores, moneda, cerrado, onPone
           // En el div y no en el campo, para que también valga desde el desplegable.
           <div className="formulario-parcial" onKeyDown={(e) => e.key === "Escape" && setAbierto(false)}>
             <div className="fila-formulario">
-              <select value={quien} onChange={(e) => setQuien(e.target.value)} aria-label="Quién pone">
-                <option value="todos">Cada uno</option>
+              <select value={quien} onChange={(e) => setQuien(e.target.value)} aria-label={t("Quién pone")}>
+                <option value="todos">{t("Cada uno")}</option>
                 {viajeros.map((v) => (
                   <option key={v.id} value={v.id}>
                     {v.nombre}
@@ -109,24 +111,24 @@ function Bote({ viajeros, aportaciones, gastos, colores, moneda, cerrado, onPone
               <input
                 type="text"
                 inputMode="decimal"
-                placeholder="Cuánto"
+                placeholder={t("Cuánto")}
                 enterKeyHint="done"
                 value={importe}
                 onFocus={(e) => e.target.select()}
                 onChange={(e) => setImporte(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && poner()}
-                aria-label="Cuánto pone"
+                aria-label={t("Cuánto pone")}
                 autoFocus
               />
             </div>
             <div className="fila-formulario">
               <button onClick={poner} disabled={!vale}>
                 {quien === "todos" && cantidad
-                  ? `Poner ${conMoneda(cantidad * viajeros.length, moneda)}`
-                  : "Poner"}
+                  ? t("Poner {cifra}", { cifra: conMoneda(cantidad * viajeros.length, moneda) })
+                  : t("Poner")}
               </button>
               <button className="boton-cancelar" onClick={() => setAbierto(false)}>
-                Cancelar
+                {t("Cancelar")}
               </button>
             </div>
           </div>
@@ -135,9 +137,9 @@ function Bote({ viajeros, aportaciones, gastos, colores, moneda, cerrado, onPone
             className="enlace"
             onClick={() => setAbierto(true)}
             aria-keyshortcuts="b"
-            title={esOrdenador() ? "También con la B" : undefined}
+            title={esOrdenador() ? t("También con la B") : undefined}
           >
-            {hay ? "Poner más en el bote" : "Hacer un bote"}
+            {hay ? t("Poner más en el bote") : t("Hacer un bote")}
           </button>
         ))}
     </section>

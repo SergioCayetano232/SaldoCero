@@ -3,11 +3,15 @@ import { diagramaDeDeudas, caminoDeFlecha, RADIO } from "../diagrama";
 import { inicial } from "../avatares";
 import { conMoneda } from "../monedas";
 import { t } from "../idioma";
+import { BOTE } from "../bote";
 
 const SIN_COLOR = "var(--tinta-tenue)";
 
 // En el SVG no hay ellipsis: lo cortamos a mano.
 const corto = (nombre) => (Array.from(nombre).length > 11 ? `${Array.from(nombre).slice(0, 10).join("")}…` : nombre);
+
+// El bote viene como "Bote" de las cuentas, y ahí se queda: se traduce al pintarlo.
+const nombreDe = (p) => (p.id === BOTE ? t("Bote") : p.nombre);
 
 function DiagramaDeudas({ pagos, colores, moneda, soy = null }) {
   const id = useId();
@@ -15,8 +19,8 @@ function DiagramaDeudas({ pagos, colores, moneda, soy = null }) {
   const color = (nombre) => colores?.get(nombre) ?? SIN_COLOR;
   const resumen = d.flechas
     .map((f) => {
-      const de = d.deben.find((p) => p.id === f.deId).nombre;
-      const a = d.cobran.find((p) => p.id === f.aId).nombre;
+      const de = nombreDe(d.deben.find((p) => p.id === f.deId));
+      const a = nombreDe(d.cobran.find((p) => p.id === f.aId));
       return t("{de} le paga {cifra} a {a}", { de, a, cifra: conMoneda(f.cantidad, moneda) });
     })
     .join(". ");
@@ -87,10 +91,10 @@ function DiagramaDeudas({ pagos, colores, moneda, soy = null }) {
             {p.id === soy && <circle className="diagrama-yo" r={RADIO + 4} />}
             <circle r={RADIO} style={{ fill: color(p.nombre) }} />
             <text className="diagrama-inicial" y="5" textAnchor="middle">
-              {inicial(p.nombre)}
+              {inicial(nombreDe(p))}
             </text>
             <text className="diagrama-nombre" y={RADIO + 15} textAnchor="middle">
-              {corto(p.nombre)}
+              {corto(nombreDe(p))}
             </text>
           </g>
         ))}

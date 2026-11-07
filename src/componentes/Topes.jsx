@@ -2,6 +2,7 @@ import { useState } from "react";
 import { conMoneda, leerImporte, simboloDe } from "../monedas";
 import { textoPresupuesto } from "../presupuesto";
 import { estadoDeTopes, sinTope, conTope } from "../topes";
+import { t } from "../idioma";
 
 // Un tope por categoría, debajo de en qué se va el dinero. Fijo, con el viaje
 // cerrado: se ven pero ya no se tocan.
@@ -29,18 +30,18 @@ function Topes({ gastos, topes, moneda, fijo = false, onGuardar }) {
     <div className="tope-editando">
       {/* Al cambiar uno ya sabes cuál es; al poner uno nuevo, se elige. */}
       {topes[editando] ? (
-        <span className="tope-nombre">{estados.find((e) => e.id === editando)?.nombre}</span>
+        <span className="tope-nombre">{t(estados.find((e) => e.id === editando)?.nombre ?? "")}</span>
       ) : (
-        <select value={editando} onChange={(e) => setEditando(e.target.value)} aria-label="Categoría">
+        <select value={editando} onChange={(e) => setEditando(e.target.value)} aria-label={t("Categoría")}>
           {libres.map((c) => (
             <option key={c.id} value={c.id}>
-              {c.emoji} {c.nombre}
+              {c.emoji} {t(c.nombre)}
             </option>
           ))}
         </select>
       )}
       <label className="presupuesto-campo">
-        <span>Como mucho</span>
+        <span>{t("Como mucho")}</span>
         <input
           type="text"
           inputMode="decimal"
@@ -59,15 +60,15 @@ function Topes({ gastos, topes, moneda, fijo = false, onGuardar }) {
       </label>
       <div className="tope-botones">
         <button onClick={() => guardar(cantidad)} disabled={!cantidad}>
-          Guardar
+          {t("Guardar")}
         </button>
         {topes[editando] && (
           <button className="enlace" onClick={() => guardar(null)}>
-            Quitar
+            {t("Quitar")}
           </button>
         )}
         <button className="enlace" onClick={() => setEditando(null)}>
-          Cancelar
+          {t("Cancelar")}
         </button>
       </div>
     </div>
@@ -75,26 +76,26 @@ function Topes({ gastos, topes, moneda, fijo = false, onGuardar }) {
 
   return (
     <div className="topes">
-      {estados.length > 0 && <h3>Topes por categoría</h3>}
+      {estados.length > 0 && <h3>{t("Topes por categoría")}</h3>}
 
       <ul className="topes-lista">
-        {estados.map((t) =>
-          editando === t.id ? (
-            <li key={t.id}>{formulario}</li>
+        {estados.map((tope) =>
+          editando === tope.id ? (
+            <li key={tope.id}>{formulario}</li>
           ) : (
-            <li key={t.id} className={`tope ${t.estado.nivel}`} style={{ "--color-categoria": t.color }}>
+            <li key={tope.id} className={`tope ${tope.estado.nivel}`} style={{ "--color-categoria": tope.color }}>
               <div className="tope-cabeza">
                 <span className="tope-nombre">
-                  {t.emoji} {t.nombre}
+                  {tope.emoji} {t(tope.nombre)}
                 </span>
                 <span className="tope-cifras">
-                  {conMoneda(t.gastado, moneda)} <small>de {conMoneda(t.tope, moneda)}</small>
+                  {conMoneda(tope.gastado, moneda)} <small>{t("de {cifra}", { cifra: conMoneda(tope.tope, moneda) })}</small>
                 </span>
                 {!fijo && (
                   <button
                     className="presupuesto-cambiar tope-cambiar"
-                    onClick={() => abrir(t.id)}
-                    title={`Cambiar el tope de ${t.nombre}`}
+                    onClick={() => abrir(tope.id)}
+                    title={t("Cambiar el tope de {categoria}", { categoria: t(tope.nombre) })}
                   >
                     ✎
                   </button>
@@ -103,14 +104,14 @@ function Topes({ gastos, topes, moneda, fijo = false, onGuardar }) {
               <div
                 className="tope-barra"
                 role="progressbar"
-                aria-valuenow={t.estado.porcentaje}
+                aria-valuenow={tope.estado.porcentaje}
                 aria-valuemin={0}
                 aria-valuemax={100}
-                aria-label={`Tope de ${t.nombre}`}
+                aria-label={t("Tope de {categoria}", { categoria: t(tope.nombre) })}
               >
-                <div className="tope-relleno" style={{ width: `${t.estado.relleno * 100}%` }} />
+                <div className="tope-relleno" style={{ width: `${tope.estado.relleno * 100}%` }} />
               </div>
-              <small className="tope-texto">{textoPresupuesto(t.estado, t.tope, moneda)}</small>
+              <small className="tope-texto">{textoPresupuesto(tope.estado, tope.tope, moneda)}</small>
             </li>
           )
         )}
@@ -119,7 +120,7 @@ function Topes({ gastos, topes, moneda, fijo = false, onGuardar }) {
 
       {!fijo && !editando && libres.length > 0 && (
         <button className="enlace" onClick={() => abrir(libres[0].id)}>
-          + Ponerle un tope a una categoría
+          {t("+ Ponerle un tope a una categoría")}
         </button>
       )}
     </div>

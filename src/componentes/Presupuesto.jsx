@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { conMoneda, leerImporte, simboloDe } from "../monedas";
 import { estadoPresupuesto, textoPresupuesto, ritmoDeGasto, textoRitmo, quedaPorCabeza } from "../presupuesto";
 import { esAtajoPresupuesto, esOrdenador } from "../teclado";
+import { t } from "../idioma";
 
 // La barra del presupuesto, dentro del recuadro del total.
 // Fijo, se ve pero no se cambia: es lo que queda de un viaje cerrado.
@@ -42,7 +43,7 @@ function Presupuesto({ total, gastos = [], presupuesto, moneda, cuantos = 0, fij
     return (
       <div className="presupuesto presupuesto-editando">
         <label className="presupuesto-campo">
-          <span>Como mucho</span>
+          <span>{t("Como mucho")}</span>
           <input
             type="text"
             inputMode="decimal"
@@ -62,10 +63,10 @@ function Presupuesto({ total, gastos = [], presupuesto, moneda, cuantos = 0, fij
         </label>
         <div className="presupuesto-botones">
           <button onClick={() => guardar(cantidad)} disabled={!cantidad}>
-            Guardar
+            {t("Guardar")}
           </button>
-          {presupuesto && <button onClick={() => guardar(null)}>Quitar</button>}
-          <button onClick={() => setEditando(false)}>Cancelar</button>
+          {presupuesto && <button onClick={() => guardar(null)}>{t("Quitar")}</button>}
+          <button onClick={() => setEditando(false)}>{t("Cancelar")}</button>
         </div>
       </div>
     );
@@ -78,9 +79,9 @@ function Presupuesto({ total, gastos = [], presupuesto, moneda, cuantos = 0, fij
         className="presupuesto-poner"
         onClick={abrir}
         aria-keyshortcuts="p"
-        title={esOrdenador() ? "También con la P" : undefined}
+        title={esOrdenador() ? t("También con la P") : undefined}
       >
-        + Poner un presupuesto
+        {t("+ Poner un presupuesto")}
       </button>
     );
   }
@@ -93,21 +94,21 @@ function Presupuesto({ total, gastos = [], presupuesto, moneda, cuantos = 0, fij
         aria-valuenow={estado.porcentaje}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label="Presupuesto gastado"
+        aria-label={t("Presupuesto gastado")}
       >
         <div className="presupuesto-relleno" style={{ width: `${estado.relleno * 100}%` }} />
       </div>
       <div className="presupuesto-pie">
         <span>
           {textoPresupuesto(estado, presupuesto, moneda)}
-          {cabeza !== null && <span className="presupuesto-cabeza">{conMoneda(cabeza, moneda)} cada uno</span>}
+          {cabeza !== null && <span className="presupuesto-cabeza">{t("{cifra} cada uno", { cifra: conMoneda(cabeza, moneda) })}</span>}
         </span>
         <span className="presupuesto-tanto">{estado.porcentaje}%</span>
         {!fijo && (
           <button
             className="presupuesto-cambiar"
             onClick={abrir}
-            title={esOrdenador() ? "Cambiar el presupuesto (también con la P)" : "Cambiar el presupuesto"}
+            title={esOrdenador() ? t("Cambiar el presupuesto (también con la P)") : t("Cambiar el presupuesto")}
             aria-keyshortcuts="p"
           >
             ✎

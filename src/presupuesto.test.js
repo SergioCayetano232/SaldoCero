@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import { usarIdioma } from "./idioma";
 import { estadoPresupuesto, textoPresupuesto, ritmoDeGasto, textoRitmo, porCabezaYDia, teSacaDelPresupuesto, quedaPorCabeza } from "./presupuesto";
 
 describe("estadoPresupuesto", () => {
@@ -190,5 +191,23 @@ describe("quedaPorCabeza", () => {
   it("si no queda nada o os habéis pasado, nada", () => {
     expect(quedaPorCabeza(estadoPresupuesto(1000, 1000), 4)).toBeNull();
     expect(quedaPorCabeza(estadoPresupuesto(1200, 1000), 4)).toBeNull();
+  });
+});
+
+describe("en inglés", () => {
+  afterEach(() => usarIdioma("es"));
+
+  it("lo que queda y lo que os pasáis", () => {
+    usarIdioma("en");
+    expect(textoPresupuesto(estadoPresupuesto(430, 1000), 1000, "EUR")).toBe("570.00 € left of 1000.00 €");
+    expect(textoPresupuesto(estadoPresupuesto(1200, 1000), 1000, "EUR")).toBe("200.00 € over budget");
+  });
+
+  it("el ritmo, con su plural", () => {
+    usarIdioma("en");
+    const ritmo = { dias: 3, porDia: 45 };
+    expect(textoRitmo(ritmo, estadoPresupuesto(135, 500), "EUR")).toBe("45.00 € a day · enough for 8 more days");
+    expect(textoRitmo(ritmo, estadoPresupuesto(135, 200), "EUR")).toBe("45.00 € a day · enough for 1 more day");
+    expect(textoRitmo(ritmo, estadoPresupuesto(135, 150), "EUR")).toBe("45.00 € a day · not enough for another day");
   });
 });

@@ -1,6 +1,7 @@
 // Cuánto llevamos gastado de lo que queríamos gastar.
 
 import { conMoneda } from "./monedas";
+import { t, tn } from "./idioma";
 import { calcularTotal } from "./calculos";
 
 // A partir de aquí la barra avisa de que os estáis acercando.
@@ -24,8 +25,8 @@ export function estadoPresupuesto(gastado, presupuesto) {
 }
 
 export function textoPresupuesto(estado, presupuesto, moneda) {
-  if (estado.nivel === "pasado") return `Os pasáis ${conMoneda(-estado.queda, moneda)}`;
-  return `Quedan ${conMoneda(Math.max(estado.queda, 0), moneda)} de ${conMoneda(presupuesto, moneda)}`;
+  if (estado.nivel === "pasado") return t("Os pasáis {cifra}", { cifra: conMoneda(-estado.queda, moneda) });
+  return t("Quedan {cifra} de {total}", { cifra: conMoneda(Math.max(estado.queda, 0), moneda), total: conMoneda(presupuesto, moneda) });
 }
 
 // Lo que queda entre los que sois, que se entiende mejor que el total.
@@ -69,10 +70,10 @@ export function porCabezaYDia(gastos, cuantos) {
 
 // "45.00 € al día · os llega para 6 días más". Cerrado o pasados, solo la media.
 export function textoRitmo(ritmo, estado, moneda, cerrado = false) {
-  const media = `${conMoneda(ritmo.porDia, moneda)} al día`;
+  const media = t("{cifra} al día", { cifra: conMoneda(ritmo.porDia, moneda) });
   if (cerrado || !estado || estado.nivel === "pasado" || !(ritmo.porDia > 0)) return media;
 
   const mas = Math.floor(estado.queda / ritmo.porDia);
-  if (mas === 0) return `${media} · no os llega para otro día`;
-  return `${media} · os llega para ${mas} ${mas === 1 ? "día" : "días"} más`;
+  if (mas === 0) return `${media} · ${t("no os llega para otro día")}`;
+  return `${media} · ${tn(mas, "os llega para {n} día más", "os llega para {n} días más")}`;
 }
