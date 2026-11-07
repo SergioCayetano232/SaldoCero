@@ -3,19 +3,20 @@
 
 import { conMoneda } from "./monedas";
 import { cuandoFue } from "./fechas";
+import { t, tn, formatoFechas } from "./idioma";
 
 // Lo que dura cada una antes de pasar sola.
 export const DURA_CADA_UNA = 5000;
 
 function enLargo(fecha) {
-  return new Date(`${fecha}T12:00:00`).toLocaleDateString("es-ES", {
+  return new Date(`${fecha}T12:00:00`).toLocaleDateString(formatoFechas(), {
     weekday: "long",
     day: "numeric",
     month: "long",
   });
 }
 
-const veces = (n) => (n === 1 ? "1 vez" : `${n} veces`);
+const veces = (n) => tn(n, "{n} vez", "{n} veces");
 
 export function historiasDelViaje(cifras, { nombre, moneda, gastos, pendientes }) {
   if (!cifras) return [];
@@ -25,7 +26,7 @@ export function historiasDelViaje(cifras, { nombre, moneda, gastos, pendientes }
   lista.push({
     id: "inicio",
     emoji: "🧳",
-    antes: "Así fue",
+    antes: t("Así fue"),
     cifra: nombre,
     despues: cuandoFue(gastos.map((g) => g.fecha)) ?? "",
   });
@@ -33,18 +34,18 @@ export function historiasDelViaje(cifras, { nombre, moneda, gastos, pendientes }
   lista.push({
     id: "total",
     emoji: "💸",
-    antes: "Entre todos os gastasteis",
+    antes: t("Entre todos os gastasteis"),
     cifra: dinero(cifras.total),
-    despues: `en ${cifras.gastos === 1 ? "1 gasto" : `${cifras.gastos} gastos`}${cifras.dias > 1 ? ` y ${cifras.dias} días` : ""}`,
+    despues: `${tn(cifras.gastos, "en {n} gasto", "en {n} gastos")}${cifras.dias > 1 ? ` ${t("y {n} días", { n: cifras.dias })}` : ""}`,
   });
 
   if (cifras.porPersonaYDia !== null) {
     lista.push({
       id: "por-dia",
       emoji: "🧍",
-      antes: "A cada uno le salió",
+      antes: t("A cada uno le salió"),
       cifra: dinero(cifras.porPersonaYDia),
-      despues: "por día, de media",
+      despues: t("por día, de media"),
     });
   }
 
@@ -52,9 +53,9 @@ export function historiasDelViaje(cifras, { nombre, moneda, gastos, pendientes }
     lista.push({
       id: "categoria",
       emoji: cifras.categoria.emoji,
-      antes: "Lo que más tirasteis",
-      cifra: `${cifras.categoria.porcentaje} %`,
-      despues: `se fue en ${cifras.categoria.nombre.toLowerCase()}`,
+      antes: t("Lo que más tirasteis"),
+      cifra: t("{n} %", { n: cifras.categoria.porcentaje }),
+      despues: t("se fue en {categoria}", { categoria: t(cifras.categoria.nombre).toLowerCase() }),
     });
   }
 
@@ -62,7 +63,7 @@ export function historiasDelViaje(cifras, { nombre, moneda, gastos, pendientes }
     lista.push({
       id: "dia-caro",
       emoji: "📅",
-      antes: "El día que más se fue",
+      antes: t("El día que más se fue"),
       cifra: enLargo(cifras.diaMasCaro.fecha),
       despues: dinero(cifras.diaMasCaro.total),
     });
@@ -72,18 +73,18 @@ export function historiasDelViaje(cifras, { nombre, moneda, gastos, pendientes }
   lista.push({
     id: "grande",
     emoji: "💎",
-    antes: "Lo más gordo",
+    antes: t("Lo más gordo"),
     cifra: grande.concepto,
-    despues: grande.quien ? `${dinero(grande.importe)}, y lo pagó ${grande.quien}` : dinero(grande.importe),
+    despues: grande.quien ? t("{cifra}, y lo pagó {quien}", { cifra: dinero(grande.importe), quien: grande.quien }) : dinero(grande.importe),
   });
 
   if (cifras.masRepetido) {
     lista.push({
       id: "repetido",
       emoji: "🔁",
-      antes: "Lo que no faltó",
+      antes: t("Lo que no faltó"),
       cifra: cifras.masRepetido.concepto,
-      despues: `${veces(cifras.masRepetido.veces)}, ${dinero(cifras.masRepetido.total)} en total`,
+      despues: t("{veces}, {cifra} en total", { veces: veces(cifras.masRepetido.veces), cifra: dinero(cifras.masRepetido.total) }),
     });
   }
 
@@ -91,7 +92,7 @@ export function historiasDelViaje(cifras, { nombre, moneda, gastos, pendientes }
     lista.push({
       id: "mas-puso",
       emoji: "🏆",
-      antes: "Quien más puso",
+      antes: t("Quien más puso"),
       cifra: cifras.quienMasPuso.nombre,
       despues: dinero(cifras.quienMasPuso.puesto),
     });
@@ -102,7 +103,7 @@ export function historiasDelViaje(cifras, { nombre, moneda, gastos, pendientes }
     lista.push({
       id: "mas-veces",
       emoji: "👛",
-      antes: "Quien más veces sacó la cartera",
+      antes: t("Quien más veces sacó la cartera"),
       cifra: cifras.quienMasVeces.nombre,
       despues: veces(cifras.quienMasVeces.veces),
     });
@@ -110,13 +111,13 @@ export function historiasDelViaje(cifras, { nombre, moneda, gastos, pendientes }
 
   lista.push(
     pendientes === 0
-      ? { id: "final", emoji: "🎉", antes: "Y lo mejor", cifra: "Estáis a cero", despues: "Nadie le debe nada a nadie" }
+      ? { id: "final", emoji: "🎉", antes: t("Y lo mejor"), cifra: t("Estáis a cero"), despues: t("Nadie le debe nada a nadie") }
       : {
           id: "final",
           emoji: "🤝",
-          antes: "Para quedar a cero",
-          cifra: pendientes === 1 ? "Falta 1 pago" : `Faltan ${pendientes} pagos`,
-          despues: "En el resumen tenéis quién paga a quién",
+          antes: t("Para quedar a cero"),
+          cifra: tn(pendientes, "Falta {n} pago", "Faltan {n} pagos"),
+          despues: t("En el resumen tenéis quién paga a quién"),
         }
   );
 

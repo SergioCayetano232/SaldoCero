@@ -48,18 +48,15 @@ export function cuandoFue(fechas) {
 
   const [desde, hasta] = [dias[0], dias.at(-1)].map((f) => {
     const [ano, mes, dia] = f.split("-");
-    const nombreMes = new Date(`${f}T12:00:00`).toLocaleDateString("es-ES", { month: "long" });
+    const nombreMes = new Date(`${f}T12:00:00`).toLocaleDateString(formatoFechas(), { month: "long" });
     return { ano, mes, dia: Number(dia), nombreMes };
   });
+  const datos = { dia: desde.dia, mes: desde.nombreMes, ano: desde.ano, dia2: hasta.dia, mes2: hasta.nombreMes, ano2: hasta.ano };
 
-  if (dias[0] === dias.at(-1)) return `El ${desde.dia} de ${desde.nombreMes} de ${desde.ano}`;
-  if (desde.ano !== hasta.ano) {
-    return `Del ${desde.dia} de ${desde.nombreMes} de ${desde.ano} al ${hasta.dia} de ${hasta.nombreMes} de ${hasta.ano}`;
-  }
-  if (desde.mes !== hasta.mes) {
-    return `Del ${desde.dia} de ${desde.nombreMes} al ${hasta.dia} de ${hasta.nombreMes} de ${hasta.ano}`;
-  }
-  return `Del ${desde.dia} al ${hasta.dia} de ${hasta.nombreMes} de ${hasta.ano}`;
+  if (dias[0] === dias.at(-1)) return t("El {dia} de {mes} de {ano}", datos);
+  if (desde.ano !== hasta.ano) return t("Del {dia} de {mes} de {ano} al {dia2} de {mes2} de {ano2}", datos);
+  if (desde.mes !== hasta.mes) return t("Del {dia} de {mes} al {dia2} de {mes2} de {ano2}", datos);
+  return t("Del {dia} al {dia2} de {mes2} de {ano2}", datos);
 }
 
 // El título de cada grupo de la lista: "Hoy", "Ayer" o el día entero.

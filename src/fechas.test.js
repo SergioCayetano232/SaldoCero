@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { hoy, ayer, anteayer, diasRapidos, enCorto, comoTitulo, porDias, cuantosGastos, haceCuanto, apuntadoHace, cuandoFue } from "./fechas";
+import { usarIdioma } from "./idioma";
 
 describe("hoy", () => {
   it("da la fecha en el formato de la base de datos", () => {
@@ -238,5 +239,17 @@ describe("cuandoFue", () => {
     expect(cuandoFue([undefined, "2026-09-11", null])).toBe("El 11 de septiembre de 2026");
     expect(cuandoFue([undefined])).toBeNull();
     expect(cuandoFue([])).toBeNull();
+  });
+});
+
+describe("cuandoFue en inglés", () => {
+  afterEach(() => usarIdioma("es"));
+
+  it("los cuatro casos", () => {
+    usarIdioma("en");
+    expect(cuandoFue(["2026-09-14", "2026-09-11"])).toBe("From 11 to 14 September 2026");
+    expect(cuandoFue(["2026-08-28", "2026-09-02"])).toBe("From 28 August to 2 September 2026");
+    expect(cuandoFue(["2025-12-30", "2026-01-02"])).toBe("From 30 December 2025 to 2 January 2026");
+    expect(cuandoFue(["2026-09-11"])).toBe("11 September 2026");
   });
 });

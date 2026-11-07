@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import { usarIdioma } from "./idioma";
 import { historiasDelViaje, siguienteHistoria, historiaDelExtremo } from "./historias";
 import { cifrasDelViaje } from "./cifras";
 
@@ -97,5 +98,26 @@ describe("historiaDelExtremo", () => {
   it("otras teclas, nada", () => {
     expect(historiaDelExtremo("ArrowRight", 5)).toBeNull();
     expect(historiaDelExtremo("h", 5)).toBeNull();
+  });
+});
+
+describe("en inglés", () => {
+  afterEach(() => usarIdioma("es"));
+
+  it("las cifras contadas en inglés", () => {
+    usarIdioma("en");
+    const h = historias();
+    expect(una(h, "total").despues).toBe("in 5 expenses and 3 days");
+    expect(una(h, "grande").despues).toBe("120.00 €, and Ana paid for it");
+    expect(una(h, "repetido").despues).toBe("2 times, 50.00 € in total");
+    expect(una(h, "categoria")).toMatchObject({ cifra: "50%", despues: "went on accommodation" });
+    expect(una(h, "dia-caro").cifra).toBe("Thursday 10 September");
+  });
+
+  it("el final, con su plural", () => {
+    usarIdioma("en");
+    expect(una(historias(gastos, 1), "final").cifra).toBe("1 payment to go");
+    expect(una(historias(gastos, 3), "final").cifra).toBe("3 payments to go");
+    expect(una(historias(gastos, 0), "final").cifra).toBe("You're all square");
   });
 });

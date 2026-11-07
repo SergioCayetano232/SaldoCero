@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { DURA_CADA_UNA, historiaDelExtremo, siguienteHistoria } from "../historias";
 import { esAtajoOtraVez, esAtajoParar, esOrdenador } from "../teclado";
+import { t } from "../idioma";
 
 // Más de esto pulsado es para pararla y leer con calma, no un toque.
 const ES_PARAR = 250;
@@ -69,7 +70,7 @@ function Historias({ historias, onCerrar }) {
       className={`historias historia-tono-${actual % 5}`}
       role="dialog"
       aria-modal="true"
-      aria-label="El viaje en historias"
+      aria-label={t("El viaje en historias")}
     >
       <div className="historias-barras">
         {historias.map((h, i) => (
@@ -89,7 +90,7 @@ function Historias({ historias, onCerrar }) {
         ))}
       </div>
 
-      <button ref={boton} className="historias-cerrar" onClick={onCerrar} aria-label="Cerrar">
+      <button ref={boton} className="historias-cerrar" onClick={onCerrar} aria-label={t("Cerrar")}>
         ×
       </button>
 
@@ -115,17 +116,17 @@ function Historias({ historias, onCerrar }) {
 
       {ultima && (
         <div className="historias-final">
-          <button onClick={() => setActual(0)} aria-keyshortcuts="r" title={esOrdenador() ? "También con la R" : undefined}>
-            ↺ Otra vez
+          <button onClick={() => setActual(0)} aria-keyshortcuts="r" title={esOrdenador() ? t("También con la R") : undefined}>
+            {t("↺ Otra vez")}
           </button>
           <button className="historias-salir" onClick={onCerrar}>
-            Cerrar
+            {t("Cerrar")}
           </button>
         </div>
       )}
 
       <p className="historias-ayuda" aria-hidden="true">
-        {esOrdenador() ? "Flechas para pasar · espacio para parar" : "Toca a los lados para pasar · mantén para parar"}
+        {esOrdenador() ? t("Flechas para pasar · espacio para parar") : t("Toca a los lados para pasar · mantén para parar")}
       </p>
     </div>,
     document.body
