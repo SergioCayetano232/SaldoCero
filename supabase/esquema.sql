@@ -16,6 +16,9 @@ create table viajes (
   redondear boolean not null default false,
   -- Topes por categoría, {"comida": 300}. Null si no hay ninguno.
   topes jsonb check (jsonb_typeof(topes) = 'object'),
+  -- Si salió de repetir otro, las cifras de aquel para compararlas. Solo cifras:
+  -- con el código del viejo, quien entrara en este podría abrir el otro.
+  anterior jsonb check (jsonb_typeof(anterior) = 'object'),
   -- Cerrado ya no se tocan gastos ni viajeros, solo se pagan las deudas.
   cerrado_en timestamptz,
   creado_en timestamptz not null default now()
@@ -185,7 +188,7 @@ alter table aportaciones_bote enable row level security;
 -- Del viaje y de los viajeros solo se cambian estas columnas. El código, o de
 -- qué viaje es cada uno, no se tocan nunca.
 revoke update on viajes from anon, authenticated;
-grant update (nombre, moneda, presupuesto, cerrado_en, redondear, topes) on viajes to anon, authenticated;
+grant update (nombre, moneda, presupuesto, cerrado_en, redondear, topes, anterior) on viajes to anon, authenticated;
 revoke update on viajeros from anon, authenticated;
 grant update (nombre, con_id, desde, hasta) on viajeros to anon, authenticated;
 
@@ -753,3 +756,7 @@ create trigger moneda_sin_dinero before update of moneda on viajes
 --   grant update (moneda) on viajes to anon, authenticated;
 --
 --   Y pega el "create function no_cambiar_moneda_con_dinero" y su trigger de más arriba.
+
+-- Comparar con el viaje del que salió al repetirlo.
+--   alter table viajes add column anterior jsonb check (jsonb_typeof(anterior) = 'object');
+--   grant update (anterior) on viajes to anon, authenticated;

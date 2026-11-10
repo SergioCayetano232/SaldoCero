@@ -10,6 +10,7 @@ import { BOTE, esDelBote } from "./bote";
 import { normalizar, deAlgunos } from "./filtros";
 import { conceptoSinEscribir } from "./categorias";
 import { t, tn, formatoFechas } from "./idioma";
+import { textoFrenteAlAnterior } from "./anterior";
 
 function resumenDeGasto(gasto, personas) {
   const pagador = personas.find((p) => p.id === gasto.pagadorId);
@@ -358,7 +359,7 @@ export function cifrasDelViaje(todos, personas, monedaViaje) {
 }
 
 // Lo mismo, para pegarlo en el grupo.
-export function cifrasEnTexto(cifras, nombre, moneda) {
+export function cifrasEnTexto(cifras, nombre, moneda, frente = null) {
   const lineas = [t("*{nombre}* en cifras 📊", { nombre }), ""];
   const dinero = (cantidad) => conMoneda(cantidad, moneda);
   const de = (quien) => (quien ? ` (${quien})` : "");
@@ -369,6 +370,7 @@ export function cifrasEnTexto(cifras, nombre, moneda) {
   if (cifras.porPersonaYDia !== null) {
     lineas.push(`🧍 ${t("{cifra} por persona y día", { cifra: dinero(cifras.porPersonaYDia) })}`);
   }
+  if (frente) lineas.push(`🔁 ${textoFrenteAlAnterior(frente, dinero)}`);
   if (cifras.quienMasPuso) {
     lineas.push(`🏆 ${t("El que más puso: {nombre}, {cifra}", { nombre: cifras.quienMasPuso.nombre, cifra: dinero(cifras.quienMasPuso.puesto) })}`);
   }

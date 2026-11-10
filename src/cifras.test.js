@@ -344,6 +344,12 @@ describe("cifrasEnTexto", () => {
     expect(texto).toContain("240.00 € en 5 gastos (48.00 € de media)");
   });
 
+  it("frente al viaje anterior, si lo hay", () => {
+    const frente = { nombre: "Oporto", porDia: false, antes: 300, porcentaje: -20 };
+    expect(cifrasEnTexto(cifrasDelViaje(gastos, personas), "Lisboa", "EUR", frente)).toContain("🔁 Un 20 % menos que en Oporto, donde gastasteis 300.00 €");
+    expect(texto).not.toContain("🔁");
+  });
+
   it("con un solo gasto, sin media", () => {
     const uno = cifrasEnTexto(cifrasDelViaje(gastos.slice(0, 1), personas), "Lisboa", "EUR");
     expect(uno).toContain("120.00 € en 1 gasto");

@@ -28,6 +28,7 @@ import { BOTE, sinBote } from "../bote";
 import { gastoPorCategoria } from "../categorias";
 import { importeDeGasto, parteDe, ordenarPorSaldo } from "../calculos";
 import { cifrasDelViaje, cifrasEnTexto } from "../cifras";
+import { frenteAlAnterior } from "../anterior";
 import Cifra from "./Cifra";
 import Confeti from "./Confeti";
 import Avatar from "./Avatar";
@@ -197,7 +198,7 @@ function Resumen({
       balances: conBote,
       pagos,
       moneda: monedaViaje,
-      cifras: cifras ? cifrasEnTexto(cifras, nombre, monedaViaje) : "",
+      cifras: cifras ? cifrasEnTexto(cifras, nombre, monedaViaje, frenteAlAnterior(cifras, viaje?.anterior, monedaViaje)) : "",
       gastos,
       enlace: viaje?.codigo ? enlaceDelViaje(viaje.codigo) : null,
     });

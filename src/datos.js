@@ -11,6 +11,7 @@ import { codigoDeTexto } from "./codigos";
 import { POR_DIAS } from "./ordenar";
 import { conCerrado, conNeto } from "./pasados";
 import { t } from "./idioma";
+import { limpiarAnterior } from "./anterior";
 import { limpiarTopes } from "./topes";
 import { limpiarEstancia } from "./estancia";
 import { limpiarDuda } from "./dudas";
@@ -271,8 +272,13 @@ export async function crearViaje(nombre, moneda = "EUR") {
 // Un viaje nuevo con la gente de otro, todos de una vez. Si el viaje se crea
 // pero la gente no pasa, te quedas dentro igual: añadirlos a mano es menos lío
 // que tener un viaje vacío suelto que no sabes ni que existe.
-export async function repetirViaje(nombre, moneda, gente) {
+export async function repetirViaje(nombre, moneda, gente, anterior = null) {
   const nuevo = await crearViaje(nombre, moneda);
+  // Sin esto el viaje sirve igual: solo se pierde la comparación.
+  if (anterior) {
+    const { error } = await supabase.from("viajes").update({ anterior }).eq("id", nuevo.id);
+    if (error) console.error("No hemos podido guardar las cifras del viaje anterior.", error);
+  }
   if (gente.length === 0) return nuevo;
 
   const { data, error } = await supabase
@@ -358,7 +364,7 @@ export { usarViajero };
 async function cargarContenido(viajeId) {
   const [delViaje, viajeros, gastos, participantes, saldados, parciales, bote, actividad] = await Promise.all([
     // Lo del viaje otra vez, por si lo ha cambiado alguien desde otro móvil.
-    supabase.from("viajes").select("nombre, moneda, presupuesto, cerrado_en, redondear, topes").eq("id", viajeId).single(),
+    supabase.from("viajes").select("nombre, moneda, presupuesto, cerrado_en, redondear, topes, anterior").eq("id", viajeId).single(),
     supabase.from("viajeros").select("id, nombre, cobro, con_id, desde, hasta").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
@@ -406,6 +412,7 @@ async function cargarContenido(viajeId) {
     // Los viajes de antes de esto no lo traen: con céntimos, como siempre.
     redondear: delViaje.data.redondear === true,
     topes: limpiarTopes(delViaje.data.topes),
+    anterior: limpiarAnterior(delViaje.data.anterior),
     // Los de antes no traen los días: esos están todo el viaje.
     viajeros: viajeros.data.map(({ con_id, desde, hasta, ...v }) => ({
       ...v,

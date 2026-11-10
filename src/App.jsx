@@ -22,6 +22,7 @@ import { hayQueSubir } from "./arriba";
 import { esAtajoDeshacer, esAtajoTema } from "./teclado";
 import { queTrae, sinLoQueTrae, recogerTicket } from "./llegada";
 import { MINIMO_PARA_FILTRAR } from "./filtros";
+import { resumenDelViaje } from "./anterior";
 import { nombreDeLaRepeticion, genteParaRepetir, quienEresEnElNuevo, pendientesParaPasar, gastosDeLoPendiente, preguntaDePendientes } from "./repetirViaje";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
@@ -423,7 +424,8 @@ function App() {
     try {
       // Lo que estés borrando, antes de cambiar de código, como al salir.
       await borradoActual.current?.espera.ahora();
-      const creado = await datos.repetirViaje(nombre, viaje.moneda ?? "EUR", genteParaRepetir(gente));
+      const anterior = resumenDelViaje(viaje.nombre, viaje.moneda ?? "EUR", gastos, viajeros);
+      const creado = await datos.repetirViaje(nombre, viaje.moneda ?? "EUR", genteParaRepetir(gente), anterior);
       const yo = quienEresEnElNuevo(soy, gente, creado.viajeros);
       // Ya, que lo pendiente que se pase tiene que salir a tu nombre.
       datos.usarViajero(yo);
@@ -642,6 +644,7 @@ function App() {
           balances={balances}
           nombre={viaje.nombre}
           moneda={viaje.moneda ?? "EUR"}
+          anterior={viaje.anterior}
           pendientes={pagosDelViaje(balances, viaje).filter((p) => !p.saldado).length}
           verHistorias={verHistorias}
           onHistorias={setVerHistorias}

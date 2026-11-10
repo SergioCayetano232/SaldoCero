@@ -10,15 +10,17 @@ import { esAtajoHistorias, esOrdenador } from "../teclado";
 import Cifra from "./Cifra";
 import Historias from "./Historias";
 import { t, tn } from "../idioma";
+import { frenteAlAnterior } from "../anterior";
 
 // Al cerrar el viaje, lo que dio de sí. Para enseñarlo en el grupo.
-function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHistorias = false, onHistorias }) {
+function CifrasViaje({ gastos, balances, nombre, moneda, anterior = null, pendientes = 0, verHistorias = false, onHistorias }) {
   const [copiado, setCopiado] = useState("");
 
   // En lo que puso cada uno también cuenta lo que metió en el bote.
   const personas = sinBote(balances).map((v) => ({ ...v, puesto: v.puesto + (v.alBote ?? 0) }));
   const cifras = cifrasDelViaje(gastos, personas, moneda);
   const hayCifras = Boolean(cifras);
+  const frente = frenteAlAnterior(cifras, anterior, moneda);
 
   useEffect(() => {
     if (!hayCifras) return;
@@ -36,7 +38,7 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
   if (!cifras) return null;
 
   async function compartir() {
-    const hecho = await copiarAlPortapapeles(cifrasEnTexto(cifras, nombre, moneda));
+    const hecho = await copiarAlPortapapeles(cifrasEnTexto(cifras, nombre, moneda, frente));
     setCopiado(hecho ? "bien" : "mal");
     setTimeout(() => setCopiado(""), 2500);
   }
@@ -85,6 +87,17 @@ function CifrasViaje({ gastos, balances, nombre, moneda, pendientes = 0, verHist
             <span className="cifras-emoji">🧍</span>
             <strong>{conMoneda(porPersonaYDia, moneda)}</strong>
             <span>{t("por persona y día")}</span>
+          </li>
+        )}
+        {frente && (
+          <li>
+            <span className="cifras-emoji">🔁</span>
+            <strong>{frente.porcentaje === 0 ? "=" : `${frente.porcentaje > 0 ? "+" : "−"}${Math.abs(frente.porcentaje)} %`}</strong>
+            <span>
+              {frente.porDia
+                ? t("frente a {nombre}, que salió a {cifra} por persona y día", { nombre: frente.nombre, cifra: conMoneda(frente.antes, moneda) })
+                : t("frente a {nombre}, donde gastasteis {cifra}", { nombre: frente.nombre, cifra: conMoneda(frente.antes, moneda) })}
+            </span>
           </li>
         )}
         {quienMasPuso && (
