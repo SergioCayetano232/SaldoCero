@@ -10,7 +10,8 @@ import { adivinarCategoria } from "../adivinar";
 import { ordenarGastos, ordenGuardado, ordenesPara, POR_DIAS, siguienteOrden } from "../ordenar";
 import { conPropina, PROPINAS } from "../propina";
 import { costeGasolina, comoImporte, cocheGuardado, guardarCoche } from "../gasolina";
-import { presentesEseDia, ausentesEseDia } from "../estancia";
+import { presentesEseDia, ausentesEseDia, tieneEstancia } from "../estancia";
+import { nochesDeCadaUno, mismasNoches } from "../noches";
 import { apuntadoPor } from "../apuntadoPor";
 import { dudasParaMi, textoDuda, avisoDeDudas, DUDA_POR_DEFECTO, LARGO_DUDA } from "../dudas";
 import { limpiarLugar, lugaresDelViaje, lugarSugerido, mismoLugar, LARGO_LUGAR } from "../lugares";
@@ -584,6 +585,23 @@ function Gastos({
     setParticipantes(nuevos);
   }
 
+  // El hotel de varias noches. Solo tiene sentido si alguien no está todo el viaje.
+  const [noches, setNoches] = useState(null);
+  const lasNoches = noches !== null ? nochesDeCadaUno(viajeros, fecha, noches) : null;
+  const hayEstancias = viajeros.some(tieneEstancia);
+
+  function ponerNoches() {
+    if (!lasNoches) return;
+    setParticipantes(Object.keys(lasNoches));
+    // Si todos duermen las mismas, a partes iguales, sin abrir nada.
+    const iguales = mismasNoches(lasNoches);
+    setPartes(iguales ? {} : lasNoches);
+    setRepartoAbierto(!iguales);
+    setPorImportes(false);
+    setPorPlatos(false);
+    setNoches(null);
+  }
+
   function limpiar(queda = siguiente) {
     setRecuperado(false);
     escribirImporte("");
@@ -598,6 +616,7 @@ function Gastos({
     setLugarTocado(false);
     setLugarAbierto(false);
     setGasolina(null);
+    setNoches(null);
     setDevolucion(false);
     setVariosPagan(false);
     setPagos({});
@@ -1251,6 +1270,56 @@ function Gastos({
                         </span>
                         <button className="poner-gasolina" onClick={ponerGasolina} disabled={!costeDeLaGasolina}>
                           {t("Ponerlo")}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {categoria === "alojamiento" && !devolucion && hayEstancias && (
+                <div className="noches">
+                  <button
+                    className="enlace"
+                    onClick={() => setNoches(noches === null ? "" : null)}
+                    aria-expanded={noches !== null}
+                  >
+                    {noches !== null ? `← ${t("no, lo reparto yo")}` : `🌙 ${t("¿varias noches?")}`}
+                  </button>
+                  {noches !== null && (
+                    <div className="calculo-noches">
+                      <p className="partes-ayuda">
+                        {t("Cada noche va entre los que duermen allí, según los días de cada uno. La primera es la del {dia}.", { dia: enCorto(fecha) })}
+                      </p>
+                      <div className="pie-noches">
+                        <label className="cuantas-noches">
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            placeholder="2"
+                            value={noches}
+                            onChange={(e) => setNoches(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), ponerNoches())}
+                            autoFocus
+                          />
+                          <span>{t("noches")}</span>
+                        </label>
+                        <span className="reparto-noches" role="status">
+                          {lasNoches
+                            ? viajeros
+                                .filter((v) => lasNoches[v.id])
+                                .map((v, i) => (
+                                  <span key={v.id} className="noches-de">
+                                    {i > 0 && " · "}
+                                    {v.nombre} {lasNoches[v.id]}
+                                  </span>
+                                ))
+                            : noches.trim()
+                              ? t("Nadie duerme esas noches")
+                              : t("¿Cuántas noches?")}
+                        </span>
+                        <button className="poner-noches" onClick={ponerNoches} disabled={!lasNoches}>
+                          {t("Repartirlo")}
                         </button>
                       </div>
                     </div>

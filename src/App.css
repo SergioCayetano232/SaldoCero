@@ -981,17 +981,40 @@ button:active {
   font-weight: 600;
 }
 
-.gasolina {
+.gasolina,
+.noches {
   font-size: 13px;
 }
 
-.calculo-gasolina {
+.calculo-gasolina,
+.calculo-noches {
   margin-top: 8px;
   padding: 12px;
   border: 1px solid var(--linea);
   border-radius: var(--radio-sm);
   background-color: var(--papel-hundido);
   animation: entrar-desde-abajo var(--medio) var(--curva-suave);
+}
+
+.calculo-noches .partes-ayuda {
+  margin: 0;
+}
+
+.cuantas-noches {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tinta-suave);
+}
+
+.cuantas-noches input {
+  width: 56px;
+  padding: 9px 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.noches-de {
+  white-space: nowrap;
 }
 
 .datos-gasolina {
@@ -1012,7 +1035,8 @@ button:active {
   font-variant-numeric: tabular-nums;
 }
 
-.pie-gasolina {
+.pie-gasolina,
+.pie-noches {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1020,7 +1044,8 @@ button:active {
   margin-top: 10px;
 }
 
-.coste-gasolina {
+.coste-gasolina,
+.reparto-noches {
   flex: 1;
   font-weight: 600;
   color: var(--teal-600);
@@ -1028,7 +1053,8 @@ button:active {
 }
 
 /* Con clase y no por debajo del formulario, que lo pintaría como el de Añadir. */
-.poner-gasolina {
+.poner-gasolina,
+.poner-noches {
   padding: 6px 14px;
   border-radius: var(--radio-pastilla);
   background-color: var(--teal-500);
@@ -1037,16 +1063,19 @@ button:active {
   font-weight: 600;
 }
 
-.poner-gasolina:hover:not(:disabled) {
+.poner-gasolina:hover:not(:disabled),
+.poner-noches:hover:not(:disabled) {
   background-color: var(--teal-600);
 }
 
-.poner-gasolina:disabled {
+.poner-gasolina:disabled,
+.poner-noches:disabled {
   opacity: 0.45;
   cursor: default;
 }
 
-:root[data-tema="oscuro"] .poner-gasolina {
+:root[data-tema="oscuro"] .poner-gasolina,
+:root[data-tema="oscuro"] .poner-noches {
   color: var(--fondo);
 }
 
