@@ -3,17 +3,19 @@
 
 import { normalizar } from "./filtros";
 
-// "12,50", "1.234,50", "12.50", "12 ,50". Siempre con céntimos: un número sin
-// ellos en un ticket suele ser una cantidad, un CIF o una hora.
-const CIFRA = /(\d{1,3}(?:[.\s]\d{3})*|\d+)\s?[.,]\s?(\d{2})(?!\d)/g;
+// "12,50", "1.234,50", "12.50", "12 ,50" y, en los de fuera, "1,234.50". Siempre
+// con céntimos: un número sin ellos en un ticket suele ser una cantidad, un CIF o una hora.
+const CIFRA = /(\d{1,3}(?:[.,\s]\d{3})*|\d+)\s?[.,]\s?(\d{2})(?!\d)/g;
 
-// Lo que dice que esta línea es la buena, y lo que dice que no.
-const ES_TOTAL = /\b(total|importe|a pagar|tot\.?)\b/;
-const NO_ES_TOTAL = /\b(subtotal|sub total|base|iva|i\.v\.a|cuota|cambio|entregado|efectivo|devolver|descuento|ahorro|propina sugerida|imponible)\b/;
-// "TOTAL (IVA INCL.)" sí es el total, aunque lleve IVA.
-const IVA_INCLUIDO = /\biva\s*incl(\.|uido)?/g;
+// Lo que dice que esta línea es la buena, y lo que dice que no. Detrás de lo
+// nuestro, lo de los tickets en inglés, que fuera es lo que más sale.
+const ES_TOTAL = /\b(total|importe|a pagar|tot\.?|amount due|balance due|amount|to pay)\b/;
+const NO_ES_TOTAL =
+  /\b(subtotal|sub total|base|iva|i\.v\.a|cuota|cambio|entregado|efectivo|devolver|descuento|ahorro|propina sugerida|imponible|sub-total|tax|vat|gst|change|cash|tendered|discount|savings|suggested tip|tip guide)\b/;
+// "TOTAL (IVA INCL.)" o "TOTAL INC VAT" sí es el total, aunque lleve el impuesto.
+const IVA_INCLUIDO = /\b(iva|vat|tax)\s*incl(\.|uido|uded)?|\binc(l\.?|luding|\.)?\s*(vat|tax)\b/g;
 // Ni el cambio ni lo que diste en mano: eso es más que el total.
-const NUNCA = /\b(cambio|entregado|efectivo|devolver|devolucion)\b/;
+const NUNCA = /\b(cambio|entregado|efectivo|devolver|devolucion|change|cash|tendered)\b/;
 
 // Los fallos típicos del OCR dentro de una cifra: la O por cero, la S por cinco...
 function arreglarCifras(linea) {
@@ -23,7 +25,7 @@ function arreglarCifras(linea) {
 }
 
 function cifrasDe(linea) {
-  return [...arreglarCifras(linea).matchAll(CIFRA)].map((m) => Number(`${m[1].replace(/[.\s]/g, "")}.${m[2]}`));
+  return [...arreglarCifras(linea).matchAll(CIFRA)].map((m) => Number(`${m[1].replace(/[.,\s]/g, "")}.${m[2]}`));
 }
 
 export function totalDelTicket(texto) {
@@ -67,7 +69,7 @@ export function fechaDelTicket(texto, hoyEs) {
         ? fechaValida(Number(m[4]), Number(m[5]), Number(m[6]))
         : fechaValida(Number(m[3].length === 2 ? `20${m[3]}` : m[3]), Number(m[2]), Number(m[1]));
       // Del futuro no puede ser: es otra cosa, o el día y el mes al revés.
-      if (fecha && fecha <= hoyEs && fecha >= limite) encontradas.push({ fecha, conNombre: /fecha/.test(normalizar(linea)) });
+      if (fecha && fecha <= hoyEs && fecha >= limite) encontradas.push({ fecha, conNombre: /fecha|date/.test(normalizar(linea)) });
     }
   }
 

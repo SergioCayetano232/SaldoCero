@@ -56,6 +56,43 @@ ENTREGADO 10,00`;
     expect(totalDelTicket("Mesa 12 Hora 21:45")).toBeNull();
   });
 
+  it("un ticket en inglés", () => {
+    const ticket = `THE RED LION PUB
+2 PINTS          11.00
+FISH & CHIPS     14.50
+SUBTOTAL         25.50
+VAT 20%           4.25
+TOTAL            25.50
+CASH             30.00
+CHANGE            4.50`;
+    expect(totalDelTicket(ticket)).toBe(25.5);
+  });
+
+  it("en inglés, con amount due o balance due", () => {
+    expect(totalDelTicket("Subtotal 18.00\nTax 1.44\nAmount due 19.44")).toBe(19.44);
+    expect(totalDelTicket("Balance due: £42.10")).toBe(42.1);
+  });
+
+  it("en inglés, con el impuesto incluido sigue siendo el total", () => {
+    expect(totalDelTicket("TOTAL INC VAT 36.00\nVAT 6.00")).toBe(36);
+    expect(totalDelTicket("Total (VAT included) 12.80")).toBe(12.8);
+  });
+
+  it("en inglés, sin la propina sugerida", () => {
+    const ticket = `TOTAL 40.00
+Suggested tip 18%: total 47.20`;
+    expect(totalDelTicket(ticket)).toBe(40);
+  });
+
+  it("con miles a la inglesa", () => {
+    expect(totalDelTicket("TOTAL 1,234.50")).toBe(1234.5);
+    expect(totalDelTicket("Grand total $2,045.00")).toBe(2045);
+  });
+
+  it("sin línea de total en inglés, lo más alto que no sea lo que diste", () => {
+    expect(totalDelTicket("MILK 1.20\nBREAD 2.10\nCASH 10.00\nCHANGE 6.70")).toBe(2.1);
+  });
+
   it("sin nada que leer, null", () => {
     expect(totalDelTicket("")).toBeNull();
     expect(totalDelTicket(null)).toBeNull();
@@ -83,6 +120,10 @@ describe("fechaDelTicket", () => {
 
   it("la de la línea que dice fecha antes que otra", () => {
     expect(leer("Vale hasta 01/10/2026\nFecha: 02/11/2026")).toBe("2026-11-02");
+  });
+
+  it("también la de la línea que dice date", () => {
+    expect(fechaDelTicket("Printed 01/11/2026\nDate: 02/11/2026", "2026-11-10")).toBe("2026-11-02");
   });
 
   it("si no, la primera", () => {
