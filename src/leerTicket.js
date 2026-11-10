@@ -76,6 +76,48 @@ export function fechaDelTicket(texto, hoyEs) {
   return (encontradas.find((f) => f.conNombre) ?? encontradas[0])?.fecha ?? null;
 }
 
+// Las líneas de lo que se pidió, para la cuenta plato a plato: "2 CAÑAS 5,00".
+// Se para en el total, que lo de debajo es el pago, y se salta el IVA y compañía.
+const HAY_TOTAL = /\b(total|sub total|importe|a pagar|amount due|balance due|to pay)\b/;
+const HORA = /\b\d{1,2}:\d{2}(:\d{2})?\b/g;
+// Más de esto no es la cuenta de una mesa, es el OCR leyendo basura.
+const MAX_PLATOS = 30;
+
+// "FISH & CHIPS" se queda en "Fish & chips": en mayúsculas grita.
+function comoNombre(texto) {
+  const limpio = texto.replace(/\s+/g, " ").trim();
+  if (limpio !== limpio.toUpperCase()) return limpio;
+  const bajo = limpio.toLowerCase();
+  return bajo.charAt(0).toUpperCase() + bajo.slice(1);
+}
+
+export function platosDelTicket(texto) {
+  const platos = [];
+
+  for (const original of String(texto ?? "").split(/\n+/)) {
+    const norma = normalizar(original);
+    if (HAY_TOTAL.test(norma) || NUNCA.test(norma)) break;
+    if (NO_ES_TOTAL.test(norma)) continue;
+
+    // La fecha y la hora no son precios, aunque "03.11" lo parezca.
+    const sinFechas = arreglarCifras(original).replace(FECHA, " ").replace(HORA, " ");
+    const cifras = cifrasDe(sinFechas).filter((c) => c > 0);
+    if (!cifras.length) continue;
+
+    // El nombre es lo que queda sin las cifras ni los símbolos de moneda.
+    // "2 x 2,50 CAFÉ": el "2 x" va con el precio por unidad, no con el nombre.
+    const nombre = comoNombre(
+      sinFechas.replace(/\b\d+\s*[x×]\s*(?=\d)/gi, " ").replace(CIFRA, " ").replace(/[€$£]|\beur\b/gi, " ")
+    );
+    if (!/\p{L}{2,}/u.test(nombre)) continue;
+
+    platos.push({ nombre, importe: cifras.at(-1) });
+    if (platos.length === MAX_PLATOS) break;
+  }
+
+  return platos;
+}
+
 // Con coma, como se escribe aquí, para el campo del importe.
 export function totalComoTexto(total) {
   return String(total).replace(".", ",");

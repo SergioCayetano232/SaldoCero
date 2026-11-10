@@ -8,7 +8,7 @@ import { t } from "../idioma";
 
 // El botón de leer el total de la foto, y lo que va saliendo. No guarda nada:
 // pone el importe en su campo, y el día si lo ve, y tú lo miras antes de apuntarlo.
-function LeerTotal({ foto, moneda, onTotal, onFecha }) {
+function LeerTotal({ foto, moneda, onTotal, onFecha, onTexto }) {
   const [estado, setEstado] = useState("quieto");
   const [avance, setAvance] = useState(0);
   const [leido, setLeido] = useState(null);
@@ -42,6 +42,7 @@ function LeerTotal({ foto, moneda, onTotal, onFecha }) {
     try {
       const texto = await leerFoto(foto, (p) => sigue.current && setAvance(p));
       if (!sigue.current) return;
+      onTexto?.(texto);
 
       const total = totalDelTicket(texto);
       // La fecha va aparte: aunque no salga el total, el día ya te lo ahorras.

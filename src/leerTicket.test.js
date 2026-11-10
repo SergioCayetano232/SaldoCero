@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { totalDelTicket, totalComoTexto, medidaParaLeer, fechaDelTicket } from "./leerTicket";
+import { totalDelTicket, totalComoTexto, medidaParaLeer, fechaDelTicket, platosDelTicket } from "./leerTicket";
 
 describe("totalDelTicket", () => {
   it("la línea del total", () => {
@@ -144,6 +144,63 @@ describe("fechaDelTicket", () => {
   it("sin texto, nada", () => {
     expect(leer("")).toBeNull();
     expect(leer(null)).toBeNull();
+  });
+});
+
+describe("platosDelTicket", () => {
+  it("cada línea con precio, hasta el total", () => {
+    const ticket = `RESTAURANTE LA PLAZA
+CIF B12345678
+Fecha 03.11.2026  Hora 21:45
+2 CAÑAS          5,00
+1 BRAVAS         6,50
+SECRETO IBÉRICO 14,90
+TOTAL           26,40
+EFECTIVO        30,00
+CAMBIO           3,60`;
+    expect(platosDelTicket(ticket)).toEqual([
+      { nombre: "2 cañas", importe: 5 },
+      { nombre: "1 bravas", importe: 6.5 },
+      { nombre: "Secreto ibérico", importe: 14.9 },
+    ]);
+  });
+
+  it("con cantidad y precio por unidad, el de la línea", () => {
+    expect(platosDelTicket("2 x 2,50 CAFÉ 5,00\nTOTAL 5,00")).toEqual([{ nombre: "Café", importe: 5 }]);
+  });
+
+  it("sin el IVA, la base ni los descuentos", () => {
+    const ticket = `PIZZA 12,00
+BASE IMPONIBLE 10,91
+IVA 10% 1,09
+DESCUENTO 2,00
+AGUA 2,00`;
+    expect(platosDelTicket(ticket).map((p) => p.nombre)).toEqual(["Pizza", "Agua"]);
+  });
+
+  it("en inglés, parando en el subtotal", () => {
+    const ticket = `THE RED LION PUB
+2 PINTS          11.00
+FISH & CHIPS     14.50
+SUBTOTAL         25.50
+VAT 20%           4.25`;
+    expect(platosDelTicket(ticket)).toEqual([
+      { nombre: "2 pints", importe: 11 },
+      { nombre: "Fish & chips", importe: 14.5 },
+    ]);
+  });
+
+  it("los nombres en minúscula se quedan como están", () => {
+    expect(platosDelTicket("Tarta de queso 6,50")).toEqual([{ nombre: "Tarta de queso", importe: 6.5 }]);
+  });
+
+  it("una línea sin nombre no es un plato", () => {
+    expect(platosDelTicket("12,50\n€ 3,00\nPAN 1,20")).toEqual([{ nombre: "Pan", importe: 1.2 }]);
+  });
+
+  it("sin texto, ninguno", () => {
+    expect(platosDelTicket("")).toEqual([]);
+    expect(platosDelTicket(undefined)).toEqual([]);
   });
 });
 

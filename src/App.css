@@ -1459,6 +1459,23 @@ button:active {
   color: var(--rojo);
 }
 
+.plato-nombre {
+  flex-basis: 100%;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tinta);
+  overflow-wrap: anywhere;
+}
+
+.sacar-platos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  font-size: 13px;
+  color: var(--tinta-suave);
+}
+
 .platos > .enlace {
   align-self: flex-start;
 }

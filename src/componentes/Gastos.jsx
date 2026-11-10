@@ -46,6 +46,8 @@ import VisorTicket from "./VisorTicket";
 import Resaltado from "./Resaltado";
 import Dictado from "./Dictado";
 import LeerTotal from "./LeerTotal";
+import { platosDelTicket, totalDelTicket, totalComoTexto } from "../leerTicket";
+import { leerFoto } from "../ocr";
 import { entenderDictado } from "../dictado";
 import { diasSinGastos, textoHuecos } from "../huecos";
 import { aOtraCategoria, categoriasDestino, textoPasarA } from "../recategorizar";
@@ -217,6 +219,11 @@ function Gastos({
 
   // La foto nueva que has elegido, la que ya tenía el gasto que editas, y si la quitas.
   const [foto, setFoto] = useState(null);
+  // Lo que se leyó de la foto, con la foto a la que pertenece: si la cambias, ya no vale.
+  const [leidoDeFoto, setLeidoDeFoto] = useState(null);
+  const textoDeLaFoto = leidoDeFoto?.foto === foto ? leidoDeFoto.texto : null;
+  // null quieto, un número mientras lee, "nada" si no saca ninguno y "fallo" si no pudo.
+  const [sacandoPlatos, setSacandoPlatos] = useState(null);
   // La foto que llega compartida desde la galería, al formulario.
   const [llegadaAntes, setLlegadaAntes] = useState(null);
   if (llegada !== llegadaAntes) {
@@ -633,6 +640,7 @@ function Gastos({
     setImportes({});
     setPorPlatos(false);
     setPlatos([platoNuevo()]);
+    setSacandoPlatos(null);
     setFecha(hoy());
     setParticipantes(null);
     setEditando(null);
@@ -720,6 +728,33 @@ function Gastos({
     );
     setPorImportes(true);
     setPorPlatos(false);
+  }
+
+  // Si ya se leyó el total, ese texto vale: la foto no se lee dos veces.
+  async function sacarPlatos() {
+    const deFoto = foto;
+    let texto = textoDeLaFoto;
+    try {
+      if (texto === null) {
+        setSacandoPlatos(0);
+        texto = await leerFoto(deFoto, (p) => setSacandoPlatos(p));
+        setLeidoDeFoto({ foto: deFoto, texto });
+      }
+    } catch (fallo) {
+      console.error("No hemos podido leer el ticket.", fallo);
+      setSacandoPlatos("fallo");
+      return;
+    }
+
+    const leidos = platosDelTicket(texto);
+    if (!leidos.length) return setSacandoPlatos("nada");
+    setPlatos(leidos.map((p) => ({ nombre: p.nombre, importe: totalComoTexto(p.importe), de: [] })));
+    // Sin importe escrito, el del ticket; y si no lo encuentra, lo que suman los platos.
+    if (!(importeLeido > 0)) {
+      const suma = Math.round(leidos.reduce((s, p) => s + p.importe * 100, 0)) / 100;
+      escribirImporte(totalComoTexto(totalDelTicket(texto) ?? suma));
+    }
+    setSacandoPlatos(null);
   }
 
   function cambiarPlato(i, plato) {
@@ -1476,6 +1511,7 @@ function Gastos({
                   moneda={moneda}
                   onTotal={escribirImporte}
                   onFecha={setFecha}
+                  onTexto={(texto) => setLeidoDeFoto({ foto, texto })}
                 />
               )}
 
@@ -1670,6 +1706,23 @@ function Gastos({
 
                     {porPlatos && (
                       <div className="platos">
+                        {foto && (
+                          <div className="sacar-platos">
+                            {typeof sacandoPlatos === "number" ? (
+                              <span role="status">🔍 {t("Leyendo el ticket…")} {Math.round(sacandoPlatos * 100)} %</span>
+                            ) : (
+                              <button className="boton-foto" onClick={sacarPlatos}>
+                                🧾 {t("Sacar los platos del ticket")}
+                              </button>
+                            )}
+                            {sacandoPlatos === "nada" && (
+                              <span className="leer-total-mal" role="status">{t("No veo platos en el ticket. Ponlos tú.")}</span>
+                            )}
+                            {sacandoPlatos === "fallo" && (
+                              <span className="leer-total-mal" role="alert">{t("No he podido leerlo. La primera vez hace falta conexión.")}</span>
+                            )}
+                          </div>
+                        )}
                         {platos.map((plato, i) => (
                           <div className="plato" key={i}>
                             <input
@@ -1682,6 +1735,7 @@ function Gastos({
                               onChange={(e) => cambiarPlato(i, { ...plato, importe: e.target.value })}
                             />
                             <div className="plato-gente">
+                              {plato.nombre && <span className="plato-nombre">{plato.nombre}</span>}
                               {viajeros
                                 .filter((v) => marcados.includes(v.id))
                                 .map((viajero) => (

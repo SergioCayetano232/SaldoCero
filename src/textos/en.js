@@ -188,6 +188,8 @@ export default {
   "Ida y vuelta": "Return trip",
   "Pon los km, el consumo y el litro": "Enter the km, the consumption and the litre price",
   "Ponerlo": "Use it",
+  "Sacar los platos del ticket": "Get the dishes from the receipt",
+  "No veo platos en el ticket. Ponlos tú.": "I can't see any dishes on the receipt. Add them yourself.",
   "¿varias noches?": "several nights?",
   "no, lo reparto yo": "no, I'll split it myself",
   "Cada noche va entre los que duermen allí, según los días de cada uno. La primera es la del {dia}.": "Each night is split between whoever sleeps there, going by everyone's dates. The first one is {dia}.",
