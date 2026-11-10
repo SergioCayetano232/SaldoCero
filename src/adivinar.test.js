@@ -41,6 +41,30 @@ describe("adivinarCategoria", () => {
     expect(adivinarCategoria("(cervezas)")).toBe("comida");
   });
 
+  it("en inglés también", () => {
+    expect(adivinarCategoria("Dinner")).toBe("comida");
+    expect(adivinarCategoria("Beers at the pub")).toBe("comida");
+    expect(adivinarCategoria("Groceries")).toBe("comida");
+    expect(adivinarCategoria("Flights")).toBe("transporte");
+    expect(adivinarCategoria("Buses")).toBe("transporte");
+    expect(adivinarCategoria("Car rental")).toBe("transporte");
+    expect(adivinarCategoria("Hostel")).toBe("alojamiento");
+    expect(adivinarCategoria("Museum tickets")).toBe("ocio");
+    expect(adivinarCategoria("Gifts")).toBe("compras");
+    expect(adivinarCategoria("Clothes")).toBe("compras");
+  });
+
+  it("en inglés manda la primera palabra igual que en español", () => {
+    expect(adivinarCategoria("Dinner at the hotel")).toBe("comida");
+    expect(adivinarCategoria("Taxi to the airport")).toBe("transporte");
+  });
+
+  it("no confunde palabras de un idioma con trozos del otro", () => {
+    // "car" no es "carne" ni "carta", ni "inn" es "ingles".
+    expect(adivinarCategoria("Carne")).toBeNull();
+    expect(adivinarCategoria("Inglés")).toBeNull();
+  });
+
   it("si no sabe, null", () => {
     expect(adivinarCategoria("Lo de Luis")).toBeNull();
     expect(adivinarCategoria("")).toBeNull();

@@ -3,7 +3,8 @@
 
 import { normalizar } from "./filtros";
 
-// Sin tildes y en minúscula, que es como se comparan.
+// Sin tildes y en minúscula, que es como se comparan. Cada lista acaba con las
+// de inglés: con la app en inglés, nadie escribe "cena".
 const PALABRAS = {
   comida: [
     "cena", "comida", "almuerzo", "desayuno", "merienda", "aperitivo", "vermut",
@@ -11,25 +12,36 @@ const PALABRAS = {
     "cervezas", "copa", "copas", "vino", "pizza", "hamburguesa", "kebab", "helado",
     "helados", "super", "supermercado", "mercadona", "carrefour", "lidl",
     "mercado", "panaderia", "churros", "bocadillo", "bocadillos", "menu", "sushi",
+    "dinner", "lunch", "breakfast", "brunch", "meal", "food", "snack", "drink",
+    "beer", "wine", "coffee", "tea", "pub", "restaurant", "burger", "ice", "takeaway",
+    "supermarket", "grocery", "groceries", "bakery", "tesco", "aldi", "picnic",
   ],
   transporte: [
     "taxi", "uber", "cabify", "bolt", "gasolina", "gasoil", "diesel", "combustible",
     "peaje", "peajes", "parking", "aparcamiento", "autobus", "bus", "metro", "tren",
     "renfe", "ave", "avion", "vuelo", "vuelos", "billete", "billetes", "ferry",
     "barco", "coche", "tranvia", "bici", "patinete",
+    "cab", "petrol", "fuel", "toll", "train", "plane", "flight", "subway", "tube",
+    "underground", "tram", "boat", "car", "rental", "bike", "scooter",
   ],
   alojamiento: [
     "hotel", "hostal", "airbnb", "apartamento", "casa", "camping", "albergue",
     "booking", "habitacion", "pension", "cabana",
+    "hostel", "apartment", "flat", "room", "house", "cabin", "campsite", "motel",
+    "inn", "accommodation",
   ],
   ocio: [
     "entrada", "entradas", "museo", "concierto", "discoteca", "fiesta", "cine",
     "teatro", "excursion", "tour", "visita", "guia", "parque", "kayak", "surf",
     "spa", "bolos", "karaoke", "partido", "festival",
+    "museum", "concert", "club", "party", "cinema", "movie", "theatre", "theater",
+    "visit", "guide", "park", "show", "match", "bowling", "zoo", "gallery",
   ],
   compras: [
     "regalo", "regalos", "souvenir", "souvenirs", "recuerdo", "recuerdos", "ropa",
     "tienda", "farmacia", "crema", "imanes", "iman",
+    "gift", "clothes", "shop", "shopping", "store", "pharmacy", "chemist",
+    "sunscreen", "magnet",
   ],
 };
 
