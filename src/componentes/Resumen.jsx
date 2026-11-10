@@ -3,7 +3,7 @@ import {
   balancesTrasPagos,
   calcularLeTocaPagar,
   estadoDeBalance,
-  calcularPagos,
+  pagosExactos,
   calcularTotal,
   mediaPorGasto,
   gastoMasCaro,
@@ -20,7 +20,7 @@ import { tarjetaEnImagen } from "../pintarTarjeta";
 import { hayDiagrama } from "../diagrama";
 import DiagramaDeudas from "./DiagramaDeudas";
 import { gastosEnCSV } from "../exportar";
-import { juntarBalances, pagaYo, cobroYo } from "../juntos";
+import { pagaYo, cobroYo } from "../juntos";
 import Topes from "./Topes";
 import { mensajeDeCobro, enlaceWhatsApp } from "../cobrar";
 import { cobroDe, cobroComoTexto, cantidadParaPegar } from "../cobro";
@@ -63,6 +63,7 @@ function Resumen({
   onParcial,
   onQuitarParcial,
   onRedondear,
+  onCentro,
   onPresupuesto,
   onTopes,
   cerrado,
@@ -109,7 +110,12 @@ function Resumen({
   const deHoy = gastadoHoy(gastos);
   const comoAyer = textoFrenteAAyer(frenteAAyer(gastos), monedaViaje);
   const miParte = personas.some((v) => v.id === soy) ? miParteDeHoy(gastos, soy, personas) : null;
-  const exactos = calcularPagos(juntarBalances(balances));
+  const centro = viaje?.centro ?? null;
+  const exactos = pagosExactos(balances, centro);
+  // Con más de un pago ya se nota la diferencia. Si está puesto, a la vista para poder quitarlo.
+  const verCentro = Boolean(onCentro) && (centro !== null || exactos.length > 1);
+  // Las marcas van por pareja: cambiar el camino haría que un pago hecho saliera otra vez.
+  const centroBloqueado = saldados.length > 0;
   const redondear = viaje?.redondear === true;
   const pagos = marcarSaldados(redondear ? redondearPagos(exactos) : exactos, saldados);
   const deGolpe = deudoresConVarias(pagos);
@@ -655,6 +661,27 @@ function Resumen({
               </button>
             ))}
           </div>
+        )}
+
+        {verCentro && (
+          <label
+            className="saldar-por-uno"
+            title={centroBloqueado ? t("Con pagos ya marcados no se cambia, que saldrían otra vez") : undefined}
+          >
+            {t("Que todo pase por")}
+            <select
+              value={centro ?? ""}
+              disabled={centroBloqueado}
+              onChange={(e) => onCentro(e.target.value || null)}
+            >
+              <option value="">{t("nadie, el camino corto")}</option>
+              {personas.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.nombre}
+                </option>
+              ))}
+            </select>
+          </label>
         )}
 
         {verRedondeo && (

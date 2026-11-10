@@ -3125,6 +3125,27 @@ button:active {
   margin-top: 12px;
 }
 
+.saldar-por-uno {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--tinta-suave);
+}
+
+.saldar-por-uno select {
+  width: auto;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.saldar-por-uno select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 /* Saldar todo lo de alguien, bajo la lista de pagos. */
 .de-golpe {
   display: flex;

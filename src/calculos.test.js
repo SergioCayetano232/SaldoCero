@@ -19,6 +19,8 @@ import {
   redondearPagos,
   hayCentimos,
   pagosDelViaje,
+  pagosPorUno,
+  pagosExactos,
 } from "./calculos";
 
 const ana = { id: "a", nombre: "Ana" };
@@ -705,6 +707,71 @@ describe("pagosDelViaje", () => {
 
   it("de los de antes, sin saldados ni redondeo", () => {
     expect(pagosDelViaje(balances, {})[0]).toEqual(expect.objectContaining({ cantidad: 20.5, saldado: false }));
+  });
+});
+
+describe("pagosPorUno", () => {
+  // Ana +60, Luis +10, Marta -30, Pepe -40.
+  const balances = [
+    { id: "a", nombre: "Ana", balance: 60 },
+    { id: "b", nombre: "Luis", balance: 10 },
+    { id: "c", nombre: "Marta", balance: -30 },
+    { id: "d", nombre: "Pepe", balance: -40 },
+  ];
+  const resumido = (pagos) => pagos.map((p) => `${p.de}→${p.a} ${p.cantidad}`);
+
+  it("todo pasa por el elegido, primero lo que le llega", () => {
+    expect(resumido(pagosPorUno(balances, "b"))).toEqual(["Pepe→Luis 40", "Marta→Luis 30", "Luis→Ana 60"]);
+  });
+
+  it("cuadra igual: cada uno acaba a cero", () => {
+    const pagos = pagosPorUno(balances, "c");
+    const neto = Object.fromEntries(balances.map((v) => [v.id, v.balance]));
+    for (const p of pagos) {
+      neto[p.deId] += p.cantidad;
+      neto[p.aId] -= p.cantidad;
+    }
+    expect(Object.values(neto).every((n) => Math.abs(n) < 0.01)).toBe(true);
+  });
+
+  it("los que están a cero no salen", () => {
+    const conCero = [...balances, { id: "e", nombre: "Eva", balance: 0.004 }];
+    expect(pagosPorUno(conCero, "a").some((p) => p.de === "Eva" || p.a === "Eva")).toBe(false);
+  });
+
+  it("si el elegido ya no está, el camino corto", () => {
+    expect(pagosPorUno(balances, "zzz")).toEqual(calcularPagos(balances));
+  });
+
+  it("con parejas, el centro es la pareja entera", () => {
+    const juntos = [
+      { id: "a", nombre: "Ana y Luis", ids: ["a", "b"], balance: 70 },
+      { id: "c", nombre: "Marta", balance: -30 },
+      { id: "d", nombre: "Pepe", balance: -40 },
+    ];
+    const pagos = pagosPorUno(juntos, "b");
+    expect(resumido(pagos)).toEqual(["Pepe→Ana y Luis 40", "Marta→Ana y Luis 30"]);
+    expect(pagos[0].aIds).toEqual(["a", "b"]);
+  });
+});
+
+describe("pagosExactos y pagosDelViaje con centro", () => {
+  const balances = [
+    { id: "a", nombre: "Ana", balance: 60 },
+    { id: "b", nombre: "Luis", balance: 10 },
+    { id: "c", nombre: "Marta", balance: -70 },
+  ];
+
+  it("sin centro, el camino corto de siempre", () => {
+    expect(pagosExactos(balances)).toEqual(calcularPagos(balances));
+  });
+
+  it("con centro, todo por él, y lo saldado se marca igual", () => {
+    const viaje = { centro: "a", saldados: [{ deId: "c", aId: "a" }] };
+    expect(pagosDelViaje(balances, viaje).map((p) => [p.de, p.a, p.cantidad, p.saldado])).toEqual([
+      ["Marta", "Ana", 70, true],
+      ["Ana", "Luis", 10, false],
+    ]);
   });
 });
 

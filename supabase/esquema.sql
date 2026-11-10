@@ -39,6 +39,10 @@ create table viajeros (
   creado_en timestamptz not null default now()
 );
 
+-- Si todo se salda a través de uno, ese. Va aquí y no en viajes porque hace
+-- falta que exista la tabla de viajeros. Si se le quita, vuelve el camino corto.
+alter table viajes add column centro uuid references viajeros(id) on delete set null;
+
 create table gastos (
   id uuid primary key default gen_random_uuid(),
   viaje_id uuid not null references viajes(id) on delete cascade,
@@ -188,7 +192,7 @@ alter table aportaciones_bote enable row level security;
 -- Del viaje y de los viajeros solo se cambian estas columnas. El código, o de
 -- qué viaje es cada uno, no se tocan nunca.
 revoke update on viajes from anon, authenticated;
-grant update (nombre, moneda, presupuesto, cerrado_en, redondear, topes, anterior) on viajes to anon, authenticated;
+grant update (nombre, moneda, presupuesto, cerrado_en, redondear, topes, anterior, centro) on viajes to anon, authenticated;
 revoke update on viajeros from anon, authenticated;
 grant update (nombre, con_id, desde, hasta) on viajeros to anon, authenticated;
 
@@ -760,3 +764,7 @@ create trigger moneda_sin_dinero before update of moneda on viajes
 -- Comparar con el viaje del que salió al repetirlo.
 --   alter table viajes add column anterior jsonb check (jsonb_typeof(anterior) = 'object');
 --   grant update (anterior) on viajes to anon, authenticated;
+
+-- Saldar todo a través de uno.
+--   alter table viajes add column centro uuid references viajeros(id) on delete set null;
+--   grant update (centro) on viajes to anon, authenticated;

@@ -364,7 +364,7 @@ export { usarViajero };
 async function cargarContenido(viajeId) {
   const [delViaje, viajeros, gastos, participantes, saldados, parciales, bote, actividad] = await Promise.all([
     // Lo del viaje otra vez, por si lo ha cambiado alguien desde otro móvil.
-    supabase.from("viajes").select("nombre, moneda, presupuesto, cerrado_en, redondear, topes, anterior").eq("id", viajeId).single(),
+    supabase.from("viajes").select("nombre, moneda, presupuesto, cerrado_en, redondear, topes, anterior, centro").eq("id", viajeId).single(),
     supabase.from("viajeros").select("id, nombre, cobro, con_id, desde, hasta").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
@@ -413,6 +413,8 @@ async function cargarContenido(viajeId) {
     redondear: delViaje.data.redondear === true,
     topes: limpiarTopes(delViaje.data.topes),
     anterior: limpiarAnterior(delViaje.data.anterior),
+    // Los de antes no lo traen: el camino corto, como siempre.
+    centro: delViaje.data.centro ?? null,
     // Los de antes no traen los días: esos están todo el viaje.
     viajeros: viajeros.data.map(({ con_id, desde, hasta, ...v }) => ({
       ...v,
@@ -558,6 +560,12 @@ export async function ponerPresupuesto(viajeId, presupuesto) {
 export async function ponerTopes(viajeId, topes) {
   const { data, error } = await supabase.from("viajes").update({ topes }).eq("id", viajeId).select("id");
   if (error || !data.length) throw fallo(error, "No hemos podido guardar el tope.");
+}
+
+// Null vuelve al camino corto.
+export async function ponerCentro(viajeId, centro) {
+  const { data, error } = await supabase.from("viajes").update({ centro }).eq("id", viajeId).select("id");
+  if (error || !data.length) throw fallo(error, "No hemos podido cambiar cómo se salda.");
 }
 
 export async function ponerRedondeo(viajeId, redondear) {

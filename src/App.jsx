@@ -666,6 +666,7 @@ function App() {
           onPresupuesto={(cantidad) => hacer(() => datos.ponerPresupuesto(viaje.id, cantidad))}
           onTopes={(topes) => hacer(() => datos.ponerTopes(viaje.id, topes))}
           onRedondear={(redondear) => hacer(() => datos.ponerRedondeo(viaje.id, redondear))}
+          onCentro={(centro) => hacer(() => datos.ponerCentro(viaje.id, centro))}
           parciales={parciales}
           aportaciones={aportaciones}
           onParcial={(parcial) => hacer(() => datos.anadirParcial(viaje.id, parcial))}

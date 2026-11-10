@@ -218,6 +218,37 @@ export function calcularPagos(balances) {
   return pagos;
 }
 
+// Todo a través de uno: los que deben le pagan a él, y él paga a los que se les
+// debe. Salen más pagos que con calcularPagos, pero cada uno solo trata con él.
+export function pagosPorUno(balances, centroId) {
+  // Si va en pareja, el centro es la pareja entera.
+  const centro = balances.find((v) => v.id === centroId || v.ids?.includes(centroId));
+  if (!centro) return calcularPagos(balances);
+
+  const pago = (de, a, cantidad) => ({
+    de: de.nombre,
+    a: a.nombre,
+    deId: de.id,
+    aId: a.id,
+    ...(de.ids && { deIds: de.ids }),
+    ...(a.ids && { aIds: a.ids }),
+    cantidad,
+  });
+  const otros = balances.filter((v) => v !== centro);
+
+  return [
+    // Primero lo que le llega, que así no tiene que adelantar nada.
+    ...otros.filter((v) => v.balance < -MARGEN).sort((x, y) => x.balance - y.balance).map((v) => pago(v, centro, -v.balance)),
+    ...otros.filter((v) => v.balance > MARGEN).sort((x, y) => y.balance - x.balance).map((v) => pago(centro, v, v.balance)),
+  ];
+}
+
+// Los pagos sin redondear, por el camino corto o a través de uno.
+export function pagosExactos(balances, centroId = null) {
+  const juntos = juntarBalances(balances);
+  return centroId ? pagosPorUno(juntos, centroId) : calcularPagos(juntos);
+}
+
 // Los pagos sin céntimos, que nadie hace un Bizum de 23,47 €. Lo que se queda
 // en nada, como unos 0,40 €, se perdona y no sale.
 export function redondearPagos(pagos) {
@@ -271,7 +302,7 @@ export function balancesTrasPagos(balances, pagos) {
 // Los pagos tal y como salen en el resumen: sin céntimos si así lo quiere el
 // viaje y con lo que ya se ha marcado como pagado.
 export function pagosDelViaje(balances, viaje) {
-  const exactos = calcularPagos(juntarBalances(balances));
+  const exactos = pagosExactos(balances, viaje?.centro);
   return marcarSaldados(viaje?.redondear ? redondearPagos(exactos) : exactos, viaje?.saldados ?? []);
 }
 
