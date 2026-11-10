@@ -358,7 +358,7 @@ export { usarViajero };
 async function cargarContenido(viajeId) {
   const [delViaje, viajeros, gastos, participantes, saldados, parciales, bote, actividad] = await Promise.all([
     // Lo del viaje otra vez, por si lo ha cambiado alguien desde otro móvil.
-    supabase.from("viajes").select("nombre, presupuesto, cerrado_en, redondear, topes").eq("id", viajeId).single(),
+    supabase.from("viajes").select("nombre, moneda, presupuesto, cerrado_en, redondear, topes").eq("id", viajeId).single(),
     supabase.from("viajeros").select("id, nombre, cobro, con_id, desde, hasta").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
@@ -400,6 +400,7 @@ async function cargarContenido(viajeId) {
 
   return {
     nombre: delViaje.data.nombre,
+    moneda: delViaje.data.moneda,
     presupuesto: delViaje.data.presupuesto === null ? null : Number(delViaje.data.presupuesto),
     cerradoEn: delViaje.data.cerrado_en,
     // Los viajes de antes de esto no lo traen: con céntimos, como siempre.
@@ -524,6 +525,15 @@ export async function renombrarViaje(viaje, nombre) {
   if (error || !data.length) throw fallo(error, "No hemos podido cambiar el nombre del viaje.");
 
   renombrarEnHistorial(viaje.codigo, nombre);
+}
+
+// La base de datos no deja si ya hay gastos o bote, aunque la app crea que no.
+export async function cambiarMoneda(viaje, moneda) {
+  const { data, error } = await supabase.from("viajes").update({ moneda }).eq("id", viaje.id).select("id");
+  if (error || !data.length) throw fallo(error, "No hemos podido cambiar la moneda del viaje.");
+
+  const lista = historial().map((v) => (v.codigo === viaje.codigo ? { ...v, moneda } : v));
+  localStorage.setItem(CLAVE_HISTORICO, JSON.stringify(lista));
 }
 
 // null lo quita.

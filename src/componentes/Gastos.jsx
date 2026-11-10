@@ -128,6 +128,13 @@ function Gastos({
   const [tasaAMano, setTasaAMano] = useState(null);
   // Con la que empieza el formulario en blanco: la del último gasto que apuntaste.
   const [siguiente, setSiguiente] = useState({ moneda: monedaViaje, tasaAMano: null });
+  // Si cambian la moneda del viaje, el formulario se va con ella si iba en la de antes.
+  const [monedaAntes, setMonedaAntes] = useState(monedaViaje);
+  if (monedaAntes !== monedaViaje) {
+    setMonedaAntes(monedaViaje);
+    if (moneda === monedaAntes) setMoneda(monedaViaje);
+    if (siguiente.moneda === monedaAntes) setSiguiente({ ...siguiente, moneda: monedaViaje });
+  }
 
   // Si la API no lo sabe, no queda otra que escribirlo.
   const sinCambio = cambioTraido?.moneda === moneda && cambioTraido.tasa === null;

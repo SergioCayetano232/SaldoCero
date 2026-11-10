@@ -523,6 +523,7 @@ function App() {
         cerrado={cerrado}
         onReabrir={reabrirViaje}
         onRenombrar={(nombre) => hacer(() => datos.renombrarViaje(viaje, nombre))}
+        onCambiarMoneda={(moneda) => hacer(() => datos.cambiarMoneda(viaje, moneda))}
       />
 
       <AvisoSinConexion />

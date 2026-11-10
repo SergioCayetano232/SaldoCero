@@ -6,6 +6,8 @@ import { textoDuracion } from "../duracion";
 import { hoy } from "../fechas";
 import { esAtajoCopiarCodigo, esAtajoInvitar, esAtajoSalir, esOrdenador } from "../teclado";
 import { t } from "../idioma";
+import { MONEDAS, monedaConBandera } from "../monedas";
+import { puedeCambiarMoneda, monedaNueva } from "../cambiarMoneda";
 
 // La librería del QR pesa, y casi nadie lo abre: se baja solo al pulsar.
 const QRViaje = lazy(() => import("./QRViaje"));
@@ -17,7 +19,7 @@ const TEXTO_INVITAR = {
 };
 
 // El viaje abierto, con su código para compartir.
-function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir }) {
+function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir, onCambiarMoneda }) {
   const [codigoCopiado, setCodigoCopiado] = useState(false);
   const [invitado, setInvitado] = useState("");
   const [conQR, setConQR] = useState(false);
@@ -92,7 +94,34 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir }) {
           />
         )}
         {duracion && <span className="viaje-dia">{duracion}</span>}
-        <span className="viaje-moneda">{viaje.moneda ?? "EUR"}</span>
+        {!cerrado && puedeCambiarMoneda(viaje) ? (
+          // El select va encima, transparente: así se ve la pastilla y al tocarla sale la lista.
+          <label className="viaje-moneda cambiar-moneda" title={t("Cambiar la moneda del viaje")}>
+            {viaje.moneda ?? "EUR"}
+            <span aria-hidden="true"> ▾</span>
+            <select
+              value={viaje.moneda ?? "EUR"}
+              onChange={(e) => {
+                const nueva = monedaNueva(e.target.value, viaje.moneda ?? "EUR");
+                if (nueva) onCambiarMoneda(nueva);
+              }}
+              aria-label={t("Cambiar la moneda del viaje")}
+            >
+              {MONEDAS.map((m) => (
+                <option key={m.codigo} value={m.codigo}>
+                  {monedaConBandera(m.codigo)}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : (
+          <span
+            className="viaje-moneda"
+            title={cerrado ? undefined : t("Con gastos o bote apuntados ya no se cambia la moneda")}
+          >
+            {viaje.moneda ?? "EUR"}
+          </span>
+        )}
         <button
           className="boton-salir"
           onClick={onSalir}

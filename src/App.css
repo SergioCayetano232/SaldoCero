@@ -1176,6 +1176,25 @@ button:active {
   flex-shrink: 0;
 }
 
+.cambiar-moneda {
+  position: relative;
+  cursor: pointer;
+  transition: background-color var(--rapido) var(--curva-suave);
+}
+
+.cambiar-moneda:hover,
+.cambiar-moneda:focus-within {
+  background-color: var(--teal-100);
+}
+
+.cambiar-moneda select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
 .viaje-dia {
   font-size: 12px;
   font-weight: 600;

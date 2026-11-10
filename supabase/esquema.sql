@@ -185,7 +185,7 @@ alter table aportaciones_bote enable row level security;
 -- Del viaje y de los viajeros solo se cambian estas columnas. El código, o de
 -- qué viaje es cada uno, no se tocan nunca.
 revoke update on viajes from anon, authenticated;
-grant update (nombre, presupuesto, cerrado_en, redondear, topes) on viajes to anon, authenticated;
+grant update (nombre, moneda, presupuesto, cerrado_en, redondear, topes) on viajes to anon, authenticated;
 revoke update on viajeros from anon, authenticated;
 grant update (nombre, con_id, desde, hasta) on viajeros to anon, authenticated;
 
@@ -523,6 +523,31 @@ create trigger actividad_viajeros after insert or delete on viajeros
 create trigger actividad_saldados after insert on pagos_saldados
   for each row execute function apuntar_actividad();
 
+-- La moneda del viaje solo se cambia mientras no hay dinero apuntado: lo guardado
+-- va convertido a la de antes. Lo miro aquí y no solo en la app, por si otro
+-- móvil apunta un gasto justo a la vez.
+create function no_cambiar_moneda_con_dinero()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.moneda !~ '^[A-Z]{3}$' then
+    raise exception 'Esa moneda no existe';
+  end if;
+  if exists (select 1 from gastos where viaje_id = new.id)
+    or exists (select 1 from aportaciones_bote where viaje_id = new.id) then
+    raise exception 'Con gastos o bote ya no se cambia la moneda';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger moneda_sin_dinero before update of moneda on viajes
+  for each row when (old.moneda is distinct from new.moneda)
+  execute function no_cambiar_moneda_con_dinero();
+
 -- ---------- Si ya tenías la base de datos creada ----------
 --
 -- Lo de abajo llegó después. Si montaste las tablas antes, no hace falta
@@ -723,3 +748,8 @@ create trigger actividad_saldados after insert on pagos_saldados
 --   drop function editar_gasto(uuid, uuid, numeric, text, numeric, text, text, date, jsonb, text, jsonb);
 --
 --   Y pega los "create function crear_gasto" y "create function editar_gasto" de más arriba.
+
+-- Cambiar la moneda del viaje mientras no tenga gastos.
+--   grant update (moneda) on viajes to anon, authenticated;
+--
+--   Y pega el "create function no_cambiar_moneda_con_dinero" y su trigger de más arriba.
