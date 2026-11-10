@@ -15,7 +15,7 @@ import { nochesDeCadaUno, mismasNoches } from "../noches";
 import { apuntadoPor } from "../apuntadoPor";
 import { dudasParaMi, textoDuda, avisoDeDudas, DUDA_POR_DEFECTO, LARGO_DUDA } from "../dudas";
 import { limpiarLugar, lugaresDelViaje, lugarSugerido, mismoLugar, LARGO_LUGAR } from "../lugares";
-import { t, tn, idiomaActual } from "../idioma";
+import { t, tn } from "../idioma";
 import { borradorQueVale, hayAlgoEscrito, hayAlgoQueBorrar } from "../borrador";
 import * as datos from "../datos";
 import { gastoAlFormulario, repetirGasto, ultimoApuntado } from "../repetir";
@@ -1005,8 +1005,7 @@ function Gastos({
                 </div>
               )}
 
-              {/* Lo dicho se entiende solo en español: en inglés no se ofrece. */}
-              {!editando && idiomaActual() === "es" && <Dictado onDictado={alDictar} />}
+              {!editando && <Dictado onDictado={alDictar} />}
 
               {!entreVarios && (
                 <select

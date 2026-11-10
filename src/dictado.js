@@ -1,17 +1,32 @@
 // Entender un gasto dicho en voz alta: "cena 45 euros pagó Ana", "pagué yo 12
 // con 50 de taxi", "museo 30 entre Ana y Luis". Lo que no se entiende se deja
 // como está en el formulario, y el concepto es lo que sobra.
+// También en inglés, mezclado con lo nuestro: "dinner 45 paid by Ana" o "I paid 12
+// for the taxi". Mejor así que adivinar el idioma de una frase de cuatro palabras.
 
 import { normalizar } from "./filtros";
 import { hoy, ayer, anteayer } from "./fechas";
 
-const DINERO = new Set(["euro", "euros", "eur", "€", "pavos", "pavo", "dolares", "dolar", "libras", "libra"]);
-const CENTIMOS = new Set(["centimos", "centimo", "centavos", "centavo"]);
-const PAGAR = new Set(["pago", "pagaste", "pague", "paga", "pagado", "pagao"]);
+const DINERO = new Set([
+  "euro", "euros", "eur", "€", "pavos", "pavo", "dolares", "dolar", "libras", "libra",
+  "dollars", "dollar", "bucks", "buck", "pounds", "pound", "quid", "usd", "gbp", "$", "£",
+]);
+const CENTIMOS = new Set(["centimos", "centimo", "centavos", "centavo", "cents", "cent", "pence"]);
+const PAGAR = new Set(["pago", "pagaste", "pague", "paga", "pagado", "pagao", "paid", "pay", "pays", "payed"]);
 const YO = new Set(["yo", "pague"]);
-export const MENOS = new Set(["menos", "sin", "excepto", "salvo", "quitando"]);
+// El que habla, delante del pago: "yo pagué", "I paid", "I've paid".
+const YO_DELANTE = new Set(["yo", "i", "i've", "ive"]);
+// El que habla, detrás de otra cosa: "paid by me", "except me".
+const YO_DETRAS = new Set(["yo", "me", "myself"]);
+export const MENOS = new Set(["menos", "sin", "excepto", "salvo", "quitando", "except", "without", "but", "minus", "excluding"]);
+const TODOS = new Set(["todos", "everyone", "everybody", "all"]);
+// Lo que une dos nombres: "Ana y Luis", "Ana and Luis", "sin Ana ni Eva".
+export const UNE = new Set(["y", "ni", "and", "or", "nor"]);
 // Lo que se cuela alrededor del concepto: "45 de cena" no es "de cena".
-const RELLENO = new Set(["de", "del", "la", "el", "los", "las", "en", "para", "por", "un", "una", "y", "al", "lo", "ha", "he", "que", "con"]);
+const RELLENO = new Set([
+  "de", "del", "la", "el", "los", "las", "en", "para", "por", "un", "una", "y", "al", "lo", "ha", "he", "que", "con",
+  "the", "a", "an", "for", "at", "of", "on", "to", "and", "with", "by", "in", "has", "have", "had",
+]);
 
 // El reconocedor suele escribir las cifras, pero lo pequeño a veces lo deja en
 // letra. Solo vale si va con "euros" detrás, que "dos cafés" no es un importe.
@@ -19,6 +34,8 @@ const EN_LETRA = {
   uno: 1, un: 1, una: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6, siete: 7, ocho: 8, nueve: 9,
   diez: 10, once: 11, doce: 12, trece: 13, catorce: 14, quince: 15, veinte: 20, treinta: 30,
   cuarenta: 40, cincuenta: 50, sesenta: 60, setenta: 70, ochenta: 80, noventa: 90, cien: 100,
+  one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
+  twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90, hundred: 100,
 };
 
 function palabras(texto) {
@@ -26,10 +43,11 @@ function palabras(texto) {
     .split(/\s+/)
     .filter(Boolean)
     .map((original) => {
-      // "45€" llega pegado: lo separamos en número y moneda.
+      // "45€" o "$45" llegan pegados: lo separamos en número y moneda.
       const limpio = original.replace(/^[¿¡"(]+|[.,;:!?")]+$/g, "");
       const norma = normalizar(limpio);
-      return { original: limpio, norma: norma === "€" ? norma : norma.replace(/€$/, ""), euro: /\d€$/.test(limpio) };
+      const conSimbolo = /\d[€$£]$/.test(limpio) || /^[$£]\d/.test(limpio);
+      return { original: limpio, norma: DINERO.has(norma) ? norma : norma.replace(/^[$£]|[€$£]$/g, ""), euro: conSimbolo };
     });
 }
 
@@ -82,17 +100,26 @@ function buscarPagador(p, viajeros, soy) {
     if (!PAGAR.has(p[i].norma)) continue;
     const usadas = [i];
 
-    // "pagué", "pagué yo", "yo pagué", "he pagado yo".
-    if (YO.has(p[i].norma) || p[i + 1]?.norma === "yo" || p[i - 1]?.norma === "yo" || p[i - 1]?.norma === "he") {
+    // El "he" solo con "pagado": "he paid" es otro, no tú.
+    const hePagado = p[i - 1]?.norma === "he" && ["pagado", "pagao"].includes(p[i].norma);
+    // "I have paid": el "have" va en medio.
+    const iHave = p[i - 1]?.norma === "have" && p[i - 2]?.norma === "i";
+    // "paid by Ana", "paid by me".
+    const by = p[i + 1]?.norma === "by" ? 1 : 0;
+
+    // "pagué", "pagué yo", "yo pagué", "he pagado yo", "I paid", "paid by me".
+    if (YO.has(p[i].norma) || p[i + 1]?.norma === "yo" || YO_DELANTE.has(p[i - 1]?.norma) || hePagado || iHave || (by && YO_DETRAS.has(p[i + 2]?.norma))) {
       if (p[i + 1]?.norma === "yo") usadas.push(i + 1);
-      if (p[i - 1]?.norma === "yo" || p[i - 1]?.norma === "he") usadas.push(i - 1);
+      if (by && YO_DETRAS.has(p[i + 2]?.norma)) usadas.push(i + 1, i + 2);
+      if (YO_DELANTE.has(p[i - 1]?.norma) || hePagado) usadas.push(i - 1);
+      if (iHave) usadas.push(i - 1, i - 2);
       return { id: soy, usadas };
     }
 
-    // "pagó Ana", "lo ha pagado Ana".
-    const despues = viajeroEn(p, i + 1, viajeros);
+    // "pagó Ana", "lo ha pagado Ana", "paid by Ana".
+    const despues = viajeroEn(p, i + 1 + by, viajeros);
     if (despues) {
-      for (let k = 1; k <= despues.largo; k++) usadas.push(i + k);
+      for (let k = 1; k <= despues.largo + by; k++) usadas.push(i + k);
       return { id: despues.viajero.id, usadas };
     }
 
@@ -110,14 +137,20 @@ function buscarPagador(p, viajeros, soy) {
   return null;
 }
 
-// "entre Ana y Luis", "entre Ana, Luis y Eva", "entre todos".
+// "entre Ana y Luis", "entre Ana, Luis y Eva", "entre todos", "split between Ana and Luis".
 function buscarEntre(p, viajeros) {
-  const i = p.findIndex((t) => t.norma === "entre");
+  const i = p.findIndex((t) => ["entre", "between", "among"].includes(t.norma));
   if (i < 0) return null;
-  if (p[i + 1]?.norma === "todos") return { ids: viajeros.map((v) => v.id), usadas: [i, i + 1] };
+  const delante = ["split", "shared", "divided"].includes(p[i - 1]?.norma) ? [i - 1] : [];
+  if (TODOS.has(p[i + 1]?.norma)) {
+    const usadas = [...delante, i, i + 1];
+    // "between all of us".
+    if (p[i + 2]?.norma === "of" && p[i + 3]?.norma === "us") usadas.push(i + 2, i + 3);
+    return { ids: viajeros.map((v) => v.id), usadas };
+  }
 
   const ids = [];
-  const usadas = [i];
+  const usadas = [...delante, i];
   let j = i + 1;
   while (j < p.length) {
     const encontrado = viajeroEn(p, j, viajeros);
@@ -125,7 +158,7 @@ function buscarEntre(p, viajeros) {
       ids.push(encontrado.viajero.id);
       for (let k = 0; k < encontrado.largo; k++) usadas.push(j + k);
       j += encontrado.largo;
-    } else if (p[j].norma === "y" && ids.length > 0) {
+    } else if ((p[j].norma === "y" || p[j].norma === "and") && ids.length > 0) {
       usadas.push(j++);
     } else break;
   }
@@ -142,13 +175,14 @@ function buscarMenos(p, viajeros, soy) {
     const ids = [];
     const usadas = [i];
     // "todos menos Luis": el "todos" sobra, que no es parte del concepto.
-    if (p[i - 1]?.norma === "todos") usadas.push(i - 1);
+    if (TODOS.has(p[i - 1]?.norma)) usadas.push(i - 1);
     let j = i + 1;
-    if (p[j]?.norma === "a") usadas.push(j++);
+    // "excepto a Luis", "except for Luis".
+    if (p[j]?.norma === "a" || p[j]?.norma === "for") usadas.push(j++);
     while (j < p.length) {
       const encontrado = viajeroEn(p, j, viajeros);
       // "sin mí" con su tilde: sin ella es "sin mi tarjeta".
-      const yo = soy && (p[j].norma === "yo" || p[j].original.toLowerCase() === "mí");
+      const yo = soy && (YO_DETRAS.has(p[j].norma) || p[j].original.toLowerCase() === "mí");
       if (encontrado) {
         ids.push(encontrado.viajero.id);
         for (let k = 0; k < encontrado.largo; k++) usadas.push(j + k);
@@ -156,7 +190,7 @@ function buscarMenos(p, viajeros, soy) {
       } else if (yo) {
         ids.push(soy);
         usadas.push(j++);
-      } else if ((p[j].norma === "y" || p[j].norma === "ni") && ids.length > 0) {
+      } else if (UNE.has(p[j].norma) && ids.length > 0) {
         usadas.push(j++);
       } else break;
     }
@@ -174,9 +208,13 @@ function buscarDia(p) {
     if (n === "antes" && p[i + 1]?.norma === "de" && p[i + 2]?.norma === "ayer") {
       return { fecha: anteayer(), usadas: [i, i + 1, i + 2] };
     }
+    if (n === "day" && p[i + 1]?.norma === "before" && p[i + 2]?.norma === "yesterday") {
+      return { fecha: anteayer(), usadas: [i, i + 1, i + 2] };
+    }
+    if (n === "last" && p[i + 1]?.norma === "night") return { fecha: ayer(), usadas: [i, i + 1] };
     if (n === "anteayer") return { fecha: anteayer(), usadas: [i] };
-    if (n === "ayer" || n === "anoche") return { fecha: ayer(), usadas: [i] };
-    if (n === "hoy") return { fecha: hoy(), usadas: [i] };
+    if (n === "ayer" || n === "anoche" || n === "yesterday") return { fecha: ayer(), usadas: [i] };
+    if (n === "hoy" || n === "today" || n === "tonight") return { fecha: hoy(), usadas: [i] };
   }
   return null;
 }

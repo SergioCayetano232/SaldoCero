@@ -1,7 +1,7 @@
 // Pegar de golpe lo que fuisteis apuntando en las notas del móvil:
 // "cena 45 ana", "taxi 12,50 luis"... Cada línea, un gasto. Se lee igual que el dictado.
 
-import { entenderDictado, MENOS } from "./dictado";
+import { entenderDictado, MENOS, UNE } from "./dictado";
 import { leerImporte } from "./monedas";
 import { adivinarCategoria } from "./adivinar";
 import { POR_DEFECTO, conceptoSinEscribir } from "./categorias";
@@ -26,7 +26,7 @@ function vaDetrasDeMenos(palabras, largo, viajeros) {
   for (let i = palabras.length - largo - 1; i >= 0; i--) {
     const p = normalizar(palabras[i].replace(/[:,.]+$/, ""));
     if (MENOS.has(p)) return true;
-    if (!nombres.has(p) && !["y", "ni", "a"].includes(p)) return false;
+    if (!nombres.has(p) && !UNE.has(p) && p !== "a" && p !== "for") return false;
   }
   return false;
 }

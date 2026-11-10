@@ -134,6 +134,60 @@ describe("el día dicho", () => {
   });
 });
 
+describe("en inglés", () => {
+  it("concepto, importe y quién pagó", () => {
+    expect(entender("dinner 45 euros paid by Ana")).toEqual({
+      importe: "45",
+      concepto: "dinner",
+      pagadorId: "ana",
+      participantes: null,
+      fecha: null,
+    });
+    expect(entender("Luis paid 12.50 for the taxi")).toMatchObject({ importe: "12,5", concepto: "taxi", pagadorId: "luis" });
+    expect(entender("Ana has paid the museum 30")).toMatchObject({ pagadorId: "ana", concepto: "museum" });
+  });
+
+  it("con el símbolo delante o detrás", () => {
+    expect(entender("taxi $23.50 paid Luis")).toMatchObject({ importe: "23,5", concepto: "taxi" });
+    expect(entender("lunch 18£")).toMatchObject({ importe: "18", concepto: "lunch" });
+    expect(entender("coffee 4 pounds").importe).toBe("4");
+  });
+
+  it("si pagaste tú", () => {
+    expect(entender("I paid 20 for petrol", "eva")).toMatchObject({ pagadorId: "eva", concepto: "petrol" });
+    expect(entender("I've paid the hotel 300", "eva").pagadorId).toBe("eva");
+    expect(entender("I have paid the hotel 300", "eva")).toMatchObject({ pagadorId: "eva", concepto: "hotel" });
+    expect(entender("groceries 54 paid by me", "eva")).toMatchObject({ pagadorId: "eva", concepto: "groceries" });
+  });
+
+  it("el he de he paid no eres tú", () => {
+    expect(entender("he paid 20 for petrol", "eva").pagadorId).toBeNull();
+  });
+
+  it("entre quiénes", () => {
+    expect(entender("museum 30 split between Ana and Luis")).toMatchObject({ participantes: ["ana", "luis"], concepto: "museum" });
+    expect(entender("dinner 90 between all of us").participantes).toEqual(["ana", "luis", "jm", "eva"]);
+  });
+
+  it("menos alguno", () => {
+    expect(entender("dinner 45 paid by Ana except Luis")).toMatchObject({ participantes: ["ana", "jm", "eva"], concepto: "dinner", pagadorId: "ana" });
+    expect(entender("wine 20 everyone but Ana and Eva").participantes).toEqual(["luis", "jm"]);
+    expect(entender("drinks 40 except for me", "eva")).toMatchObject({ participantes: ["ana", "luis", "jm"], concepto: "drinks" });
+  });
+
+  it("los números en letra solo con la moneda detrás", () => {
+    expect(entender("five pounds for bread")).toMatchObject({ importe: "5", concepto: "bread" });
+    expect(entender("two coffees 3 euros")).toMatchObject({ importe: "3", concepto: "two coffees" });
+  });
+
+  it("el día dicho", () => {
+    expect(entender("dinner yesterday 45 paid by Ana")).toMatchObject({ concepto: "dinner", fecha: ayer() });
+    expect(entender("drinks last night 30")).toMatchObject({ concepto: "drinks", fecha: ayer() });
+    expect(entender("museum the day before yesterday 30")).toMatchObject({ concepto: "museum", fecha: anteayer() });
+    expect(entender("Today, breakfast 12")).toMatchObject({ concepto: "breakfast", fecha: hoy() });
+  });
+});
+
 describe("reconocedorDeVoz", () => {
   it("el normal o el de Chrome y Safari", () => {
     const R = function () {};

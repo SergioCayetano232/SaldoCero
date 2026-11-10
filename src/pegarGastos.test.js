@@ -102,6 +102,23 @@ describe("gastosDeLista", () => {
   });
 });
 
+describe("gastosDeLista en inglés", () => {
+  it("con el nombre suelto o con paid", () => {
+    const { gastos, sinEntender } = leer("dinner 45 ana\nluis: taxi 12.50\nmuseum 30 paid by marta");
+    expect(sinEntender).toEqual([]);
+    expect(gastos.map((g) => [g.pagadorId, g.importe, g.concepto, g.categoria])).toEqual([
+      ["a", 45, "Dinner", "comida"],
+      ["b", 12.5, "Taxi", "transporte"],
+      ["c", 30, "Museum", "ocio"],
+    ]);
+  });
+
+  it("except no se confunde con el que pagó", () => {
+    const [gasto] = leer("beers 20 ana except luis").gastos;
+    expect(gasto).toMatchObject({ pagadorId: "a", participantes: ["a", "c"] });
+  });
+});
+
 describe("textoApuntarLista", () => {
   it("uno o varios", () => {
     expect(textoApuntarLista(1)).toBe("Apuntar 1 gasto");

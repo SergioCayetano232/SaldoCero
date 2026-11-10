@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { reconocedorDeVoz } from "../dictado";
 import { esAtajoDictar, esOrdenador } from "../teclado";
+import { t, formatoFechas } from "../idioma";
 
 // Los fallos del reconocedor, dichos para alguien que no sabe qué es un "not-allowed".
 const FALLOS = {
@@ -62,7 +63,8 @@ function Dictado({ onDictado }) {
     }
 
     const r = new Reconocedor();
-    r.lang = "es-ES";
+    // En el idioma de la app: con el español puesto, el inglés lo entiende fatal.
+    r.lang = formatoFechas();
     r.interimResults = true;
     r.maxAlternatives = 1;
     reconocedor.current = r;
@@ -91,23 +93,23 @@ function Dictado({ onDictado }) {
         onClick={empezar}
         aria-pressed={escuchando}
         aria-keyshortcuts="d"
-        title={esOrdenador() ? "También con la D" : undefined}
+        title={esOrdenador() ? t("También con la D") : undefined}
       >
         <span className="dictar-icono" aria-hidden="true">
           🎙️
         </span>
-        {escuchando ? "Te escucho… (toca para parar)" : "Dictar el gasto"}
+        {escuchando ? t("Te escucho… (toca para parar)") : t("Dictar el gasto")}
       </button>
       {fallo ? (
         <p className="dictado-fallo" role="alert">
-          {fallo}
+          {t(fallo)}
         </p>
       ) : oido ? (
         <p className="dictado-oido" aria-live="polite">
           “{oido}”
         </p>
       ) : (
-        !escuchando && <p className="dictado-ayuda">Por ejemplo: “cena de ayer, 45 euros, pagó Ana”</p>
+        !escuchando && <p className="dictado-ayuda">{t("Por ejemplo: “cena de ayer, 45 euros, pagó Ana”")}</p>
       )}
     </div>
   );
