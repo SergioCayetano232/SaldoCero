@@ -16,6 +16,9 @@ create table viajes (
   redondear boolean not null default false,
   -- Topes por categoría, {"comida": 300}. Null si no hay ninguno.
   topes jsonb check (jsonb_typeof(topes) = 'object'),
+  -- Las categorías que se inventa el viaje, [{"id": "p-super", "nombre": "Super", ...}].
+  -- Null si solo usa las de siempre.
+  categorias jsonb check (jsonb_typeof(categorias) = 'array' and jsonb_array_length(categorias) <= 6),
   -- Si salió de repetir otro, las cifras de aquel para compararlas. Solo cifras:
   -- con el código del viejo, quien entrara en este podría abrir el otro.
   anterior jsonb check (jsonb_typeof(anterior) = 'object'),
@@ -192,7 +195,7 @@ alter table aportaciones_bote enable row level security;
 -- Del viaje y de los viajeros solo se cambian estas columnas. El código, o de
 -- qué viaje es cada uno, no se tocan nunca.
 revoke update on viajes from anon, authenticated;
-grant update (nombre, moneda, presupuesto, cerrado_en, redondear, topes, anterior, centro) on viajes to anon, authenticated;
+grant update (nombre, moneda, presupuesto, cerrado_en, redondear, topes, anterior, centro, categorias) on viajes to anon, authenticated;
 revoke update on viajeros from anon, authenticated;
 grant update (nombre, con_id, desde, hasta) on viajeros to anon, authenticated;
 
@@ -768,3 +771,8 @@ create trigger moneda_sin_dinero before update of moneda on viajes
 -- Saldar todo a través de uno.
 --   alter table viajes add column centro uuid references viajeros(id) on delete set null;
 --   grant update (centro) on viajes to anon, authenticated;
+
+-- Categorías propias de cada viaje.
+--   alter table viajes add column categorias jsonb
+--     check (jsonb_typeof(categorias) = 'array' and jsonb_array_length(categorias) <= 6);
+--   grant update (categorias) on viajes to anon, authenticated;

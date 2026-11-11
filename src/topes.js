@@ -1,16 +1,16 @@
 // Topes por categoría: "en comida, como mucho 300". Va aparte del presupuesto
 // del viaje, que puede estar o no.
 
-import { CATEGORIAS, POR_DEFECTO } from "./categorias";
+import { todasLasCategorias, POR_DEFECTO } from "./categorias";
 import { calcularTotal } from "./calculos";
 import { estadoPresupuesto, teSacaDelPresupuesto } from "./presupuesto";
 
 // Lo que llega de la base de datos puede traer de todo: solo valen las
 // categorías que existen y con una cifra de verdad.
-export function limpiarTopes(crudo) {
+export function limpiarTopes(crudo, categorias = todasLasCategorias()) {
   if (!crudo || typeof crudo !== "object") return {};
   return Object.fromEntries(
-    CATEGORIAS.filter((c) => Number(crudo[c.id]) > 0).map((c) => [c.id, Number(crudo[c.id])])
+    categorias.filter((c) => Number(crudo[c.id]) > 0).map((c) => [c.id, Number(crudo[c.id])])
   );
 }
 
@@ -29,14 +29,14 @@ function gastadoEn(gastos, categoria) {
 
 // Las que tienen tope, en el orden de siempre, con lo gastado y cómo va la barra.
 export function estadoDeTopes(gastos, topes) {
-  return CATEGORIAS.filter((c) => topes[c.id] > 0).map((c) => {
+  return todasLasCategorias().filter((c) => topes[c.id] > 0).map((c) => {
     const gastado = gastadoEn(gastos, c.id);
     return { ...c, tope: topes[c.id], gastado, estado: estadoPresupuesto(gastado, topes[c.id]) };
   });
 }
 
 export function sinTope(topes) {
-  return CATEGORIAS.filter((c) => !(topes[c.id] > 0));
+  return todasLasCategorias().filter((c) => !(topes[c.id] > 0));
 }
 
 // Como con el presupuesto: solo avisa si es este gasto el que la pasa.

@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { calcularTotal, gastoMasCaro, importeDeGasto, mediaPorGasto, participantesDeGasto, esDevolucion } from "../calculos";
 import { MONEDAS, cambio, cambioDelGasto, conMoneda, leerTasa, monedaDelSiguiente, monedasEnOrden, simboloDe, tasaComoTexto } from "../monedas";
 import { enLista } from "../nombres";
-import { CATEGORIAS, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
+import { todasLasCategorias, categoriasPropias, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
+import CategoriasPropias from "./CategoriasPropias";
 import { alternarHoy, alternarLoMio, filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayTickets, hayGastosDelBote, cuantosDe, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia, textoSinResultados } from "../filtros";
 import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
 import { sugerirConceptos, importeSugerido } from "../sugerencias";
@@ -64,6 +65,7 @@ function Gastos({
   monedaViaje,
   presupuesto = null,
   topes = {},
+  onCategorias,
   recienLlegados,
   cerrado,
   onAnadir,
@@ -364,7 +366,7 @@ function Gastos({
   const visibles = filtrando ? filtrarGastos(gastos, filtros, viajeros, monedaViaje) : gastos;
   const buscado = filtrando ? filtros.texto : "";
   // Solo las categorías que hay, que elegir una vacía no sirve de nada.
-  const categoriasUsadas = CATEGORIAS.filter((c) =>
+  const categoriasUsadas = todasLasCategorias().filter((c) =>
     gastos.some((g) => (g.categoria ?? POR_DEFECTO) === c.id)
   );
 
@@ -1603,7 +1605,7 @@ function Gastos({
               {/* En qué se fue. Van como pastillas y no en un desplegable:
                   se ven todas a la vez y se elige de un toque. */}
               <div className="categorias">
-                {CATEGORIAS.map((c) => (
+                {todasLasCategorias().map((c) => (
                   <button
                     key={c.id}
                     className={`pastilla-categoria ${categoria === c.id ? "elegida" : ""}`}
@@ -1615,6 +1617,14 @@ function Gastos({
                     {t(c.nombre)}
                   </button>
                 ))}
+
+                <CategoriasPropias
+                  propias={categoriasPropias()}
+                  gastos={gastos}
+                  onGuardar={onCategorias}
+                  onCreada={elegirCategoria}
+                  onQuitada={(id) => categoria === id && setCategoria(POR_DEFECTO)}
+                />
               </div>
 
               <div className="participantes">

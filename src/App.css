@@ -1519,6 +1519,56 @@ button:active {
   line-height: 1;
 }
 
+/* "+ Otra" va discontinua: no es una categoría, es para hacer una. */
+.pastilla-nueva {
+  border-style: dashed;
+  color: var(--tinta-tenue);
+}
+
+.categoria-nueva {
+  flex-basis: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px;
+  border: 1px dashed var(--linea);
+  border-radius: var(--radio-sm);
+  animation: entrar-desde-abajo var(--medio) var(--curva-muelle) both;
+}
+
+.categoria-nueva .fila-formulario {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.fila-formulario .campo-emoji {
+  flex: 0 0 52px;
+  width: 52px;
+  text-align: center;
+}
+
+.propias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.quitar-propia span {
+  margin-left: 2px;
+  color: var(--tinta-tenue);
+}
+
+.quitar-propia:hover span {
+  color: var(--rojo);
+}
+
+/* Con gastos no se puede quitar: se ve, pero apagada. */
+.pastilla-categoria.con-gastos {
+  opacity: 0.6;
+  cursor: default;
+}
+
 /* Lo ya apuntado que encaja con lo que escribes. Discontinua para que no se
    confunda con elegir categoría. */
 .sugerencias {
@@ -4862,6 +4912,15 @@ kbd {
   /* La moneda es corta: se queda al lado del botón, no ocupa una línea. */
   .fila-formulario .selector-moneda {
     flex: 0 0 auto;
+  }
+
+  /* Y el emoji, al lado del nombre de la categoría. */
+  .fila-formulario .campo-emoji {
+    flex: 0 0 52px;
+  }
+
+  .categoria-nueva .fila-formulario input:not(.campo-emoji) {
+    flex: 1 1 calc(100% - 60px);
   }
 
   .fila-formulario button {

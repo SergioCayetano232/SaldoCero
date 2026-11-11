@@ -2,7 +2,7 @@
 
 import { importeDeGasto, parteDe } from "./calculos";
 import { BOTE } from "./bote";
-import { CATEGORIAS, categoriaDe } from "./categorias";
+import { todasLasCategorias, categoriaDe } from "./categorias";
 
 export const ORDENES = [
   { id: "dias", nombre: "Por días" },
@@ -65,7 +65,8 @@ export function ordenarGastos(gastos, orden, viajeros, soy = null) {
 
   // En el orden en que salen al apuntar, que "Otros" ya va el último.
   if (orden === "categoria") {
-    const puesto = (g) => CATEGORIAS.indexOf(categoriaDe(g.categoria));
+    const lista = todasLasCategorias();
+    const puesto = (g) => lista.indexOf(categoriaDe(g.categoria));
     return [...gastos].sort((a, b) => puesto(a) - puesto(b) || masCaro(a, b));
   }
 

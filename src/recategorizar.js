@@ -1,7 +1,7 @@
 // Cambiar de categoría todos los gastos que tienes a la vista: buscas "café",
 // están en Otros, y los pasas a Comida de una vez.
 
-import { categoriaDe, CATEGORIAS, POR_DEFECTO } from "./categorias";
+import { categoriaDe, todasLasCategorias, POR_DEFECTO } from "./categorias";
 import { t } from "./idioma";
 
 // Solo los que cambian de verdad. Los que ya estaban en esa ni se tocan.
@@ -14,7 +14,7 @@ export function aOtraCategoria(gastos, categoria) {
 // Las categorías a las que se puede pasar algo. Si ya están todos en Comida,
 // Comida no sale.
 export function categoriasDestino(gastos) {
-  return CATEGORIAS.filter((c) => aOtraCategoria(gastos, c.id).length > 0);
+  return todasLasCategorias().filter((c) => aOtraCategoria(gastos, c.id).length > 0);
 }
 
 export function textoPasarA(cuantos) {

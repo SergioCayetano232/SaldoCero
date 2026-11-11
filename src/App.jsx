@@ -35,6 +35,7 @@ import CargandoViaje from "./componentes/CargandoViaje";
 import CifrasViaje from "./componentes/CifrasViaje";
 import Atajos from "./componentes/Atajos";
 import { enLista } from "./nombres";
+import { usarCategoriasPropias } from "./categorias";
 import { t, idiomaActual, alCambiarIdioma, usarIdioma, guardarIdioma, otroIdioma, IDIOMAS } from "./idioma";
 
 // Fuera del componente: dentro, el linter no deja tocar window.location.
@@ -56,6 +57,8 @@ function App() {
     document.documentElement.lang = idioma;
   }, [idioma]);
   const [viaje, setViaje] = useState(null); // null = todavía no has entrado en ninguno
+  // Las categorías propias se apuntan antes de pintar nada, que todo lo de abajo las lee.
+  usarCategoriasPropias(viaje?.categorias);
   // Solo salimos cargando si de verdad hay un viaje que recuperar.
   const [cargando, setCargando] = useState(() => codigoDeArranque() !== "");
   const [error, setError] = useState("");
@@ -583,6 +586,7 @@ function App() {
         monedaViaje={viaje.moneda ?? "EUR"}
         presupuesto={viaje.presupuesto}
         topes={viaje.topes ?? {}}
+        onCategorias={(categorias) => hacer(() => datos.ponerCategorias(viaje.id, categorias))}
         recienLlegados={novedad?.ids}
         cerrado={cerrado}
         soy={soy}
