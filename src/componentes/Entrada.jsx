@@ -183,6 +183,7 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
                     )}
                     {viaje.visto && <span className="viaje-pasado-cuando">· {haceCuanto(viaje.visto)}</span>}
                     {viaje.cerrado && <span className="viaje-pasado-cuando">· 🔒 {t("cerrado")}</span>}
+                    {viaje.soloVer && <span className="viaje-pasado-cuando">· 👁️ {t("para mirar")}</span>}
                     {cuentaDeNeto(viaje.neto, viaje.moneda) && (
                       <span className={`viaje-pasado-cuando viaje-pasado-saldo ${viaje.neto > 0 ? "le-deben" : "debe"}`}>
                         · {cuentaDeNeto(viaje.neto, viaje.moneda)}

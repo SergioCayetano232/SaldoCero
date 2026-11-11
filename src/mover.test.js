@@ -42,6 +42,7 @@ describe("destinosPosibles", () => {
       { codigo: "AQUI", nombre: "Lisboa" },
       { codigo: "OTRO", nombre: "Oporto" },
       { codigo: "VIEJO", nombre: "Roma", cerrado: true },
+      { codigo: "MIRAR12345", nombre: "Lo de mis padres", soloVer: true },
     ];
     expect(destinosPosibles(historial, "AQUI").map((v) => v.codigo)).toEqual(["OTRO"]);
   });

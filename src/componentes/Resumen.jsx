@@ -69,6 +69,8 @@ function Resumen({
   onPresupuesto,
   onTopes,
   cerrado,
+  // Con el código de mirar se ve todo, pero no se marca ni se cambia nada.
+  soloVer = false,
   viaje,
   soy,
   onVerGastos,
@@ -373,7 +375,7 @@ function Resumen({
           presupuesto={viaje?.presupuesto ?? null}
           moneda={monedaViaje}
           cuantos={personas.length}
-          fijo={cerrado}
+          fijo={cerrado || soloVer}
           onGuardar={onPresupuesto}
         />
       </div>
@@ -425,7 +427,7 @@ function Resumen({
 
       <PorLugar gastos={gastos} moneda={monedaViaje} />
 
-      <Topes gastos={gastos} topes={viaje?.topes ?? {}} moneda={monedaViaje} fijo={cerrado} onGuardar={onTopes} />
+      <Topes gastos={gastos} topes={viaje?.topes ?? {}} moneda={monedaViaje} fijo={cerrado || soloVer} onGuardar={onTopes} />
 
       <PorDias gastos={gastos} moneda={monedaViaje} onVerDia={onVerDia} />
 
@@ -602,7 +604,7 @@ function Resumen({
                     )}
 
                     {/* Al bote no se le manda un WhatsApp. */}
-                    {!pago.saldado && pago.deId !== BOTE && pago.aId !== BOTE && (
+                    {!soloVer && !pago.saldado && pago.deId !== BOTE && pago.aId !== BOTE && (
                       <a
                         className="boton-saldar boton-cobrar"
                         href={enlaceWhatsApp(
@@ -624,19 +626,21 @@ function Resumen({
                       </a>
                     )}
 
-                    <button
-                      className="boton-saldar"
-                      onClick={() => (pago.saldado ? onDesaldar(pago) : saldar(pago))}
-                      title={pago.saldado ? t("Marcar como pendiente") : t("Marcar como pagado")}
-                    >
-                      {pago.saldado ? "↩︎" : "✓"}
-                    </button>
+                    {!soloVer && (
+                      <button
+                        className="boton-saldar"
+                        onClick={() => (pago.saldado ? onDesaldar(pago) : saldar(pago))}
+                        title={pago.saldado ? t("Marcar como pendiente") : t("Marcar como pagado")}
+                      >
+                        {pago.saldado ? "↩︎" : "✓"}
+                      </button>
+                    )}
                   </span>
 
                   {pago.porConfirmar && (
                     <p className="pago-por-confirmar">
                       <span>⏳ {textoPorConfirmar(pago, soy)}</span>
-                      {puedeConfirmar(pago, soy) && (
+                      {!soloVer && puedeConfirmar(pago, soy) && (
                         <>
                           <button className="boton-confirmar" onClick={() => onConfirmar(pago)}>
                             {t("Sí, me ha llegado")}
@@ -686,7 +690,7 @@ function Resumen({
           </>
         )}
 
-        {deGolpe.length > 0 && (
+        {!soloVer && deGolpe.length > 0 && (
           <div className="de-golpe">
             {deGolpe.map((deudor) => (
               <button
@@ -702,7 +706,7 @@ function Resumen({
           </div>
         )}
 
-        {verCentro && (
+        {!soloVer && verCentro && (
           <label
             className="saldar-por-uno"
             title={centroBloqueado ? t("Con pagos ya marcados no se cambia, que saldrían otra vez") : undefined}
@@ -723,7 +727,7 @@ function Resumen({
           </label>
         )}
 
-        {verRedondeo && (
+        {!soloVer && verRedondeo && (
           <button
             className="pastilla-interruptor boton-redondeo"
             onClick={() => onRedondear(!redondear)}
@@ -734,6 +738,7 @@ function Resumen({
           </button>
         )}
 
+        {!soloVer && (
         <PagosACuenta
           viajeros={personas}
           pagos={pagos.filter((p) => p.deId !== BOTE && p.aId !== BOTE)}
@@ -743,6 +748,7 @@ function Resumen({
           onAnadir={onParcial}
           onQuitar={onQuitarParcial}
         />
+        )}
       </div>
 
       {fiesta && <Confeti key={fiesta} />}

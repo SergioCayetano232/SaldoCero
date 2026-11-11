@@ -850,4 +850,11 @@ export default {
   "1 por confirmar": "1 to confirm",
   "{n} por confirmar": "{n} to confirm",
   "No hemos podido confirmar el pago.": "We couldn't confirm the payment.",
+  "Así van las cuentas de \"{nombre}\". Solo para mirar, no se puede cambiar nada.": "Here's how the numbers stand for \"{nombre}\". View only, nothing can be changed.",
+  "No hemos podido sacar el enlace para mirar.": "We couldn't get the view-only link.",
+  "Solo para mirar.": "View only.",
+  "Ves las cuentas como van, pero no puedes cambiar nada.": "You can see how the numbers stand, but you can't change anything.",
+  "Este código es para mirar. Si se lo pasas a alguien, tampoco podrá cambiar nada.": "This code is view-only. If you pass it on, they won't be able to change anything either.",
+  "¿Alguien que solo quiera mirar?": "Someone who just wants to look?",
+  "para mirar": "view only",
 };

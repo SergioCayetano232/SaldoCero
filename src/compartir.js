@@ -211,6 +211,16 @@ export function invitacion({ nombre, codigo }, base) {
 // Con el menú de compartir del móvil si lo hay, y si no, copiando el enlace
 // (o el texto, si no hay enlace, como con el resumen).
 // Devuelve "compartido", "cancelado", "copiado" o "fallo".
+// Para los que no van pero quieren ver cómo va: tus padres, el que pone dinero...
+// Con este código se ve todo y no se toca nada.
+export function invitacionParaMirar({ nombre, codigo }, base) {
+  return {
+    title: t("{nombre} en SaldoCero", { nombre }),
+    text: t('Así van las cuentas de "{nombre}". Solo para mirar, no se puede cambiar nada.', { nombre }),
+    url: enlaceDelViaje(codigo, base),
+  };
+}
+
 export async function invitar(datos, nav = navigator) {
   if (nav.share) {
     try {

@@ -62,7 +62,15 @@ function apuntarEnHistorial(viaje) {
   const resto = historial().filter((v) => v.codigo !== viaje.codigo);
   // El candado se queda como estaba hasta que el viaje acabe de cargar.
   const lista = [
-    { codigo: viaje.codigo, nombre: viaje.nombre, moneda: viaje.moneda, visto: Date.now(), cerrado: Boolean(antes?.cerrado), neto: antes?.neto ?? null },
+    {
+      codigo: viaje.codigo,
+      nombre: viaje.nombre,
+      moneda: viaje.moneda,
+      visto: Date.now(),
+      cerrado: Boolean(antes?.cerrado),
+      neto: antes?.neto ?? null,
+      soloVer: Boolean(viaje.soloVer),
+    },
     ...resto,
   ];
 
@@ -349,13 +357,22 @@ export async function abrirViaje(codigo) {
     throw noExiste;
   }
 
-  const viaje = data[0];
+  const { solo_ver, ...viaje } = data[0];
+  // Los de antes de esto no lo traen: esos son para tocar.
+  viaje.soloVer = solo_ver === true;
   // A partir de aquí, todas las peticiones van con este código.
   usarCodigo(viaje.codigo);
   recordarCodigo(viaje.codigo);
   apuntarEnHistorial(viaje);
 
   return { ...viaje, ...(await cargarContenido(viaje.id)) };
+}
+
+// El código de solo mirar. Solo lo da si traes el bueno.
+export async function codigoParaVer() {
+  const { data, error } = await supabase.rpc("codigo_para_ver");
+  if (error || !data) throw fallo(error, "No hemos podido sacar el enlace para mirar.");
+  return data;
 }
 
 const CUANTA_ACTIVIDAD = 40;
@@ -813,8 +830,9 @@ export async function abrirOtroViaje(codigo) {
   const cliente = clienteDe(codigo, soyEn(codigo));
   const { data: viaje, error } = await cliente
     .from("viajes")
+    // Sin filtrar por el código: esa columna no se puede leer, y las reglas ya
+    // dejan ver solo el viaje del código que lleva este cliente.
     .select("id, nombre, moneda, cerrado_en, categorias")
-    .eq("codigo", codigo)
     .maybeSingle();
   if (error || !viaje) throw fallo(error, "No hemos podido abrir ese viaje.");
 

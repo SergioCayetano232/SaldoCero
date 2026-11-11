@@ -4072,6 +4072,16 @@ button.pago-cantidad:hover {
   line-height: 1.2;
 }
 
+/* El de solo mirar con un toque de color, que no se confunda con un viaje cerrado. */
+.viaje-solo-ver {
+  background-color: var(--teal-50);
+  border-color: var(--teal-300);
+}
+
+.invitar-a-mirar {
+  font-size: inherit;
+}
+
 /* Lo de sugerir cerrar: los dos botones uno encima del otro, a la derecha. */
 .sugerir-cerrar-botones {
   display: flex;

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { usarIdioma } from "./idioma";
-import { resumenEnTexto, enQueSeFue, enlaceDelViaje, invitacion, invitar, nombreDeArchivo, compartirImagen, copiarAlPortapapeles } from "./compartir";
+import { resumenEnTexto, enQueSeFue, enlaceDelViaje, invitacion, invitacionParaMirar, invitar, nombreDeArchivo, compartirImagen, copiarAlPortapapeles } from "./compartir";
 import { PATRONES } from "./vibrar";
 
 // Un viaje de ejemplo, para no repetirlo en cada prueba.
@@ -250,6 +250,19 @@ describe("invitacion", () => {
   it("y el código en el texto, por si hay que escribirlo", () => {
     expect(datos.text).toContain("Lisboa");
     expect(datos.text).toContain("ABC12345");
+  });
+});
+
+describe("invitacionParaMirar", () => {
+  const datos = invitacionParaMirar({ nombre: "Lisboa", codigo: "MIRAR23456" }, "https://saldocero.app/");
+
+  it("lleva el enlace con el código de mirar", () => {
+    expect(datos.url).toBe("https://saldocero.app/#MIRAR23456");
+  });
+
+  it("dice que es solo para mirar, y no invita a apuntar", () => {
+    expect(datos.text).toContain("Solo para mirar");
+    expect(datos.text).not.toContain("Apunta");
   });
 });
 

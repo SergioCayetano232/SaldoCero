@@ -6,8 +6,9 @@ import { POR_DEFECTO } from "./categorias";
 import { t } from "./idioma";
 
 // Los que tienes en "tus viajes", menos este y los cerrados, que ahí ya no se apunta.
+// Ni a los que solo puedes mirar.
 export function destinosPosibles(historial, codigoActual) {
-  return historial.filter((v) => v.codigo !== codigoActual && !v.cerrado);
+  return historial.filter((v) => v.codigo !== codigoActual && !v.cerrado && !v.soloVer);
 }
 
 // El de este viaje que se llama igual en el otro. "luis" y "Luís" valen.

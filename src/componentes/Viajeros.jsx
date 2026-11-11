@@ -13,6 +13,7 @@ function Viajeros({
   colores,
   recienLlegados,
   cerrado,
+  soloVer = false,
   onAnadir,
   onRenombrar,
   onQuitar,
@@ -263,13 +264,15 @@ function Viajeros({
               )}
 
               {/* Con el viaje cerrado también: es cuando más falta hace. */}
-              <button
-                className={`boton-cobro ${cobroDe(viajero) ? "tiene-cobro" : ""}`}
-                onClick={() => abrirCobro(viajero)}
-                title={t("Bizum, IBAN o PayPal de {nombre}", { nombre: viajero.nombre })}
-              >
-                {{ iban: "🏦", paypal: "💳", revolut: "💳" }[cobroDe(viajero)?.tipo] ?? "📲"}
-              </button>
+              {!soloVer && (
+                <button
+                  className={`boton-cobro ${cobroDe(viajero) ? "tiene-cobro" : ""}`}
+                  onClick={() => abrirCobro(viajero)}
+                  title={t("Bizum, IBAN o PayPal de {nombre}", { nombre: viajero.nombre })}
+                >
+                  {{ iban: "🏦", paypal: "💳", revolut: "💳" }[cobroDe(viajero)?.tipo] ?? "📲"}
+                </button>
+              )}
 
               <button
                 className="boton-soy"

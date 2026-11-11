@@ -518,6 +518,9 @@ function App() {
   const balances = balancesConBote(viajeros, gastos, parciales, aportaciones);
   const colores = conColoresDeGrupos(coloresDelViaje(viajeros.map((v) => v.nombre)), viajeros);
   const cerrado = estaCerrado(viaje);
+  // Con el código de mirar es como un viaje cerrado, pero sin poder ni pagar.
+  const soloVer = Boolean(viaje.soloVer);
+  const fijo = cerrado || soloVer;
 
   return (
     <div className="app">
@@ -527,6 +530,8 @@ function App() {
         viaje={viaje}
         onSalir={salirDelViaje}
         cerrado={cerrado}
+        soloVer={soloVer}
+        onCodigoParaVer={datos.codigoParaVer}
         onReabrir={reabrirViaje}
         onRenombrar={(nombre) => hacer(() => datos.renombrarViaje(viaje, nombre))}
         onCambiarMoneda={(moneda) => hacer(() => datos.cambiarMoneda(viaje, moneda))}
@@ -534,7 +539,9 @@ function App() {
 
       <AvisoSinConexion />
       {error && <p className="error">{error}</p>}
-      <SugerirCerrar key={`cerrar-${viaje.codigo}-${cerrado}`} codigo={viaje.codigo} gastos={gastos} cerrado={cerrado} onCerrar={cerrarViaje} />
+      {!soloVer && (
+        <SugerirCerrar key={`cerrar-${viaje.codigo}-${cerrado}`} codigo={viaje.codigo} gastos={gastos} cerrado={cerrado} onCerrar={cerrarViaje} />
+      )}
 
       <Viajeros
         viajeros={viajeros}
@@ -543,7 +550,8 @@ function App() {
         soy={soy}
         onSoyYo={elegirQuienSoy}
         recienLlegados={novedad?.ids}
-        cerrado={cerrado}
+        cerrado={fijo}
+        soloVer={soloVer}
         onAnadir={(nombre) =>
           hacer(async () => propios.current.add((await datos.anadirViajero(viaje.id, nombre)).id))
         }
@@ -567,7 +575,7 @@ function App() {
           gastos={gastos}
           colores={colores}
           moneda={viaje.moneda ?? "EUR"}
-          cerrado={cerrado}
+          cerrado={fijo}
           onPoner={(lista) => hacer(() => datos.ponerEnElBote(viaje.id, lista))}
           onQuitar={(a, nombre) =>
             borrarConAviso(a.id, t("lo que puso {nombre} en el bote", { nombre }), () => datos.quitarDelBote(a.id))
@@ -589,7 +597,7 @@ function App() {
         topes={viaje.topes ?? {}}
         onCategorias={(categorias) => hacer(() => datos.ponerCategorias(viaje.id, categorias))}
         recienLlegados={novedad?.ids}
-        cerrado={cerrado}
+        cerrado={fijo}
         soy={soy}
         verDe={verDe}
         verDia={verDia}
@@ -681,6 +689,7 @@ function App() {
           onDesaldar={(pago) => hacer(() => datos.desmarcarSaldado(viaje.id, pago))}
           onConfirmar={(pago) => hacer(() => datos.confirmarSaldado(viaje.id, pago))}
           cerrado={cerrado}
+          soloVer={soloVer}
           onPresupuesto={(cantidad) => hacer(() => datos.ponerPresupuesto(viaje.id, cantidad))}
           onTopes={(topes) => hacer(() => datos.ponerTopes(viaje.id, topes))}
           onRedondear={(redondear) => hacer(() => datos.ponerRedondeo(viaje.id, redondear))}
@@ -708,7 +717,7 @@ function App() {
 
       <Actividad actividad={viaje.actividad} viajeros={viajeros} soy={soy} monedaViaje={viaje.moneda ?? "EUR"} />
 
-      {(viajeros.length > 0 || gastos.length > 0) && (
+      {!soloVer && (viajeros.length > 0 || gastos.length > 0) && (
         <div className="botones-final">
           {!cerrado && gastos.length > 0 && (
             <button className="boton-cerrar-viaje" onClick={cerrarViaje}>

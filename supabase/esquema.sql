@@ -3,10 +3,22 @@
 
 -- ---------- Tablas ----------
 
+-- Un código al azar, sin las letras que se confunden (O/0, I/1).
+create function nuevo_codigo(largo int)
+returns text
+language sql
+volatile
+as $$
+  select string_agg(substr('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', floor(random() * 32 + 1)::int, 1), '')
+  from generate_series(1, largo);
+$$;
+
 -- Un viaje. El código es lo que compartes con tus amigos para que entren.
 create table viajes (
   id uuid primary key default gen_random_uuid(),
   codigo text unique not null,
+  -- El de solo mirar. Lleva 10 y los otros 8, así que nunca coinciden.
+  codigo_ver text unique not null default nuevo_codigo(10),
   nombre text not null,
   -- En esta moneda se hacen las cuentas del viaje.
   moneda text not null default 'EUR',
@@ -187,6 +199,18 @@ as $$
   where v.codigo = codigo_actual() and codigo_actual() <> '' and v.cerrado_en is null;
 $$;
 
+-- Para leer vale también el código de solo mirar. Para tocar, solo el bueno.
+create function viaje_visible()
+returns uuid
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select v.id from viajes v
+  where codigo_actual() <> '' and (v.codigo = codigo_actual() or v.codigo_ver = codigo_actual());
+$$;
+
 alter table viajes enable row level security;
 alter table viajeros enable row level security;
 alter table gastos enable row level security;
@@ -204,22 +228,25 @@ grant update (nombre, con_id, desde, hasta) on viajeros to anon, authenticated;
 -- De una deuda pagada solo se cambia eso: que el que cobra la confirme.
 revoke update on pagos_saldados from anon, authenticated;
 grant update (confirmado) on pagos_saldados to anon, authenticated;
+-- Los códigos no se leen nunca: el que entra con el de mirar sacaría el bueno.
+revoke select on viajes from anon, authenticated;
+grant select (id, nombre, moneda, presupuesto, redondear, topes, categorias, anterior, centro, cerrado_en, creado_en) on viajes to anon, authenticated;
 
 -- Un viaje solo se ve si traes su código. Nunca se listan todos.
-create policy "ver mi viaje" on viajes for select using (id = viaje_actual());
+create policy "ver mi viaje" on viajes for select using (id = viaje_visible());
 create policy "crear un viaje" on viajes for insert with check (true);
 create policy "editar mi viaje" on viajes for update
   using (id = viaje_actual()) with check (id = viaje_actual());
 
 -- Viajeros y gastos: solo los del viaje cuyo código traes. Y para tocarlos,
 -- que no esté cerrado.
-create policy "ver viajeros" on viajeros for select using (viaje_id = viaje_actual());
+create policy "ver viajeros" on viajeros for select using (viaje_id = viaje_visible());
 create policy "anadir viajeros" on viajeros for insert with check (viaje_id = viaje_abierto());
 create policy "quitar viajeros" on viajeros for delete using (viaje_id = viaje_abierto());
 create policy "renombrar viajeros" on viajeros for update
   using (viaje_id = viaje_abierto()) with check (viaje_id = viaje_abierto());
 
-create policy "ver gastos" on gastos for select using (viaje_id = viaje_actual());
+create policy "ver gastos" on gastos for select using (viaje_id = viaje_visible());
 create policy "anadir gastos" on gastos for insert with check (viaje_id = viaje_abierto());
 create policy "quitar gastos" on gastos for delete using (viaje_id = viaje_abierto());
 create policy "editar gastos" on gastos for update
@@ -228,7 +255,7 @@ create policy "editar gastos" on gastos for update
 
 -- Los participantes cuelgan de un gasto, así que heredan el permiso del gasto.
 create policy "ver participantes" on gastos_participantes for select using (
-  exists (select 1 from gastos g where g.id = gasto_id and g.viaje_id = viaje_actual())
+  exists (select 1 from gastos g where g.id = gasto_id and g.viaje_id = viaje_visible())
 );
 create policy "anadir participantes" on gastos_participantes for insert with check (
   exists (select 1 from gastos g where g.id = gasto_id and g.viaje_id = viaje_abierto())
@@ -238,7 +265,7 @@ create policy "quitar participantes" on gastos_participantes for delete using (
 );
 
 -- Las deudas saldadas, como todo lo demás: las del viaje cuyo código traes.
-create policy "ver saldados" on pagos_saldados for select using (viaje_id = viaje_actual());
+create policy "ver saldados" on pagos_saldados for select using (viaje_id = viaje_visible());
 -- Y los dos viajeros, de este mismo viaje.
 create policy "marcar saldado" on pagos_saldados for insert with check (
   viaje_id = viaje_actual()
@@ -250,7 +277,7 @@ create policy "confirmar saldado" on pagos_saldados for update using (viaje_id =
 
 -- Los pagos a cuenta, igual. Se pueden apuntar con el viaje cerrado: las deudas
 -- se pagan después de volver.
-create policy "ver parciales" on pagos_parciales for select using (viaje_id = viaje_actual());
+create policy "ver parciales" on pagos_parciales for select using (viaje_id = viaje_visible());
 create policy "anadir parcial" on pagos_parciales for insert with check (
   viaje_id = viaje_actual()
   and exists (select 1 from viajeros v where v.id = de_id and v.viaje_id = viaje_actual())
@@ -259,7 +286,7 @@ create policy "anadir parcial" on pagos_parciales for insert with check (
 create policy "quitar parcial" on pagos_parciales for delete using (viaje_id = viaje_actual());
 
 -- El bote es parte del viaje: cerrado, ya no se mete ni se saca nada.
-create policy "ver bote" on aportaciones_bote for select using (viaje_id = viaje_actual());
+create policy "ver bote" on aportaciones_bote for select using (viaje_id = viaje_visible());
 create policy "poner en el bote" on aportaciones_bote for insert with check (
   viaje_id = viaje_abierto()
   and exists (select 1 from viajeros v where v.id = viajero_id and v.viaje_id = viaje_actual())
@@ -276,7 +303,7 @@ values ('tickets', 'tickets', false, 2097152, array['image/jpeg'])
 on conflict (id) do nothing;
 
 create policy "ver tickets" on storage.objects for select using (
-  bucket_id = 'tickets' and (storage.foldername(name))[1] = viaje_actual()::text
+  bucket_id = 'tickets' and (storage.foldername(name))[1] = viaje_visible()::text
 );
 create policy "subir tickets" on storage.objects for insert with check (
   bucket_id = 'tickets' and (storage.foldername(name))[1] = viaje_abierto()::text
@@ -322,15 +349,27 @@ $$;
 
 -- Entrar a un viaje con su código. Es la única puerta: sin código no hay id, y
 -- sin id no llegas a nada.
+-- Con el de mirar devuelve ese mismo, nunca el bueno, y avisa de que es para mirar.
 create function abrir_viaje(codigo_buscado text)
-returns table (id uuid, codigo text, nombre text, moneda text)
+returns table (id uuid, codigo text, nombre text, moneda text, solo_ver boolean)
 language sql
 security definer
 set search_path = public
 as $$
-  select v.id, v.codigo, v.nombre, v.moneda
+  select v.id, upper(trim(codigo_buscado)), v.nombre, v.moneda, v.codigo_ver = upper(trim(codigo_buscado))
   from viajes v
-  where v.codigo = upper(trim(codigo_buscado));
+  where v.codigo = upper(trim(codigo_buscado)) or v.codigo_ver = upper(trim(codigo_buscado));
+$$;
+
+-- El de mirar solo se lo damos a quien ya trae el bueno.
+create function codigo_para_ver()
+returns text
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select codigo_ver from viajes where id = viaje_actual();
 $$;
 
 -- Editar un gasto de una vez: los datos y el reparto, o todo o nada.
@@ -480,7 +519,7 @@ create table actividad (
 create index on actividad (viaje_id, creado_en desc);
 alter table actividad enable row level security;
 -- Solo se lee. Escribe el trigger, que se salta las reglas.
-create policy "ver actividad" on actividad for select using (viaje_id = viaje_actual());
+create policy "ver actividad" on actividad for select using (viaje_id = viaje_visible());
 
 -- Quién hace la petición: el que se marcó como "yo" en ese móvil, si es de este viaje.
 create function viajero_actual()
@@ -789,3 +828,19 @@ create trigger moneda_sin_dinero before update of moneda on viajes
 --   revoke update on pagos_saldados from anon, authenticated;
 --   grant update (confirmado) on pagos_saldados to anon, authenticated;
 --   create policy "confirmar saldado" on pagos_saldados for update using (viaje_id = viaje_actual());
+
+-- Un enlace para solo mirar.
+--   Pega el "create function nuevo_codigo" del principio, y luego:
+--   alter table viajes add column codigo_ver text unique not null default nuevo_codigo(10);
+--
+--   Pega el "create function viaje_visible" de más arriba.
+--
+--   revoke select on viajes from anon, authenticated;
+--   grant select (id, nombre, moneda, presupuesto, redondear, topes, categorias, anterior, centro, cerrado_en, creado_en) on viajes to anon, authenticated;
+--
+--   Las reglas de leer pasan a viaje_visible(). Bórralas y vuelve a pegar las de
+--   más arriba: "ver mi viaje", "ver viajeros", "ver gastos", "ver participantes",
+--   "ver saldados", "ver parciales", "ver bote", "ver tickets" y "ver actividad".
+--
+--   drop function abrir_viaje(text);
+--   Y pega los "create function abrir_viaje" y "create function codigo_para_ver" de más arriba.

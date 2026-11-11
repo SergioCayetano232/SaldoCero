@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
-import { copiarAlPortapapeles, enlaceDelViaje, invitacion, invitar } from "../compartir";
+import { copiarAlPortapapeles, enlaceDelViaje, invitacion, invitacionParaMirar, invitar } from "../compartir";
 import NombreEditable from "./NombreEditable";
 import { textoCerrado } from "../cerrar";
 import { textoDuracion } from "../duracion";
@@ -19,9 +19,12 @@ const TEXTO_INVITAR = {
 };
 
 // El viaje abierto, con su código para compartir.
-function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir, onCambiarMoneda }) {
+// Con soloVer se entró con el código de mirar: se ve todo, no se toca nada.
+function BarraViaje({ viaje, cerrado, soloVer = false, onSalir, onRenombrar, onReabrir, onCambiarMoneda, onCodigoParaVer }) {
   const [codigoCopiado, setCodigoCopiado] = useState(false);
   const [invitado, setInvitado] = useState("");
+  const [paraMirar, setParaMirar] = useState("");
+  const fijo = cerrado || soloVer;
   const [conQR, setConQR] = useState(false);
   // Siempre la misma: si cambiara, la ventana robaría el foco en cada refresco.
   const cerrarQR = useCallback(() => setConQR(false), []);
@@ -70,7 +73,7 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir, onCambiar
   }
 
   async function alInvitar() {
-    const como = await invitar(invitacion(viaje));
+    const como = await invitar(soloVer ? invitacionParaMirar(viaje) : invitacion(viaje));
     // Si ha salido el menú del móvil, ya se ha visto lo que pasaba: nada que decir.
     if (!TEXTO_INVITAR[como]) return;
 
@@ -78,11 +81,25 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir, onCambiar
     setTimeout(() => setInvitado(""), 2500);
   }
 
+  // El código de mirar no lo tenemos: se le pide a la base de datos al pulsar.
+  async function invitarAMirar() {
+    let como;
+    try {
+      como = await invitar(invitacionParaMirar({ nombre: viaje.nombre, codigo: await onCodigoParaVer() }));
+    } catch {
+      como = "fallo";
+    }
+    if (!TEXTO_INVITAR[como]) return;
+
+    setParaMirar(como);
+    setTimeout(() => setParaMirar(""), 2500);
+  }
+
   return (
     <section className="tarjeta tarjeta-viaje">
       <div className="viaje-titulo">
         <span className="viaje-emoji">🗺️</span>
-        {cerrado ? (
+        {fijo ? (
           <h2 className="viaje-nombre">{viaje.nombre}</h2>
         ) : (
           <NombreEditable
@@ -94,7 +111,7 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir, onCambiar
           />
         )}
         {duracion && <span className="viaje-dia">{duracion}</span>}
-        {!cerrado && puedeCambiarMoneda(viaje) ? (
+        {!fijo && puedeCambiarMoneda(viaje) ? (
           // El select va encima, transparente: así se ve la pastilla y al tocarla sale la lista.
           <label className="viaje-moneda cambiar-moneda" title={t("Cambiar la moneda del viaje")}>
             {viaje.moneda ?? "EUR"}
@@ -117,7 +134,7 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir, onCambiar
         ) : (
           <span
             className="viaje-moneda"
-            title={cerrado ? undefined : t("Con gastos o bote apuntados ya no se cambia la moneda")}
+            title={fijo ? undefined : t("Con gastos o bote apuntados ya no se cambia la moneda")}
           >
             {viaje.moneda ?? "EUR"}
           </span>
@@ -141,9 +158,22 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir, onCambiar
             <strong>{textoCerrado(viaje.cerradoEn)}.</strong>{" "}
             {t("Los gastos ya no cambian; las deudas se pueden seguir marcando como pagadas.")}
           </p>
-          <button className="enlace" onClick={onReabrir}>
-            {t("Reabrir")}
-          </button>
+          {!soloVer && (
+            <button className="enlace" onClick={onReabrir}>
+              {t("Reabrir")}
+            </button>
+          )}
+        </div>
+      )}
+
+      {soloVer && (
+        <div className="viaje-cerrado viaje-solo-ver">
+          <span className="viaje-cerrado-icono" aria-hidden="true">
+            👁️
+          </span>
+          <p>
+            <strong>{t("Solo para mirar.")}</strong> {t("Ves las cuentas como van, pero no puedes cambiar nada.")}
+          </p>
         </div>
       )}
 
@@ -168,7 +198,17 @@ function BarraViaje({ viaje, cerrado, onSalir, onRenombrar, onReabrir, onCambiar
       </div>
 
       <p className="vacio aviso-codigo">
-        {t("Invítalos con el enlace, o pásales el código y entran a este mismo viaje. Guárdalo tú también: es la única forma de volver desde otro móvil.")}
+        {soloVer
+          ? t("Este código es para mirar. Si se lo pasas a alguien, tampoco podrá cambiar nada.")
+          : t("Invítalos con el enlace, o pásales el código y entran a este mismo viaje. Guárdalo tú también: es la única forma de volver desde otro móvil.")}
+        {!soloVer && (
+          <>
+            {" "}
+            <button className="enlace invitar-a-mirar" onClick={invitarAMirar}>
+              {paraMirar ? t(TEXTO_INVITAR[paraMirar]) : `👁️ ${t("¿Alguien que solo quiera mirar?")}`}
+            </button>
+          </>
+        )}
       </p>
 
       {conQR && (
