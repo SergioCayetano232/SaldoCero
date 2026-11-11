@@ -10,6 +10,7 @@ import { limpiarNombre } from "./nombres";
 import { codigoDeTexto } from "./codigos";
 import { POR_DIAS } from "./ordenar";
 import { conCerrado, conNeto } from "./pasados";
+import { conLoTuyo } from "./tuAno";
 import { t } from "./idioma";
 import { limpiarAnterior } from "./anterior";
 import { limpiarTopes } from "./topes";
@@ -69,6 +70,9 @@ function apuntarEnHistorial(viaje) {
       visto: Date.now(),
       cerrado: Boolean(antes?.cerrado),
       neto: antes?.neto ?? null,
+      // Lo que te tocó y de qué año es, para "tu año". Se rehace al cargarlo.
+      tuyo: antes?.tuyo ?? null,
+      ano: antes?.ano ?? null,
       soloVer: Boolean(viaje.soloVer),
     },
     ...resto,
@@ -90,6 +94,11 @@ export function cerradoEnHistorial(codigo, cerrado) {
 
 export function netoEnHistorial(codigo, neto) {
   const lista = conNeto(historial(), codigo, neto);
+  if (lista) localStorage.setItem(CLAVE_HISTORICO, JSON.stringify(lista));
+}
+
+export function loTuyoEnHistorial(codigo, lo) {
+  const lista = conLoTuyo(historial(), codigo, lo);
   if (lista) localStorage.setItem(CLAVE_HISTORICO, JSON.stringify(lista));
 }
 

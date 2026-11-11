@@ -4142,6 +4142,48 @@ button.pago-cantidad:hover {
   line-height: 1.2;
 }
 
+/* "Tu año", arriba de tus viajes: lo que te ha tocado pagar sumándolos todos. */
+.tu-ano {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border-radius: var(--radio-sm);
+  background: linear-gradient(135deg, var(--teal-50), color-mix(in srgb, var(--naranja-100) 60%, transparent));
+  border: 1px solid var(--linea);
+  animation: aparecer-creciendo var(--medio) var(--curva-suave);
+}
+
+.tu-ano-icono {
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.tu-ano p {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--tinta-suave);
+}
+
+.tu-ano strong {
+  color: var(--tinta);
+}
+
+.tu-ano-cifra {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--teal-700);
+  font-variant-numeric: tabular-nums;
+}
+
+.tu-ano small {
+  font-variant-numeric: tabular-nums;
+}
+
 /* El de solo mirar con un toque de color, que no se confunda con un viaje cerrado. */
 .viaje-solo-ver {
   background-color: var(--teal-50);

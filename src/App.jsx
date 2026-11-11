@@ -37,6 +37,7 @@ import Atajos from "./componentes/Atajos";
 import { enLista } from "./nombres";
 import { usarCategoriasPropias } from "./categorias";
 import { destinosPosibles, pasarGasto } from "./mover";
+import { loTuyo } from "./tuAno";
 import { t, idiomaActual, alCambiarIdioma, usarIdioma, guardarIdioma, otroIdioma, IDIOMAS } from "./idioma";
 
 // Fuera del componente: dentro, el linter no deja tocar window.location.
@@ -188,6 +189,15 @@ function App() {
   useEffect(() => {
     if (codigoAbierto) datos.netoEnHistorial(codigoAbierto, neto);
   }, [codigoAbierto, neto]);
+
+  // Y lo que te tocó pagar, para "tu año". Sueltos, que el objeto es nuevo en cada pintada.
+  const loMio = loTuyo(viaje, soy);
+  const tuyo = loMio?.tuyo ?? null;
+  const anoDelViaje = loMio?.ano ?? null;
+
+  useEffect(() => {
+    if (codigoAbierto) datos.loTuyoEnHistorial(codigoAbierto, tuyo === null ? null : { tuyo, ano: anoDelViaje });
+  }, [codigoAbierto, tuyo, anoDelViaje]);
 
   // Lo que han apuntado los demás, mientras dura el aviso.
   const [novedad, setNovedad] = useState(null);

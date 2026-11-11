@@ -864,4 +864,8 @@ export default {
   "Otra foto": "Another photo",
   "Quitar esta": "Remove this one",
   "No hemos podido subir la foto.": "We couldn't upload the photo.",
+  "En {ano}, 1 viaje": "In {ano}, 1 trip",
+  "En {ano}, {n} viajes": "In {ano}, {n} trips",
+  "Te han tocado {cifras}": "Your share: {cifras}",
+  "El más caro, {nombre}: {cifra}": "The priciest, {nombre}: {cifra}",
 };

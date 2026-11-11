@@ -5,6 +5,7 @@ import { haceCuanto } from "../fechas";
 import { LARGO_MAXIMO } from "../nombres";
 import { codigoDelPortapapeles } from "../codigos";
 import { monedaEnLista, seOlvidanTodos, avisoOlvidarTodos, seBuscanViajes, buscarViajes } from "../pasados";
+import { tuAno, textoTuAno } from "../tuAno";
 import { cuentaDeNeto } from "../titulo";
 import { esOrdenador, viajeDeLaTecla } from "../teclado";
 import { t } from "../idioma";
@@ -22,6 +23,7 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
   const [buscado, setBuscado] = useState("");
   // Las teclas del 1 al 9 van por lo que se ve, no por la lista entera.
   const visibles = seBuscanViajes(pasados) ? buscarViajes(pasados, buscado) : pasados;
+  const delAno = textoTuAno(tuAno(pasados, new Date().getFullYear()));
   const sePuedePegar = typeof navigator !== "undefined" && Boolean(navigator.clipboard?.readText);
 
   async function pegar() {
@@ -148,6 +150,17 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
             <span className="icono">🕘</span> {t("Tus viajes")}
             <span className="titulo-cuantos">{pasados.length}</span>
           </h2>
+
+          {delAno && (
+            <div className="tu-ano">
+              <span className="tu-ano-icono" aria-hidden="true">📅</span>
+              <p>
+                <strong>{delAno.titulo}</strong>
+                <span className="tu-ano-cifra">{delAno.cifra}</span>
+                <small>{delAno.masCaro}</small>
+              </p>
+            </div>
+          )}
 
           {seBuscanViajes(pasados) && (
             <input
