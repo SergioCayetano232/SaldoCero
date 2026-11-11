@@ -36,6 +36,7 @@ import CifrasViaje from "./componentes/CifrasViaje";
 import Atajos from "./componentes/Atajos";
 import { enLista } from "./nombres";
 import { usarCategoriasPropias } from "./categorias";
+import { destinosPosibles, pasarGasto } from "./mover";
 import { t, idiomaActual, alCambiarIdioma, usarIdioma, guardarIdioma, otroIdioma, IDIOMAS } from "./idioma";
 
 // Fuera del componente: dentro, el linter no deja tocar window.location.
@@ -624,6 +625,18 @@ function App() {
         }}
         // Uno detrás de otro, para que queden en la lista en el orden en que los pegaste.
         onDuda={(id, texto) => hacer(() => datos.ponerDuda(id, texto, soy))}
+        destinos={destinosPosibles(datos.historial(), viaje.codigo)}
+        prepararMover={async (gasto, codigo) => {
+          try {
+            const alli = await datos.abrirOtroViaje(codigo);
+            if (alli.cerrado) return { error: t("{viaje} está cerrado.", { viaje: alli.nombre }) };
+            const { gasto: pasado, error } = pasarGasto(gasto, { deAqui: viajeros, monedaAqui: viaje.moneda ?? "EUR" }, alli);
+            return error ? { error } : { alli, pasado };
+          } catch (fallo) {
+            return { error: fallo.message };
+          }
+        }}
+        onMover={(gasto, alli, pasado) => hacer(() => datos.moverGasto(gasto, alli, pasado))}
         onAnadirVarios={(lista) =>
           hacer(async () => {
             for (const gasto of lista) propios.current.add((await datos.anadirGasto(viaje.id, gasto, soy)).id);

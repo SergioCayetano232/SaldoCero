@@ -4,6 +4,7 @@ import { MONEDAS, cambio, cambioDelGasto, conMoneda, leerTasa, monedaDelSiguient
 import { enLista } from "../nombres";
 import { todasLasCategorias, categoriasPropias, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
 import CategoriasPropias from "./CategoriasPropias";
+import MoverGasto from "./MoverGasto";
 import { alternarHoy, alternarLoMio, filtrarGastos, hayFiltros, hayGastosDeHoy, hayNotas, hayOtrasMonedas, hayDeAlgunos, hayTickets, hayGastosDelBote, cuantosDe, MINIMO_PARA_FILTRAR, SIN_FILTROS, soloDe, soloDelDia, textoSinResultados } from "../filtros";
 import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntadoHace } from "../fechas";
 import { sugerirConceptos, importeSugerido } from "../sugerencias";
@@ -75,6 +76,9 @@ function Gastos({
   onAnadirVarios,
   onQuitar,
   onDuda,
+  destinos = [],
+  prepararMover,
+  onMover,
   verTicket,
   soy = null,
   verDe = null,
@@ -327,6 +331,8 @@ function Gastos({
   const barraFiltros = useRef(null);
 
   // De qué gasto estás preguntando, y lo que llevas escrito.
+  // El gasto que estás pasando a otro viaje.
+  const [moviendo, setMoviendo] = useState(null);
   const [preguntando, setPreguntando] = useState(null);
   const [pregunta, setPregunta] = useState("");
   const paraMi = dudasParaMi(gastos, soy);
@@ -2307,6 +2313,15 @@ function Gastos({
                             </button>
                           </span>
                         )}
+                        {moviendo === gasto.id && (
+                          <MoverGasto
+                            gasto={gasto}
+                            destinos={destinos}
+                            preparar={prepararMover}
+                            onMover={onMover}
+                            onCerrar={() => setMoviendo(null)}
+                          />
+                        )}
                       </span>
 
                       <span className="gasto-importe">
@@ -2357,6 +2372,16 @@ function Gastos({
                           >
                             ⧉
                           </button>
+                          {destinos.length > 0 && (
+                            <button
+                              className="boton-mover-gasto"
+                              onClick={() => setMoviendo(moviendo === gasto.id ? null : gasto.id)}
+                              title={t("Pasar a otro viaje")}
+                              aria-label={t("Pasar {concepto} a otro viaje", { concepto: gasto.concepto })}
+                            >
+                              ↪
+                            </button>
+                          )}
                           <button
                             className="boton-editar"
                             onClick={() => editar(gasto)}

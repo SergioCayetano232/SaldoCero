@@ -2,7 +2,7 @@
 // Hacia fuera devuelve viajes con la misma forma de siempre:
 // { id, codigo, nombre, viajeros: [], gastos: [] }
 
-import { supabase, usarCodigo, usarViajero } from "./supabase";
+import { supabase, usarCodigo, usarViajero, clienteDe } from "./supabase";
 import { BOTE } from "./bote";
 import { rutaDelTicket } from "./tickets";
 import { limpiarNota } from "./notas";
@@ -794,6 +794,67 @@ export async function urlDelTicket(ruta) {
 async function borrarFotos(rutas) {
   const { error } = await supabase.storage.from(TICKETS).remove(rutas);
   if (error) console.error("No se ha podido borrar la foto", error);
+}
+
+// Lo justo de otro de tus viajes para pasarle un gasto, con su propio cliente.
+export async function abrirOtroViaje(codigo) {
+  const cliente = clienteDe(codigo, soyEn(codigo));
+  const { data: viaje, error } = await cliente
+    .from("viajes")
+    .select("id, nombre, moneda, cerrado_en, categorias")
+    .eq("codigo", codigo)
+    .maybeSingle();
+  if (error || !viaje) throw fallo(error, "No hemos podido abrir ese viaje.");
+
+  const { data: viajeros, error: errorViajeros } = await cliente.from("viajeros").select("id, nombre").eq("viaje_id", viaje.id);
+  if (errorViajeros) throw fallo(errorViajeros, "No hemos podido abrir ese viaje.");
+
+  return {
+    cliente,
+    codigo,
+    id: viaje.id,
+    nombre: viaje.nombre,
+    moneda: viaje.moneda ?? "EUR",
+    cerrado: Boolean(viaje.cerrado_en),
+    categorias: limpiarPropias(viaje.categorias),
+    viajeros,
+  };
+}
+
+// Se apunta allí, se le pasa la foto y se quita de aquí. Si algo falla por el
+// camino, se deshace lo de allí: mejor que no se mueva a que salga dos veces.
+export async function moverGasto(gasto, alli, pasado) {
+  const { data: nuevoId, error } = await alli.cliente.rpc("crear_gasto", {
+    g_viaje: alli.id,
+    ...datosDelGasto(pasado),
+    g_creado_por: soyEn(alli.codigo),
+  });
+  if (error) throw fallo(error, "No hemos podido mover el gasto.");
+
+  let fotoAlli = null;
+  try {
+    if (gasto.ticket) {
+      const bajada = await supabase.storage.from(TICKETS).download(gasto.ticket);
+      if (bajada.error) throw bajada.error;
+
+      const ruta = rutaDelTicket(alli.id, nuevoId);
+      const subida = await alli.cliente.storage.from(TICKETS).upload(ruta, bajada.data, { contentType: "image/jpeg" });
+      if (subida.error) throw subida.error;
+      fotoAlli = ruta;
+
+      const pegada = await alli.cliente.from("gastos").update({ ticket: ruta }).eq("id", nuevoId).select("id");
+      if (pegada.error || !pegada.data.length) throw pegada.error ?? new Error("No se ha pegado la foto");
+    }
+
+    const quitado = await supabase.from("gastos").delete().eq("id", gasto.id).select("id");
+    if (quitado.error || !quitado.data.length) throw quitado.error ?? new Error("No se ha quitado de aquí");
+  } catch (problema) {
+    await alli.cliente.from("gastos").delete().eq("id", nuevoId);
+    if (fotoAlli) await alli.cliente.storage.from(TICKETS).remove([fotoAlli]);
+    throw fallo(problema, "No hemos podido mover el gasto.");
+  }
+
+  if (gasto.ticket) await borrarFotos([gasto.ticket]);
 }
 
 // Vaciar el viaje: fuera viajeros (y con ellos, sus gastos) y fuera gastos.
