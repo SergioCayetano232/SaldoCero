@@ -24,6 +24,7 @@ import { pagaYo, cobroYo } from "../juntos";
 import Topes from "./Topes";
 import { mensajeDeCobro, enlaceWhatsApp } from "../cobrar";
 import { cobroDe, cobroComoTexto, cantidadParaPegar, esEnlace, enlaceDeCobro, nombreDeCobro } from "../cobro";
+import { puedeConfirmar, textoPorConfirmar, cuantosPorConfirmar } from "../confirmar";
 import { BOTE, sinBote } from "../bote";
 import { gastoPorCategoria } from "../categorias";
 import { importeDeGasto, parteDe, ordenarPorSaldo } from "../calculos";
@@ -60,6 +61,7 @@ function Resumen({
   onSaldar,
   onSaldarVarios,
   onDesaldar,
+  onConfirmar,
   onParcial,
   onQuitarParcial,
   onRedondear,
@@ -533,11 +535,18 @@ function Resumen({
       <div className="saldar" ref={zonaSaldar}>
         <h3>
           {t("Cómo saldar cuentas")}
-          {pendiente > 0 && (
-            <span className="pendiente">
-              {t("quedan")} <Cifra valor={pendiente} moneda={monedaViaje} />
-            </span>
-          )}
+          <span className="saldar-pastillas">
+            {pendiente > 0 && (
+              <span className="pendiente">
+                {t("quedan")} <Cifra valor={pendiente} moneda={monedaViaje} />
+              </span>
+            )}
+            {cuantosPorConfirmar(pagos) > 0 && (
+              <span className="pendiente por-confirmar">
+                ⏳ {tn(cuantosPorConfirmar(pagos), "1 por confirmar", "{n} por confirmar")}
+              </span>
+            )}
+          </span>
         </h3>
 
         {pagos.length === 0 ? (
@@ -623,6 +632,22 @@ function Resumen({
                       {pago.saldado ? "↩︎" : "✓"}
                     </button>
                   </span>
+
+                  {pago.porConfirmar && (
+                    <p className="pago-por-confirmar">
+                      <span>⏳ {textoPorConfirmar(pago, soy)}</span>
+                      {puedeConfirmar(pago, soy) && (
+                        <>
+                          <button className="boton-confirmar" onClick={() => onConfirmar(pago)}>
+                            {t("Sí, me ha llegado")}
+                          </button>
+                          <button className="enlace" onClick={() => onDesaldar(pago)}>
+                            {t("No, aún no")}
+                          </button>
+                        </>
+                      )}
+                    </p>
+                  )}
 
                   {!pago.saldado && esEnlace(cobro) && (
                     <a

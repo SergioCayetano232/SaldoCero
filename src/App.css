@@ -3210,6 +3210,46 @@ button:active {
 }
 
 /* Lo que falta por pagar, al lado del título. */
+/* Lo que ya está pagado pero el que cobra aún no ha dicho que le llegó. */
+.pago-por-confirmar {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--tinta-suave);
+}
+
+.boton-confirmar {
+  padding: 5px 12px;
+  border-radius: var(--radio-pastilla);
+  background-color: var(--teal-500);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  transition: transform var(--rapido) var(--curva-muelle);
+}
+
+.boton-confirmar:hover {
+  transform: scale(1.04);
+}
+
+/* Si no caben al lado del título, bajan; el título no se parte. */
+.saldar h3 {
+  flex-wrap: wrap;
+  white-space: nowrap;
+}
+
+.saldar-pastillas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-left: auto;
+}
+
 .pendiente {
   font-family: var(--fuente);
   font-size: 12px;

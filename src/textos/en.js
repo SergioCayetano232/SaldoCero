@@ -843,4 +843,11 @@ export default {
   "Se quedan fuera, por ir en otra moneda o no cuadrar:": "Left out, because they're in another currency or don't add up:",
   "¿Veníais de Splitwise?": "Coming from Splitwise?",
   "Trae su CSV": "Bring its CSV",
+  "¿Te ha llegado?": "Did you get it?",
+  "Falta que {nombre} confirme que le ha llegado": "Waiting for {nombre} to confirm it arrived",
+  "Sí, me ha llegado": "Yes, I got it",
+  "No, aún no": "Not yet",
+  "1 por confirmar": "1 to confirm",
+  "{n} por confirmar": "{n} to confirm",
+  "No hemos podido confirmar el pago.": "We couldn't confirm the payment.",
 };

@@ -274,11 +274,12 @@ export function mismoPago(x, y) {
 // Los pagos no se guardan, se calculan cada vez. Así que si alguien apunta un
 // gasto después, las cuentas cambian y lo que marcaste puede ya no cuadrar. En
 // ese caso lo dejamos ver igual, pero avisando de que la cifra ha cambiado.
+// Los marcados antes de confirmar no traen el campo: esos van como confirmados.
 export function marcarSaldados(pagos, saldados = []) {
-  return pagos.map((pago) => ({
-    ...pago,
-    saldado: saldados.some((s) => mismoPago(s, pago)),
-  }));
+  return pagos.map((pago) => {
+    const marcado = saldados.find((s) => mismoPago(s, pago));
+    return { ...pago, saldado: Boolean(marcado), porConfirmar: marcado?.confirmado === false };
+  });
 }
 
 // Los balances contando lo que ya se ha pagado.

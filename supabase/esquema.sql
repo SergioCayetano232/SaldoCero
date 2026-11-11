@@ -106,6 +106,9 @@ create table pagos_saldados (
   de_nombre text not null,
   a_nombre text not null,
   saldado_en timestamptz not null default now(),
+  -- Si lo marca otro que no es el que cobra, falta que este diga que le ha llegado.
+  -- Los de antes de esto van como confirmados.
+  confirmado boolean not null default true,
   -- El mismo par no se puede marcar dos veces.
   unique (viaje_id, de_id, a_id)
 );
@@ -198,6 +201,9 @@ revoke update on viajes from anon, authenticated;
 grant update (nombre, moneda, presupuesto, cerrado_en, redondear, topes, anterior, centro, categorias) on viajes to anon, authenticated;
 revoke update on viajeros from anon, authenticated;
 grant update (nombre, con_id, desde, hasta) on viajeros to anon, authenticated;
+-- De una deuda pagada solo se cambia eso: que el que cobra la confirme.
+revoke update on pagos_saldados from anon, authenticated;
+grant update (confirmado) on pagos_saldados to anon, authenticated;
 
 -- Un viaje solo se ve si traes su código. Nunca se listan todos.
 create policy "ver mi viaje" on viajes for select using (id = viaje_actual());
@@ -240,6 +246,7 @@ create policy "marcar saldado" on pagos_saldados for insert with check (
   and (a_id is null or exists (select 1 from viajeros v where v.id = a_id and v.viaje_id = viaje_actual()))
 );
 create policy "desmarcar saldado" on pagos_saldados for delete using (viaje_id = viaje_actual());
+create policy "confirmar saldado" on pagos_saldados for update using (viaje_id = viaje_actual());
 
 -- Los pagos a cuenta, igual. Se pueden apuntar con el viaje cerrado: las deudas
 -- se pagan después de volver.
@@ -776,3 +783,9 @@ create trigger moneda_sin_dinero before update of moneda on viajes
 --   alter table viajes add column categorias jsonb
 --     check (jsonb_typeof(categorias) = 'array' and jsonb_array_length(categorias) <= 6);
 --   grant update (categorias) on viajes to anon, authenticated;
+
+-- Que el que cobra confirme que le ha llegado.
+--   alter table pagos_saldados add column confirmado boolean not null default true;
+--   revoke update on pagos_saldados from anon, authenticated;
+--   grant update (confirmado) on pagos_saldados to anon, authenticated;
+--   create policy "confirmar saldado" on pagos_saldados for update using (viaje_id = viaje_actual());

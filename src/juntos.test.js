@@ -61,8 +61,8 @@ describe("los pagos con grupos", () => {
   it("Ana y Luis hacen un solo pago por los dos", () => {
     const pagos = pagosDelViaje(balances, {});
     expect(pagos).toEqual([
-      { de: "Ana y Luis", a: "Eva", deId: "a", aId: "e", deIds: ["a", "l"], cantidad: 60, saldado: false },
-      { de: "Pepe", a: "Eva", deId: "p", aId: "e", cantidad: 30, saldado: false },
+      { de: "Ana y Luis", a: "Eva", deId: "a", aId: "e", deIds: ["a", "l"], cantidad: 60, saldado: false, porConfirmar: false },
+      { de: "Pepe", a: "Eva", deId: "p", aId: "e", cantidad: 30, saldado: false, porConfirmar: false },
     ]);
   });
 

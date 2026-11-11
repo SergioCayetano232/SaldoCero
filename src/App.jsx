@@ -676,9 +676,10 @@ function App() {
           soy={soy}
           monedaViaje={viaje.moneda ?? "EUR"}
           saldados={viaje.saldados ?? []}
-          onSaldar={(pago) => hacer(() => datos.marcarSaldado(viaje.id, pago))}
-          onSaldarVarios={(pagos) => hacer(() => datos.marcarVariosSaldados(viaje.id, pagos))}
+          onSaldar={(pago) => hacer(() => datos.marcarSaldado(viaje.id, pago, soy))}
+          onSaldarVarios={(pagos) => hacer(() => datos.marcarVariosSaldados(viaje.id, pagos, soy))}
           onDesaldar={(pago) => hacer(() => datos.desmarcarSaldado(viaje.id, pago))}
+          onConfirmar={(pago) => hacer(() => datos.confirmarSaldado(viaje.id, pago))}
           cerrado={cerrado}
           onPresupuesto={(cantidad) => hacer(() => datos.ponerPresupuesto(viaje.id, cantidad))}
           onTopes={(topes) => hacer(() => datos.ponerTopes(viaje.id, topes))}

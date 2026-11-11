@@ -13,6 +13,7 @@ import { conCerrado, conNeto } from "./pasados";
 import { t } from "./idioma";
 import { limpiarAnterior } from "./anterior";
 import { limpiarTopes } from "./topes";
+import { confirmadoAlMarcar } from "./confirmar";
 import { limpiarPropias, todasLasCategorias, paraGuardar } from "./categorias";
 import { limpiarEstancia } from "./estancia";
 import { limpiarDuda } from "./dudas";
@@ -379,7 +380,7 @@ async function cargarContenido(viajeId) {
       .eq("gastos.viaje_id", viajeId),
     supabase
       .from("pagos_saldados")
-      .select("de_id, a_id, de_nombre, a_nombre")
+      .select("de_id, a_id, de_nombre, a_nombre, confirmado")
       .eq("viaje_id", viajeId),
     supabase
       .from("pagos_parciales")
@@ -432,6 +433,8 @@ async function cargarContenido(viajeId) {
       aId: idDeSaldado(p.a_id, p.a_nombre, p.de_id),
       de: p.de_nombre,
       a: p.a_nombre,
+      // Los de antes de confirmar no lo traen: esos ya estaban dados por buenos.
+      confirmado: p.confirmado !== false,
     })),
     parciales: parciales.data.map((p) => ({
       id: p.id,
@@ -656,13 +659,13 @@ export async function editarGasto(id, gasto) {
   return { ...gasto, id };
 }
 
-// Dar una deuda por pagada.
-export async function marcarSaldado(viajeId, pago) {
-  await marcarVariosSaldados(viajeId, [pago]);
+// Dar una deuda por pagada. Quién la marca decide si falta confirmarla.
+export async function marcarSaldado(viajeId, pago, soy = null) {
+  await marcarVariosSaldados(viajeId, [pago], soy);
 }
 
 // Todo en una petición: o se marcan todos o ninguno, sin quedarse a medias.
-export async function marcarVariosSaldados(viajeId, pagos) {
+export async function marcarVariosSaldados(viajeId, pagos, soy = null) {
   const { error } = await supabase
     .from("pagos_saldados")
     .insert(
@@ -672,10 +675,19 @@ export async function marcarVariosSaldados(viajeId, pagos) {
         a_id: sinBote(pago.aId),
         de_nombre: pago.de,
         a_nombre: pago.a,
+        confirmado: confirmadoAlMarcar(pago, soy),
       }))
     );
 
   if (error) throw fallo(error, "No hemos podido marcar el pago.");
+}
+
+// El que cobra dice que le ha llegado.
+export async function confirmarSaldado(viajeId, pago) {
+  const lado = (consulta, columna, id) => (id === BOTE ? consulta.is(columna, null) : consulta.eq(columna, id));
+  const consulta = supabase.from("pagos_saldados").update({ confirmado: true }).eq("viaje_id", viajeId);
+  const { data, error } = await lado(lado(consulta, "de_id", pago.deId), "a_id", pago.aId).select("id");
+  if (error || !data.length) throw fallo(error, "No hemos podido confirmar el pago.");
 }
 
 // El bote no es un viajero: en la base de datos va sin id, solo con el nombre.
