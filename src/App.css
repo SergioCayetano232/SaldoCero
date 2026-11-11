@@ -3710,6 +3710,76 @@ button.pago-cantidad:hover {
   display: none;
 }
 
+/* Las flechas van encima de la foto, a los lados, para pasar sin buscarlas. */
+.visor-foto {
+  position: relative;
+  min-height: 0;
+}
+
+.visor-flecha {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--papel) 85%, transparent);
+  box-shadow: var(--sombra-flotante);
+  color: var(--tinta);
+  font-size: 24px;
+  line-height: 1;
+  transition: transform var(--rapido) var(--curva-muelle);
+}
+
+.visor-flecha:hover {
+  transform: scale(1.08);
+}
+
+.visor-anterior {
+  left: 6px;
+}
+
+.visor-siguiente {
+  right: 6px;
+}
+
+.visor-cuenta {
+  color: var(--tinta-tenue);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.visor-pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 4px 2px;
+}
+
+/* Con el pie hay menos sitio para la foto. */
+.visor-caja:has(.visor-pie) img {
+  max-height: calc(100dvh - 160px);
+}
+
+.visor-quitar {
+  margin-left: auto;
+  color: var(--rojo);
+}
+
+.boton-foto.subiendo {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.cuantas-fotos {
+  margin-left: 1px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--tinta-tenue);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ===== Bote común ===== */
 .bote-queda {
   margin-left: auto;

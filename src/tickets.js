@@ -60,3 +60,23 @@ export function urlParaBajar(url, concepto) {
   const nombre = `Ticket ${String(concepto ?? "").replace(/[/\\]/g, "-").trim() || "del gasto"}.jpg`;
   return `${url}&download=${encodeURIComponent(nombre)}`;
 }
+
+// Un ticket largo en dos fotos, o el ticket y la factura. La primera sigue en
+// "ticket", que es la que se lee y la que miran los filtros; las demás van aparte.
+export const MAXIMO_FOTOS = 4;
+
+export function fotosDeGasto(gasto) {
+  return [gasto?.ticket, ...(gasto?.masTickets ?? [])].filter(Boolean);
+}
+
+export function cabeOtraFoto(gasto) {
+  const cuantas = fotosDeGasto(gasto).length;
+  return cuantas > 0 && cuantas < MAXIMO_FOTOS;
+}
+
+// Si se quita la primera, sube la siguiente: el gasto no se queda sin ticket
+// teniendo otras fotos.
+export function sinLaFoto(gasto, ruta) {
+  const quedan = fotosDeGasto(gasto).filter((r) => r !== ruta);
+  return { ticket: quedan[0] ?? null, masTickets: quedan.slice(1) };
+}

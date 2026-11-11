@@ -857,4 +857,11 @@ export default {
   "Este código es para mirar. Si se lo pasas a alguien, tampoco podrá cambiar nada.": "This code is view-only. If you pass it on, they won't be able to change anything either.",
   "¿Alguien que solo quiera mirar?": "Someone who just wants to look?",
   "para mirar": "view only",
+  "¿Quitar esta foto?": "Remove this photo?",
+  "Foto anterior": "Previous photo",
+  "Foto siguiente": "Next photo",
+  "Subiendo…": "Uploading…",
+  "Otra foto": "Another photo",
+  "Quitar esta": "Remove this one",
+  "No hemos podido subir la foto.": "We couldn't upload the photo.",
 };

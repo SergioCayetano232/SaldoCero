@@ -4,7 +4,7 @@
 
 import { supabase, usarCodigo, usarViajero, clienteDe } from "./supabase";
 import { BOTE } from "./bote";
-import { rutaDelTicket } from "./tickets";
+import { rutaDelTicket, fotosDeGasto, sinLaFoto } from "./tickets";
 import { limpiarNota } from "./notas";
 import { limpiarNombre } from "./nombres";
 import { codigoDeTexto } from "./codigos";
@@ -387,7 +387,7 @@ async function cargarContenido(viajeId) {
     supabase.from("viajeros").select("id, nombre, cobro, con_id, desde, hasta").eq("viaje_id", viajeId).order("creado_en"),
     supabase
       .from("gastos")
-      .select("id, pagador_id, pagadores, importe, moneda, importe_convertido, concepto, categoria, fecha, ticket, nota, creado_en, creado_por, duda, duda_por, lugar")
+      .select("id, pagador_id, pagadores, importe, moneda, importe_convertido, concepto, categoria, fecha, ticket, mas_tickets, nota, creado_en, creado_por, duda, duda_por, lugar")
       .eq("viaje_id", viajeId)
       .order("fecha")
       .order("creado_en"),
@@ -491,6 +491,8 @@ async function cargarContenido(viajeId) {
       categoria: gasto.categoria ?? "otros",
       fecha: gasto.fecha,
       ticket: gasto.ticket ?? null,
+      // Los de antes de las fotos de más no lo traen.
+      masTickets: gasto.mas_tickets ?? [],
       nota: gasto.nota ?? null,
       // Cuándo se apuntó, que no es lo mismo que el día del gasto.
       creadoEn: gasto.creado_en ?? null,
@@ -778,11 +780,13 @@ export async function quitarDelBote(id) {
 // lo segundo quedaría un gasto apuntando a una foto que ya no está.
 // Si las reglas no dejan borrarlo (el viaje se ha cerrado desde otro móvil), no
 // da error: simplemente no borra nada. Por eso el select.
-export async function quitarGasto(id, ticket = null) {
+// Con todas sus fotos: una ruta suelta o la lista entera.
+export async function quitarGasto(id, fotos = null) {
   const { data, error } = await supabase.from("gastos").delete().eq("id", id).select("id");
   if (error || !data.length) throw fallo(error, "No hemos podido quitar el gasto.");
 
-  if (ticket) await borrarFotos([ticket]);
+  const rutas = [fotos].flat().filter(Boolean);
+  if (rutas.length) await borrarFotos(rutas);
 }
 
 const TICKETS = "tickets";
@@ -803,11 +807,34 @@ export async function ponerTicket(viajeId, gastoId, foto, anterior = null) {
   if (anterior) await borrarFotos([anterior]);
 }
 
-export async function quitarTicket(gastoId, ruta) {
-  const { data, error } = await supabase.from("gastos").update({ ticket: null }).eq("id", gastoId).select("id");
+// Quitar una de las fotos. Si era la primera, sube la siguiente.
+export async function quitarFoto(gasto, ruta) {
+  const { ticket, masTickets } = sinLaFoto(gasto, ruta);
+  const { data, error } = await supabase
+    .from("gastos")
+    .update({ ticket, mas_tickets: masTickets })
+    .eq("id", gasto.id)
+    .select("id");
   if (error || !data.length) throw fallo(error, "No hemos podido quitar la foto.");
 
   await borrarFotos([ruta]);
+}
+
+// Otra foto más al gasto, detrás de las que ya tiene.
+export async function anadirFoto(viajeId, gasto, foto) {
+  const ruta = rutaDelTicket(viajeId, gasto.id);
+  const subida = await supabase.storage.from(TICKETS).upload(ruta, foto, { contentType: "image/jpeg" });
+  if (subida.error) throw fallo(subida.error, "No hemos podido subir la foto.");
+
+  const { data, error } = await supabase
+    .from("gastos")
+    .update({ mas_tickets: [...(gasto.masTickets ?? []), ruta] })
+    .eq("id", gasto.id)
+    .select("id");
+  if (error || !data.length) {
+    await borrarFotos([ruta]);
+    throw fallo(error, "No hemos podido subir la foto.");
+  }
 }
 
 // Un enlace que caduca en una hora: el bucket es privado y la etiqueta <img> no
@@ -861,30 +888,37 @@ export async function moverGasto(gasto, alli, pasado) {
   });
   if (error) throw fallo(error, "No hemos podido mover el gasto.");
 
-  let fotoAlli = null;
+  const fotos = fotosDeGasto(gasto);
+  const fotosAlli = [];
   try {
-    if (gasto.ticket) {
-      const bajada = await supabase.storage.from(TICKETS).download(gasto.ticket);
+    for (const foto of fotos) {
+      const bajada = await supabase.storage.from(TICKETS).download(foto);
       if (bajada.error) throw bajada.error;
 
       const ruta = rutaDelTicket(alli.id, nuevoId);
       const subida = await alli.cliente.storage.from(TICKETS).upload(ruta, bajada.data, { contentType: "image/jpeg" });
       if (subida.error) throw subida.error;
-      fotoAlli = ruta;
+      fotosAlli.push(ruta);
+    }
 
-      const pegada = await alli.cliente.from("gastos").update({ ticket: ruta }).eq("id", nuevoId).select("id");
-      if (pegada.error || !pegada.data.length) throw pegada.error ?? new Error("No se ha pegado la foto");
+    if (fotosAlli.length) {
+      const pegada = await alli.cliente
+        .from("gastos")
+        .update({ ticket: fotosAlli[0], mas_tickets: fotosAlli.slice(1) })
+        .eq("id", nuevoId)
+        .select("id");
+      if (pegada.error || !pegada.data.length) throw pegada.error ?? new Error("No se han pegado las fotos");
     }
 
     const quitado = await supabase.from("gastos").delete().eq("id", gasto.id).select("id");
     if (quitado.error || !quitado.data.length) throw quitado.error ?? new Error("No se ha quitado de aquí");
   } catch (problema) {
     await alli.cliente.from("gastos").delete().eq("id", nuevoId);
-    if (fotoAlli) await alli.cliente.storage.from(TICKETS).remove([fotoAlli]);
+    if (fotosAlli.length) await alli.cliente.storage.from(TICKETS).remove(fotosAlli);
     throw fallo(problema, "No hemos podido mover el gasto.");
   }
 
-  if (gasto.ticket) await borrarFotos([gasto.ticket]);
+  if (fotos.length) await borrarFotos(fotos);
 }
 
 // Vaciar el viaje: fuera viajeros (y con ellos, sus gastos) y fuera gastos.

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { medidaReducida, rutaDelTicket, esImagen, LADO_MAXIMO, urlParaBajar } from "./tickets";
+import { medidaReducida, rutaDelTicket, esImagen, LADO_MAXIMO, urlParaBajar, MAXIMO_FOTOS, fotosDeGasto, cabeOtraFoto, sinLaFoto } from "./tickets";
 
 describe("medidaReducida", () => {
   it("una foto vertical del móvil baja a 1600 de alto", () => {
@@ -62,5 +62,37 @@ describe("urlParaBajar", () => {
 
   it("sin concepto, un nombre igual", () => {
     expect(new URL(urlParaBajar(firmada, "")).searchParams.get("download")).toBe("Ticket del gasto.jpg");
+  });
+});
+
+describe("varias fotos", () => {
+  const gasto = { ticket: "v/g-1.jpg", masTickets: ["v/g-2.jpg", "v/g-3.jpg"] };
+
+  it("todas, la primera delante", () => {
+    expect(fotosDeGasto(gasto)).toEqual(["v/g-1.jpg", "v/g-2.jpg", "v/g-3.jpg"]);
+  });
+
+  it("los gastos de antes no traen las de más", () => {
+    expect(fotosDeGasto({ ticket: "v/g-1.jpg" })).toEqual(["v/g-1.jpg"]);
+    expect(fotosDeGasto({ ticket: null })).toEqual([]);
+  });
+
+  it("cabe otra hasta llegar al máximo, y sin la primera no", () => {
+    expect(cabeOtraFoto(gasto)).toBe(true);
+    expect(cabeOtraFoto({ ...gasto, masTickets: ["a", "b", "c"] })).toBe(false);
+    expect(cabeOtraFoto({ ticket: null })).toBe(false);
+    expect(MAXIMO_FOTOS).toBe(4);
+  });
+
+  it("quitar una de las de más", () => {
+    expect(sinLaFoto(gasto, "v/g-2.jpg")).toEqual({ ticket: "v/g-1.jpg", masTickets: ["v/g-3.jpg"] });
+  });
+
+  it("quitar la primera sube la siguiente", () => {
+    expect(sinLaFoto(gasto, "v/g-1.jpg")).toEqual({ ticket: "v/g-2.jpg", masTickets: ["v/g-3.jpg"] });
+  });
+
+  it("quitar la única deja el gasto sin foto", () => {
+    expect(sinLaFoto({ ticket: "v/g-1.jpg" }, "v/g-1.jpg")).toEqual({ ticket: null, masTickets: [] });
   });
 });

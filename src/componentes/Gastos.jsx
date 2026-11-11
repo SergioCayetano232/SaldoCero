@@ -24,7 +24,7 @@ import { gastoAlFormulario, repetirGasto, ultimoApuntado } from "../repetir";
 import { leerImporte, loQueFalta, cuadra, importesAPartes, partesAImportes } from "../importes";
 import { platoNuevo, repartoPorPlatos, alternarEnPlato } from "../platos";
 import { BOTE } from "../bote";
-import { esImagen } from "../tickets";
+import { esImagen, fotosDeGasto, cabeOtraFoto } from "../tickets";
 import { LARGO_NOTA, quedanEnNota, trozosConEnlaces } from "../notas";
 import { cuentaDe, textoCuentaDe, textoParteDe, mensajeDeCuenta } from "../loDeUno";
 import { posiblesRepetidos } from "../repetidos";
@@ -80,6 +80,8 @@ function Gastos({
   destinos = [],
   prepararMover,
   onMover,
+  onAnadirFoto,
+  onQuitarFoto,
   verTicket,
   soy = null,
   verDe = null,
@@ -241,6 +243,8 @@ function Gastos({
   const [quitarFoto, setQuitarFoto] = useState(false);
   // El gasto cuyo ticket estás mirando.
   const [viendo, setViendo] = useState(null);
+  // El de la lista, al día: si le añades una foto, el visor la ve sin cerrarlo.
+  const gastoViendo = viendo?.id ? gastos.find((g) => g.id === viendo.id) ?? null : viendo;
   // Entre quiénes se reparte. null = no lo has tocado, así que van todos.
   const [participantes, setParticipantes] = useState(null);
   // El gasto que estás tocando ahora mismo. Vacío si estás apuntando uno nuevo.
@@ -2277,6 +2281,7 @@ function Gastos({
                             aria-label={t("Ver el ticket de {concepto}", { concepto: gasto.concepto })}
                           >
                             🧾
+                            {fotosDeGasto(gasto).length > 1 && <small className="cuantas-fotos">{fotosDeGasto(gasto).length}</small>}
                           </button>
                         )}
                         <br />
@@ -2423,7 +2428,7 @@ function Gastos({
                           </button>
                           <button
                             className="boton-quitar"
-                            onClick={() => onQuitar(gasto.id, gasto.concepto, gasto.ticket)}
+                            onClick={() => onQuitar(gasto.id, gasto.concepto, fotosDeGasto(gasto))}
                             title={t("Borrar {concepto}", { concepto: gasto.concepto })}
                           >
                             ✕
@@ -2439,12 +2444,15 @@ function Gastos({
         </>
       )}
 
-      {viendo && (
+      {gastoViendo && fotosDeGasto(gastoViendo).length > 0 && (
         <VisorTicket
-          ruta={viendo.ticket}
-          concepto={viendo.concepto}
+          rutas={fotosDeGasto(gastoViendo)}
+          concepto={gastoViendo.concepto}
           cargar={verTicket}
           onCerrar={() => setViendo(null)}
+          // Desde el formulario es solo para mirar: ahí la foto se cambia con lo suyo.
+          onAnadir={!cerrado && gastoViendo.id && cabeOtraFoto(gastoViendo) ? (archivo) => onAnadirFoto(gastoViendo, archivo) : undefined}
+          onQuitar={!cerrado && gastoViendo.id ? (ruta) => onQuitarFoto(gastoViendo, ruta) : undefined}
         />
       )}
     </section>

@@ -81,6 +81,8 @@ create table gastos (
   fecha date not null default current_date,
   -- La foto del ticket, si hay: su ruta en el bucket "tickets".
   ticket text,
+  -- Las fotos de más: el ticket largo en dos, o el ticket y la factura.
+  mas_tickets text[] not null default '{}' check (cardinality(mas_tickets) <= 3),
   -- Una aclaración corta: "incluye la propina", "Luis no tomó postre".
   nota text check (char_length(nota) <= 200),
   -- Quién lo apuntó: el que se marcó como "yo" en ese móvil. Null si no se sabe.
@@ -844,3 +846,6 @@ create trigger moneda_sin_dinero before update of moneda on viajes
 --
 --   drop function abrir_viaje(text);
 --   Y pega los "create function abrir_viaje" y "create function codigo_para_ver" de más arriba.
+
+-- Varias fotos por gasto.
+--   alter table gastos add column mas_tickets text[] not null default '{}' check (cardinality(mas_tickets) <= 3);

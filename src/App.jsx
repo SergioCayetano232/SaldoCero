@@ -14,7 +14,7 @@ import { avisoAlCerrar, estaCerrado, sugerirCerrar, ultimoApunte } from "./cerra
 import { pagosDelViaje } from "./calculos";
 import { hoy } from "./fechas";
 import { cuantosMios, ponerGlobito } from "./globito";
-import { reducirFoto } from "./tickets";
+import { reducirFoto, fotosDeGasto } from "./tickets";
 import { avisoDeArranque, codigoQueAbrir, hayQueOlvidar } from "./arranque";
 import { tituloDelViaje, miNeto } from "./titulo";
 import { temaGuardado, siguienteTema, temaDe, temaQueToca } from "./tema";
@@ -620,7 +620,7 @@ function App() {
             const foto = gasto.foto && (await reducirFoto(gasto.foto));
             await datos.editarGasto(id, gasto);
             if (foto) await datos.ponerTicket(viaje.id, id, foto, gasto.ticketAnterior);
-            else if (gasto.quitarFoto) await datos.quitarTicket(id, gasto.ticketAnterior);
+            else if (gasto.quitarFoto) await datos.quitarFoto(gastos.find((g) => g.id === id), gasto.ticketAnterior);
           });
           if (bien && antes) {
             setEditado({ texto: t('Has cambiado "{concepto}"', { concepto: gasto.concepto }), cambios: [{ id, antes }], viajeId: viaje.id });
@@ -654,12 +654,14 @@ function App() {
           borrarConAviso(
             quitados.map((g) => g.id),
             queSeVaConGastos(quitados, viaje.moneda ?? "EUR"),
-            () => Promise.all(quitados.map((g) => datos.quitarGasto(g.id, g.ticket)))
+            () => Promise.all(quitados.map((g) => datos.quitarGasto(g.id, fotosDeGasto(g))))
           )
         }
-        onQuitar={(id, concepto, ticket) =>
-          borrarConAviso(id, `"${concepto}"`, () => datos.quitarGasto(id, ticket))
+        onQuitar={(id, concepto, fotos) =>
+          borrarConAviso(id, `"${concepto}"`, () => datos.quitarGasto(id, fotos))
         }
+        onAnadirFoto={(gasto, archivo) => hacer(async () => datos.anadirFoto(viaje.id, gasto, await reducirFoto(archivo)))}
+        onQuitarFoto={(gasto, ruta) => hacer(() => datos.quitarFoto(gasto, ruta))}
         verTicket={datos.urlDelTicket}
       />
 
