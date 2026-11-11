@@ -23,7 +23,7 @@ import { gastosEnCSV } from "../exportar";
 import { pagaYo, cobroYo } from "../juntos";
 import Topes from "./Topes";
 import { mensajeDeCobro, enlaceWhatsApp } from "../cobrar";
-import { cobroDe, cobroComoTexto, cantidadParaPegar } from "../cobro";
+import { cobroDe, cobroComoTexto, cantidadParaPegar, esEnlace, enlaceDeCobro, nombreDeCobro } from "../cobro";
 import { BOTE, sinBote } from "../bote";
 import { gastoPorCategoria } from "../categorias";
 import { importeDeGasto, parteDe, ordenarPorSaldo } from "../calculos";
@@ -624,7 +624,21 @@ function Resumen({
                     </button>
                   </span>
 
-                  {!pago.saldado && cobro && (
+                  {!pago.saldado && esEnlace(cobro) && (
+                    <a
+                      className="pago-cobro"
+                      href={enlaceDeCobro(cobro, pago.cantidad, monedaViaje)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={t("Pagar por {tipo}", { tipo: nombreDeCobro(cobro) })}
+                    >
+                      <span className="pago-cobro-tipo">💳 {nombreDeCobro(cobro)}</span>
+                      <span className="pago-cobro-valor">{cobroComoTexto(cobro)}</span>
+                      <span className="pago-cobro-copiar">{t("pagar")} ↗</span>
+                    </a>
+                  )}
+
+                  {!pago.saldado && cobro && !esEnlace(cobro) && (
                     <button
                       className="pago-cobro"
                       onClick={() => copiarCobro(pago, cobro)}

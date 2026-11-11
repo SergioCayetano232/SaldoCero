@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { leerCobro, cobroComoTexto, cobroDe, lineaDeCobro, cantidadParaPegar } from "./cobro";
+import { leerCobro, cobroComoTexto, cobroDe, lineaDeCobro, cantidadParaPegar, enlaceDeCobro, esEnlace } from "./cobro";
 
 // Un IBAN de ejemplo que pasa el control.
 const IBAN = "ES9121000418450200051332";
@@ -92,5 +92,66 @@ describe("cantidadParaPegar", () => {
   it("sin colas de decimales de las cuentas", () => {
     expect(cantidadParaPegar(33.333333)).toBe("33,33");
     expect(cantidadParaPegar(19.999999)).toBe("20");
+  });
+});
+
+describe("PayPal.me y Revolut", () => {
+  it("el enlace de PayPal, se pegue como se pegue", () => {
+    for (const texto of ["paypal.me/Ana", "https://www.paypal.me/ana/", " PayPal.me/ANA ", "https://paypal.com/paypalme/ana"]) {
+      expect(leerCobro(texto)).toEqual({ tipo: "paypal", valor: "paypal.me/ana" });
+    }
+  });
+
+  it("el de Revolut, con su punto o su guion", () => {
+    expect(leerCobro("https://revolut.me/ana.m-23")).toEqual({ tipo: "revolut", valor: "revolut.me/ana.m-23" });
+  });
+
+  it("lo que se guarda se vuelve a leer igual", () => {
+    expect(cobroDe({ cobro: "paypal.me/ana" })).toEqual({ tipo: "paypal", valor: "paypal.me/ana" });
+    expect(cobroDe({ cobro: "revolut.me/ana" })?.tipo).toBe("revolut");
+  });
+
+  it("cabe en los 40 de la base de datos", () => {
+    expect(leerCobro(`revolut.me/${"a".repeat(25)}`).valor.length).toBeLessThanOrEqual(40);
+    expect(leerCobro(`revolut.me/${"a".repeat(26)}`)).toBeNull();
+  });
+
+  it("sin usuario, u otra web, no vale", () => {
+    expect(leerCobro("paypal.me/")).toBeNull();
+    expect(leerCobro("paypal.me/ana/12EUR")).toBeNull();
+    expect(leerCobro("bizum.me/ana")).toBeNull();
+    expect(leerCobro("https://paypal.me.timo.com/ana")).toBeNull();
+  });
+
+  it("solo estos dos son enlaces", () => {
+    expect(esEnlace({ tipo: "paypal", valor: "paypal.me/ana" })).toBe(true);
+    expect(esEnlace({ tipo: "bizum", valor: "612345678" })).toBe(false);
+    expect(esEnlace(null)).toBe(false);
+  });
+
+  it("se enseña tal cual", () => {
+    expect(cobroComoTexto({ tipo: "paypal", valor: "paypal.me/ana" })).toBe("paypal.me/ana");
+  });
+
+  it("a PayPal le va la cifra en el enlace, sin céntimos de más", () => {
+    const cobro = { tipo: "paypal", valor: "paypal.me/ana" };
+    expect(enlaceDeCobro(cobro, 12.5, "EUR")).toBe("https://paypal.me/ana/12.5EUR");
+    expect(enlaceDeCobro(cobro, 33.333333, "USD")).toBe("https://paypal.me/ana/33.33USD");
+    expect(enlaceDeCobro(cobro)).toBe("https://paypal.me/ana");
+  });
+
+  it("a Revolut no, que no tiene cómo", () => {
+    expect(enlaceDeCobro({ tipo: "revolut", valor: "revolut.me/ana" }, 12.5, "EUR")).toBe("https://revolut.me/ana");
+  });
+
+  it("Bizum e IBAN no tienen enlace", () => {
+    expect(enlaceDeCobro({ tipo: "bizum", valor: "612345678" }, 10, "EUR")).toBeNull();
+  });
+
+  it("en la línea va el enlace para que se pueda tocar", () => {
+    const cobro = { tipo: "paypal", valor: "paypal.me/ana" };
+    expect(lineaDeCobro(cobro, "Ana")).toBe("PayPal de Ana: https://paypal.me/ana");
+    expect(lineaDeCobro(cobro, null, 20, "EUR")).toBe("Mi PayPal: https://paypal.me/ana/20EUR");
+    expect(lineaDeCobro({ tipo: "revolut", valor: "revolut.me/ana" }, "Ana")).toBe("Revolut de Ana: https://revolut.me/ana");
   });
 });

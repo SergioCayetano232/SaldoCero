@@ -19,7 +19,7 @@ export function mensajeDeCobro({ pago, soy, nombreViaje, codigo, moneda, base, c
   ];
 
   // Si sabemos dónde, que no tenga ni que preguntarlo.
-  const donde = lineaDeCobro(cobro, cobroYo ? null : pago.a);
+  const donde = lineaDeCobro(cobro, cobroYo ? null : pago.a, pago.cantidad, moneda);
   if (donde) lineas.push("", donde);
 
   if (codigo) {

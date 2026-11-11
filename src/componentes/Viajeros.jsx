@@ -30,7 +30,7 @@ function Viajeros({
   const [alRenombrar, setAlRenombrar] = useState(false);
   // Los que se parecen a alguien que ya está, esperando a que digas si son otros.
   const [dudas, setDudas] = useState(null);
-  // De quién estás poniendo el Bizum, y lo que llevas escrito.
+  // De quién estás poniendo el Bizum o el PayPal, y lo que llevas escrito.
   const [cobrando, setCobrando] = useState(null);
   const [textoCobro, setTextoCobro] = useState("");
   const [cobroMal, setCobroMal] = useState(false);
@@ -266,9 +266,9 @@ function Viajeros({
               <button
                 className={`boton-cobro ${cobroDe(viajero) ? "tiene-cobro" : ""}`}
                 onClick={() => abrirCobro(viajero)}
-                title={t("Bizum o IBAN de {nombre}", { nombre: viajero.nombre })}
+                title={t("Bizum, IBAN o PayPal de {nombre}", { nombre: viajero.nombre })}
               >
-                {cobroDe(viajero)?.tipo === "iban" ? "🏦" : "📲"}
+                {{ iban: "🏦", paypal: "💳", revolut: "💳" }[cobroDe(viajero)?.tipo] ?? "📲"}
               </button>
 
               <button
@@ -376,7 +376,7 @@ function Viajeros({
                     <input
                       type="text"
                       autoFocus
-                      placeholder={t("Móvil de Bizum o IBAN")}
+                      placeholder={t("Bizum, IBAN, paypal.me o revolut.me")}
                       className={cobroMal ? "campo-mal" : ""}
                       value={textoCobro}
                       onChange={(e) => {
@@ -392,7 +392,7 @@ function Viajeros({
                   </div>
                   <p className={cobroMal ? "cobro-ayuda cobro-mal" : "cobro-ayuda"}>
                     {cobroMal
-                      ? t("Eso no es un móvil español ni un IBAN válido.")
+                      ? t("Eso no es un móvil español, un IBAN válido ni un enlace de PayPal.me o Revolut.")
                       : t("Para que sepan dónde pagarle a {nombre}. Lo ve todo el que tenga el código.", { nombre: viajero.nombre })}
                   </p>
                 </div>

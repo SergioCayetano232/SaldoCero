@@ -16,6 +16,11 @@ describe("mensajeDeCobro", () => {
     expect(mensaje({ cobro, soy: "a" })).toContain("Mi Bizum: 612 345 678");
   });
 
+  it("con PayPal, el enlace ya lleva lo que debe", () => {
+    const cobro = { tipo: "paypal", valor: "paypal.me/ana" };
+    expect(mensaje({ cobro })).toContain("PayPal de Ana: https://paypal.me/ana/108.83EUR");
+  });
+
   it("sin Bizum ni IBAN, el mensaje de siempre", () => {
     expect(mensaje()).not.toContain("Bizum");
   });

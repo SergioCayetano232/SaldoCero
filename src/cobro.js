@@ -1,4 +1,4 @@
-// Dónde le pagan a cada uno: su Bizum o su IBAN.
+// Dónde le pagan a cada uno: su Bizum, su IBAN o su PayPal.me o Revolut.
 
 import { t } from "./idioma";
 
@@ -20,8 +20,31 @@ function ibanValido(iban) {
   return resto === 1;
 }
 
-// { tipo: "bizum" | "iban", valor } o null si no es ninguna de las dos cosas.
+// "https://www.PayPal.me/Ana" o "revolut.me/ana", de las dos formas va.
+// Se guarda sin el https para que quepa en los 40 de la columna.
+const ENLACES = [
+  { tipo: "paypal", dominio: "paypal.me", patron: /^(?:https?:\/\/)?(?:www\.)?paypal\.(?:me|com\/paypalme)\/([a-z0-9]{1,20})\/?$/i },
+  { tipo: "revolut", dominio: "revolut.me", patron: /^(?:https?:\/\/)?(?:www\.)?revolut\.me\/([a-z0-9._-]{2,25})\/?$/i },
+];
+
+function leerEnlace(texto) {
+  const limpio = String(texto ?? "").trim();
+  for (const { tipo, dominio, patron } of ENLACES) {
+    const usuario = limpio.match(patron)?.[1];
+    if (usuario) return { tipo, valor: `${dominio}/${usuario.toLowerCase()}` };
+  }
+  return null;
+}
+
+export function esEnlace(cobro) {
+  return cobro?.tipo === "paypal" || cobro?.tipo === "revolut";
+}
+
+// { tipo: "bizum" | "iban" | "paypal" | "revolut", valor } o null si no es nada de eso.
 export function leerCobro(texto) {
+  const enlace = leerEnlace(texto);
+  if (enlace) return enlace;
+
   const limpio = compactar(texto);
 
   // Bizum va con el móvil, que en España empieza por 6 o por 7.
@@ -38,6 +61,7 @@ export function leerCobro(texto) {
 // "612 345 678" y "ES91 2100 0418 ...", que es como se leen y se dictan.
 export function cobroComoTexto(cobro) {
   if (!cobro) return "";
+  if (esEnlace(cobro)) return cobro.valor;
   if (cobro.tipo === "bizum") return cobro.valor.replace(/(\d{3})(\d{3})(\d{3})/, "$1 $2 $3");
   return cobro.valor.replace(/(.{4})/g, "$1 ").trim();
 }
@@ -47,12 +71,28 @@ export function cobroDe(viajero) {
   return viajero?.cobro ? leerCobro(viajero.cobro) : null;
 }
 
+const NOMBRES = { bizum: "Bizum", iban: "IBAN", paypal: "PayPal", revolut: "Revolut" };
+
+export function nombreDeCobro(cobro) {
+  return NOMBRES[cobro?.tipo] ?? "";
+}
+
+// PayPal.me se deja la cifra en el enlace: paypal.me/ana/12.5EUR. Revolut no
+// dice cómo hacerlo, así que ahí abre el perfil y la cifra la pone él.
+export function enlaceDeCobro(cobro, cantidad = null, moneda = null) {
+  if (!esEnlace(cobro)) return null;
+  const base = `https://${cobro.valor}`;
+  if (cobro.tipo !== "paypal" || !(cantidad > 0) || !moneda) return base;
+  return `${base}/${Math.round(cantidad * 100) / 100}${moneda}`;
+}
+
 // Sin nombre es que el que cobra eres tú: "Mi Bizum".
-export function lineaDeCobro(cobro, nombre = null) {
+// Con cantidad, el enlace de PayPal ya va con ella.
+export function lineaDeCobro(cobro, nombre = null, cantidad = null, moneda = null) {
   if (!cobro) return null;
-  const tipo = cobro.tipo === "bizum" ? "Bizum" : "IBAN";
-  const como = !nombre ? t("Mi {tipo}", { tipo }) : tipo === "Bizum" ? t("Bizum a {nombre}", { nombre }) : t("IBAN de {nombre}", { nombre });
-  return `${como}: ${cobroComoTexto(cobro)}`;
+  const tipo = nombreDeCobro(cobro);
+  const como = !nombre ? t("Mi {tipo}", { tipo }) : tipo === "Bizum" ? t("Bizum a {nombre}", { nombre }) : t("{tipo} de {nombre}", { tipo, nombre });
+  return `${como}: ${enlaceDeCobro(cobro, cantidad, moneda) ?? cobroComoTexto(cobro)}`;
 }
 
 // La cifra para pegar en Bizum o en el banco: con coma, sin símbolo y sin

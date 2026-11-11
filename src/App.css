@@ -4378,6 +4378,12 @@ button.pago-cantidad:hover {
   text-align: left;
 }
 
+/* PayPal y Revolut van en un enlace: que se vea igual que el de copiar. */
+a.pago-cobro {
+  color: inherit;
+  text-decoration: none;
+}
+
 .pago-cobro:hover {
   border-style: solid;
   background-color: var(--teal-50);
