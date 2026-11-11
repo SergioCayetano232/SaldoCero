@@ -55,6 +55,7 @@ import { diasSinGastos, textoHuecos } from "../huecos";
 import { aOtraCategoria, categoriasDestino, textoPasarA } from "../recategorizar";
 import { textoQuitarVarios } from "../deshacer";
 import { esUnaLista, gastosDeLista, textoApuntarLista } from "../pegarGastos";
+import { esDeSplitwise, gastosDeSplitwise, textoDeSplitwise } from "../splitwise";
 
 function Gastos({
   codigo,
@@ -251,7 +252,11 @@ function Gastos({
   const [sinGastar, setSinGastar] = useState(() => datos.leerDiasSinGastar(codigo));
   // Lo pegado de las notas del móvil, mientras miras qué ha salido antes de apuntarlo.
   const [pegado, setPegado] = useState(null);
-  const deLaLista = pegado && gastosDeLista(pegado, viajeros, { pagadorId, moneda: monedaViaje, soy });
+  const deSplitwise = Boolean(pegado) && esDeSplitwise(pegado);
+  const deLaLista =
+    pegado &&
+    (deSplitwise ? gastosDeSplitwise(pegado, viajeros, monedaViaje) : gastosDeLista(pegado, viajeros, { pagadorId, moneda: monedaViaje, soy }));
+  const campoSplitwise = useRef(null);
   const huecos = diasSinGastos(gastos, sinGastar);
   const campoFecha = useRef(null);
   const formulario = useRef(null);
@@ -915,6 +920,14 @@ function Gastos({
     setPegado(texto);
   }
 
+  async function abrirSplitwise(e) {
+    const archivo = e.target.files?.[0];
+    e.target.value = "";
+    if (!archivo) return;
+    setPegado(await archivo.text());
+    formulario.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   async function apuntarLista() {
     if (await onAnadirVarios(deLaLista.gastos)) {
       setPegado(null);
@@ -999,9 +1012,13 @@ function Gastos({
                 <div className="lista-pegada" role="status">
                   <p>
                     📋{" "}
-                    {deLaLista.gastos.length === 0
-                      ? t("De lo que has pegado no sale ningún gasto.")
-                      : tn(deLaLista.gastos.length, "De lo que has pegado sale 1 gasto:", "De lo que has pegado salen {n} gastos:")}
+                    {deLaLista.faltan?.length > 0
+                      ? t("En Splitwise hay gente que aquí no está. Añade antes a {nombres}.", { nombres: enLista(deLaLista.faltan) })
+                      : deLaLista.gastos.length === 0
+                        ? t("De lo que has pegado no sale ningún gasto.")
+                        : deSplitwise
+                          ? textoDeSplitwise(deLaLista.gastos.length)
+                          : tn(deLaLista.gastos.length, "De lo que has pegado sale 1 gasto:", "De lo que has pegado salen {n} gastos:")}
                   </p>
                   {deLaLista.gastos.length > 0 && (
                     <ul>
@@ -1024,7 +1041,10 @@ function Gastos({
                   {deLaLista.sinEntender.length > 0 && (
                     <p className="lista-pegada-fuera">
                       {/* Lo normal es que falte quién pagó: con el de arriba elegido, entran. */}
-                      {t("Se quedan fuera, sin importe o sin quién pagó:")} {deLaLista.sinEntender.map((l) => `«${l}»`).join(", ")}
+                      {deSplitwise
+                        ? t("Se quedan fuera, por ir en otra moneda o no cuadrar:")
+                        : t("Se quedan fuera, sin importe o sin quién pagó:")}{" "}
+                      {deLaLista.sinEntender.map((l) => `«${l}»`).join(", ")}
                     </p>
                   )}
                   <div className="lista-pegada-botones">
@@ -2188,7 +2208,19 @@ function Gastos({
           )}
 
           {gastos.length === 0 ? (
-            <p className="vacio">{t("Todavía no hay gastos. Apunta el primero aquí arriba.")}</p>
+            <>
+              <p className="vacio">{t("Todavía no hay gastos. Apunta el primero aquí arriba.")}</p>
+              {/* Lo normal es cambiarse de app con el viaje recién creado. */}
+              {!cerrado && (
+                <p className="vacio de-splitwise">
+                  {t("¿Veníais de Splitwise?")}{" "}
+                  <button className="enlace" onClick={() => campoSplitwise.current?.click()}>
+                    {t("Trae su CSV")}
+                  </button>
+                  <input ref={campoSplitwise} type="file" accept=".csv,text/csv" onChange={abrirSplitwise} hidden />
+                </p>
+              )}
+            </>
           ) : visibles.length === 0 ? (
             <p className="vacio">{textoSinResultados(filtros)}</p>
           ) : (

@@ -837,4 +837,10 @@ export default {
   "Pasar a {viaje}": "Move to {viaje}",
   "Pasar a otro viaje": "Move to another trip",
   "Pasar {concepto} a otro viaje": "Move {concepto} to another trip",
+  "De Splitwise sale 1 gasto:": "1 expense comes from Splitwise:",
+  "De Splitwise salen {n} gastos:": "{n} expenses come from Splitwise:",
+  "En Splitwise hay gente que aquí no está. Añade antes a {nombres}.": "Some people in Splitwise aren't here. Add {nombres} first.",
+  "Se quedan fuera, por ir en otra moneda o no cuadrar:": "Left out, because they're in another currency or don't add up:",
+  "¿Veníais de Splitwise?": "Coming from Splitwise?",
+  "Trae su CSV": "Bring its CSV",
 };
