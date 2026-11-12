@@ -372,6 +372,21 @@ export async function ponerDuda(id, texto, por = null) {
   if (error || !data.length) throw fallo(error, "No hemos podido guardar la pregunta.");
 }
 
+export async function apuntarCompras(viajeId, textos) {
+  const { error } = await supabase.from("compras").insert(textos.map((texto) => ({ viaje_id: viajeId, texto })));
+  if (error) throw fallo(error, "No hemos podido apuntarlo en la lista.");
+}
+
+export async function marcarCompra(id, comprado) {
+  const { data, error } = await supabase.from("compras").update({ comprado }).eq("id", id).select("id");
+  if (error || !data.length) throw fallo(error, "No hemos podido marcarlo.");
+}
+
+export async function quitarCompras(ids) {
+  const { error } = await supabase.from("compras").delete().in("id", ids);
+  if (error) throw fallo(error, "No hemos podido quitarlo de la lista.");
+}
+
 // Poner, cambiar o quitar la tuya. Lo que toca lo dice alTocar.
 export async function reaccionar(gastoId, viajeroId, emoji, que) {
   const fila = supabase.from("reacciones");
@@ -454,7 +469,7 @@ export { usarViajero };
 
 // Los viajeros y los gastos de un viaje ya abierto.
 async function cargarContenido(viajeId) {
-  const [delViaje, viajeros, gastos, participantes, saldados, parciales, bote, actividad, reacciones] = await Promise.all([
+  const [delViaje, viajeros, gastos, participantes, saldados, parciales, bote, actividad, reacciones, compras] = await Promise.all([
     // Lo del viaje otra vez, por si lo ha cambiado alguien desde otro móvil.
     supabase.from("viajes").select("nombre, moneda, presupuesto, cerrado_en, redondear, topes, anterior, centro, categorias").eq("id", viajeId).single(),
     supabase.from("viajeros").select("id, nombre, cobro, con_id, desde, hasta").eq("viaje_id", viajeId).order("creado_en"),
@@ -493,6 +508,7 @@ async function cargarContenido(viajeId) {
       .select("gasto_id, viajero_id, emoji, gastos!inner(viaje_id)")
       .eq("gastos.viaje_id", viajeId)
       .order("creado_en"),
+    supabase.from("compras").select("id, texto, comprado, creado_en").eq("viaje_id", viajeId).order("creado_en"),
   ]);
   // Como con la actividad: si fallan, el viaje se abre igual, sin caritas.
   const porGasto = reaccionesPorGasto(reacciones.error ? [] : reacciones.data);
@@ -551,6 +567,10 @@ async function cargarContenido(viajeId) {
           moneda: f.moneda,
           creadoEn: f.creado_en,
         })),
+    // Igual que las reacciones: sin la lista de la compra, el viaje se abre.
+    compras: compras.error
+      ? []
+      : compras.data.map((c) => ({ id: c.id, texto: c.texto, comprado: c.comprado, creadoEn: c.creado_en })),
     aportaciones: bote.data.map((a) => ({
       id: a.id,
       viajeroId: a.viajero_id,

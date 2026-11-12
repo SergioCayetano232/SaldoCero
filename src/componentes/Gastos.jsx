@@ -92,6 +92,8 @@ function Gastos({
   verGasto = null,
   llegada = null,
   onLlegadaUsada,
+  deCompra = null,
+  onCompraApuntada,
 }) {
   // Lo que dejaste a medias la última vez, si lo hay.
   const [borrador] = useState(() => borradorQueVale(datos.leerBorrador(codigo), Date.now(), viajeros));
@@ -252,6 +254,20 @@ function Gastos({
   const [participantes, setParticipantes] = useState(null);
   // El gasto que estás tocando ahora mismo. Vacío si estás apuntando uno nuevo.
   const [editando, setEditando] = useState(null);
+  // Lo de la lista de la compra que se está apuntando. Al guardar, sale de la lista.
+  const [idsDeCompra, setIdsDeCompra] = useState(null);
+  const [compraAntes, setCompraAntes] = useState(null);
+  // Editando otro gasto no, que le cambiaría el concepto a ese.
+  const vieneDeCompra = deCompra !== compraAntes && deCompra && !cerrado && !editando;
+  if (deCompra !== compraAntes) {
+    setCompraAntes(deCompra);
+    if (vieneDeCompra) {
+      setConcepto(deCompra.concepto);
+      setCategoria(deCompra.categoria);
+      setCategoriaAMano(true);
+      setIdsDeCompra(deCompra.ids);
+    }
+  }
   // Al editar no: ese gasto ya tiene el suyo.
   const ultimo = editando ? null : ultimoCambio(gastos, moneda, monedaViaje);
   // El gasto que se parece al que ibas a apuntar, con lo que tenías escrito.
@@ -537,6 +553,15 @@ function Gastos({
     return () => window.removeEventListener("keydown", alPulsar);
   }, [cerrado]);
 
+  // De la lista de la compra, igual: lo que falta es quién y cuánto.
+  useEffect(() => {
+    if (!deCompra || cerrado) return;
+    const campo = pagadorId ? campoImporte.current : campoPagador.current;
+    campo?.focus({ preventScroll: true });
+    formulario.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deCompra]);
+
   // Venga del atajo del icono o con un ticket, lo siguiente es escribir el importe.
   useEffect(() => {
     if (!llegada) return;
@@ -651,6 +676,7 @@ function Gastos({
   }
 
   function limpiar(queda = siguiente) {
+    setIdsDeCompra(null);
     setRecuperado(false);
     escribirImporte("");
     setMoneda(queda.moneda);
@@ -911,6 +937,8 @@ function Gastos({
     } else {
       // Dejamos el pagador puesto por si encadena varios gastos.
       guardando = onAnadir(gasto);
+      const comprado = idsDeCompra;
+      if (comprado) Promise.resolve(guardando).then((bien) => bien && onCompraApuntada?.(comprado));
     }
     // Solo si ha ido bien: si falla, ya sale el error arriba.
     Promise.resolve(guardando).then((bien) => bien && avisarHecho(como));
@@ -925,6 +953,13 @@ function Gastos({
   function cancelar() {
     setPagadorId(porDefecto);
     limpiar();
+  }
+
+  function soltarCompra() {
+    setIdsDeCompra(null);
+    setConcepto("");
+    setCategoria(POR_DEFECTO);
+    setCategoriaAMano(false);
   }
 
   // Con varios días va al primero: al apuntarlo se quita y sale el siguiente.
@@ -1508,6 +1543,14 @@ function Gastos({
                 <small className={`nota-quedan ${quedanEnConcepto(concepto) === 0 ? "tope" : ""}`} aria-live="polite">
                   {quedanEnConcepto(concepto) === 0 ? t("No cabe más") : t("Quedan {n} letras", { n: quedanEnConcepto(concepto) })}
                 </small>
+              )}
+              {idsDeCompra && (
+                <p className="de-la-compra" role="status">
+                  🛒 {t("Al guardarlo, sale de la lista de la compra.")}
+                  <button className="enlace" onClick={soltarCompra}>
+                    {t("No es esto")}
+                  </button>
+                </p>
               )}
 
               <div className="fila-ticket">

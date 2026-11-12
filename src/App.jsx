@@ -28,6 +28,7 @@ import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
 import Viajeros from "./componentes/Viajeros";
 import Bote from "./componentes/Bote";
+import ListaCompra from "./componentes/ListaCompra";
 import Gastos from "./componentes/Gastos";
 import Resumen from "./componentes/Resumen";
 import Actividad from "./componentes/Actividad";
@@ -40,6 +41,7 @@ import { destinosPosibles, pasarGasto } from "./mover";
 import { loTuyo } from "./tuAno";
 import { estaDiscreto, ponerDiscreto, alCambiarDiscreto } from "./discreto";
 import { alTocar, trasTocar } from "./reacciones";
+import { conceptoDeCompras, categoriaDeCompras } from "./compras";
 import { t, idiomaActual, alCambiarIdioma, usarIdioma, guardarIdioma, otroIdioma, IDIOMAS } from "./idioma";
 
 // Fuera del componente: dentro, el linter no deja tocar window.location.
@@ -72,6 +74,8 @@ function App() {
   const [borrado, setBorrado] = useState(null);
   // Lo último editado, con cómo estaba cada gasto, mientras se puede deshacer.
   const [editado, setEditado] = useState(null);
+  // Lo comprado que va camino del formulario de gastos.
+  const [deCompra, setDeCompra] = useState(null);
   // Cuál de los viajeros eres tú. Guardado en este navegador.
   const [soy, setSoy] = useState(null);
   useEffect(() => datos.usarViajero(soy), [soy]);
@@ -529,6 +533,7 @@ function App() {
   const gastos = viaje.gastos.filter((g) => !seVan.has(g.id) && !seVan.has(g.pagadorId));
   const parciales = (viaje.parciales ?? []).filter((p) => !seVan.has(p.id));
   const aportaciones = (viaje.aportaciones ?? []).filter((a) => !seVan.has(a.id) && !seVan.has(a.viajeroId));
+  const compras = (viaje.compras ?? []).filter((c) => !seVan.has(c.id));
   const balances = balancesConBote(viajeros, gastos, parciales, aportaciones);
   const colores = conColoresDeGrupos(coloresDelViaje(viajeros.map((v) => v.nombre)), viajeros);
   const cerrado = estaCerrado(viaje);
@@ -602,6 +607,22 @@ function App() {
         />
       )}
 
+      <ListaCompra
+        compras={compras}
+        cerrado={fijo}
+        onApuntar={(textos) => hacer(() => datos.apuntarCompras(viaje.id, textos))}
+        onMarcar={async (cosa, comprado) => {
+          const ponerla = (valor) =>
+            setViaje((v) => ({ ...v, compras: v.compras.map((c) => (c.id === cosa.id ? { ...c, comprado: valor } : c)) }));
+          ponerla(comprado);
+          if (!(await hacer(() => datos.marcarCompra(cosa.id, comprado)))) ponerla(!comprado);
+        }}
+        onQuitar={(cosa) => borrarConAviso(cosa.id, `"${cosa.texto}"`, () => datos.quitarCompras([cosa.id]))}
+        onGasto={(cosas) =>
+          setDeCompra({ ids: cosas.map((c) => c.id), concepto: conceptoDeCompras(cosas), categoria: categoriaDeCompras(cosas) })
+        }
+      />
+
       <Gastos
         // Otro viaje, otro formulario: que no se cuele lo que escribías en el anterior.
         key={viaje.codigo}
@@ -652,6 +673,8 @@ function App() {
         }}
         // Uno detrás de otro, para que queden en la lista en el orden en que los pegaste.
         onDuda={(id, texto) => hacer(() => datos.ponerDuda(id, texto, soy))}
+        deCompra={deCompra}
+        onCompraApuntada={(ids) => hacer(() => datos.quitarCompras(ids))}
         // Hay que saber quién eres. Con el viaje cerrado sí, mirando no.
         onReaccionar={
           soloVer || !soy

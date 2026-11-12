@@ -4012,6 +4012,123 @@ button.pago-cantidad:hover {
   margin-bottom: 8px;
 }
 
+/* ===== Lista de la compra ===== */
+.compra-explica {
+  margin-bottom: 10px;
+}
+
+.compra-lista {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+}
+
+.compra-lista li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--linea);
+  animation: aparecer-creciendo var(--medio) var(--curva-muelle);
+}
+
+.compra-lista li:last-child {
+  border-bottom: none;
+}
+
+.compra-lista label {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.compra-lista input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: var(--teal-500);
+  transition: transform var(--rapido) var(--curva-muelle);
+}
+
+.compra-lista input[type="checkbox"]:active {
+  transform: scale(0.85);
+}
+
+.compra-texto {
+  overflow-wrap: anywhere;
+  transition: color var(--medio) var(--curva-suave);
+}
+
+/* Tachado con una raya que se dibuja, no de golpe. */
+.compra-lista .compra-texto {
+  background: linear-gradient(currentColor, currentColor) no-repeat 0 55% / 0 1.5px;
+  transition: background-size var(--medio) var(--curva-suave), color var(--medio);
+}
+
+.compra-lista li.comprado .compra-texto {
+  color: var(--tinta-tenue);
+  background-size: 100% 1.5px;
+}
+
+.compra-lista li .boton-quitar {
+  opacity: 0.3;
+}
+
+.compra-lista li:hover .boton-quitar,
+.compra-lista li:focus-within .boton-quitar {
+  opacity: 0.7;
+}
+
+@media (hover: none) {
+  .compra-lista li .boton-quitar {
+    opacity: 0.6;
+  }
+}
+
+.compra-apuntar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  font-weight: 600;
+  color: var(--teal-700);
+  background-color: var(--teal-50);
+  border: 1px dashed var(--teal-300);
+  border-radius: var(--radio-sm);
+  animation: rebotar var(--medio) var(--curva-muelle);
+}
+
+.compra-apuntar:hover {
+  background-color: var(--teal-100);
+  transform: translateY(-1px);
+}
+
+.compra .fila-formulario {
+  margin-bottom: 0;
+}
+
+
+.compra .aviso {
+  margin-top: 8px;
+}
+
+.de-la-compra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin: -4px 0 4px;
+  font-size: 13px;
+  color: var(--teal-700);
+  animation: entrar-desde-abajo var(--medio) var(--curva-suave);
+}
+
 .bote .lista-parciales {
   margin-bottom: 12px;
 }

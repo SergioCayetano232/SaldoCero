@@ -148,6 +148,15 @@ create table aportaciones_bote (
   creado_en timestamptz not null default now()
 );
 
+-- La lista de la compra. Al apuntar el gasto, lo comprado se borra de aquí.
+create table compras (
+  id uuid primary key default gen_random_uuid(),
+  viaje_id uuid not null references viajes(id) on delete cascade,
+  texto text not null check (char_length(texto) between 1 and 40),
+  comprado boolean not null default false,
+  creado_en timestamptz not null default now()
+);
+
 -- Las reacciones a los gastos. Una por viajero y gasto: otra la cambia.
 -- Las mismas cuatro que REACCIONES en src/reacciones.js.
 create table reacciones (
@@ -166,6 +175,7 @@ create index on pagos_saldados (viaje_id);
 create index on pagos_parciales (viaje_id);
 create index on aportaciones_bote (viaje_id);
 create index on reacciones (viajero_id);
+create index on compras (viaje_id);
 
 -- ---------- Quién puede ver qué ----------
 --
@@ -232,6 +242,7 @@ alter table pagos_saldados enable row level security;
 alter table pagos_parciales enable row level security;
 alter table aportaciones_bote enable row level security;
 alter table reacciones enable row level security;
+alter table compras enable row level security;
 
 -- Del viaje y de los viajeros solo se cambian estas columnas. El código, o de
 -- qué viaje es cada uno, no se tocan nunca.
@@ -245,6 +256,9 @@ grant update (confirmado) on pagos_saldados to anon, authenticated;
 -- De una reacción solo se cambia cuál es.
 revoke update on reacciones from anon, authenticated;
 grant update (emoji) on reacciones to anon, authenticated;
+-- De lo de la compra solo se marca si ya está.
+revoke update on compras from anon, authenticated;
+grant update (comprado) on compras to anon, authenticated;
 -- Los códigos no se leen nunca: el que entra con el de mirar sacaría el bueno.
 revoke select on viajes from anon, authenticated;
 grant select (id, nombre, moneda, presupuesto, redondear, topes, categorias, anterior, centro, cerrado_en, creado_en) on viajes to anon, authenticated;
@@ -309,6 +323,13 @@ create policy "poner en el bote" on aportaciones_bote for insert with check (
   and exists (select 1 from viajeros v where v.id = viajero_id and v.viaje_id = viaje_actual())
 );
 create policy "quitar del bote" on aportaciones_bote for delete using (viaje_id = viaje_abierto());
+
+-- La compra es del viaje en marcha: cerrado, ya no se toca.
+create policy "ver compras" on compras for select using (viaje_id = viaje_visible());
+create policy "apuntar compra" on compras for insert with check (viaje_id = viaje_abierto());
+create policy "marcar compra" on compras for update
+  using (viaje_id = viaje_abierto()) with check (viaje_id = viaje_abierto());
+create policy "quitar compra" on compras for delete using (viaje_id = viaje_abierto());
 
 -- Las reacciones cuelgan del gasto, como los participantes. Con viaje_actual y
 -- no abierto: reírse de la cuenta del restaurante se puede después de volver.
@@ -889,3 +910,11 @@ create trigger moneda_sin_dinero before update of moneda on viajes
 --   revoke update on reacciones from anon, authenticated;
 --   grant update (emoji) on reacciones to anon, authenticated;
 --   Y pega las cuatro reglas: "ver reacciones", "reaccionar", "cambiar reaccion" y "quitar reaccion".
+
+-- La lista de la compra.
+--   Pega la tabla "create table compras" de más arriba, y luego:
+--   create index on compras (viaje_id);
+--   alter table compras enable row level security;
+--   revoke update on compras from anon, authenticated;
+--   grant update (comprado) on compras to anon, authenticated;
+--   Y pega las cuatro reglas: "ver compras", "apuntar compra", "marcar compra" y "quitar compra".
