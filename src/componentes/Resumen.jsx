@@ -49,6 +49,7 @@ import { vibrar } from "../vibrar";
 import { miSaldo, textoMiSaldo, estadoMiSaldo } from "../miSaldo";
 import { esAtajoBajarResumen, esAtajoCompartir, esAtajoExcel, esAtajoCuentas, esOrdenador } from "../teclado";
 import { t, tn } from "../idioma";
+import { esperaDeLasDeudas } from "../esperando";
 
 function Resumen({
   balances,
@@ -128,6 +129,7 @@ function Resumen({
   // Con lo ya pagado descontado: si todo está saldado, no le toca a nadie.
   const leTocaPagar = calcularLeTocaPagar(balancesTrasPagos(personas, pagos));
   const pendiente = quedaPorPagar(pagos);
+  const espera = esperaDeLasDeudas(viaje?.cerradoEn, pendiente);
   const delViaje = gastoPorCategoria(gastos, importeDeGasto);
   // Si lo han quitado del viaje mientras lo mirabas, vuelve a todos.
   const deQuien = personas.find((v) => v.id === persona);
@@ -543,6 +545,7 @@ function Resumen({
                 {t("quedan")} <Cifra valor={pendiente} moneda={monedaViaje} />
               </span>
             )}
+            {espera && <span className={`pendiente espera ${espera.avisar ? "avisar" : ""}`}>🕰️ {espera.texto}</span>}
             {cuantosPorConfirmar(pagos) > 0 && (
               <span className="pendiente por-confirmar">
                 ⏳ {tn(cuantosPorConfirmar(pagos), "1 por confirmar", "{n} por confirmar")}
@@ -557,6 +560,12 @@ function Resumen({
           <>
             {todoPagado && (
               <p className="saldadas">🎉 {t("Todo pagado. Ya estáis a cero.")}</p>
+            )}
+
+            {espera?.avisar && !soloVer && (
+              <p className="espera-toque" role="status">
+                {t("Ya va siendo hora de dar un toque: con el 💬 se lo pides por WhatsApp con la cifra puesta.")}
+              </p>
             )}
 
             {tasaACasa && pendiente > 0 && (

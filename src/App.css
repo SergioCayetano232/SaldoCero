@@ -3365,6 +3365,31 @@ button:active {
   font-variant-numeric: tabular-nums;
 }
 
+.pendiente.espera {
+  color: var(--tinta-suave);
+  background-color: var(--papel-hundido);
+  border: 1px solid var(--linea);
+}
+
+/* A las dos semanas ya no es neutro. */
+.pendiente.espera.avisar {
+  color: var(--rojo);
+  background-color: var(--rojo-fondo);
+  border-color: transparent;
+  animation: latido 0.6s var(--curva-muelle) 2;
+}
+
+.espera-toque {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--tinta-suave);
+  border-left: 3px solid var(--rojo);
+  background-color: var(--rojo-fondo);
+  border-radius: 0 var(--radio-sm) var(--radio-sm) 0;
+  animation: entrar-desde-abajo var(--medio) var(--curva-suave);
+}
+
 /* El botón de dar por pagada una deuda. */
 .boton-saldar {
   flex-shrink: 0;
