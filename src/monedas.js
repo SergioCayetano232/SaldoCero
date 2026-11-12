@@ -1,5 +1,7 @@
 // Las monedas y el cambio entre ellas.
 
+import { estaDiscreto, CIFRA_TAPADA } from "./discreto";
+
 // Las que se suelen necesitar en un viaje.
 // La API solo trae las del Banco Central Europeo. Las marcadas aMano no están
 // ahí: el cambio de esas lo escribe quien apunta el gasto.
@@ -46,14 +48,23 @@ export function simboloDe(codigo) {
 }
 
 // "12,50 €". El símbolo detrás o delante según la moneda, como se escribe aquí.
+// Es lo que se ve en pantalla: con el modo discreto, "•••• €".
 export function conMoneda(importe, codigo = "EUR") {
-  const cifra = importe.toFixed(2);
-  const simbolo = simboloDe(codigo);
+  if (estaDiscreto()) return ponerSimbolo(CIFRA_TAPADA, codigo);
+  return conMonedaDeVerdad(importe, codigo);
+}
 
+// Para lo que sale de la app (el resumen, la imagen, el WhatsApp): esas cifras
+// van siempre, que el otro no tiene el modo discreto puesto.
+export function conMonedaDeVerdad(importe, codigo = "EUR") {
+  const cifra = importe.toFixed(2);
   // Con el símbolo delante, el menos va antes que él: "-$400.00", no "$-400.00".
-  return codigo === "USD" || codigo === "GBP"
-    ? `${importe < 0 ? "-" : ""}${simbolo}${cifra.replace("-", "")}`
-    : `${cifra} ${simbolo}`;
+  return ponerSimbolo(cifra.replace("-", ""), codigo, importe < 0 ? "-" : "");
+}
+
+function ponerSimbolo(cifra, codigo, menos = "") {
+  const simbolo = simboloDe(codigo);
+  return codigo === "USD" || codigo === "GBP" ? `${menos}${simbolo}${cifra}` : `${menos}${cifra} ${simbolo}`;
 }
 
 // El cambio nos lo da esta API, que es gratis y no pide clave.

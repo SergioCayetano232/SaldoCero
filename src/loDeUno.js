@@ -2,7 +2,7 @@
 
 import { importeDeGasto, parteDe, loQuePuso } from "./calculos";
 import { pagoEnElGasto } from "./pagadores";
-import { conMoneda } from "./monedas";
+import { conMoneda, conMonedaDeVerdad } from "./monedas";
 import { enCorto } from "./fechas";
 import { enlaceDelViaje } from "./compartir";
 import { t } from "./idioma";
@@ -46,10 +46,10 @@ export function mensajeDeCuenta({ gastos, viajero, viajeros, esYo, nombreViaje, 
   for (const gasto of suyos) {
     const parte = parteDe(gasto, viajero.id, viajeros);
     const pago = pagoEnElGasto(gasto, viajero.id);
-    const cuanto = conMoneda(importeDeGasto(gasto), moneda);
+    const cuanto = conMonedaDeVerdad(importeDeGasto(gasto), moneda);
     const cuando = gasto.fecha ? `, ${enCorto(gasto.fecha)}` : "";
 
-    const cifra = conMoneda(parte, moneda);
+    const cifra = conMonedaDeVerdad(parte, moneda);
     let suyo;
     if (pago && parte > 0) suyo = esYo ? t("lo pagué, me tocan {cifra}", { cifra }) : t("lo pagaste, te tocan {cifra}", { cifra });
     else if (pago) suyo = esYo ? t("lo pagué, no iba") : t("lo pagaste, no ibas");
@@ -62,8 +62,8 @@ export function mensajeDeCuenta({ gastos, viajero, viajeros, esYo, nombreViaje, 
   lineas.push("");
   lineas.push(
     esYo
-      ? t("En total pagué *{pagado}* y me tocan *{toca}*", { pagado: conMoneda(pagado, moneda), toca: conMoneda(leToca, moneda) })
-      : t("En total pagaste *{pagado}* y te tocan *{toca}*", { pagado: conMoneda(pagado, moneda), toca: conMoneda(leToca, moneda) })
+      ? t("En total pagué *{pagado}* y me tocan *{toca}*", { pagado: conMonedaDeVerdad(pagado, moneda), toca: conMonedaDeVerdad(leToca, moneda) })
+      : t("En total pagaste *{pagado}* y te tocan *{toca}*", { pagado: conMonedaDeVerdad(pagado, moneda), toca: conMonedaDeVerdad(leToca, moneda) })
   );
 
   if (codigo) lineas.push("", t("Las cuentas, aquí: {enlace}", { enlace: enlaceDelViaje(codigo, base) }));

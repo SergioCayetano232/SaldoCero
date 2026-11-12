@@ -262,6 +262,26 @@
   transform: rotate(90deg);
 }
 
+.boton-discreto {
+  font-size: 15px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition: background-color var(--rapido) var(--curva-suave), transform var(--medio) var(--curva-muelle);
+}
+
+.boton-discreto:hover {
+  background-color: var(--teal-50);
+}
+
+.boton-discreto:active {
+  transform: scale(0.85);
+}
+
+.boton-discreto.puesto {
+  background-color: var(--teal-100);
+}
+
 /* ===== Formularios ===== */
 .fila-formulario {
   display: flex;

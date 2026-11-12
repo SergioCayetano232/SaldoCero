@@ -38,6 +38,7 @@ import { enLista } from "./nombres";
 import { usarCategoriasPropias } from "./categorias";
 import { destinosPosibles, pasarGasto } from "./mover";
 import { loTuyo } from "./tuAno";
+import { estaDiscreto, ponerDiscreto, alCambiarDiscreto } from "./discreto";
 import { t, idiomaActual, alCambiarIdioma, usarIdioma, guardarIdioma, otroIdioma, IDIOMAS } from "./idioma";
 
 // Fuera del componente: dentro, el linter no deja tocar window.location.
@@ -58,6 +59,8 @@ function App() {
   useEffect(() => {
     document.documentElement.lang = idioma;
   }, [idioma]);
+  // Igual con el modo discreto: todas las cifras salen de conMoneda.
+  const discreto = useSyncExternalStore(alCambiarDiscreto, estaDiscreto);
   const [viaje, setViaje] = useState(null); // null = todavía no has entrado en ninguno
   // Las categorías propias se apuntan antes de pintar nada, que todo lo de abajo las lee.
   usarCategoriasPropias(viaje?.categorias);
@@ -173,7 +176,7 @@ function App() {
 
   useEffect(() => {
     document.title = tituloDelViaje(viaje, soy);
-  }, [viaje, soy]);
+  }, [viaje, soy, discreto]);
 
   // Lo cierre quien lo cierre, aquí o desde otro móvil, en "Tus viajes" sale el candado.
   const codigoAbierto = viaje?.codigo;
@@ -545,6 +548,11 @@ function App() {
         onReabrir={reabrirViaje}
         onRenombrar={(nombre) => hacer(() => datos.renombrarViaje(viaje, nombre))}
         onCambiarMoneda={(moneda) => hacer(() => datos.cambiarMoneda(viaje, moneda))}
+        discreto={discreto}
+        onDiscreto={() => {
+          ponerDiscreto(!discreto);
+          datos.guardarDiscreto(!discreto);
+        }}
       />
 
       <AvisoSinConexion />

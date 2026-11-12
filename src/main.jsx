@@ -3,9 +3,12 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { usarIdioma, idiomaGuardado, idiomaDelMovil } from './idioma'
+import { ponerDiscreto } from './discreto'
+import { leerDiscreto } from './datos'
 
 // Antes de pintar nada, que no se vea un momento en el otro idioma.
 usarIdioma(idiomaGuardado() ?? idiomaDelMovil(navigator.languages))
+ponerDiscreto(leerDiscreto())
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

@@ -1,6 +1,6 @@
 // El resumen del viaje en texto, para pegarlo en el grupo.
 
-import { conMoneda } from "./monedas";
+import { conMonedaDeVerdad as conMoneda } from "./monedas";
 import { cuandoFue, hoy } from "./fechas";
 import { vibrar } from "./vibrar";
 import { gastoPorCategoria } from "./categorias";

@@ -1,6 +1,6 @@
 // Pedir el dinero de una deuda por WhatsApp, con el mensaje ya escrito.
 
-import { conMoneda } from "./monedas";
+import { conMonedaDeVerdad as conMoneda } from "./monedas";
 import { enlaceDelViaje } from "./compartir";
 import { lineaDeCobro } from "./cobro";
 import { cobroYo as cobroEsMio } from "./juntos";

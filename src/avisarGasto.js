@@ -3,7 +3,7 @@
 
 import { importeDeGasto, participantesDeGasto, repartoDeGasto } from "./calculos";
 import { categoriaDe } from "./categorias";
-import { conMoneda } from "./monedas";
+import { conMonedaDeVerdad as conMoneda } from "./monedas";
 import { porCabeza } from "./porCabeza";
 import { BOTE } from "./bote";
 import { enlaceDelViaje } from "./compartir";

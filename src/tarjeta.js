@@ -1,7 +1,7 @@
 // El resumen en una imagen para el grupo: quién paga a quién se entiende de
 // un vistazo, sin abrir nada. Aquí lo que va en ella; lo de pintar, aparte.
 
-import { conMoneda } from "./monedas";
+import { conMonedaDeVerdad as conMoneda } from "./monedas";
 import { cuandoFue } from "./fechas";
 import { porCabeza } from "./compartir";
 import { tn } from "./idioma";

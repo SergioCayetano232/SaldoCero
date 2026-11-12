@@ -20,7 +20,7 @@ const TEXTO_INVITAR = {
 
 // El viaje abierto, con su código para compartir.
 // Con soloVer se entró con el código de mirar: se ve todo, no se toca nada.
-function BarraViaje({ viaje, cerrado, soloVer = false, onSalir, onRenombrar, onReabrir, onCambiarMoneda, onCodigoParaVer }) {
+function BarraViaje({ viaje, cerrado, soloVer = false, onSalir, onRenombrar, onReabrir, onCambiarMoneda, onCodigoParaVer, discreto = false, onDiscreto }) {
   const [codigoCopiado, setCodigoCopiado] = useState(false);
   const [invitado, setInvitado] = useState("");
   const [paraMirar, setParaMirar] = useState("");
@@ -138,6 +138,16 @@ function BarraViaje({ viaje, cerrado, soloVer = false, onSalir, onRenombrar, onR
           >
             {viaje.moneda ?? "EUR"}
           </span>
+        )}
+        {onDiscreto && (
+          <button
+            className={`boton-discreto ${discreto ? "puesto" : ""}`}
+            onClick={onDiscreto}
+            aria-pressed={discreto}
+            title={discreto ? t("Enseñar las cifras") : t("Tapar las cifras")}
+          >
+            <span aria-hidden="true">{discreto ? "🙈" : "👁️"}</span>
+          </button>
         )}
         <button
           className="boton-salir"

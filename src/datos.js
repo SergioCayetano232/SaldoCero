@@ -242,6 +242,27 @@ export function guardarTema(tema) {
   }
 }
 
+// El modo discreto se queda puesto: si lo quitara al volver a abrir, se verían
+// las cifras justo cuando enseñas el móvil.
+const CLAVE_DISCRETO = "saldocero-discreto";
+
+export function leerDiscreto() {
+  try {
+    return localStorage.getItem(CLAVE_DISCRETO) === "si";
+  } catch {
+    return false;
+  }
+}
+
+export function guardarDiscreto(si) {
+  try {
+    if (si) localStorage.setItem(CLAVE_DISCRETO, "si");
+    else localStorage.removeItem(CLAVE_DISCRETO);
+  } catch {
+    // Sin guardar, dura lo que dure la pestaña.
+  }
+}
+
 // El gasto a medio escribir de cada viaje. Solo en este móvil.
 const CLAVE_BORRADOR = "saldocero-borrador";
 
