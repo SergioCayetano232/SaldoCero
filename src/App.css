@@ -455,6 +455,7 @@ button:active {
 /* Los botones de quitar y editar solo salen cuando vas a por ellos. */
 .lista li .boton-quitar,
 .lista li .boton-editar,
+.lista li .boton-fijar:not(.puesto),
 .lista li .boton-repetir,
 .lista li .boton-mover-gasto,
 .lista li .boton-avisar,
@@ -465,6 +466,8 @@ button:active {
 .lista li:hover .boton-quitar,
 .lista li:hover .boton-editar,
 .lista li:hover .boton-repetir,
+.lista li:hover .boton-fijar:not(.puesto),
+.lista li:focus-within .boton-fijar:not(.puesto),
 .lista li:hover .boton-mover-gasto,
 .lista li:focus-within .boton-quitar,
 .lista li:focus-within .boton-editar,
@@ -489,6 +492,80 @@ button:active {
   background-color: var(--rojo-fondo);
   opacity: 1 !important;
   transform: scale(1.1);
+}
+
+/* Lo fijado arriba de la lista. Va en cristal, que se vea que es aparte. */
+.fijados {
+  margin-bottom: 18px;
+}
+
+.fijados ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.fijados li {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: aparecer-creciendo var(--medio) var(--curva-muelle);
+}
+
+.fijado-ir {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  text-align: left;
+  border-radius: var(--radio-sm);
+  background: var(--cristal);
+  border: 1px solid var(--cristal-borde);
+  box-shadow: var(--sombra-sm);
+  transition: background-color var(--rapido), transform var(--rapido) var(--curva-suave);
+}
+
+.fijado-ir:hover {
+  background-color: var(--teal-50);
+}
+
+.fijado-ir:active {
+  transform: scale(0.98);
+}
+
+.fijado-texto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fijado-texto .gasto-concepto {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.boton-fijar {
+  font-size: 14px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition: transform var(--rapido) var(--curva-muelle);
+}
+
+.boton-fijar:hover {
+  background-color: var(--teal-50);
+  opacity: 1 !important;
+  transform: scale(1.1);
+}
+
+/* Fijado, la chincheta se clava un poco de lado. */
+.boton-fijar.puesto {
+  transform: rotate(-20deg);
 }
 
 /* Los dos botones que lleva cada gasto a la derecha. */

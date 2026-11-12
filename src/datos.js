@@ -9,6 +9,7 @@ import { limpiarNota } from "./notas";
 import { limpiarNombre } from "./nombres";
 import { codigoDeTexto } from "./codigos";
 import { POR_DIAS } from "./ordenar";
+import { fijadosGuardados } from "./fijados";
 import { conCerrado, conNeto } from "./pasados";
 import { conLoTuyo } from "./tuAno";
 import { t } from "./idioma";
@@ -164,6 +165,35 @@ export function guardarOrden(codigo, orden) {
     localStorage.setItem(CLAVE_ORDEN, JSON.stringify(todos));
   } catch {
     // Sin guardar, vuelve a por días la próxima vez. Nada grave.
+  }
+}
+
+// Los gastos fijados arriba en cada viaje.
+const CLAVE_FIJADOS = "saldocero-fijados";
+
+function todosLosFijados() {
+  try {
+    const guardado = JSON.parse(localStorage.getItem(CLAVE_FIJADOS) ?? "{}");
+    return typeof guardado === "object" && guardado !== null ? guardado : {};
+  } catch {
+    return {};
+  }
+}
+
+export function leerFijados(codigo) {
+  return fijadosGuardados(todosLosFijados()[codigo]);
+}
+
+export function guardarFijados(codigo, ids) {
+  const todos = todosLosFijados();
+
+  if (ids.length) todos[codigo] = ids;
+  else delete todos[codigo];
+
+  try {
+    localStorage.setItem(CLAVE_FIJADOS, JSON.stringify(todos));
+  } catch {
+    // Sin guardar, se desfijan al volver a abrir. Nada grave.
   }
 }
 

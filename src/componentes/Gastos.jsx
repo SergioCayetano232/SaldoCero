@@ -10,6 +10,7 @@ import { hoy, comoTitulo, enCorto, porDias, diasRapidos, cuantosGastos, apuntado
 import { sugerirConceptos, importeSugerido } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
 import { ordenarGastos, ordenGuardado, ordenesPara, POR_DIAS, siguienteOrden } from "../ordenar";
+import { cambiarFijado, gastosFijados } from "../fijados";
 import { conPropina, PROPINAS } from "../propina";
 import { costeGasolina, comoImporte, cocheGuardado, guardarCoche } from "../gasolina";
 import { presentesEseDia, ausentesEseDia, tieneEstancia } from "../estancia";
@@ -363,6 +364,14 @@ function Gastos({
     setSenalado(gasto.id);
   }
 
+  const [fijados, setFijados] = useState(() => datos.leerFijados(codigo));
+
+  function fijar(id) {
+    const nuevos = cambiarFijado(fijados, id);
+    setFijados(nuevos);
+    datos.guardarFijados(codigo, nuevos);
+  }
+
   useEffect(() => {
     if (!verDe && !verDia) return;
     const quieto = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -381,6 +390,8 @@ function Gastos({
   const puedeFiltrar = gastos.length >= MINIMO_PARA_FILTRAR;
   const filtrando = puedeFiltrar && hayFiltros(filtros);
   const visibles = filtrando ? filtrarGastos(gastos, filtros, viajeros, monedaViaje) : gastos;
+  // Buscando otra cosa, los fijados solo estorbarían arriba.
+  const losFijados = filtrando ? [] : gastosFijados(gastos, fijados);
   const buscado = filtrando ? filtros.texto : "";
   // Solo las categorías que hay, que elegir una vacía no sirve de nada.
   const categoriasUsadas = todasLasCategorias().filter((c) =>
@@ -2238,7 +2249,43 @@ function Gastos({
           ) : visibles.length === 0 ? (
             <p className="vacio">{textoSinResultados(filtros)}</p>
           ) : (
-            dias.map((dia) => (
+            <>
+            {losFijados.length > 0 && (
+              <div className="fijados">
+                <p className="dia-titulo">
+                  <span>📌 {t("Fijados")}</span>
+                </p>
+                {/* Una chuleta: tocarlo te lleva al gasto de verdad, que sigue en su día. */}
+                <ul>
+                  {losFijados.map((gasto) => (
+                    <li key={gasto.id}>
+                      <button className="fijado-ir" onClick={() => verDuda(gasto)} title={t("Verlo en la lista")}>
+                        <span className="gasto-icono" aria-hidden="true">
+                          {categoriaDe(gasto.categoria).emoji}
+                        </span>
+                        <span className="fijado-texto">
+                          <span className="gasto-concepto">{gasto.concepto}</span>
+                          <small className="reparto">
+                            {idsDeQuienPago(gasto).length > 1 ? nombreDeQuienPago(gasto, viajeros) : nombrePagador(gasto.pagadorId)}
+                            {gasto.fecha && ` · ${comoTitulo(gasto.fecha)}`}
+                          </small>
+                        </span>
+                        <span className="gasto-importe">{conMoneda(gasto.importe, gasto.moneda ?? monedaViaje)}</span>
+                      </button>
+                      <button
+                        className="boton-fijar puesto"
+                        onClick={() => fijar(gasto.id)}
+                        title={t("Desfijar")}
+                        aria-label={t("Desfijar {concepto}", { concepto: gasto.concepto })}
+                      >
+                        📌
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {dias.map((dia) => (
               <div className="dia" key={dia.fecha || "sin-fecha"}>
                 {/* El día solo se pone si el viaje dura más de uno. */}
                 {dias.length > 1 && (
@@ -2412,6 +2459,19 @@ function Gastos({
                             </button>
                           )}
                           <button
+                            className={`boton-fijar ${fijados.includes(gasto.id) ? "puesto" : ""}`}
+                            onClick={() => fijar(gasto.id)}
+                            aria-pressed={fijados.includes(gasto.id)}
+                            title={fijados.includes(gasto.id) ? t("Desfijar") : t("Fijar arriba")}
+                            aria-label={
+                              fijados.includes(gasto.id)
+                                ? t("Desfijar {concepto}", { concepto: gasto.concepto })
+                                : t("Fijar {concepto} arriba", { concepto: gasto.concepto })
+                            }
+                          >
+                            📌
+                          </button>
+                          <button
                             className="boton-repetir"
                             onClick={() => repetir(gasto)}
                             title={t("Apuntar otro igual")}
@@ -2449,7 +2509,8 @@ function Gastos({
                   ))}
                 </ul>
               </div>
-            ))
+            ))}
+            </>
           )}
         </>
       )}
