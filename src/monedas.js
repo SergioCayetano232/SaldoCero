@@ -142,6 +142,29 @@ export function cambioDelGasto(gasto, monedaViaje) {
     : `1 ${monedaViaje} = ${corta(1 / tasa)} ${gasto.moneda}`;
 }
 
+// El cambio del último gasto del viaje en esa moneda, para no tener que volver a
+// escribirlo. Sale de los gastos, así que les vale a todos los del viaje.
+// Con importes pequeños el redondeo a céntimos lo tuerce (0,46 € de 5 DH), así
+// que solo cuentan los de 5 o más; si no hay ninguno, el más grande.
+export function ultimoCambio(gastos, moneda, monedaViaje) {
+  const enEsa = gastos
+    .filter((g) => g.moneda === moneda && moneda !== monedaViaje && g.importe && g.importeConvertido)
+    .sort((a, b) => (a.creadoEn ?? "").localeCompare(b.creadoEn ?? ""));
+  if (!enEsa.length) return null;
+
+  const fiables = enEsa.filter((g) => Math.abs(g.importeConvertido) >= 5);
+  const gasto = fiables.length
+    ? fiables.at(-1)
+    : enEsa.reduce((mas, g) => (Math.abs(g.importeConvertido) > Math.abs(mas.importeConvertido) ? g : mas));
+
+  return { tasa: Number(tasaDeGasto(gasto).toPrecision(4)), texto: cambioDelGasto(gasto, monedaViaje) };
+}
+
+// Si el de ahora es otro. Por debajo de medio punto es el mismo, cosas del redondeo.
+export function esOtroCambio(tasa, otra) {
+  return !tasa || Math.abs(tasa / otra - 1) > 0.005;
+}
+
 // Para ponerlo en el campo: sin colas de decimales, pero sin perder precisión.
 export function tasaComoTexto(tasa) {
   return String(Number(tasa.toFixed(6))).replace(".", ",");

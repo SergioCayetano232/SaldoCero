@@ -1148,6 +1148,12 @@ button:active {
   color: var(--teal-600);
 }
 
+/* En su propia línea: al lado del cambio del día no cabe en el móvil. */
+.conversion .enlace.cambio-anterior {
+  display: block;
+  margin: 4px 0 0;
+}
+
 .conversion .enlace {
   margin-left: 8px;
   font-size: 12px;

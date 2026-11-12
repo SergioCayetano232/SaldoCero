@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { MONEDAS, cambio, esAMano, leerTasa, leerImporte, tasaDeGasto, tasaComoTexto, conMoneda, monedaDelSiguiente, monedasEnOrden, monedaDeCasa, banderaDe, monedaConBandera, cambioDelGasto } from "./monedas";
+import { MONEDAS, cambio, esAMano, leerTasa, leerImporte, tasaDeGasto, tasaComoTexto, conMoneda, monedaDelSiguiente, monedasEnOrden, monedaDeCasa, banderaDe, monedaConBandera, cambioDelGasto, ultimoCambio, esOtroCambio } from "./monedas";
 
 describe("leerTasa", () => {
   it("vale con coma o con punto", () => {
@@ -226,5 +226,65 @@ describe("cambioDelGasto", () => {
   it("en la moneda del viaje, o de los de antes sin moneda, nada", () => {
     expect(cambioDelGasto({ moneda: "EUR", importe: 20, importeConvertido: 20 }, "EUR")).toBeNull();
     expect(cambioDelGasto({ importe: 20 }, "EUR")).toBeNull();
+  });
+});
+
+describe("ultimoCambio", () => {
+  const gasto = (importe, importeConvertido, creadoEn, moneda = "MAD") => ({ importe, importeConvertido, moneda, creadoEn });
+
+  it("el del último gasto en esa moneda", () => {
+    const gastos = [gasto(500, 46, "2026-11-01T10:00"), gasto(1000, 92.1, "2026-11-02T10:00"), gasto(40, 40, "2026-11-03T10:00", "EUR")];
+    expect(ultimoCambio(gastos, "MAD", "EUR").tasa).toBe(0.0921);
+  });
+
+  it("el último apuntado, aunque sea de otro día", () => {
+    const gastos = [gasto(1000, 92.1, "2026-11-05T10:00"), gasto(500, 46, "2026-11-01T10:00")];
+    expect(ultimoCambio(gastos, "MAD", "EUR").tasa).toBe(0.0921);
+  });
+
+  it("trae el texto para enseñarlo", () => {
+    expect(ultimoCambio([gasto(1000, 92.1, "2026-11-02")], "MAD", "EUR").texto).toBe("1 EUR = 10.9 MAD");
+  });
+
+  it("los pequeños no cuentan, que el redondeo los tuerce", () => {
+    const gastos = [gasto(1000, 92.1, "2026-11-01"), gasto(5, 0.47, "2026-11-02")];
+    expect(ultimoCambio(gastos, "MAD", "EUR").tasa).toBe(0.0921);
+  });
+
+  it("si solo hay pequeños, el más grande", () => {
+    const gastos = [gasto(30, 2.76, "2026-11-01"), gasto(5, 0.47, "2026-11-02")];
+    expect(ultimoCambio(gastos, "MAD", "EUR").tasa).toBe(0.092);
+  });
+
+  it("las devoluciones también valen", () => {
+    expect(ultimoCambio([gasto(-1000, -92.1, "2026-11-01")], "MAD", "EUR").tasa).toBe(0.0921);
+  });
+
+  it("sin gastos en esa moneda, nada", () => {
+    expect(ultimoCambio([gasto(40, 40, "2026-11-01", "EUR")], "MAD", "EUR")).toBeNull();
+    expect(ultimoCambio([], "MAD", "EUR")).toBeNull();
+  });
+
+  it("la del viaje no tiene cambio", () => {
+    expect(ultimoCambio([gasto(40, 40, "2026-11-01", "EUR")], "EUR", "EUR")).toBeNull();
+  });
+
+  it("los de antes sin fecha de apunte no rompen nada", () => {
+    expect(ultimoCambio([gasto(1000, 92.1, undefined)], "MAD", "EUR").tasa).toBe(0.0921);
+  });
+});
+
+describe("esOtroCambio", () => {
+  it("por un redondeo no es otro", () => {
+    expect(esOtroCambio(0.0921, 0.0922)).toBe(false);
+  });
+
+  it("el del banco sí lo es", () => {
+    expect(esOtroCambio(0.92, 0.95)).toBe(true);
+  });
+
+  it("si no hay ninguno, cualquiera es otro", () => {
+    expect(esOtroCambio(null, 0.92)).toBe(true);
+    expect(esOtroCambio(undefined, 0.92)).toBe(true);
   });
 });

@@ -79,6 +79,7 @@ export default {
   "Cambiar el nombre del viaje": "Rename the trip",
   "Salir del viaje (también con la Q)": "Leave the trip (also with Q)",
   "Salir del viaje": "Leave the trip",
+  "Usar el de la última vez: {cambio}": "Use last time's rate: {cambio}",
   "Tapar las cifras": "Hide the amounts",
   "Enseñar las cifras": "Show the amounts",
   "Los gastos ya no cambian; las deudas se pueden seguir marcando como pagadas.": "Expenses can't change any more; debts can still be marked as paid.",

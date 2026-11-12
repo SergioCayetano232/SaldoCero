@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { calcularTotal, gastoMasCaro, importeDeGasto, mediaPorGasto, participantesDeGasto, esDevolucion } from "../calculos";
-import { MONEDAS, cambio, cambioDelGasto, conMoneda, leerTasa, monedaDelSiguiente, monedasEnOrden, simboloDe, tasaComoTexto } from "../monedas";
+import { MONEDAS, cambio, cambioDelGasto, conMoneda, esAMano, esOtroCambio, leerTasa, monedaDelSiguiente, monedasEnOrden, simboloDe, tasaComoTexto, ultimoCambio } from "../monedas";
 import { enLista } from "../nombres";
 import { todasLasCategorias, categoriasPropias, POR_DEFECTO, categoriaDe, conceptoSinEscribir } from "../categorias";
 import CategoriasPropias from "./CategoriasPropias";
@@ -249,6 +249,8 @@ function Gastos({
   const [participantes, setParticipantes] = useState(null);
   // El gasto que estás tocando ahora mismo. Vacío si estás apuntando uno nuevo.
   const [editando, setEditando] = useState(null);
+  // Al editar no: ese gasto ya tiene el suyo.
+  const ultimo = editando ? null : ultimoCambio(gastos, moneda, monedaViaje);
   // El gasto que se parece al que ibas a apuntar, con lo que tenías escrito.
   const [repetido, setRepetido] = useState(null);
   const [raro, setRaro] = useState(null);
@@ -1227,8 +1229,11 @@ function Gastos({
                   className="selector-moneda"
                   value={moneda}
                   onChange={(e) => {
-                    setMoneda(e.target.value);
-                    setTasaAMano(null);
+                    const nueva = e.target.value;
+                    setMoneda(nueva);
+                    // Las que la API no sabe, con el de la última vez ya puesto.
+                    const antes = esAMano(nueva) && !editando ? ultimoCambio(gastos, nueva, monedaViaje) : null;
+                    setTasaAMano(antes ? tasaComoTexto(antes.tasa) : null);
                   }}
                   title={t("¿En qué moneda se pagó?")}
                 >
@@ -1451,6 +1456,11 @@ function Gastos({
                         {t("Cambiar")}
                       </button>
                     </>
+                  )}
+                  {ultimo && tasa !== undefined && esOtroCambio(tasa, ultimo.tasa) && (
+                    <button className="enlace cambio-anterior" onClick={() => setTasaAMano(tasaComoTexto(ultimo.tasa))}>
+                      {t("Usar el de la última vez: {cambio}", { cambio: ultimo.texto })}
+                    </button>
                   )}
                 </div>
               )}
