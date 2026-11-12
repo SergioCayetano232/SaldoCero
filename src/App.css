@@ -3365,6 +3365,11 @@ button:active {
   font-variant-numeric: tabular-nums;
 }
 
+/* En "Tus viajes", lo que lleva semanas sin pagarse. */
+.viaje-pasado-espera {
+  color: var(--rojo);
+}
+
 .pendiente.espera {
   color: var(--tinta-suave);
   background-color: var(--papel-hundido);

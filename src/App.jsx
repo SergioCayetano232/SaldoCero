@@ -187,9 +187,11 @@ function App() {
   const codigoAbierto = viaje?.codigo;
   const estaCerradoYa = estaCerrado(viaje);
 
+  const cerradoEn = viaje?.cerradoEn ?? null;
+
   useEffect(() => {
-    if (codigoAbierto) datos.cerradoEnHistorial(codigoAbierto, estaCerradoYa);
-  }, [codigoAbierto, estaCerradoYa]);
+    if (codigoAbierto) datos.cerradoEnHistorial(codigoAbierto, estaCerradoYa, cerradoEn);
+  }, [codigoAbierto, estaCerradoYa, cerradoEn]);
 
   // Y lo que debes o te deben, para verlo desde la lista sin entrar.
   const neto = miNeto(viaje, soy);

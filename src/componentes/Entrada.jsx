@@ -9,6 +9,19 @@ import { tuAno, textoTuAno } from "../tuAno";
 import { cuentaDeNeto } from "../titulo";
 import { esOrdenador, viajeDeLaTecla } from "../teclado";
 import { t } from "../idioma";
+import { esperaDeLasDeudas } from "../esperando";
+
+// El candado, y si se te debe algo (o debes), desde cuándo. Sin la cuenta no se
+// dice: que el viaje se cerrara hace un mes no le importa a nadie.
+function Cerrado({ viaje }) {
+  const espera = cuentaDeNeto(viaje.neto, viaje.moneda) ? esperaDeLasDeudas(viaje.cerradoEn, Math.abs(viaje.neto)) : null;
+  if (!espera) return <span className="viaje-pasado-cuando">· 🔒 {t("cerrado")}</span>;
+  return (
+    <span className={`viaje-pasado-cuando ${espera.avisar ? "viaje-pasado-espera" : ""}`}>
+      · 🔒 {t("cerrado {cuando}", { cuando: espera.cuando })}
+    </span>
+  );
+}
 
 // Primera pantalla: o creas un viaje o entras en el de alguien con su código.
 function Entrada({ onCrear, onEntrar, cargando, error }) {
@@ -195,7 +208,7 @@ function Entrada({ onCrear, onEntrar, cargando, error }) {
                       <span className="viaje-pasado-cuando">· {monedaEnLista(viaje.moneda, deCasa)}</span>
                     )}
                     {viaje.visto && <span className="viaje-pasado-cuando">· {haceCuanto(viaje.visto)}</span>}
-                    {viaje.cerrado && <span className="viaje-pasado-cuando">· 🔒 {t("cerrado")}</span>}
+                    {viaje.cerrado && <Cerrado viaje={viaje} />}
                     {viaje.soloVer && <span className="viaje-pasado-cuando">· 👁️ {t("para mirar")}</span>}
                     {cuentaDeNeto(viaje.neto, viaje.moneda) && (
                       <span className={`viaje-pasado-cuando viaje-pasado-saldo ${viaje.neto > 0 ? "le-deben" : "debe"}`}>

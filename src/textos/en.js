@@ -79,6 +79,7 @@ export default {
   "Cambiar el nombre del viaje": "Rename the trip",
   "Salir del viaje (también con la Q)": "Leave the trip (also with Q)",
   "Salir del viaje": "Leave the trip",
+  "cerrado {cuando}": "closed {cuando}",
   "Ya va siendo hora de dar un toque: con el 💬 se lo pides por WhatsApp con la cifra puesta.": "Time for a nudge: the 💬 asks them on WhatsApp with the amount filled in.",
   "cerrado {cuando} y sin pagar": "closed {cuando}, still unpaid",
   "Al guardarlo, sale de la lista de la compra.": "Once saved, it comes off the shopping list.",

@@ -23,7 +23,7 @@ describe("esperaDeLasDeudas", () => {
   });
 
   it("a los tres días ya sale, sin avisar", () => {
-    expect(esperaDeLasDeudas(haceDias(3), 30, ahora)).toEqual({ dias: 3, texto: "cerrado hace 3 días y sin pagar", avisar: false });
+    expect(esperaDeLasDeudas(haceDias(3), 30, ahora)).toEqual({ dias: 3, cuando: "hace 3 días", texto: "cerrado hace 3 días y sin pagar", avisar: false });
   });
 
   it("a las dos semanas, con aviso", () => {

@@ -71,6 +71,7 @@ function apuntarEnHistorial(viaje) {
       moneda: viaje.moneda,
       visto: Date.now(),
       cerrado: Boolean(antes?.cerrado),
+      cerradoEn: antes?.cerradoEn ?? null,
       neto: antes?.neto ?? null,
       // Lo que te tocó y de qué año es, para "tu año". Se rehace al cargarlo.
       tuyo: antes?.tuyo ?? null,
@@ -89,8 +90,8 @@ export function renombrarEnHistorial(codigo, nombre) {
   localStorage.setItem(CLAVE_HISTORICO, JSON.stringify(lista));
 }
 
-export function cerradoEnHistorial(codigo, cerrado) {
-  const lista = conCerrado(historial(), codigo, cerrado);
+export function cerradoEnHistorial(codigo, cerrado, cerradoEn = null) {
+  const lista = conCerrado(historial(), codigo, cerrado, cerradoEn);
   if (lista) localStorage.setItem(CLAVE_HISTORICO, JSON.stringify(lista));
 }
 

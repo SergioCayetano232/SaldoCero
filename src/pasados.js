@@ -2,14 +2,21 @@ import { monedaConBandera } from "./monedas";
 import { t } from "./idioma";
 import { normalizar } from "./filtros";
 
-// La lista de "Tus viajes" con el candado puesto o quitado en uno de ellos.
+// La lista de "Tus viajes" con el candado puesto o quitado en uno de ellos, y
+// cuándo se cerró, para decir desde cuándo se deben las cosas.
 // Devuelve null si no cambia nada, para no escribir por escribir.
-export function conCerrado(lista, codigo, cerrado) {
+export function conCerrado(lista, codigo, cerrado, cerradoEn = null) {
   const viaje = lista.find((v) => v.codigo === codigo);
-  // Los guardados de antes no traen el campo: esos van como abiertos.
-  if (!viaje || Boolean(viaje.cerrado) === cerrado) return null;
+  const cuando = cerrado ? cerradoEn ?? viaje?.cerradoEn ?? null : null;
+  // Los guardados de antes no traen los campos: esos van como abiertos.
+  if (!viaje || (Boolean(viaje.cerrado) === cerrado && (viaje.cerradoEn ?? null) === cuando)) return null;
 
-  return lista.map((v) => (v.codigo === codigo ? { ...v, cerrado } : v));
+  return lista.map((v) => {
+    if (v.codigo !== codigo) return v;
+    const nuevo = { ...v, cerrado, cerradoEn: cuando };
+    if (!cuando) delete nuevo.cerradoEn;
+    return nuevo;
+  });
 }
 
 // Lo que debes o te deben en ese viaje, para verlo sin entrar. Se queda lo de la

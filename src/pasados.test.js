@@ -32,6 +32,31 @@ describe("conCerrado", () => {
   it("un viaje que no está en la lista no se añade", () => {
     expect(conCerrado(lista, "ZZZ999", true)).toBeNull();
   });
+
+  it("guarda cuándo se cerró", () => {
+    expect(conCerrado(lista, "AAA111", true, "2026-11-01T10:00:00Z")[0].cerradoEn).toBe("2026-11-01T10:00:00Z");
+  });
+
+  it("a un cerrado de antes, sin fecha, se la pone", () => {
+    expect(conCerrado(lista, "BBB222", true, "2026-11-01T10:00:00Z")[1]).toEqual({
+      codigo: "BBB222", nombre: "Fallas", visto: 2, cerrado: true, cerradoEn: "2026-11-01T10:00:00Z",
+    });
+  });
+
+  it("con la misma fecha, no hay nada que guardar", () => {
+    const conFecha = [{ codigo: "AAA111", cerrado: true, cerradoEn: "2026-11-01T10:00:00Z" }];
+    expect(conCerrado(conFecha, "AAA111", true, "2026-11-01T10:00:00Z")).toBeNull();
+  });
+
+  it("al reabrirlo, la fecha se va", () => {
+    const conFecha = [{ codigo: "AAA111", cerrado: true, cerradoEn: "2026-11-01T10:00:00Z" }];
+    expect(conCerrado(conFecha, "AAA111", false)[0]).toEqual({ codigo: "AAA111", cerrado: false });
+  });
+
+  it("cerrado sin saber cuándo, se queda la que tenía", () => {
+    const conFecha = [{ codigo: "AAA111", cerrado: true, cerradoEn: "2026-11-01T10:00:00Z" }];
+    expect(conCerrado(conFecha, "AAA111", true)).toBeNull();
+  });
 });
 
 describe("monedaEnLista", () => {

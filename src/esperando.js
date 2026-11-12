@@ -16,9 +16,6 @@ export function esperaDeLasDeudas(cerradoEn, quedan, ahora = Date.now()) {
   const dias = Math.floor((ahora - cierre) / 86400000);
   if (dias < DIAS_PARA_DECIRLO) return null;
 
-  return {
-    dias,
-    texto: t("cerrado {cuando} y sin pagar", { cuando: haceCuanto(cierre, ahora) }),
-    avisar: dias >= DIAS_PARA_AVISAR,
-  };
+  const cuando = haceCuanto(cierre, ahora);
+  return { dias, cuando, texto: t("cerrado {cuando} y sin pagar", { cuando }), avisar: dias >= DIAS_PARA_AVISAR };
 }
