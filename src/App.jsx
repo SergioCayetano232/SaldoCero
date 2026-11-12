@@ -39,6 +39,7 @@ import { usarCategoriasPropias } from "./categorias";
 import { destinosPosibles, pasarGasto } from "./mover";
 import { loTuyo } from "./tuAno";
 import { estaDiscreto, ponerDiscreto, alCambiarDiscreto } from "./discreto";
+import { alTocar, trasTocar } from "./reacciones";
 import { t, idiomaActual, alCambiarIdioma, usarIdioma, guardarIdioma, otroIdioma, IDIOMAS } from "./idioma";
 
 // Fuera del componente: dentro, el linter no deja tocar window.location.
@@ -651,6 +652,20 @@ function App() {
         }}
         // Uno detrás de otro, para que queden en la lista en el orden en que los pegaste.
         onDuda={(id, texto) => hacer(() => datos.ponerDuda(id, texto, soy))}
+        // Hay que saber quién eres. Con el viaje cerrado sí, mirando no.
+        onReaccionar={
+          soloVer || !soy
+            ? null
+            : async (gasto, emoji) => {
+                const que = alTocar(gasto.reacciones, soy, emoji);
+                const ponerlas = (reacciones) =>
+                  setViaje((v) => ({ ...v, gastos: v.gastos.map((g) => (g.id === gasto.id ? { ...g, reacciones } : g)) }));
+                // Se ve al momento. Si no se guarda, vuelve como estaba.
+                ponerlas(trasTocar(gasto.reacciones, soy, emoji));
+                const bien = await hacer(() => datos.reaccionar(gasto.id, soy, emoji, que));
+                if (!bien) ponerlas(gasto.reacciones);
+              }
+        }
         destinos={destinosPosibles(datos.historial(), viaje.codigo)}
         prepararMover={async (gasto, codigo) => {
           try {

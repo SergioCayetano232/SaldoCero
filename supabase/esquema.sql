@@ -148,6 +148,16 @@ create table aportaciones_bote (
   creado_en timestamptz not null default now()
 );
 
+-- Las reacciones a los gastos. Una por viajero y gasto: otra la cambia.
+-- Las mismas cuatro que REACCIONES en src/reacciones.js.
+create table reacciones (
+  gasto_id uuid not null references gastos(id) on delete cascade,
+  viajero_id uuid not null references viajeros(id) on delete cascade,
+  emoji text not null check (emoji in ('👍', '😂', '😱', '🤔')),
+  creado_en timestamptz not null default now(),
+  primary key (gasto_id, viajero_id)
+);
+
 create index on viajes (codigo);
 create index on viajeros (viaje_id);
 create index on gastos (viaje_id);
@@ -155,6 +165,7 @@ create index on gastos_participantes (viajero_id);
 create index on pagos_saldados (viaje_id);
 create index on pagos_parciales (viaje_id);
 create index on aportaciones_bote (viaje_id);
+create index on reacciones (viajero_id);
 
 -- ---------- Quién puede ver qué ----------
 --
@@ -220,6 +231,7 @@ alter table gastos_participantes enable row level security;
 alter table pagos_saldados enable row level security;
 alter table pagos_parciales enable row level security;
 alter table aportaciones_bote enable row level security;
+alter table reacciones enable row level security;
 
 -- Del viaje y de los viajeros solo se cambian estas columnas. El código, o de
 -- qué viaje es cada uno, no se tocan nunca.
@@ -230,6 +242,9 @@ grant update (nombre, con_id, desde, hasta) on viajeros to anon, authenticated;
 -- De una deuda pagada solo se cambia eso: que el que cobra la confirme.
 revoke update on pagos_saldados from anon, authenticated;
 grant update (confirmado) on pagos_saldados to anon, authenticated;
+-- De una reacción solo se cambia cuál es.
+revoke update on reacciones from anon, authenticated;
+grant update (emoji) on reacciones to anon, authenticated;
 -- Los códigos no se leen nunca: el que entra con el de mirar sacaría el bueno.
 revoke select on viajes from anon, authenticated;
 grant select (id, nombre, moneda, presupuesto, redondear, topes, categorias, anterior, centro, cerrado_en, creado_en) on viajes to anon, authenticated;
@@ -294,6 +309,23 @@ create policy "poner en el bote" on aportaciones_bote for insert with check (
   and exists (select 1 from viajeros v where v.id = viajero_id and v.viaje_id = viaje_actual())
 );
 create policy "quitar del bote" on aportaciones_bote for delete using (viaje_id = viaje_abierto());
+
+-- Las reacciones cuelgan del gasto, como los participantes. Con viaje_actual y
+-- no abierto: reírse de la cuenta del restaurante se puede después de volver.
+-- Con el código de mirar, no.
+create policy "ver reacciones" on reacciones for select using (
+  exists (select 1 from gastos g where g.id = gasto_id and g.viaje_id = viaje_visible())
+);
+create policy "reaccionar" on reacciones for insert with check (
+  exists (select 1 from gastos g where g.id = gasto_id and g.viaje_id = viaje_actual())
+  and exists (select 1 from viajeros v where v.id = viajero_id and v.viaje_id = viaje_actual())
+);
+create policy "cambiar reaccion" on reacciones for update
+  using (exists (select 1 from gastos g where g.id = gasto_id and g.viaje_id = viaje_actual()))
+  with check (exists (select 1 from gastos g where g.id = gasto_id and g.viaje_id = viaje_actual()));
+create policy "quitar reaccion" on reacciones for delete using (
+  exists (select 1 from gastos g where g.id = gasto_id and g.viaje_id = viaje_actual())
+);
 
 -- ---------- Fotos de los tickets ----------
 --
@@ -849,3 +881,11 @@ create trigger moneda_sin_dinero before update of moneda on viajes
 
 -- Varias fotos por gasto.
 --   alter table gastos add column mas_tickets text[] not null default '{}' check (cardinality(mas_tickets) <= 3);
+
+-- Reacciones a los gastos.
+--   Pega la tabla "create table reacciones" de más arriba, y luego:
+--   create index on reacciones (viajero_id);
+--   alter table reacciones enable row level security;
+--   revoke update on reacciones from anon, authenticated;
+--   grant update (emoji) on reacciones to anon, authenticated;
+--   Y pega las cuatro reglas: "ver reacciones", "reaccionar", "cambiar reaccion" y "quitar reaccion".

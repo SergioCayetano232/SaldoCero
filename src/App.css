@@ -3557,6 +3557,110 @@ button.pago-cantidad:hover {
 }
 
 /* En el color de los avisos: es algo que alguien está esperando que contestes. */
+/* Las caritas de debajo del gasto. */
+.reacciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-top: 5px;
+}
+
+.reaccion {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  border-radius: var(--radio-pastilla);
+  background-color: var(--papel-hundido);
+  border: 1px solid var(--linea);
+  animation: rebotar var(--medio) var(--curva-muelle);
+  transition: transform var(--rapido) var(--curva-muelle), background-color var(--rapido);
+}
+
+.reaccion-cuantos {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tinta-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.reaccion.mia {
+  background-color: var(--teal-50);
+  border-color: var(--teal-300);
+}
+
+.reaccion.mia .reaccion-cuantos {
+  color: var(--teal-600);
+}
+
+.reaccion:not(:disabled):hover {
+  transform: scale(1.08);
+}
+
+.reaccion:disabled {
+  cursor: default;
+}
+
+.anadir-reaccion {
+  padding: 2px 7px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--tinta-tenue);
+  border-radius: var(--radio-pastilla);
+  border: 1px dashed var(--linea);
+  opacity: 0;
+  transition: opacity var(--rapido), color var(--rapido);
+}
+
+.anadir-reaccion small {
+  font-size: 10px;
+  margin-left: 1px;
+}
+
+.lista li:hover .anadir-reaccion,
+.anadir-reaccion:focus-visible {
+  opacity: 1;
+}
+
+.anadir-reaccion:hover {
+  color: var(--teal-600);
+  border-color: var(--teal-300);
+}
+
+/* En el móvil no hay hover: el botón se ve siempre, aunque flojito. */
+@media (hover: none) {
+  .anadir-reaccion {
+    opacity: 0.7;
+  }
+}
+
+.elegir-reaccion {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px 4px;
+  border-radius: var(--radio-pastilla);
+  background: var(--cristal);
+  border: 1px solid var(--cristal-borde);
+  box-shadow: var(--sombra-md);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  animation: aparecer-creciendo var(--medio) var(--curva-muelle);
+}
+
+.elegir-reaccion button {
+  font-size: 18px;
+  padding: 2px 5px;
+  border-radius: var(--radio-pastilla);
+  transition: transform var(--rapido) var(--curva-muelle);
+}
+
+.elegir-reaccion button:hover {
+  transform: scale(1.25) translateY(-2px);
+}
+
 .gasto-duda {
   display: flex;
   flex-wrap: wrap;

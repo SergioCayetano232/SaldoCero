@@ -11,6 +11,7 @@ import { sugerirConceptos, importeSugerido } from "../sugerencias";
 import { adivinarCategoria } from "../adivinar";
 import { ordenarGastos, ordenGuardado, ordenesPara, POR_DIAS, siguienteOrden } from "../ordenar";
 import { cambiarFijado, gastosFijados } from "../fijados";
+import { REACCIONES, pastillas } from "../reacciones";
 import { conPropina, PROPINAS } from "../propina";
 import { costeGasolina, comoImporte, cocheGuardado, guardarCoche } from "../gasolina";
 import { presentesEseDia, ausentesEseDia, tieneEstancia } from "../estancia";
@@ -78,6 +79,7 @@ function Gastos({
   onAnadirVarios,
   onQuitar,
   onDuda,
+  onReaccionar = null,
   destinos = [],
   prepararMover,
   onMover,
@@ -365,6 +367,8 @@ function Gastos({
   }
 
   const [fijados, setFijados] = useState(() => datos.leerFijados(codigo));
+  // El gasto al que le estás eligiendo cara.
+  const [reaccionando, setReaccionando] = useState(null);
 
   function fijar(id) {
     const nuevos = cambiarFijado(fijados, id);
@@ -2386,6 +2390,50 @@ function Gastos({
                               </button>
                             )}
                           </small>
+                        )}
+                        {(gasto.reacciones?.length > 0 || onReaccionar) && (
+                          <span className="reacciones">
+                            {pastillas(gasto.reacciones, viajeros, soy).map((p) => (
+                              <button
+                                // Con la cifra en la clave, al cambiar vuelve a dar el salto.
+                                key={`${p.emoji}${p.cuantos}`}
+                                className={`reaccion ${p.mia ? "mia" : ""}`}
+                                onClick={() => onReaccionar?.(gasto, p.emoji)}
+                                disabled={!onReaccionar}
+                                aria-pressed={p.mia}
+                                title={p.quienes}
+                                aria-label={`${p.emoji} ${p.quienes}`}
+                              >
+                                {p.emoji} <span className="reaccion-cuantos">{p.cuantos}</span>
+                              </button>
+                            ))}
+                            {onReaccionar &&
+                              (reaccionando === gasto.id ? (
+                                <span className="elegir-reaccion">
+                                  {REACCIONES.map((emoji) => (
+                                    <button
+                                      key={emoji}
+                                      onClick={() => {
+                                        setReaccionando(null);
+                                        onReaccionar(gasto, emoji);
+                                      }}
+                                      aria-label={t("Reaccionar con {emoji}", { emoji })}
+                                    >
+                                      {emoji}
+                                    </button>
+                                  ))}
+                                </span>
+                              ) : (
+                                <button
+                                  className="anadir-reaccion"
+                                  onClick={() => setReaccionando(gasto.id)}
+                                  title={t("Reaccionar")}
+                                  aria-label={t("Reaccionar a {concepto}", { concepto: gasto.concepto })}
+                                >
+                                  ☺︎<small>+</small>
+                                </button>
+                              ))}
+                          </span>
                         )}
                         {preguntando === gasto.id && (
                           <span className="preguntar-gasto">

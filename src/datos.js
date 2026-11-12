@@ -10,6 +10,7 @@ import { limpiarNombre } from "./nombres";
 import { codigoDeTexto } from "./codigos";
 import { POR_DIAS } from "./ordenar";
 import { fijadosGuardados } from "./fijados";
+import { reaccionesPorGasto } from "./reacciones";
 import { conCerrado, conNeto } from "./pasados";
 import { conLoTuyo } from "./tuAno";
 import { t } from "./idioma";
@@ -371,6 +372,18 @@ export async function ponerDuda(id, texto, por = null) {
   if (error || !data.length) throw fallo(error, "No hemos podido guardar la pregunta.");
 }
 
+// Poner, cambiar o quitar la tuya. Lo que toca lo dice alTocar.
+export async function reaccionar(gastoId, viajeroId, emoji, que) {
+  const fila = supabase.from("reacciones");
+  const { error } =
+    que === "poner"
+      ? await fila.insert({ gasto_id: gastoId, viajero_id: viajeroId, emoji })
+      : que === "cambiar"
+        ? await fila.update({ emoji }).eq("gasto_id", gastoId).eq("viajero_id", viajeroId)
+        : await fila.delete().eq("gasto_id", gastoId).eq("viajero_id", viajeroId);
+  if (error) throw fallo(error, "No hemos podido guardar la reacción.");
+}
+
 // Las deudas que quedaban, al viaje nuevo como gastos, y en el viejo dadas por
 // pagadas. Solo se marcan las que han llegado, que si no se perderían.
 export async function pasarLoPendiente(viejo, nuevo, pares, creadoPor = null) {
@@ -441,7 +454,7 @@ export { usarViajero };
 
 // Los viajeros y los gastos de un viaje ya abierto.
 async function cargarContenido(viajeId) {
-  const [delViaje, viajeros, gastos, participantes, saldados, parciales, bote, actividad] = await Promise.all([
+  const [delViaje, viajeros, gastos, participantes, saldados, parciales, bote, actividad, reacciones] = await Promise.all([
     // Lo del viaje otra vez, por si lo ha cambiado alguien desde otro móvil.
     supabase.from("viajes").select("nombre, moneda, presupuesto, cerrado_en, redondear, topes, anterior, centro, categorias").eq("id", viajeId).single(),
     supabase.from("viajeros").select("id, nombre, cobro, con_id, desde, hasta").eq("viaje_id", viajeId).order("creado_en"),
@@ -475,7 +488,14 @@ async function cargarContenido(viajeId) {
       .eq("viaje_id", viajeId)
       .order("creado_en", { ascending: false })
       .limit(CUANTA_ACTIVIDAD),
+    supabase
+      .from("reacciones")
+      .select("gasto_id, viajero_id, emoji, gastos!inner(viaje_id)")
+      .eq("gastos.viaje_id", viajeId)
+      .order("creado_en"),
   ]);
+  // Como con la actividad: si fallan, el viaje se abre igual, sin caritas.
+  const porGasto = reaccionesPorGasto(reacciones.error ? [] : reacciones.data);
 
   const error =
     delViaje.error ||
@@ -561,6 +581,7 @@ async function cargarContenido(viajeId) {
       lugar: gasto.lugar ?? null,
       duda: gasto.duda ?? null,
       dudaPor: gasto.duda_por ?? null,
+      reacciones: porGasto.get(gasto.id) ?? [],
       participantes: participantes.data
         .filter((p) => p.gasto_id === gasto.id)
         .map((p) => p.viajero_id),
