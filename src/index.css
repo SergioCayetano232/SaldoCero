@@ -187,6 +187,14 @@ h3 {
   text-wrap: balance;
 }
 
+/* Instalada, que no rebote al llegar al final como una web. En el navegador
+   lo dejo, que ahí se tira hacia abajo para recargar. */
+@media (display-mode: standalone) {
+  html {
+    overscroll-behavior-y: none;
+  }
+}
+
 /* Que un párrafo no acabe con una palabra sola en la última línea. */
 p {
   text-wrap: pretty;
