@@ -161,11 +161,12 @@ body {
   overflow-x: hidden;
   /* Cuatro manchas de color, quietas respecto a la ventana. Van aquí y no en
      un pseudoelemento porque así no hay juntas en páginas largas. */
-  background-image:
+  --manchas:
     radial-gradient(circle 46em at 12% 8%, var(--luz-teal), transparent 65%),
     radial-gradient(circle 38em at 88% 12%, var(--luz-naranja), transparent 62%),
     radial-gradient(circle 42em at 78% 82%, var(--luz-teal-2), transparent 65%),
     radial-gradient(circle 34em at 18% 92%, var(--luz-rosa), transparent 60%);
+  background-image: var(--manchas);
   background-attachment: fixed;
   background-repeat: no-repeat;
 }
@@ -199,6 +200,26 @@ body::after {
       animation: llenar-scroll linear both;
       animation-timeline: scroll(root);
     }
+  }
+}
+
+/* En el ordenador las manchas se mueven muy despacio, como si respiraran.
+   Las paso a una capa fija y muevo la capa entera: animar el fondo lo
+   repintaría en cada fotograma. En el móvil no, por la batería. Es más grande
+   que la ventana para que al moverse no se le vean los bordes. */
+@media screen and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  body {
+    background-image: none;
+  }
+
+  #root::before {
+    content: "";
+    position: fixed;
+    inset: -12%;
+    z-index: -1;
+    background-image: var(--manchas);
+    pointer-events: none;
+    animation: respirar 36s ease-in-out infinite alternate;
   }
 }
 
@@ -425,6 +446,18 @@ p {
   }
   50% {
     background-position: 100% 50%;
+  }
+}
+
+@keyframes respirar {
+  33% {
+    transform: translate(3%, -2%) rotate(2deg) scale(1.04);
+  }
+  66% {
+    transform: translate(-2%, 3%) rotate(-1.5deg) scale(0.98);
+  }
+  to {
+    transform: translate(2%, 2%) rotate(1deg) scale(1.03);
   }
 }
 
