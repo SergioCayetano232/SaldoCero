@@ -29,6 +29,22 @@
   animation-delay: 0.4s;
 }
 
+/* Y las que quedan más abajo entran según bajas. Va con translate y scale,
+   no con transform, para no quitarles el levantarse con el ratón. La primera
+   de la lista es la del scroll: así la de entrar manda mientras dura. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .app > .tarjeta {
+      animation-name: entrar-al-verla, aparecer;
+      animation-duration: auto, var(--lento);
+      animation-timing-function: var(--curva-suave), var(--curva-suave);
+      animation-fill-mode: both, backwards;
+      animation-timeline: view(), auto;
+      animation-range: entry 0% entry 70%, normal;
+    }
+  }
+}
+
 /* ===== Cabecera ===== */
 .cabecera {
   text-align: center;
