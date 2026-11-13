@@ -474,6 +474,18 @@ p {
   }
 }
 
+@keyframes abrir-halo {
+  0% {
+    box-shadow: 0 0 0 0 var(--teal-100);
+  }
+  45% {
+    box-shadow: 0 0 0 7px var(--teal-100);
+  }
+  100% {
+    box-shadow: 0 0 0 3px var(--teal-50);
+  }
+}
+
 @keyframes cerrar-anillo {
   to {
     --avance: 100%;

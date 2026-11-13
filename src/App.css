@@ -372,6 +372,13 @@ select:focus {
   box-shadow: 0 0 0 3px var(--teal-50);
 }
 
+/* El halo se abre de más y vuelve, como una gota al caer. Las casillas no,
+   que son pequeñas y se ve raro. */
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus {
+  animation: abrir-halo 0.45s var(--curva-suave);
+}
+
 select {
   cursor: pointer;
   appearance: none;
