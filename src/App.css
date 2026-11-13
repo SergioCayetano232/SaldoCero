@@ -3506,9 +3506,17 @@ button:active {
 
 .pago.pagado strong,
 .pago.pagado .pago-cantidad {
-  text-decoration: line-through;
-  text-decoration-thickness: 1.5px;
   color: var(--tinta-tenue);
+  /* La raya es un fondo y no un line-through para poder dibujarla de
+     izquierda a derecha al marcarla. */
+  background: linear-gradient(currentColor, currentColor) no-repeat 0 55% / 100% 1.5px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  animation: tachar 0.45s var(--curva-suave) backwards;
+}
+
+.pago.pagado .pago-cantidad {
+  animation-delay: 0.12s;
 }
 
 .pago.pagado .pago-flecha {

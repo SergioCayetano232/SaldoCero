@@ -428,6 +428,12 @@ p {
   }
 }
 
+@keyframes tachar {
+  from {
+    background-size: 0% 1.5px;
+  }
+}
+
 @keyframes dar-la-vuelta {
   from {
     opacity: 0;
