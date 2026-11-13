@@ -150,6 +150,8 @@ body {
   padding: 28px 18px 72px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  /* Fuera el recuadro azul al tocar: los botones ya se hunden con :active. */
+  -webkit-tap-highlight-color: transparent;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   position: relative;
