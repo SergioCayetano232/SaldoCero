@@ -195,6 +195,11 @@ h3 {
   }
 }
 
+input,
+textarea {
+  caret-color: var(--teal-500);
+}
+
 /* Que un párrafo no acabe con una palabra sola en la última línea. */
 p {
   text-wrap: pretty;
