@@ -117,7 +117,22 @@
   box-shadow: var(--sombra-md);
   position: relative;
   transition: box-shadow var(--medio) var(--curva-suave),
-    transform var(--medio) var(--curva-suave), border-color var(--medio);
+    transform var(--medio) var(--curva-suave), border-color var(--medio),
+    --brillo var(--medio);
+  /* La luz que sigue al ratón. --luz-x y --luz-y las pone luz.js. */
+  background-image: radial-gradient(
+    circle 280px at var(--luz-x, 50%) var(--luz-y, 0%),
+    var(--brillo),
+    transparent 70%
+  );
+}
+
+/* Registrada para que se pueda fundir: un color suelto no se anima dentro
+   de un degradado. */
+@property --brillo {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: transparent;
 }
 
 /* Una luz fina en el borde de arriba, como si le diera el sol. */
@@ -150,6 +165,13 @@
   box-shadow: var(--sombra-flotante);
   transform: translateY(-3px);
   border-color: var(--teal-300);
+}
+
+/* Solo con ratón: en el móvil se quedaría encendida después de tocar. */
+@media (hover: hover) {
+  .tarjeta:hover {
+    --brillo: var(--luz-raton);
+  }
 }
 
 .tarjeta h2 {

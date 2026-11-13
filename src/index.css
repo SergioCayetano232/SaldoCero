@@ -72,6 +72,8 @@
   --luz-teal-2: rgba(52, 168, 166, 0.32);
   --luz-naranja: rgba(244, 162, 89, 0.38);
   --luz-rosa: rgba(214, 122, 158, 0.28);
+  /* El brillo de la tarjeta bajo el ratón. */
+  --luz-raton: rgba(14, 124, 123, 0.15);
   --fuerza-grano: 0.055;
 
   /* El cristal de las tarjetas: un blanco translucido sobre el fondo. */
@@ -128,6 +130,7 @@
   --luz-teal-2: rgba(40, 120, 170, 0.17);
   --luz-naranja: rgba(200, 120, 60, 0.15);
   --luz-rosa: rgba(150, 70, 120, 0.14);
+  --luz-raton: rgba(43, 163, 161, 0.2);
   --fuerza-grano: 0.05;
 
   --cristal: rgba(20, 36, 41, 0.72);

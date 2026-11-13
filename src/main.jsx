@@ -5,10 +5,12 @@ import App from './App.jsx'
 import { usarIdioma, idiomaGuardado, idiomaDelMovil } from './idioma'
 import { ponerDiscreto } from './discreto'
 import { leerDiscreto } from './datos'
+import { seguirLaLuz } from './luz'
 
 // Antes de pintar nada, que no se vea un momento en el otro idioma.
 usarIdioma(idiomaGuardado() ?? idiomaDelMovil(navigator.languages))
 ponerDiscreto(leerDiscreto())
+seguirLaLuz()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
