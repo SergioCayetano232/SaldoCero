@@ -88,6 +88,30 @@
     mover-degradado 7s 0.8s ease-in-out infinite;
 }
 
+/* Al pasar el ratón las dos mitades se levantan, una detrás de otra, y al
+   salir caen con rebote. Con translate y rotate sueltos para no pisar las
+   animaciones de arriba, que van con transform. */
+@media (hover: hover) {
+  .cabecera h1 .saldo,
+  .cabecera h1 .cero {
+    transition: translate var(--medio) var(--curva-muelle), rotate var(--medio) var(--curva-muelle);
+  }
+
+  .cabecera h1 .cero {
+    transition-delay: 0.06s;
+  }
+
+  .cabecera h1:hover .saldo {
+    translate: 0 -6px;
+    rotate: -3deg;
+  }
+
+  .cabecera h1:hover .cero {
+    translate: 0 -6px;
+    rotate: 3deg;
+  }
+}
+
 .cabecera p {
   color: var(--tinta-suave);
   margin-top: 10px;
