@@ -18,6 +18,8 @@
   /* El fondo de lo que has buscado en la lista. */
   --resaltado: #fde7a6;
   --seleccion: rgba(14, 124, 123, 0.22);
+  --scroll: rgba(14, 124, 123, 0.32);
+  --scroll-encima: rgba(14, 124, 123, 0.55);
 
   /* Grises con un puntito de verde, que peguen con el teal. */
   --tinta: #14262c;
@@ -97,6 +99,8 @@
   --naranja-500: #f0a765;
   --resaltado: #6b5214;
   --seleccion: rgba(43, 163, 161, 0.4);
+  --scroll: rgba(43, 163, 161, 0.35);
+  --scroll-encima: rgba(43, 163, 161, 0.6);
 
   --tinta: #e8f0f1;
   --tinta-suave: #9db3ba;
@@ -194,6 +198,33 @@ h3 {
 ::selection {
   background: var(--seleccion);
   color: inherit;
+}
+
+/* Barra de scroll fina y teal. Lo de -webkit- es para Safari, que aún no
+   entiende scrollbar-color. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll) transparent;
+}
+
+@supports not (scrollbar-color: red transparent) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--scroll);
+    border-radius: var(--radio-pastilla);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scroll-encima);
+  }
 }
 
 /* Que se vea bien por dónde vas al ir con el teclado. */
