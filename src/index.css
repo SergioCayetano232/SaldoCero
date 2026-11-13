@@ -17,6 +17,7 @@
   --naranja-500: #e8862e;
   /* El fondo de lo que has buscado en la lista. */
   --resaltado: #fde7a6;
+  --seleccion: rgba(14, 124, 123, 0.22);
 
   /* Grises con un puntito de verde, que peguen con el teal. */
   --tinta: #14262c;
@@ -95,6 +96,7 @@
   --naranja-400: #f4a259;
   --naranja-500: #f0a765;
   --resaltado: #6b5214;
+  --seleccion: rgba(43, 163, 161, 0.4);
 
   --tinta: #e8f0f1;
   --tinta-suave: #9db3ba;
@@ -186,6 +188,12 @@ h3 {
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+/* Al seleccionar texto, nuestro teal y no el azul del sistema. */
+::selection {
+  background: var(--seleccion);
+  color: inherit;
 }
 
 /* Que se vea bien por dónde vas al ir con el teclado. */
