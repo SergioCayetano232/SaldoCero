@@ -26,6 +26,7 @@ import { resumenDelViaje } from "./anterior";
 import { nombreDeLaRepeticion, genteParaRepetir, quienEresEnElNuevo, pendientesParaPasar, gastosDeLoPendiente, preguntaDePendientes } from "./repetirViaje";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
+import BarraPegada from "./componentes/BarraPegada";
 import Viajeros from "./componentes/Viajeros";
 import Bote from "./componentes/Bote";
 import ListaCompra from "./componentes/ListaCompra";
@@ -825,6 +826,7 @@ function App() {
 
       <Globito cuantos={cuantosMios(pagosDelViaje(balances, viaje), soy)} />
       <BotonArriba />
+      <BarraPegada viaje={viaje} />
       <BotonInstalar />
       <Pie enViaje />
     </div>

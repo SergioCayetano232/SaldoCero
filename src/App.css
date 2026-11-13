@@ -6418,3 +6418,65 @@ kbd {
     transform: scaleX(0);
   }
 }
+
+/* ===== La barra que se queda arriba al bajar ===== */
+.barra-pegada {
+  position: fixed;
+  top: max(10px, env(safe-area-inset-top));
+  left: 50%;
+  z-index: 30;
+  width: min(588px, calc(100% - 28px));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  border: 1px solid var(--cristal-borde);
+  border-radius: var(--radio-pastilla);
+  background-color: var(--cristal);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: var(--sombra-lg);
+  color: var(--tinta);
+  font-size: 14px;
+  text-align: left;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -140%);
+  transition: transform var(--medio) var(--curva-muelle), opacity var(--rapido);
+}
+
+.barra-pegada.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+/* Que no herede el hundirse de los botones: se iría de su sitio. */
+.barra-pegada:active {
+  transform: translate(-50%, 0) scale(0.98);
+}
+
+.barra-pegada-nombre {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--fuente-titulo);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.barra-pegada-codigo {
+  font-family: var(--fuente-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--teal-600);
+  background: var(--teal-50);
+  padding: 2px 9px;
+  border-radius: var(--radio-pastilla);
+}
+
+/* Va dentro de .app, pero no entra con las tarjetas: se movería de su sitio. */
+.app > .barra-pegada {
+  animation: none;
+}
