@@ -408,6 +408,29 @@ p {
   }
 }
 
+/* La onda de los botones. Dos copias iguales: ver onda.js. */
+@keyframes onda-a {
+  from {
+    opacity: 1;
+    transform: scale(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+@keyframes onda-b {
+  from {
+    opacity: 1;
+    transform: scale(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
 /* El brillo que recorre el borde de la tarjeta del viaje. */
 @keyframes girar-borde {
   to {

@@ -404,6 +404,36 @@ button:active {
   box-shadow: var(--sombra-md);
 }
 
+/* La onda que sale de donde pulsas. El centro y el tamaño los pone onda.js;
+   a y b son la misma animación con dos nombres, para que vuelva a empezar. */
+.fila-formulario button:not(.codigo):not(.boton-qr)::before,
+.formulario-gasto > button::before,
+.formulario-gasto .fila-botones button::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--onda-x, 50%) - var(--onda-r, 0px));
+  top: calc(var(--onda-y, 50%) - var(--onda-r, 0px));
+  width: calc(var(--onda-r, 0px) * 2);
+  height: calc(var(--onda-r, 0px) * 2);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.15) 60%, transparent 70%);
+  opacity: 0;
+  transform: scale(0);
+  pointer-events: none;
+}
+
+.fila-formulario button[data-onda="a"]:not(.codigo):not(.boton-qr)::before,
+.formulario-gasto > button[data-onda="a"]::before,
+.formulario-gasto .fila-botones button[data-onda="a"]::before {
+  animation: onda-a 0.6s var(--curva-suave);
+}
+
+.fila-formulario button[data-onda="b"]:not(.codigo):not(.boton-qr)::before,
+.formulario-gasto > button[data-onda="b"]::before,
+.formulario-gasto .fila-botones button[data-onda="b"]::before {
+  animation: onda-b 0.6s var(--curva-suave);
+}
+
 /* Un brillo que cruza el botón al pasar por encima. */
 .fila-formulario button:not(.codigo):not(.boton-qr)::after,
 .formulario-gasto > button::after,
