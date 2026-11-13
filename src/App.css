@@ -2508,15 +2508,24 @@ button:active {
   box-shadow: var(--sombra-lg);
   position: relative;
   overflow: hidden;
+  /* El giro lo pone inclinar.js según el ratón; sin ratón, recto. */
+  transform: perspective(800px) rotateX(var(--giro-x, 0deg)) rotateY(var(--giro-y, 0deg));
+  transition: transform var(--lento) var(--curva-suave);
 }
 
-/* Un brillo en diagonal, para que el degradado no se vea plano. */
+/* Mientras sigue al ratón va más rápido, que si no se queda atrás. */
+.total-destacado:hover {
+  transition-duration: 0.12s;
+}
+
+/* Un brillo en diagonal, para que el degradado no se vea plano. Con el
+   ratón encima se va a donde está él. */
 .total-destacado::before {
   content: "";
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    ellipse 60% 80% at 85% -20%,
+    ellipse 60% 80% at var(--reflejo-x, 85%) var(--reflejo-y, -20%),
     rgba(255, 255, 255, 0.22),
     transparent
   );

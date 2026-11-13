@@ -7,12 +7,14 @@ import { ponerDiscreto } from './discreto'
 import { leerDiscreto } from './datos'
 import { seguirLaLuz } from './luz'
 import { ondearBotones } from './onda'
+import { inclinarElTotal } from './inclinar'
 
 // Antes de pintar nada, que no se vea un momento en el otro idioma.
 usarIdioma(idiomaGuardado() ?? idiomaDelMovil(navigator.languages))
 ponerDiscreto(leerDiscreto())
 seguirLaLuz()
 ondearBotones()
+inclinarElTotal()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
