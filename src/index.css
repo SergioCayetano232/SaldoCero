@@ -474,6 +474,19 @@ p {
   }
 }
 
+/* Con scale suelto y no transform, que las casillas ya se hunden con :active. */
+@keyframes salto-casilla-a {
+  40% {
+    scale: 1.3;
+  }
+}
+
+@keyframes salto-casilla-b {
+  40% {
+    scale: 1.3;
+  }
+}
+
 @keyframes abrir-halo {
   0% {
     box-shadow: 0 0 0 0 var(--teal-100);

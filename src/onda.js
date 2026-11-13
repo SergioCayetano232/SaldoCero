@@ -30,3 +30,16 @@ export function ondearBotones(doc = document) {
   doc.addEventListener("pointerdown", alPulsar, { passive: true });
   return () => doc.removeEventListener("pointerdown", alPulsar);
 }
+
+// Las casillas dan un saltito al marcarlas o desmarcarlas. Con change y no con
+// :checked en el CSS, que si no saltarían todas al cargar las que ya vienen puestas.
+export function saltarCasillas(doc = document) {
+  function alCambiar(e) {
+    const casilla = e.target;
+    if (casilla.type !== "checkbox" && casilla.type !== "radio") return;
+    casilla.dataset.salto = siguienteOnda(casilla.dataset.salto);
+  }
+
+  doc.addEventListener("change", alCambiar);
+  return () => doc.removeEventListener("change", alCambiar);
+}

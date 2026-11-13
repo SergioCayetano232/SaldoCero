@@ -400,6 +400,15 @@ select:focus {
   box-shadow: 0 0 0 3px var(--teal-50);
 }
 
+/* El saltito de las casillas; lo lanza onda.js. Dos nombres, como la onda. */
+input[data-salto="a"] {
+  animation: salto-casilla-a 0.35s var(--curva-muelle);
+}
+
+input[data-salto="b"] {
+  animation: salto-casilla-b 0.35s var(--curva-muelle);
+}
+
 /* El halo se abre de más y vuelve, como una gota al caer. Las casillas no,
    que son pequeñas y se ve raro. */
 input:not([type="checkbox"]):not([type="radio"]):focus,
