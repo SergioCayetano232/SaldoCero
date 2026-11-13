@@ -474,6 +474,12 @@ p {
   }
 }
 
+@keyframes cerrar-anillo {
+  to {
+    --avance: 100%;
+  }
+}
+
 @keyframes llenar-scroll {
   to {
     transform: scaleX(1);

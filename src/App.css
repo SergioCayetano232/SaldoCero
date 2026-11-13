@@ -5392,6 +5392,32 @@ a.pago-cobro {
   transform: translateY(-2px);
 }
 
+/* Un anillo alrededor que se va cerrando según bajas: de un vistazo sabes
+   cuánto queda. Sin scroll-timeline, el botón se queda como estaba. */
+@property --avance {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .boton-arriba::before {
+      content: "";
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      background: conic-gradient(var(--teal-500) var(--avance), transparent 0);
+      /* Solo el borde: del centro hacia fuera, transparente hasta los 3px. */
+      mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px));
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px));
+      pointer-events: none;
+      animation: cerrar-anillo linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+}
+
 /* Con el aviso de deshacer abajo, se aparta para no taparlo en el móvil. */
 .deshacer ~ .boton-arriba {
   bottom: 84px;
