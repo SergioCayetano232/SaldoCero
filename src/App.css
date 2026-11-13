@@ -386,6 +386,13 @@ select {
 
 input::placeholder {
   color: var(--tinta-tenue);
+  transition: opacity var(--medio) var(--curva-suave);
+}
+
+/* Al entrar en el campo, el ejemplo se queda en segundo plano: sigue ahí por
+   si no te acuerdas, pero ya no parece que haya algo escrito. */
+input:focus::placeholder {
+  opacity: 0.45;
 }
 
 input:hover:not(:focus),
