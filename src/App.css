@@ -84,6 +84,10 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  /* Con el letter-spacing negativo la "o" se sale de la caja y el degradado
+     no la pintaba entera. Le doy aire por dentro y se lo quito por fuera. */
+  padding-right: 0.08em;
+  margin-right: -0.08em;
   animation: entrar-letra 0.7s 0.1s var(--curva-muelle) backwards,
     mover-degradado 7s 0.8s ease-in-out infinite;
 }
@@ -4467,6 +4471,19 @@ button.pago-cantidad:hover {
   box-shadow: 0 2px 6px color-mix(in srgb, var(--color-avatar) 35%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
   user-select: none;
+  transition: translate var(--medio) var(--curva-muelle), scale var(--medio) var(--curva-muelle),
+    box-shadow var(--medio) var(--curva-suave);
+}
+
+/* Al pasar el ratón se levanta y le crece una sombra de su color. Con
+   translate y scale sueltos, que el latido ya usa transform. */
+@media (hover: hover) {
+  .avatar:hover {
+    translate: 0 -3px;
+    scale: 1.08;
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--color-avatar) 55%, transparent),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
 }
 
 .avatar-pequeno {
