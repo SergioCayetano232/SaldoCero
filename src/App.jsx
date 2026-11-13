@@ -1034,9 +1034,13 @@ function BotonTema() {
     };
   }, [tema]);
 
+  // Cuenta los cambios para que el icono dé su vuelta cada vez, y no al cargar.
+  const [vueltas, setVueltas] = useState(0);
+
   function cambiar() {
     const nuevo = siguienteTema(tema);
     setTema(nuevo);
+    setVueltas((v) => v + 1);
     datos.guardarTema(nuevo);
   }
 
@@ -1046,6 +1050,7 @@ function BotonTema() {
       e.preventDefault();
       const nuevo = siguienteTema(tema);
       setTema(nuevo);
+      setVueltas((v) => v + 1);
       datos.guardarTema(nuevo);
     }
 
@@ -1057,7 +1062,10 @@ function BotonTema() {
 
   return (
     <button className="pie-tema" onClick={cambiar} title={t("Cambiar el tema")} aria-keyshortcuts="t">
-      <span aria-hidden="true">{icono}</span> {t("Tema: {nombre}", { nombre: t(nombre).toLowerCase() })}
+      <span key={vueltas} className={`pie-tema-icono ${vueltas ? "gira" : ""}`} aria-hidden="true">
+        {icono}
+      </span>{" "}
+      {t("Tema: {nombre}", { nombre: t(nombre).toLowerCase() })}
     </button>
   );
 }

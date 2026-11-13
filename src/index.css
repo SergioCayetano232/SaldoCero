@@ -428,6 +428,13 @@ p {
   }
 }
 
+@keyframes dar-la-vuelta {
+  from {
+    opacity: 0;
+    transform: rotate(-200deg) scale(0.3);
+  }
+}
+
 @keyframes llenar-scroll {
   to {
     transform: scaleX(1);

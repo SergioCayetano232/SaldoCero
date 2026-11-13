@@ -5435,6 +5435,16 @@ a.pago-cobro {
   color: var(--teal-600);
 }
 
+/* El sol y la luna dan una vuelta al cambiar. inline-block, que si no un
+   span no gira. */
+.pie-tema-icono {
+  display: inline-block;
+}
+
+.pie-tema-icono.gira {
+  animation: dar-la-vuelta 0.6s var(--curva-muelle);
+}
+
 /* Debajo del tema va en su línea, sin tanto aire. */
 .pie-tema + .pie-tema {
   margin-top: 0;
