@@ -1303,6 +1303,8 @@ button:active {
 /* En su propia línea: al lado del cambio del día no cabe en el móvil. */
 .conversion .enlace.cambio-anterior {
   display: block;
+  /* Si no, la raya de debajo iría de lado a lado. */
+  width: fit-content;
   margin: 4px 0 0;
 }
 
@@ -2073,6 +2075,25 @@ button:active {
 
 .enlace:hover {
   color: var(--teal-700);
+}
+
+/* Con ratón, la raya de siempre se apaga y se dibuja otra de izquierda a
+   derecha. Es un fondo porque el subrayado normal no se puede animar. */
+@media (hover: hover) {
+  .enlace,
+  .pie-enlace,
+  .pie-tema {
+    background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0% 1.5px;
+    transition: color var(--rapido), background-size var(--medio) var(--curva-suave),
+      text-decoration-color var(--rapido);
+  }
+
+  .enlace:hover,
+  .pie-enlace:hover,
+  .pie-tema:hover {
+    text-decoration-color: transparent;
+    background-size: 100% 1.5px;
+  }
 }
 
 /* El gasto en la lista: concepto arriba, quién y cuánto abajo. */
