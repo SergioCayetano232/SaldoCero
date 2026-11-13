@@ -441,6 +441,13 @@ p {
   }
 }
 
+/* El fundido al cambiar de tema, que lo lanza BotonTema. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--lento);
+  animation-timing-function: var(--curva-suave);
+}
+
 /* Si has pedido menos movimiento, todo quieto. Las animaciones son un
    adorno, la app funciona igual sin ellas. */
 @media (prefers-reduced-motion: reduce) {

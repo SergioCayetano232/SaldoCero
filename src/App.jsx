@@ -1005,10 +1005,21 @@ function BotonTema() {
 
     function pintar() {
       const toca = temaQueToca(tema, sistema.matches, papel.matches);
-      document.documentElement.dataset.tema = toca;
-      for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
-        meta.content = COLOR_BARRA[toca];
-      }
+      const html = document.documentElement;
+      const aplicar = () => {
+        html.dataset.tema = toca;
+        for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
+          meta.content = COLOR_BARRA[toca];
+        }
+      };
+      // Fundido de un tema al otro. Al imprimir no, que tiene que estar ya.
+      const fundir =
+        html.dataset.tema !== toca &&
+        !papel.matches &&
+        document.startViewTransition &&
+        !matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (fundir) document.startViewTransition(aplicar);
+      else aplicar();
     }
 
     pintar();
