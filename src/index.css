@@ -182,6 +182,12 @@ h2,
 h3 {
   font-family: var(--fuente-titulo);
   letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+/* Que un párrafo no acabe con una palabra sola en la última línea. */
+p {
+  text-wrap: pretty;
 }
 
 /* Para el lector de pantalla y nadie más. */
