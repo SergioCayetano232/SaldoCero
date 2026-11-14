@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { esHorizontal, conResistencia, queHacer, dobleClicEdita, HOLGURA } from "../deslizar";
 import { vibrar } from "../vibrar";
+import { t } from "../idioma";
 
 // Una fila de la lista que se puede arrastrar de lado con el dedo.
 // Quieta, no se mueve: es para cuando no hay nada que editar ni quitar.
@@ -80,7 +81,10 @@ function Deslizable({ className = "", onEditar, onQuitar, quieto = false, childr
 
   return (
     <li
-      className={`deslizable ${className} ${lista ? `listo-${lista}` : ""} ${soltada ? "soltada" : ""}`}
+      className={`deslizable ${className} ${lista ? `listo-${lista}` : ""} ${soltada ? "soltada" : ""} ${quieto ? "quieto" : ""}`}
+      // Lo que asoma al deslizar lo pinta el CSS con estos textos.
+      data-editar={t("Editar")}
+      data-quitar={t("Borrar")}
       style={{ transform: dx ? `translateX(${dx}px)` : undefined, "--dx": `${dx}px` }}
       onPointerDown={alBajar}
       onPointerMove={alMover}

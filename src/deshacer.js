@@ -9,7 +9,7 @@ import { calcularTotal } from "./calculos";
 import { limpiarNota } from "./notas";
 import { t } from "./idioma";
 
-export const ESPERA = 5000;
+export const ESPERA = 8000;
 
 // Devuelve con qué cancelarlo y con qué adelantarlo.
 export function borradoConEspera(borrar, alTerminar) {

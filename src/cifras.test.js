@@ -341,31 +341,31 @@ describe("cifrasEnTexto", () => {
 
   it("lleva el nombre y el total", () => {
     expect(texto).toContain("*Lisboa* en cifras");
-    expect(texto).toContain("240.00 € en 5 gastos (48.00 € de media)");
+    expect(texto).toContain("240,00 € en 5 gastos (48,00 € de media)");
   });
 
   it("frente al viaje anterior, si lo hay", () => {
     const frente = { nombre: "Oporto", porDia: false, antes: 300, porcentaje: -20 };
-    expect(cifrasEnTexto(cifrasDelViaje(gastos, personas), "Lisboa", "EUR", frente)).toContain("🔁 Un 20 % menos que en Oporto, donde gastasteis 300.00 €");
+    expect(cifrasEnTexto(cifrasDelViaje(gastos, personas), "Lisboa", "EUR", frente)).toContain("🔁 Un 20 % menos que en Oporto, donde gastasteis 300,00 €");
     expect(texto).not.toContain("🔁");
   });
 
   it("con un solo gasto, sin media", () => {
     const uno = cifrasEnTexto(cifrasDelViaje(gastos.slice(0, 1), personas), "Lisboa", "EUR");
-    expect(uno).toContain("120.00 € en 1 gasto");
+    expect(uno).toContain("120,00 € en 1 gasto");
     expect(uno).not.toContain("gastos");
     expect(uno).not.toContain("de media");
   });
 
   it("lleva cada cifra", () => {
-    expect(texto).toContain("El que más puso: Ana, 150.00 €");
-    expect(texto).toContain("El que menos puso: Marta, 30.00 €");
-    expect(texto).toContain("El gasto más gordo: Hotel, 120.00 € (Ana)");
-    expect(texto).toContain("El más pequeño: Taxi, 20.00 € (Luis)");
+    expect(texto).toContain("El que más puso: Ana, 150,00 €");
+    expect(texto).toContain("El que menos puso: Marta, 30,00 €");
+    expect(texto).toContain("El gasto más gordo: Hotel, 120,00 € (Ana)");
+    expect(texto).toContain("El más pequeño: Taxi, 20,00 € (Luis)");
     expect(texto).toContain("alojamiento, el 50 %");
-    expect(texto).toContain("26.67 € por persona y día");
+    expect(texto).toContain("26,67 € por persona y día");
     expect(texto).toContain("El día más tranquilo:");
-    expect(texto).toContain("30.00 €");
+    expect(texto).toContain("30,00 €");
   });
 
   it("el que más veces pagó, si lo hay", () => {
@@ -385,7 +385,7 @@ describe("cifrasEnTexto", () => {
   it("lo que más se repitió, si lo hay", () => {
     const taxis = [...gastos, { pagadorId: "b", importe: 15, concepto: "Taxi", fecha: "2026-09-12" }];
     expect(cifrasEnTexto(cifrasDelViaje(taxis, personas), "Lisboa", "EUR")).toContain(
-      "Lo que más se repitió: Taxi, 2 veces (35.00 €)",
+      "Lo que más se repitió: Taxi, 2 veces (35,00 €)",
     );
     expect(texto).not.toContain("se repitió");
   });
@@ -393,7 +393,7 @@ describe("cifrasEnTexto", () => {
   it("lo más caro por cabeza, si lo hay", () => {
     const conCena = [...gastos, { pagadorId: "b", importe: 90, concepto: "Marisco", participantes: ["a", "b"], fecha: "2026-09-11" }];
     expect(cifrasEnTexto(cifrasDelViaje(conCena, personas), "Lisboa", "EUR")).toContain(
-      "Lo más caro por cabeza: Marisco, 45.00 € cada uno (entre 2)",
+      "Lo más caro por cabeza: Marisco, 45,00 € cada uno (entre 2)",
     );
     expect(texto).not.toContain("por cabeza");
   });
@@ -401,7 +401,7 @@ describe("cifrasEnTexto", () => {
   it("lo del bote, si lo hubo, y en singular si fue uno", () => {
     const uno = gastos.map((g, i) => (i === 0 ? { ...g, pagadorId: BOTE } : g));
     expect(cifrasEnTexto(cifrasDelViaje(uno, personas), "Lisboa", "EUR")).toContain(
-      "Del bote salieron 120.00 € en 1 gasto, el 50 %",
+      "Del bote salieron 120,00 € en 1 gasto, el 50 %",
     );
     expect(texto).not.toContain("bote");
   });
@@ -494,7 +494,7 @@ describe("diaDeLaSemana", () => {
     ];
     const cifras = cifrasDelViaje(largo, personas);
     expect(cifras.diaDeLaSemana.dia).toBe("sábados");
-    expect(cifrasEnTexto(cifras, "Lisboa", "EUR")).toContain("🗓️ Cuando más gastáis: los sábados, 140.00 € de media");
+    expect(cifrasEnTexto(cifras, "Lisboa", "EUR")).toContain("🗓️ Cuando más gastáis: los sábados, 140,00 € de media");
   });
 
   it("en el viaje corto de siempre, no", () => {
@@ -544,7 +544,7 @@ describe("findeContraSemana", () => {
     const cifras = cifrasDelViaje(largo, personas);
     expect(cifras.findeContraSemana.gana).toBe("finde");
     expect(cifrasEnTexto(cifras, "Lisboa", "EUR")).toContain(
-      "🎉 Los findes gastáis el doble que entre semana: 120.00 € al día contra 60.00 €",
+      "🎉 Los findes gastáis el doble que entre semana: 120,00 € al día contra 60,00 €",
     );
   });
 
@@ -554,7 +554,7 @@ describe("findeContraSemana", () => {
       { pagadorId: "b", importe: 50, concepto: "Cena", categoria: "comida", fecha: "2026-10-31" },
     ];
     expect(cifrasEnTexto(cifrasDelViaje(largo, personas), "Lisboa", "EUR")).toContain(
-      "🎉 Entre semana gastáis el triple que los findes: 150.00 € al día contra 50.00 €",
+      "🎉 Entre semana gastáis el triple que los findes: 150,00 € al día contra 50,00 €",
     );
   });
 });

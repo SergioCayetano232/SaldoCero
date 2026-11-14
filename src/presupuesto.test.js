@@ -44,19 +44,19 @@ describe("estadoPresupuesto", () => {
 describe("textoPresupuesto", () => {
   it("lo que queda y de cuánto", () => {
     expect(textoPresupuesto(estadoPresupuesto(430, 1000), 1000, "EUR")).toBe(
-      "Quedan 570.00 € de 1000.00 €"
+      "Quedan 570,00 € de 1000,00 €"
     );
   });
 
   it("si os pasáis, cuánto", () => {
     expect(textoPresupuesto(estadoPresupuesto(1030, 1000), 1000, "EUR")).toBe(
-      "Os pasáis 30.00 €"
+      "Os pasáis 30,00 €"
     );
   });
 
   it("justo en el tope, quedan cero", () => {
     expect(textoPresupuesto(estadoPresupuesto(100.004, 100), 100, "USD")).toBe(
-      "Quedan $0.00 de $100.00"
+      "Quedan $0,00 de $100,00"
     );
   });
 });
@@ -103,32 +103,32 @@ describe("textoRitmo", () => {
 
   it("os dice para cuántos días os llega", () => {
     expect(textoRitmo(ritmo, estadoPresupuesto(135, 500), "EUR")).toBe(
-      "45.00 € al día · os llega para 8 días más"
+      "45,00 € al día · os llega para 8 días más"
     );
   });
 
   it("un día, en singular", () => {
     expect(textoRitmo(ritmo, estadoPresupuesto(135, 200), "EUR")).toBe(
-      "45.00 € al día · os llega para 1 día más"
+      "45,00 € al día · os llega para 1 día más"
     );
   });
 
   it("si no da ni para uno, lo avisa", () => {
     expect(textoRitmo(ritmo, estadoPresupuesto(135, 150), "EUR")).toBe(
-      "45.00 € al día · no os llega para otro día"
+      "45,00 € al día · no os llega para otro día"
     );
   });
 
   it("pasados del presupuesto, solo la media", () => {
-    expect(textoRitmo(ritmo, estadoPresupuesto(600, 500), "EUR")).toBe("45.00 € al día");
+    expect(textoRitmo(ritmo, estadoPresupuesto(600, 500), "EUR")).toBe("45,00 € al día");
   });
 
   it("con el viaje cerrado ya no hay días por delante", () => {
-    expect(textoRitmo(ritmo, estadoPresupuesto(135, 500), "EUR", true)).toBe("45.00 € al día");
+    expect(textoRitmo(ritmo, estadoPresupuesto(135, 500), "EUR", true)).toBe("45,00 € al día");
   });
 
   it("respeta la moneda del viaje", () => {
-    expect(textoRitmo(ritmo, null, "GBP")).toBe("£45.00 al día");
+    expect(textoRitmo(ritmo, null, "GBP")).toBe("£45,00 al día");
   });
 });
 

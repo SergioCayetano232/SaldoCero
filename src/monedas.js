@@ -1,6 +1,7 @@
 // Las monedas y el cambio entre ellas.
 
 import { estaDiscreto, CIFRA_TAPADA } from "./discreto";
+import { idiomaActual } from "./idioma";
 
 // Las que se suelen necesitar en un viaje.
 // La API solo trae las del Banco Central Europeo. Las marcadas aMano no están
@@ -57,9 +58,14 @@ export function conMoneda(importe, codigo = "EUR") {
 // Para lo que sale de la app (el resumen, la imagen, el WhatsApp): esas cifras
 // van siempre, que el otro no tiene el modo discreto puesto.
 export function conMonedaDeVerdad(importe, codigo = "EUR") {
-  const cifra = importe.toFixed(2);
+  // En español los decimales van con coma: "12,50 €". En inglés, con punto.
+  const cifra = conDecimales(importe.toFixed(2));
   // Con el símbolo delante, el menos va antes que él: "-$400.00", no "$-400.00".
   return ponerSimbolo(cifra.replace("-", ""), codigo, importe < 0 ? "-" : "");
+}
+
+function conDecimales(cifra) {
+  return idiomaActual() === "es" ? cifra.replace(".", ",") : cifra;
 }
 
 function ponerSimbolo(cifra, codigo, menos = "") {

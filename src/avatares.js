@@ -3,12 +3,12 @@
 // Oscuros a propósito: la letra va en blanco y tiene que leerse en claro y en oscuro.
 export const COLORES_AVATAR = [
   "#0e7c7b",
-  "#c2601a",
+  "#a9520f",
   "#7c5cc4",
-  "#c4457a",
-  "#2a8f5f",
+  "#b03a6b",
+  "#237a51",
   "#3569b0",
-  "#9a7219",
+  "#85620f",
   "#5b6f7a",
 ];
 

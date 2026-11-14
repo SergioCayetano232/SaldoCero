@@ -31,7 +31,6 @@ import { importeDeGasto, parteDe, ordenarPorSaldo } from "../calculos";
 import { cifrasDelViaje, cifrasEnTexto } from "../cifras";
 import { frenteAlAnterior } from "../anterior";
 import Cifra from "./Cifra";
-import Confeti from "./Confeti";
 import Avatar from "./Avatar";
 import Desglose from "./Desglose";
 import PorLugar from "./PorLugar";
@@ -82,7 +81,7 @@ function Resumen({
   const [copiado, setCopiado] = useState("");
   // "haciendo" mientras se pinta, que en un móvil lento tarda un momento.
   const [imagen, setImagen] = useState("");
-  // Qué fiesta va. Hace de key para que el confeti vuelva a caer si se repite.
+  // Qué fiesta va. Hace de key para que el sello vuelva a caer si se repite.
   const [fiesta, setFiesta] = useState(null);
   const fiestas = useRef(0);
   const zonaSaldar = useRef(null);
@@ -593,6 +592,11 @@ function Resumen({
                   <span className="pago-flecha">→</span>
                   <AvatarDe id={pago.aId} nombre={pago.a} colores={colores} />
                   <strong>{pago.aId === BOTE ? t("Bote") : pago.a}</strong>
+                  {pago.saldado && (
+                    <span className={`sello ${pago.porConfirmar ? "a-medias" : ""}`}>
+                      {pago.porConfirmar ? t("Enviado") : t("Pagado")}
+                    </span>
+                  )}
                   <span className="pago-final">
                     {pago.saldado ? (
                       <span className="pago-cantidad">{conMoneda(pago.cantidad, monedaViaje)}</span>
@@ -628,10 +632,9 @@ function Resumen({
                         )}
                         target="_blank"
                         rel="noopener noreferrer"
-                        title={t("Pedírselo a {nombre} por WhatsApp", { nombre: pago.de })}
                         aria-label={t("Pedírselo a {nombre} por WhatsApp", { nombre: pago.de })}
                       >
-                        💬
+                        {t("Pedírselo")}
                       </a>
                     )}
 
@@ -639,9 +642,13 @@ function Resumen({
                       <button
                         className="boton-saldar"
                         onClick={() => (pago.saldado ? onDesaldar(pago) : saldar(pago))}
-                        title={pago.saldado ? t("Marcar como pendiente") : t("Marcar como pagado")}
+                        aria-label={
+                          pago.saldado
+                            ? t("Deshacer el pago de {de} a {a}", { de: pago.de, a: pago.a })
+                            : t("Marcar que {de} ha pagado a {a}", { de: pago.de, a: pago.a })
+                        }
                       >
-                        {pago.saldado ? "↩︎" : "✓"}
+                        {pago.saldado ? t("Deshacer") : t("Marcar pagado")}
                       </button>
                     )}
                   </span>
@@ -760,7 +767,12 @@ function Resumen({
         )}
       </div>
 
-      {fiesta && <Confeti key={fiesta} />}
+      {/* El último pago saldado: la cartera entera se sella a cero. */}
+      {fiesta && (
+        <div className="sello-final" key={fiesta} role="status">
+          <span>{t("Saldo cero")}</span>
+        </div>
+      )}
     </section>
   );
 }

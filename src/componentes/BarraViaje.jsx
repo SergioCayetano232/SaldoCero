@@ -144,6 +144,7 @@ function BarraViaje({ viaje, cerrado, soloVer = false, onSalir, onRenombrar, onR
             className={`boton-discreto ${discreto ? "puesto" : ""}`}
             onClick={onDiscreto}
             aria-pressed={discreto}
+            aria-label={t("Tapar las cifras")}
             title={discreto ? t("Enseñar las cifras") : t("Tapar las cifras")}
           >
             <span aria-hidden="true">{discreto ? "🙈" : "👁️"}</span>
@@ -152,6 +153,7 @@ function BarraViaje({ viaje, cerrado, soloVer = false, onSalir, onRenombrar, onR
         <button
           className="boton-salir"
           onClick={onSalir}
+          aria-label={t("Salir del viaje")}
           title={esOrdenador() ? t("Salir del viaje (también con la Q)") : t("Salir del viaje")}
           aria-keyshortcuts="q"
         >

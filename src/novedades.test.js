@@ -54,12 +54,12 @@ describe("textoDeNovedades", () => {
 
   it("un gasto, con su cifra y quién lo pagó", () => {
     const texto = textoDeNovedades({ gastos: [cena], viajeros: [] }, todos, "EUR");
-    expect(texto).toBe("Nuevo gasto: Cena · 30.00 € (pagó Luis)");
+    expect(texto).toBe("Nuevo gasto: Cena · 30,00 € (pagó Luis)");
   });
 
   it("si salió del bote, lo dice", () => {
     const texto = textoDeNovedades({ gastos: [{ ...cena, pagadorId: BOTE }], viajeros: [] }, todos, "EUR");
-    expect(texto).toBe("Nuevo gasto: Cena · 30.00 € (del bote)");
+    expect(texto).toBe("Nuevo gasto: Cena · 30,00 € (del bote)");
   });
 
   it("varios, solo cuántos", () => {
@@ -86,7 +86,7 @@ describe("textoDeNovedades", () => {
   it("si no sabe quién pagó, no se lo inventa", () => {
     const raro = { ...cena, pagadorId: "zzz" };
     expect(textoDeNovedades({ gastos: [raro], viajeros: [] }, todos, "EUR")).toBe(
-      "Nuevo gasto: Cena · 30.00 €"
+      "Nuevo gasto: Cena · 30,00 €"
     );
   });
 

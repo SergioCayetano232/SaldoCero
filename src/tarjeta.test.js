@@ -19,9 +19,9 @@ function datos(pagos) {
 describe("datosDeTarjeta", () => {
   it("el total, las fechas y lo que sale por cabeza", () => {
     const d = datos([]);
-    expect(d.total).toBe("90.00 €");
+    expect(d.total).toBe("90,00 €");
     expect(d.cuando).toBe("Del 3 al 5 de julio de 2026");
-    expect(d.detalle).toBe("2 gastos · 3 viajeros · 30.00 € por cabeza");
+    expect(d.detalle).toBe("2 gastos · 3 viajeros · 30,00 € por cabeza");
   });
 
   it("solo los pagos que quedan, con su cantidad escrita", () => {
@@ -29,7 +29,7 @@ describe("datosDeTarjeta", () => {
       { de: "Luis", a: "Ana", cantidad: 14 },
       { de: "Eva", a: "Ana", cantidad: 3, saldado: true },
     ]);
-    expect(d.pagos).toEqual([{ de: "Luis", a: "Ana", cantidad: "14.00 €" }]);
+    expect(d.pagos).toEqual([{ de: "Luis", a: "Ana", cantidad: "14,00 €" }]);
     expect(d.estado).toBe("pendiente");
   });
 

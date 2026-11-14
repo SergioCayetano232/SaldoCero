@@ -40,11 +40,11 @@ describe("avisoAlCerrar", () => {
 
   it("si quedan, dice cuántos y cuánto, sin contar los pagados", () => {
     const texto = avisoAlCerrar("Lisboa", [pago(30), pago(15.5), pago(100, true)]);
-    expect(texto).toContain("aún quedan 2 pagos sin hacer (45.50 €)");
+    expect(texto).toContain("aún quedan 2 pagos sin hacer (45,50 €)");
   });
 
   it("uno solo, en singular y en la moneda del viaje", () => {
-    expect(avisoAlCerrar("Londres", [pago(20)], "GBP")).toContain("aún queda 1 pago sin hacer (£20.00)");
+    expect(avisoAlCerrar("Londres", [pago(20)], "GBP")).toContain("aún queda 1 pago sin hacer (£20,00)");
   });
 });
 

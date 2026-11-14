@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Avatar from "./Avatar";
+import MenuAcciones from "./MenuAcciones";
 import NombreEditable from "./NombreEditable";
 import { enLista, nombreRepetido, nombreParecido, separarNombres, avisoDeRepetidos, avisoDeParecidos, enUnaLinea, LARGO_VARIOS } from "../nombres";
 import { leerCobro, cobroDe, cobroComoTexto } from "../cobro";
@@ -159,6 +160,7 @@ function Viajeros({
             ref={campo}
             type="text"
             placeholder={t("Nombre, o varios: Ana, Luis…")}
+            aria-label={t("Añadir viajeros")}
             aria-keyshortcuts="a"
             title={esOrdenador() ? t("También con la A") : undefined}
             autoCapitalize="words"
@@ -243,54 +245,36 @@ function Viajeros({
                 )}
               </span>
 
-              {!cerrado && viajeros.length >= MINIMO_PARA_JUNTAR && (
-                <button
-                  className={`boton-cobro ${suGrupo(viajero).length > 0 ? "tiene-cobro" : ""}`}
-                  onClick={() => setJuntando(juntando === viajero.id ? null : viajero.id)}
-                  title={t("Con quién paga {nombre} al saldar", { nombre: viajero.nombre })}
-                >
-                  👫
-                </button>
-              )}
-
-              {!cerrado && (
-                <button
-                  className={`boton-cobro ${tieneEstancia(viajero) ? "tiene-cobro" : ""}`}
-                  onClick={() => abrirEstancia(viajero)}
-                  title={t("Qué días está {nombre}", { nombre: viajero.nombre })}
-                >
-                  📅
-                </button>
-              )}
-
-              {/* Con el viaje cerrado también: es cuando más falta hace. */}
-              {!soloVer && (
-                <button
-                  className={`boton-cobro ${cobroDe(viajero) ? "tiene-cobro" : ""}`}
-                  onClick={() => abrirCobro(viajero)}
-                  title={t("Bizum, IBAN o PayPal de {nombre}", { nombre: viajero.nombre })}
-                >
-                  {{ iban: "🏦", paypal: "💳", revolut: "💳" }[cobroDe(viajero)?.tipo] ?? "📲"}
-                </button>
-              )}
-
               <button
-                className="boton-soy"
+                className={`boton-soy ${viajero.id === soy ? "puesto" : ""}`}
                 onClick={() => onSoyYo(viajero.id)}
-                title={viajero.id === soy ? t("Ya no soy yo") : t("Este soy yo")}
+                aria-pressed={viajero.id === soy}
+                aria-label={viajero.id === soy ? t("{nombre} eres tú", { nombre: viajero.nombre }) : t("Soy {nombre}", { nombre: viajero.nombre })}
               >
-                {viajero.id === soy ? "✓" : t("¿yo?")}
+                {viajero.id === soy ? t("Eres tú") : t("Soy yo")}
               </button>
 
-              {!cerrado && (
-                <button
-                  className="boton-quitar"
-                  onClick={() => onQuitar(viajero.id, viajero.nombre)}
-                  title={t("Quitar a {nombre}", { nombre: viajero.nombre })}
-                >
-                  ✕
-                </button>
-              )}
+              <MenuAcciones
+                etiqueta={t("Más opciones de {de}", { de: viajero.nombre })}
+                acciones={[
+                  !cerrado &&
+                    viajeros.length >= MINIMO_PARA_JUNTAR && {
+                      texto: t("Con quién paga al saldar"),
+                      alPulsar: () => setJuntando(juntando === viajero.id ? null : viajero.id),
+                    },
+                  !cerrado && { texto: t("Qué días está"), alPulsar: () => abrirEstancia(viajero) },
+                  // Con el viaje cerrado también: es cuando más falta hace.
+                  !soloVer && {
+                    texto: cobroDe(viajero) ? t("Cambiar su Bizum, IBAN o PayPal") : t("Poner su Bizum, IBAN o PayPal"),
+                    alPulsar: () => abrirCobro(viajero),
+                  },
+                  !cerrado && {
+                    texto: t("Quitar a {nombre}", { nombre: viajero.nombre }),
+                    peligro: true,
+                    alPulsar: () => onQuitar(viajero.id, viajero.nombre),
+                  },
+                ]}
+              />
 
               {juntando === viajero.id && (
                 <div className="editar-cobro">

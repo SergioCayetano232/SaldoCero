@@ -12,7 +12,7 @@ afterEach(() => ponerDiscreto(false));
 describe("modo discreto", () => {
   it("empieza quitado", () => {
     expect(estaDiscreto()).toBe(false);
-    expect(conMoneda(12.5)).toBe("12.50 €");
+    expect(conMoneda(12.5)).toBe("12,50 €");
   });
 
   it("tapa la cifra y deja la moneda donde va", () => {
@@ -30,7 +30,7 @@ describe("modo discreto", () => {
   it("al quitarlo vuelven las cifras", () => {
     ponerDiscreto(true);
     ponerDiscreto(false);
-    expect(conMoneda(12.5)).toBe("12.50 €");
+    expect(conMoneda(12.5)).toBe("12,50 €");
   });
 
   it("avisa al cambiar, y solo si cambia", () => {
@@ -54,8 +54,8 @@ describe("modo discreto", () => {
 describe("lo que sale de la app, con el modo discreto puesto", () => {
   it("conMonedaDeVerdad no tapa nunca", () => {
     ponerDiscreto(true);
-    expect(conMonedaDeVerdad(-400, "USD")).toBe("-$400.00");
-    expect(conMonedaDeVerdad(12.5)).toBe("12.50 €");
+    expect(conMonedaDeVerdad(-400, "USD")).toBe("-$400,00");
+    expect(conMonedaDeVerdad(12.5)).toBe("12,50 €");
   });
 
   it("el resumen en texto", () => {
@@ -71,15 +71,15 @@ describe("lo que sale de la app, con el modo discreto puesto", () => {
       ],
       pagos: [{ de: "Luis", a: "Ana", cantidad: 45, saldado: false }],
     });
-    expect(texto).toContain("90.00 €");
-    expect(texto).toContain("45.00 €");
+    expect(texto).toContain("90,00 €");
+    expect(texto).toContain("45,00 €");
     expect(texto).not.toContain("••••");
   });
 
   it("el WhatsApp para cobrar", () => {
     ponerDiscreto(true);
     const texto = mensajeDeCobro({ pago: { de: "Marta", a: "Ana", cantidad: 108.83 }, nombreViaje: "Lisboa", codigo: "ABC12345", moneda: "EUR", base: "https://saldocero.app/" });
-    expect(texto).toContain("108.83 €");
+    expect(texto).toContain("108,83 €");
     expect(texto).not.toContain("••••");
   });
 
@@ -87,7 +87,7 @@ describe("lo que sale de la app, con el modo discreto puesto", () => {
     ponerDiscreto(true);
     const viajeros = [{ id: "a", nombre: "Ana" }, { id: "b", nombre: "Luis" }];
     const texto = mensajeDeGasto({ gasto: { concepto: "Cena", importe: 60, pagadoPor: "a", categoria: "comida" }, viajeros, moneda: "EUR" });
-    expect(texto).toContain("60.00 €");
+    expect(texto).toContain("60,00 €");
     expect(texto).not.toContain("••••");
   });
 
@@ -96,7 +96,7 @@ describe("lo que sale de la app, con el modo discreto puesto", () => {
     const viajeros = [{ id: "a", nombre: "Ana" }, { id: "b", nombre: "Luis" }];
     const gastos = [{ concepto: "Cena", importe: 90, pagadoPor: "a" }];
     const texto = mensajeDeCuenta({ gastos, viajero: viajeros[1], viajeros, esYo: false, nombreViaje: "Lisboa", moneda: "EUR" });
-    expect(texto).toContain("90.00 €");
+    expect(texto).toContain("90,00 €");
     expect(texto).not.toContain("••••");
   });
 
@@ -111,6 +111,6 @@ describe("lo que sale de la app, con el modo discreto puesto", () => {
       gastos: [{ concepto: "Cena", importe: 90 }],
     });
     expect(JSON.stringify(tarjeta)).not.toContain("••••");
-    expect(tarjeta.total).toBe("90.00 €");
+    expect(tarjeta.total).toBe("90,00 €");
   });
 });

@@ -29,12 +29,12 @@ describe("mensajeDeCobro", () => {
     const texto = mensaje({ soy: "a" });
 
     expect(texto).toContain("Hola Marta!");
-    expect(texto).toContain("me debes *108.83 €*");
+    expect(texto).toContain("me debes *108,83 €*");
     expect(texto).not.toContain("a Ana");
   });
 
   it("si no eres tú quien cobra, dice a quién hay que pagarle", () => {
-    expect(mensaje({ soy: null })).toContain("te toca pagarle *108.83 €* a Ana");
+    expect(mensaje({ soy: null })).toContain("te toca pagarle *108,83 €* a Ana");
   });
 
   it("siendo el que debe, tampoco dice me debes", () => {
@@ -54,12 +54,12 @@ describe("mensajeDeCobro", () => {
   });
 
   it("respeta la moneda del viaje", () => {
-    expect(mensaje({ moneda: "GBP", soy: "a" })).toContain("£108.83");
+    expect(mensaje({ moneda: "GBP", soy: "a" })).toContain("£108,83");
   });
 
   it("redondea los decimales de las cuentas", () => {
     const texto = mensaje({ pago: { ...pago, cantidad: 33.333333 }, soy: "a" });
-    expect(texto).toContain("33.33 €");
+    expect(texto).toContain("33,33 €");
   });
 });
 

@@ -31,16 +31,16 @@ describe("enQueSeFue", () => {
 
   it("de más a menos, con lo que es del total", () => {
     expect(enQueSeFue(gastos, "EUR")).toEqual([
-      "· 🛏️ Alojamiento: 150.00 € (50 %)",
-      "· 🍽️ Comida: 90.00 € (30 %)",
-      "· 🚌 Transporte: 60.00 € (20 %)",
+      "· 🛏️ Alojamiento: 150,00 € (50 %)",
+      "· 🍽️ Comida: 90,00 € (30 %)",
+      "· 🚌 Transporte: 60,00 € (20 %)",
     ]);
   });
 
   it("los de antes sin categoría van a otros", () => {
     expect(enQueSeFue([{ importe: 10, categoria: "ocio" }, { importe: 30 }], "EUR")).toEqual([
-      "· 📦 Otros: 30.00 € (75 %)",
-      "· 🎟️ Ocio: 10.00 € (25 %)",
+      "· 📦 Otros: 30,00 € (75 %)",
+      "· 🎟️ Ocio: 10,00 € (25 %)",
     ]);
   });
 
@@ -60,8 +60,8 @@ describe("resumenEnTexto", () => {
     const i = lineas.indexOf("*En qué se fue*");
 
     expect(i).toBeGreaterThan(lineas.findIndex((l) => l.includes("Total del viaje")));
-    expect(lineas[i + 1]).toBe("· 🛏️ Alojamiento: 200.00 € (61 %)");
-    expect(lineas[i + 2]).toBe("· 🍽️ Comida: 126.50 € (39 %)");
+    expect(lineas[i + 1]).toBe("· 🛏️ Alojamiento: 200,00 € (61 %)");
+    expect(lineas[i + 2]).toBe("· 🍽️ Comida: 126,50 € (39 %)");
   });
 
   it("sin gastos, sin ese apartado", () => {
@@ -72,15 +72,15 @@ describe("resumenEnTexto", () => {
     const texto = resumenEnTexto(viaje);
 
     expect(texto).toContain("Lisboa");
-    expect(texto).toContain("326.50 €");
+    expect(texto).toContain("326,50 €");
   });
 
   it("lista lo que puso cada uno", () => {
     const texto = resumenEnTexto(viaje);
 
-    expect(texto).toContain("Ana: 240.00 €");
-    expect(texto).toContain("Luis: 86.50 €");
-    expect(texto).toContain("Marta: 0.00 €");
+    expect(texto).toContain("Ana: 240,00 €");
+    expect(texto).toContain("Luis: 86,50 €");
+    expect(texto).toContain("Marta: 0,00 €");
   });
 
   it("dice quién le paga a quién", () => {
@@ -106,8 +106,8 @@ describe("resumenEnTexto", () => {
   it("al lado de lo que puso, lo que le tocaba", () => {
     const texto = resumenEnTexto(viaje);
 
-    expect(texto).toContain("Ana: 240.00 € (le tocaban 108.83 €)");
-    expect(texto).toContain("Marta: 0.00 € (le tocaban 108.83 €)");
+    expect(texto).toContain("Ana: 240,00 € (le tocaban 108,83 €)");
+    expect(texto).toContain("Marta: 0,00 € (le tocaban 108,83 €)");
   });
 
   it("si puso justo lo suyo, no lo repite", () => {
@@ -116,7 +116,7 @@ describe("resumenEnTexto", () => {
       balances: [{ id: "a", nombre: "Ana", puesto: 50, tocaPagar: 50.004, balance: 0 }],
     });
 
-    expect(texto).toContain("Ana: 50.00 €\n");
+    expect(texto).toContain("Ana: 50,00 €\n");
     expect(texto).not.toContain("le tocaban");
   });
 
@@ -132,7 +132,7 @@ describe("resumenEnTexto", () => {
   });
 
   it("al lado del total, lo que sale por cabeza", () => {
-    expect(resumenEnTexto(viaje)).toContain("Total del viaje: *326.50 €* · 108.83 € por cabeza\n");
+    expect(resumenEnTexto(viaje)).toContain("Total del viaje: *326,50 €* · 108,83 € por cabeza\n");
   });
 
   it("si no a todos les toca lo mismo, avisa de que es una media", () => {
@@ -141,7 +141,7 @@ describe("resumenEnTexto", () => {
       { id: "b", nombre: "Luis", puesto: 0, tocaPagar: 30, balance: -30 },
     ];
 
-    expect(resumenEnTexto({ ...viaje, total: 90, balances })).toContain("45.00 € por cabeza de media");
+    expect(resumenEnTexto({ ...viaje, total: 90, balances })).toContain("45,00 € por cabeza de media");
   });
 
   it("con uno solo o sin gastos, no lo pone", () => {
@@ -151,7 +151,7 @@ describe("resumenEnTexto", () => {
 
   it("respeta la moneda del viaje", () => {
     const texto = resumenEnTexto({ ...viaje, moneda: "GBP" });
-    expect(texto).toContain("£326.50");
+    expect(texto).toContain("£326,50");
   });
 
   it("si no hay deudas, lo dice y ya", () => {
@@ -171,7 +171,7 @@ describe("resumenEnTexto", () => {
     });
 
     // El pendiente, en la lista de arriba con su importe.
-    expect(texto).toContain("· Luis → Ana: *22.33 €*");
+    expect(texto).toContain("· Luis → Ana: *22,33 €*");
     // Y el ya pagado, apartado abajo.
     expect(texto).toContain("Ya pagado: Marta → Ana");
   });

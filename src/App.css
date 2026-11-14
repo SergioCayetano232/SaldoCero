@@ -270,23 +270,6 @@
   overflow: hidden;
 }
 
-/* Una franja de color arriba, que es la que la distingue del resto. */
-.tarjeta-viaje::after {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 3px;
-  background: linear-gradient(
-    90deg,
-    var(--teal-500),
-    var(--teal-300),
-    var(--naranja-400),
-    var(--teal-500)
-  );
-  background-size: 300% 100%;
-  animation: mover-degradado 6s ease-in-out infinite;
-  pointer-events: none;
-}
 
 .viaje-titulo {
   display: flex;
@@ -427,7 +410,7 @@ select {
   cursor: pointer;
   appearance: none;
   /* La flechita, dibujada aquí para no depender de una imagen. */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%237b929b' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%235b6680' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;
   padding-right: 38px;
@@ -778,7 +761,7 @@ button:active {
 .filtro-buscar {
   padding-left: 38px;
   /* La lupa, dibujada aquí como la flecha de los desplegables. */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%237b929b' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='m11 11 3.5 3.5'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%235b6680' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='m11 11 3.5 3.5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: 14px center;
 }
@@ -1731,14 +1714,15 @@ button:active {
 
 .pastilla-categoria:hover {
   border-color: var(--color-categoria);
-  color: var(--color-categoria);
-  transform: translateY(-1px);
+  color: color-mix(in srgb, var(--color-categoria) 55%, var(--tinta));
 }
 
 /* La elegida se pinta con su propio color. */
 .pastilla-categoria.elegida {
   border-color: var(--color-categoria);
-  color: var(--color-categoria);
+  /* El color de la categoría solo, en naranja o gris, no se lee: va mezclado
+     con la tinta, que en claro lo oscurece y en oscuro lo aclara. */
+  color: color-mix(in srgb, var(--color-categoria) 55%, var(--tinta));
   background-color: color-mix(in srgb, var(--color-categoria) 12%, transparent);
   font-weight: 600;
 }
@@ -2034,16 +2018,11 @@ button:active {
 }
 
 /* ===== Participantes de un gasto ===== */
+/* Entre quién se reparte: un grupo más del formulario, separado por una
+   raya de troquel, no una caja dentro de la tarjeta. */
 .participantes {
-  border: 1px dashed var(--linea);
-  border-radius: var(--radio-sm);
-  padding: 13px;
-  background-color: var(--papel-hundido);
-  transition: border-color var(--medio);
-}
-
-.participantes:hover {
-  border-color: var(--teal-300);
+  padding-top: 12px;
+  border-top: 1px dashed var(--cupon-raya);
 }
 
 .participantes-titulo {
@@ -2406,22 +2385,6 @@ button:active {
     border-color var(--rapido);
 }
 
-/* Un brillo que cruza el codigo, para que se vea que se puede tocar. */
-.codigo::after {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 45%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.65),
-    transparent
-  );
-  transform: translateX(-100%);
-  animation: barrido 3.5s 1.5s infinite var(--curva-suave);
-  pointer-events: none;
-}
 
 .codigo:hover {
   background-color: var(--teal-100);
@@ -2520,7 +2483,7 @@ button:active {
 }
 
 .qr-puntos {
-  fill: #14262c;
+  fill: var(--tinta);
 }
 
 .qr-codigo {
@@ -2850,7 +2813,7 @@ button:active {
   padding-right: 8px;
   /* Que cada cifra quede centrada en su raya. */
   margin: -7px 0;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 14px;
   text-align: right;
   color: var(--tinta-tenue);
@@ -3011,7 +2974,7 @@ button:active {
   min-width: 0;
   display: flex;
   justify-content: center;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--tinta-tenue);
   white-space: nowrap;
 }
@@ -3419,8 +3382,8 @@ button:active {
 }
 
 .saldar h3 {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   margin-bottom: 14px;
   display: flex;
   align-items: baseline;
@@ -3538,9 +3501,8 @@ button:active {
   padding: 8px 12px;
   font-size: 13px;
   color: var(--tinta-suave);
-  border-left: 3px solid var(--rojo);
   background-color: var(--rojo-fondo);
-  border-radius: 0 var(--radio-sm) var(--radio-sm) 0;
+  border-radius: var(--radio-sm);
   animation: entrar-desde-abajo var(--medio) var(--curva-suave);
 }
 
@@ -3803,7 +3765,7 @@ button.pago-cantidad:hover {
 }
 
 .anadir-reaccion small {
-  font-size: 10px;
+  font-size: 11px;
   margin-left: 1px;
 }
 
@@ -4168,7 +4130,7 @@ button.pago-cantidad:hover {
 
 .cuantas-fotos {
   margin-left: 1px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--tinta-tenue);
   font-variant-numeric: tabular-nums;
@@ -4872,7 +4834,7 @@ button.pago-cantidad:hover {
   background-color: var(--teal-50);
   border: 1px solid var(--teal-100);
   color: var(--teal-700);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -4911,7 +4873,7 @@ button.pago-cantidad:hover {
   border-radius: var(--radio-pastilla);
   background-color: var(--verde-fondo);
   color: var(--verde);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -4937,7 +4899,7 @@ button.pago-cantidad:hover {
   border-radius: var(--radio-pastilla);
   background-color: var(--naranja-100);
   color: var(--naranja-500);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -5384,7 +5346,7 @@ a.pago-cobro {
   height: 2px;
   background-color: var(--naranja-400);
   transform-origin: left;
-  animation: se-acaba-el-tiempo 5s linear forwards;
+  animation: se-acaba-el-tiempo 8s linear forwards;
 }
 
 @keyframes se-acaba-el-tiempo {
@@ -5986,13 +5948,13 @@ kbd {
 }
 
 /* ===== Diagrama de deudas ===== */
+/* El diagrama va suelto en la tarjeta, cerrado por una raya de troquel:
+   no es una caja dentro de otra. */
 .diagrama-deudas {
   max-width: 420px;
   margin: 4px auto 16px;
-  padding: 10px 6px 2px;
-  border-radius: var(--radio);
-  background-color: var(--papel-hundido);
-  border: 1px solid var(--linea);
+  padding: 6px 6px 12px;
+  border-bottom: 1px dashed var(--cupon-raya);
 }
 
 .diagrama-deudas svg {

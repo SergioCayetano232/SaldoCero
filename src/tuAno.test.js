@@ -78,8 +78,8 @@ describe("textoTuAno", () => {
   it("las tres líneas", () => {
     const texto = textoTuAno({ ano: 2026, viajes: 3, porMoneda: [{ moneda: "EUR", cifra: 660.5 }, { moneda: "GBP", cifra: 150 }], masCaro: { nombre: "Lisboa", tuyo: 410, moneda: "EUR" } });
     expect(texto.titulo).toBe("En 2026, 3 viajes");
-    expect(texto.cifra).toMatch(/^Te han tocado 660.50 € y .*150.00/);
-    expect(texto.masCaro).toBe("El más caro, Lisboa: 410.00 €");
+    expect(texto.cifra).toMatch(/^Te han tocado 660,50 € y .*150.00/);
+    expect(texto.masCaro).toBe("El más caro, Lisboa: 410,00 €");
   });
 
   it("sin resumen, nada", () => {

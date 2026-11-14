@@ -79,8 +79,8 @@ describe("frenteAAyer", () => {
 
 describe("textoFrenteAAyer", () => {
   it("más, menos o lo mismo", () => {
-    expect(textoFrenteAAyer(15, "EUR")).toMatch(/^15\.00\s€ más que ayer$/);
-    expect(textoFrenteAAyer(-30, "EUR")).toMatch(/^30\.00\s€ menos que ayer$/);
+    expect(textoFrenteAAyer(15, "EUR")).toMatch(/^15,00\s€ más que ayer$/);
+    expect(textoFrenteAAyer(-30, "EUR")).toMatch(/^30,00\s€ menos que ayer$/);
     expect(textoFrenteAAyer(0, "EUR")).toBe("lo mismo que ayer");
   });
 

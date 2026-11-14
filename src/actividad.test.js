@@ -11,17 +11,17 @@ const fila = (que, quien, sobre, creadoEn, importe = null) => ({ id: ++n, que, q
 describe("frase", () => {
   it("un gasto, con su importe", () => {
     const [g] = agrupar([fila("gasto_nuevo", "l", "Cena", "2026-11-06T20:00:00Z", 45)]);
-    expect(frase(g, viajeros, null)).toBe("Luis apuntó Cena (45.00 €)");
+    expect(frase(g, viajeros, null)).toBe("Luis apuntó Cena (45,00 €)");
   });
 
   it("si fuiste tú, en segunda persona", () => {
     const [g] = agrupar([fila("gasto_borrado", "l", "Taxi", "2026-11-06T20:00:00Z", 12)]);
-    expect(frase(g, viajeros, "l")).toBe("Tú borraste Taxi (12.00 €)");
+    expect(frase(g, viajeros, "l")).toBe("Tú borraste Taxi (12,00 €)");
   });
 
   it("sin saber quién, alguien", () => {
     const [g] = agrupar([fila("gasto_cambiado", null, "Hotel", "2026-11-06T20:00:00Z", 300)]);
-    expect(frase(g, viajeros, null)).toBe("Alguien cambió Hotel (300.00 €)");
+    expect(frase(g, viajeros, null)).toBe("Alguien cambió Hotel (300,00 €)");
   });
 
   it("viajeros y pagos, sin importe", () => {

@@ -98,15 +98,15 @@ describe("queSeVaConViajero", () => {
   });
 
   it("con un gasto, en singular", () => {
-    expect(queSeVaConViajero(luis, gastos.slice(0, 2))).toBe("a Luis y el gasto que pagó (30.00 €)");
+    expect(queSeVaConViajero(luis, gastos.slice(0, 2))).toBe("a Luis y el gasto que pagó (30,00 €)");
   });
 
   it("con varios, cuántos y cuánto en la moneda del viaje", () => {
-    expect(queSeVaConViajero(luis, gastos)).toBe("a Luis y los 2 gastos que pagó (42.25 €)");
+    expect(queSeVaConViajero(luis, gastos)).toBe("a Luis y los 2 gastos que pagó (42,25 €)");
   });
 
   it("con la moneda del viaje", () => {
-    expect(queSeVaConViajero(luis, gastos.slice(0, 1), "USD")).toBe("a Luis y el gasto que pagó ($30.00)");
+    expect(queSeVaConViajero(luis, gastos.slice(0, 1), "USD")).toBe("a Luis y el gasto que pagó ($30,00)");
   });
 });
 
@@ -178,12 +178,12 @@ describe("queSeVaConGastos", () => {
   const cafe = (id, importe) => ({ id, concepto: "Café", importe });
 
   it("varios: cuántos y lo que suman", () => {
-    expect(queSeVaConGastos([cafe("1", 2), cafe("2", 2.5), cafe("3", 2)])).toBe("3 gastos (6.50 €)");
+    expect(queSeVaConGastos([cafe("1", 2), cafe("2", 2.5), cafe("3", 2)])).toBe("3 gastos (6,50 €)");
   });
 
   it("en la moneda del viaje, con lo convertido", () => {
     const fuera = { id: "1", concepto: "Ramen", importe: 1000, importeConvertido: 6.1 };
-    expect(queSeVaConGastos([fuera, cafe("2", 2)], "EUR")).toBe("2 gastos (8.10 €)");
+    expect(queSeVaConGastos([fuera, cafe("2", 2)], "EUR")).toBe("2 gastos (8,10 €)");
   });
 
   it("uno solo, por su nombre, como al quitarlo a mano", () => {

@@ -16,21 +16,21 @@ describe("tituloDePestana", () => {
   });
 
   it("con lo tuyo, entre el nombre y la marca", () => {
-    expect(tituloDePestana("Lisboa", "debes 20.00 €")).toBe("Lisboa · debes 20.00 € · SaldoCero");
+    expect(tituloDePestana("Lisboa", "debes 20,00 €")).toBe("Lisboa · debes 20,00 € · SaldoCero");
   });
 });
 
 describe("cuentaEnTitulo", () => {
   it("lo que debes", () => {
-    expect(cuentaEnTitulo({ debes: 20, teDeben: 0 })).toBe("debes 20.00 €");
+    expect(cuentaEnTitulo({ debes: 20, teDeben: 0 })).toBe("debes 20,00 €");
   });
 
   it("lo que te deben, en la moneda del viaje", () => {
-    expect(cuentaEnTitulo({ debes: 0, teDeben: 15 }, "USD")).toBe("te deben $15.00");
+    expect(cuentaEnTitulo({ debes: 0, teDeben: 15 }, "USD")).toBe("te deben $15,00");
   });
 
   it("con las dos cosas, lo neto", () => {
-    expect(cuentaEnTitulo({ debes: 30, teDeben: 10 })).toBe("debes 20.00 €");
+    expect(cuentaEnTitulo({ debes: 30, teDeben: 10 })).toBe("debes 20,00 €");
   });
 
   it("en paz, nada", () => {
@@ -55,11 +55,11 @@ describe("tituloDelViaje", () => {
   });
 
   it("al que pagó le deben su parte", () => {
-    expect(tituloDelViaje(viaje, "ana")).toBe("Lisboa · te deben 45.00 € · SaldoCero");
+    expect(tituloDelViaje(viaje, "ana")).toBe("Lisboa · te deben 45,00 € · SaldoCero");
   });
 
   it("y el otro la debe", () => {
-    expect(tituloDelViaje(viaje, "luis")).toBe("Lisboa · debes 45.00 € · SaldoCero");
+    expect(tituloDelViaje(viaje, "luis")).toBe("Lisboa · debes 45,00 € · SaldoCero");
   });
 
   it("sin saber quién eres, solo el nombre", () => {
@@ -102,8 +102,8 @@ describe("miNeto", () => {
 
 describe("cuentaDeNeto", () => {
   it("con su moneda", () => {
-    expect(cuentaDeNeto(23, "EUR")).toBe("te deben 23.00 €");
-    expect(cuentaDeNeto(-12.5, "USD")).toBe("debes $12.50");
+    expect(cuentaDeNeto(23, "EUR")).toBe("te deben 23,00 €");
+    expect(cuentaDeNeto(-12.5, "USD")).toBe("debes $12,50");
   });
 
   it("a cero, o sin guardar todavía, nada", () => {

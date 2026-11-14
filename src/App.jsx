@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from "react";
+import { flushSync } from "react-dom";
 import "./App.css";
+import "./cartera.css";
 import * as datos from "./datos";
 import { hayConexion, usarCodigo } from "./supabase";
 import { balancesConBote, hayBote } from "./bote";
@@ -18,7 +20,6 @@ import { reducirFoto, fotosDeGasto } from "./tickets";
 import { avisoDeArranque, codigoQueAbrir, hayQueOlvidar } from "./arranque";
 import { tituloDelViaje, miNeto } from "./titulo";
 import { temaGuardado, siguienteTema, temaDe, temaQueToca } from "./tema";
-import { hayQueSubir } from "./arriba";
 import { esAtajoDeshacer, esAtajoTema } from "./teclado";
 import { queTrae, sinLoQueTrae, recogerTicket } from "./llegada";
 import { MINIMO_PARA_FILTRAR } from "./filtros";
@@ -26,7 +27,6 @@ import { resumenDelViaje } from "./anterior";
 import { nombreDeLaRepeticion, genteParaRepetir, quienEresEnElNuevo, pendientesParaPasar, gastosDeLoPendiente, preguntaDePendientes } from "./repetirViaje";
 import Entrada from "./componentes/Entrada";
 import BarraViaje from "./componentes/BarraViaje";
-import BarraPegada from "./componentes/BarraPegada";
 import Viajeros from "./componentes/Viajeros";
 import Bote from "./componentes/Bote";
 import ListaCompra from "./componentes/ListaCompra";
@@ -36,6 +36,10 @@ import Actividad from "./componentes/Actividad";
 import CargandoViaje from "./componentes/CargandoViaje";
 import CifrasViaje from "./componentes/CifrasViaje";
 import Atajos from "./componentes/Atajos";
+import Talon from "./componentes/Talon";
+import BarraPestanas from "./componentes/BarraPestanas";
+import { pestanaAlEntrar, pestanaDelAtajo } from "./pestanas";
+import { datosDelTalon } from "./talon";
 import { enLista } from "./nombres";
 import { usarCategoriasPropias } from "./categorias";
 import { destinosPosibles, pasarGasto } from "./mover";
@@ -43,7 +47,7 @@ import { loTuyo } from "./tuAno";
 import { estaDiscreto, ponerDiscreto, alCambiarDiscreto } from "./discreto";
 import { alTocar, trasTocar } from "./reacciones";
 import { conceptoDeCompras, categoriaDeCompras } from "./compras";
-import { t, idiomaActual, alCambiarIdioma, usarIdioma, guardarIdioma, otroIdioma, IDIOMAS } from "./idioma";
+import { t, tn, idiomaActual, alCambiarIdioma, usarIdioma, guardarIdioma, otroIdioma, IDIOMAS } from "./idioma";
 
 // Fuera del componente: dentro, el linter no deja tocar window.location.
 function quitarEnlace() {
@@ -119,6 +123,42 @@ function App() {
     if (!aLasCuentas.current) return;
     window.history.replaceState(null, "", sinLoQueTrae(window.location.href));
   }, []);
+
+  // En qué parte del viaje estás: Gastos, Cuentas o Viaje. Al entrar en un
+  // viaje, o al cerrarlo o reabrirlo, vuelve a la que toca en ese momento.
+  const [entrarEnCuentas, setEntrarEnCuentas] = useState(() => queTrae(window.location.search) === "cuentas");
+  const [pestanaDe, setPestanaDe] = useState({ clave: null, id: "gastos" });
+  const claveDePestana = viaje ? `${viaje.codigo}|${estaCerrado(viaje)}` : null;
+  if (claveDePestana && pestanaDe.clave !== claveDePestana) {
+    setPestanaDe({
+      clave: claveDePestana,
+      id: pestanaAlEntrar({ cerrado: estaCerrado(viaje), aLasCuentas: entrarEnCuentas, sinViajeros: viaje.viajeros.length === 0 }),
+    });
+    if (entrarEnCuentas) setEntrarEnCuentas(false);
+  }
+  const pestana = pestanaDe.clave === claveDePestana ? pestanaDe.id : "gastos";
+
+  const cambiarPestana = useCallback(
+    (id) => {
+      setPestanaDe({ clave: claveDePestana, id });
+      window.scrollTo({ top: 0 });
+    },
+    [claveDePestana]
+  );
+
+  // Un atajo de otra parte primero te lleva a ella; luego hace lo suyo, que
+  // para entonces ya está a la vista. Va en captura para llegar antes.
+  useEffect(() => {
+    if (!claveDePestana) return;
+
+    function alPulsar(e) {
+      const destino = pestanaDelAtajo(e, Boolean(document.querySelector('[aria-modal="true"]')));
+      if (destino && destino !== pestana) flushSync(() => cambiarPestana(destino));
+    }
+
+    window.addEventListener("keydown", alPulsar, true);
+    return () => window.removeEventListener("keydown", alPulsar, true);
+  }, [claveDePestana, pestana, cambiarPestana]);
 
   useEffect(() => {
     if (!viaje || !aLasCuentas.current) return;
@@ -544,260 +584,305 @@ function App() {
   const soloVer = Boolean(viaje.soloVer);
   const fijo = cerrado || soloVer;
 
-  return (
-    <div className="app">
-      <Cabecera />
+  const talon = datosDelTalon(balances, viaje, soy, { cerrado });
+  const misPendientes = cuantosMios(pagosDelViaje(balances, viaje), soy);
 
-      <BarraViaje
-        viaje={viaje}
-        onSalir={salirDelViaje}
-        cerrado={cerrado}
-        soloVer={soloVer}
-        onCodigoParaVer={datos.codigoParaVer}
-        onReabrir={reabrirViaje}
-        onRenombrar={(nombre) => hacer(() => datos.renombrarViaje(viaje, nombre))}
-        onCambiarMoneda={(moneda) => hacer(() => datos.cambiarMoneda(viaje, moneda))}
-        discreto={discreto}
-        onDiscreto={() => {
-          ponerDiscreto(!discreto);
-          datos.guardarDiscreto(!discreto);
-        }}
-      />
+  return (
+    <div className={`app app-viaje en-${pestana}`}>
+      <header className="cartera-cabecera">
+        <div className="cartera-linea">
+          <button className="cartera-nombre" onClick={() => cambiarPestana("viaje")}>
+            <span className="cartera-marca">SaldoCero</span>
+            <span className="cartera-viaje">{viaje.nombre}</span>
+          </button>
+          <span className="cartera-gente">{tn(viajeros.length, "{n} persona", "{n} personas")}</span>
+        </div>
+        <Talon
+          datos={talon}
+          moneda={viaje.moneda ?? "EUR"}
+          onCuentas={() => cambiarPestana("cuentas")}
+          onQuienEres={() => cambiarPestana("viaje")}
+        />
+      </header>
 
       <AvisoSinConexion />
       {error && <p className="error">{error}</p>}
-      {!soloVer && (
-        <SugerirCerrar key={`cerrar-${viaje.codigo}-${cerrado}`} codigo={viaje.codigo} gastos={gastos} cerrado={cerrado} onCerrar={cerrarViaje} />
-      )}
 
-      <Viajeros
-        viajeros={viajeros}
-        colores={colores}
-        enfocar={recienCreado === viaje.codigo}
-        soy={soy}
-        onSoyYo={elegirQuienSoy}
-        recienLlegados={novedad?.ids}
-        cerrado={fijo}
-        soloVer={soloVer}
-        onAnadir={(nombre) =>
-          hacer(async () => propios.current.add((await datos.anadirViajero(viaje.id, nombre)).id))
-        }
-        onRenombrar={(id, nombre) => hacer(() => datos.renombrarViajero(id, nombre))}
-        onCobro={(id, cobro) => hacer(() => datos.ponerCobro(id, cobro))}
-        onJuntar={(id, conId) => hacer(() => datos.juntarViajero(id, conId))}
-        onEstancia={(id, desde, hasta) => hacer(() => datos.ponerEstancia(id, desde, hasta))}
-        onQuitar={(id, nombre) =>
-          borrarConAviso(
-            id,
-            queSeVaConViajero({ id, nombre }, gastos, viaje.moneda ?? "EUR"),
-            () => datos.quitarViajero(id)
-          )
-        }
-      />
-
-      {viajeros.length > 0 && (
-        <Bote
-          viajeros={viajeros}
-          aportaciones={aportaciones}
-          gastos={gastos}
-          colores={colores}
-          moneda={viaje.moneda ?? "EUR"}
-          cerrado={fijo}
-          onPoner={(lista) => hacer(() => datos.ponerEnElBote(viaje.id, lista))}
-          onQuitar={(a, nombre) =>
-            borrarConAviso(a.id, t("lo que puso {nombre} en el bote", { nombre }), () => datos.quitarDelBote(a.id))
-          }
-        />
-      )}
-
-      <ListaCompra
-        compras={compras}
-        cerrado={fijo}
-        onApuntar={(textos) => hacer(() => datos.apuntarCompras(viaje.id, textos))}
-        onMarcar={async (cosa, comprado) => {
-          const ponerla = (valor) =>
-            setViaje((v) => ({ ...v, compras: v.compras.map((c) => (c.id === cosa.id ? { ...c, comprado: valor } : c)) }));
-          ponerla(comprado);
-          if (!(await hacer(() => datos.marcarCompra(cosa.id, comprado)))) ponerla(!comprado);
-        }}
-        onQuitar={(cosa) => borrarConAviso(cosa.id, `"${cosa.texto}"`, () => datos.quitarCompras([cosa.id]))}
-        onGasto={(cosas) =>
-          setDeCompra({ ids: cosas.map((c) => c.id), concepto: conceptoDeCompras(cosas), categoria: categoriaDeCompras(cosas) })
-        }
-      />
-
-      <Gastos
-        // Otro viaje, otro formulario: que no se cuele lo que escribías en el anterior.
-        key={viaje.codigo}
-        codigo={viaje.codigo}
-        nombreViaje={viaje.nombre}
-        viajeros={viajeros}
-        colores={colores}
-        hayBote={hayBote(aportaciones, gastos)}
-        gastos={gastos}
-        monedaViaje={viaje.moneda ?? "EUR"}
-        presupuesto={viaje.presupuesto}
-        topes={viaje.topes ?? {}}
-        onCategorias={(categorias) => hacer(() => datos.ponerCategorias(viaje.id, categorias))}
-        recienLlegados={novedad?.ids}
-        cerrado={fijo}
-        soy={soy}
-        verDe={verDe}
-        verDia={verDia}
-        verGasto={verGasto}
-        llegada={llegada}
-        onLlegadaUsada={() => setLlegada(null)}
-        onAnadir={(gasto) =>
-          hacer(async () => {
-            // La foto se reduce antes de guardar nada: si no se puede leer, mejor
-            // enterarse sin haber apuntado el gasto a medias.
-            const foto = gasto.foto && (await reducirFoto(gasto.foto));
-            const nuevo = await datos.anadirGasto(viaje.id, gasto, soy);
-            propios.current.add(nuevo.id);
-            if (foto) await datos.ponerTicket(viaje.id, nuevo.id, foto);
-          })
-        }
-        onEditar={async (id, gasto) => {
-          const antes = deshacerEdicion(gastos.find((g) => g.id === id), gasto);
-          const bien = await hacer(async () => {
-            const foto = gasto.foto && (await reducirFoto(gasto.foto));
-            await datos.editarGasto(id, gasto);
-            if (foto) await datos.ponerTicket(viaje.id, id, foto, gasto.ticketAnterior);
-            else if (gasto.quitarFoto) await datos.quitarFoto(gastos.find((g) => g.id === id), gasto.ticketAnterior);
-          });
-          if (bien && antes) {
-            setEditado({ texto: t('Has cambiado "{concepto}"', { concepto: gasto.concepto }), cambios: [{ id, antes }], viajeId: viaje.id });
-          }
-          return bien;
-        }}
-        onCambiarCategoria={async (cambios, categoria) => {
-          const bien = await hacer(() => Promise.all(cambios.map((c) => datos.editarGasto(c.id, c.despues))));
-          if (bien) setEditado({ texto: textoPasados(cambios.length, categoria), cambios, viajeId: viaje.id });
-        }}
-        // Uno detrás de otro, para que queden en la lista en el orden en que los pegaste.
-        onDuda={(id, texto) => hacer(() => datos.ponerDuda(id, texto, soy))}
-        deCompra={deCompra}
-        onCompraApuntada={(ids) => hacer(() => datos.quitarCompras(ids))}
-        // Hay que saber quién eres. Con el viaje cerrado sí, mirando no.
-        onReaccionar={
-          soloVer || !soy
-            ? null
-            : async (gasto, emoji) => {
-                const que = alTocar(gasto.reacciones, soy, emoji);
-                const ponerlas = (reacciones) =>
-                  setViaje((v) => ({ ...v, gastos: v.gastos.map((g) => (g.id === gasto.id ? { ...g, reacciones } : g)) }));
-                // Se ve al momento. Si no se guarda, vuelve como estaba.
-                ponerlas(trasTocar(gasto.reacciones, soy, emoji));
-                const bien = await hacer(() => datos.reaccionar(gasto.id, soy, emoji, que));
-                if (!bien) ponerlas(gasto.reacciones);
+      <main className="paneles">
+        <section
+          id="panel-gastos"
+          role="tabpanel"
+          aria-labelledby="pestana-gastos"
+          className={`panel panel-gastos ${pestana === "gastos" ? "activo" : ""}`}
+        >
+          <Gastos
+            // Otro viaje, otro formulario: que no se cuele lo que escribías en el anterior.
+            key={viaje.codigo}
+            codigo={viaje.codigo}
+            nombreViaje={viaje.nombre}
+            viajeros={viajeros}
+            colores={colores}
+            hayBote={hayBote(aportaciones, gastos)}
+            gastos={gastos}
+            monedaViaje={viaje.moneda ?? "EUR"}
+            presupuesto={viaje.presupuesto}
+            topes={viaje.topes ?? {}}
+            onCategorias={(categorias) => hacer(() => datos.ponerCategorias(viaje.id, categorias))}
+            recienLlegados={novedad?.ids}
+            cerrado={fijo}
+            soy={soy}
+            verDe={verDe}
+            verDia={verDia}
+            verGasto={verGasto}
+            llegada={llegada}
+            onLlegadaUsada={() => setLlegada(null)}
+            onAnadir={(gasto) =>
+              hacer(async () => {
+                // La foto se reduce antes de guardar nada: si no se puede leer, mejor
+                // enterarse sin haber apuntado el gasto a medias.
+                const foto = gasto.foto && (await reducirFoto(gasto.foto));
+                const nuevo = await datos.anadirGasto(viaje.id, gasto, soy);
+                propios.current.add(nuevo.id);
+                if (foto) await datos.ponerTicket(viaje.id, nuevo.id, foto);
+              })
+            }
+            onEditar={async (id, gasto) => {
+              const antes = deshacerEdicion(gastos.find((g) => g.id === id), gasto);
+              const bien = await hacer(async () => {
+                const foto = gasto.foto && (await reducirFoto(gasto.foto));
+                await datos.editarGasto(id, gasto);
+                if (foto) await datos.ponerTicket(viaje.id, id, foto, gasto.ticketAnterior);
+                else if (gasto.quitarFoto) await datos.quitarFoto(gastos.find((g) => g.id === id), gasto.ticketAnterior);
+              });
+              if (bien && antes) {
+                setEditado({ texto: t('Has cambiado "{concepto}"', { concepto: gasto.concepto }), cambios: [{ id, antes }], viajeId: viaje.id });
               }
-        }
-        destinos={destinosPosibles(datos.historial(), viaje.codigo)}
-        prepararMover={async (gasto, codigo) => {
-          try {
-            const alli = await datos.abrirOtroViaje(codigo);
-            if (alli.cerrado) return { error: t("{viaje} está cerrado.", { viaje: alli.nombre }) };
-            const { gasto: pasado, error } = pasarGasto(gasto, { deAqui: viajeros, monedaAqui: viaje.moneda ?? "EUR" }, alli);
-            return error ? { error } : { alli, pasado };
-          } catch (fallo) {
-            return { error: fallo.message };
-          }
-        }}
-        onMover={(gasto, alli, pasado) => hacer(() => datos.moverGasto(gasto, alli, pasado))}
-        onAnadirVarios={(lista) =>
-          hacer(async () => {
-            for (const gasto of lista) propios.current.add((await datos.anadirGasto(viaje.id, gasto, soy)).id);
-          })
-        }
-        onQuitarVarios={(quitados) =>
-          borrarConAviso(
-            quitados.map((g) => g.id),
-            queSeVaConGastos(quitados, viaje.moneda ?? "EUR"),
-            () => Promise.all(quitados.map((g) => datos.quitarGasto(g.id, fotosDeGasto(g))))
-          )
-        }
-        onQuitar={(id, concepto, fotos) =>
-          borrarConAviso(id, `"${concepto}"`, () => datos.quitarGasto(id, fotos))
-        }
-        onAnadirFoto={(gasto, archivo) => hacer(async () => datos.anadirFoto(viaje.id, gasto, await reducirFoto(archivo)))}
-        onQuitarFoto={(gasto, ruta) => hacer(() => datos.quitarFoto(gasto, ruta))}
-        verTicket={datos.urlDelTicket}
-      />
-
-      {cerrado && (
-        <CifrasViaje
-          gastos={gastos}
-          balances={balances}
-          nombre={viaje.nombre}
-          moneda={viaje.moneda ?? "EUR"}
-          anterior={viaje.anterior}
-          pendientes={pagosDelViaje(balances, viaje).filter((p) => !p.saldado).length}
-          verHistorias={verHistorias}
-          onHistorias={setVerHistorias}
-        />
-      )}
-
-      {gastos.length > 0 && (
-        <Resumen
-          balances={balances}
-          colores={colores}
-          gastos={gastos}
-          soy={soy}
-          monedaViaje={viaje.moneda ?? "EUR"}
-          saldados={viaje.saldados ?? []}
-          onSaldar={(pago) => hacer(() => datos.marcarSaldado(viaje.id, pago, soy))}
-          onSaldarVarios={(pagos) => hacer(() => datos.marcarVariosSaldados(viaje.id, pagos, soy))}
-          onDesaldar={(pago) => hacer(() => datos.desmarcarSaldado(viaje.id, pago))}
-          onConfirmar={(pago) => hacer(() => datos.confirmarSaldado(viaje.id, pago))}
-          cerrado={cerrado}
-          soloVer={soloVer}
-          onPresupuesto={(cantidad) => hacer(() => datos.ponerPresupuesto(viaje.id, cantidad))}
-          onTopes={(topes) => hacer(() => datos.ponerTopes(viaje.id, topes))}
-          onRedondear={(redondear) => hacer(() => datos.ponerRedondeo(viaje.id, redondear))}
-          onCentro={(centro) => hacer(() => datos.ponerCentro(viaje.id, centro))}
-          parciales={parciales}
-          aportaciones={aportaciones}
-          onParcial={(parcial) => hacer(() => datos.anadirParcial(viaje.id, parcial))}
-          onQuitarParcial={(parcial, de, a) =>
-            borrarConAviso(parcial.id, t("el pago de {de} a {a}", { de, a }), () => datos.quitarParcial(parcial.id))
-          }
-          viaje={viaje}
-          onVerGastos={
-            gastos.length >= MINIMO_PARA_FILTRAR
-              ? (id) => setVerDe((antes) => ({ id, vez: (antes?.vez ?? 0) + 1 }))
-              : undefined
-          }
-          onVerGasto={(id) => setVerGasto((antes) => ({ id, vez: (antes?.vez ?? 0) + 1 }))}
-          onVerDia={
-            gastos.length >= MINIMO_PARA_FILTRAR
-              ? (fecha) => setVerDia((antes) => ({ fecha, vez: (antes?.vez ?? 0) + 1 }))
-              : undefined
-          }
-        />
-      )}
-
-      <Actividad actividad={viaje.actividad} viajeros={viajeros} soy={soy} monedaViaje={viaje.moneda ?? "EUR"} />
-
-      {!soloVer && (viajeros.length > 0 || gastos.length > 0) && (
-        <div className="botones-final">
-          {!cerrado && gastos.length > 0 && (
-            <button className="boton-cerrar-viaje" onClick={cerrarViaje}>
-              🔒 {t("Cerrar el viaje")}
-            </button>
+              return bien;
+            }}
+            onCambiarCategoria={async (cambios, categoria) => {
+              const bien = await hacer(() => Promise.all(cambios.map((c) => datos.editarGasto(c.id, c.despues))));
+              if (bien) setEditado({ texto: textoPasados(cambios.length, categoria), cambios, viajeId: viaje.id });
+            }}
+            // Uno detrás de otro, para que queden en la lista en el orden en que los pegaste.
+            onDuda={(id, texto) => hacer(() => datos.ponerDuda(id, texto, soy))}
+            deCompra={deCompra}
+            onCompraApuntada={(ids) => hacer(() => datos.quitarCompras(ids))}
+            // Hay que saber quién eres. Con el viaje cerrado sí, mirando no.
+            onReaccionar={
+              soloVer || !soy
+                ? null
+                : async (gasto, emoji) => {
+                    const que = alTocar(gasto.reacciones, soy, emoji);
+                    const ponerlas = (reacciones) =>
+                      setViaje((v) => ({ ...v, gastos: v.gastos.map((g) => (g.id === gasto.id ? { ...g, reacciones } : g)) }));
+                    // Se ve al momento. Si no se guarda, vuelve como estaba.
+                    ponerlas(trasTocar(gasto.reacciones, soy, emoji));
+                    const bien = await hacer(() => datos.reaccionar(gasto.id, soy, emoji, que));
+                    if (!bien) ponerlas(gasto.reacciones);
+                  }
+            }
+            destinos={destinosPosibles(datos.historial(), viaje.codigo)}
+            prepararMover={async (gasto, codigo) => {
+              try {
+                const alli = await datos.abrirOtroViaje(codigo);
+                if (alli.cerrado) return { error: t("{viaje} está cerrado.", { viaje: alli.nombre }) };
+                const { gasto: pasado, error } = pasarGasto(gasto, { deAqui: viajeros, monedaAqui: viaje.moneda ?? "EUR" }, alli);
+                return error ? { error } : { alli, pasado };
+              } catch (fallo) {
+                return { error: fallo.message };
+              }
+            }}
+            onMover={(gasto, alli, pasado) => hacer(() => datos.moverGasto(gasto, alli, pasado))}
+            onAnadirVarios={(lista) =>
+              hacer(async () => {
+                for (const gasto of lista) propios.current.add((await datos.anadirGasto(viaje.id, gasto, soy)).id);
+              })
+            }
+            onQuitarVarios={(quitados) =>
+              borrarConAviso(
+                quitados.map((g) => g.id),
+                queSeVaConGastos(quitados, viaje.moneda ?? "EUR"),
+                () => Promise.all(quitados.map((g) => datos.quitarGasto(g.id, fotosDeGasto(g))))
+              )
+            }
+            onQuitar={(id, concepto, fotos) =>
+              borrarConAviso(id, `"${concepto}"`, () => datos.quitarGasto(id, fotos))
+            }
+            onAnadirFoto={(gasto, archivo) => hacer(async () => datos.anadirFoto(viaje.id, gasto, await reducirFoto(archivo)))}
+            onQuitarFoto={(gasto, ruta) => hacer(() => datos.quitarFoto(gasto, ruta))}
+            verTicket={datos.urlDelTicket}
+          />
+        </section>
+        <section
+          id="panel-cuentas"
+          role="tabpanel"
+          aria-labelledby="pestana-cuentas"
+          className={`panel panel-cuentas ${pestana === "cuentas" ? "activo" : ""}`}
+        >
+          {!soloVer && (
+            <SugerirCerrar key={`cerrar-${viaje.codigo}-${cerrado}`} codigo={viaje.codigo} gastos={gastos} cerrado={cerrado} onCerrar={cerrarViaje} />
           )}
-          {/* Con uno solo no hay grupo que repetir. */}
-          {viajeros.length > 1 && (
-            <button className="boton-repetir-viaje" onClick={() => repetirViaje(viajeros)} disabled={repitiendo}>
-              {repitiendo ? t("Creando…") : `🔁 ${t("Repetir con la misma gente")}`}
-            </button>
+          {cerrado && (
+            <CifrasViaje
+              gastos={gastos}
+              balances={balances}
+              nombre={viaje.nombre}
+              moneda={viaje.moneda ?? "EUR"}
+              anterior={viaje.anterior}
+              pendientes={pagosDelViaje(balances, viaje).filter((p) => !p.saldado).length}
+              verHistorias={verHistorias}
+              onHistorias={setVerHistorias}
+            />
           )}
-          {!cerrado && (
-            <button className="boton-reiniciar" onClick={vaciarViaje}>
-              {t("Vaciar este viaje")}
-            </button>
+          {gastos.length > 0 && (
+            <Resumen
+              balances={balances}
+              colores={colores}
+              gastos={gastos}
+              soy={soy}
+              monedaViaje={viaje.moneda ?? "EUR"}
+              saldados={viaje.saldados ?? []}
+              onSaldar={(pago) => hacer(() => datos.marcarSaldado(viaje.id, pago, soy))}
+              onSaldarVarios={(pagos) => hacer(() => datos.marcarVariosSaldados(viaje.id, pagos, soy))}
+              onDesaldar={(pago) => hacer(() => datos.desmarcarSaldado(viaje.id, pago))}
+              onConfirmar={(pago) => hacer(() => datos.confirmarSaldado(viaje.id, pago))}
+              cerrado={cerrado}
+              soloVer={soloVer}
+              onPresupuesto={(cantidad) => hacer(() => datos.ponerPresupuesto(viaje.id, cantidad))}
+              onTopes={(topes) => hacer(() => datos.ponerTopes(viaje.id, topes))}
+              onRedondear={(redondear) => hacer(() => datos.ponerRedondeo(viaje.id, redondear))}
+              onCentro={(centro) => hacer(() => datos.ponerCentro(viaje.id, centro))}
+              parciales={parciales}
+              aportaciones={aportaciones}
+              onParcial={(parcial) => hacer(() => datos.anadirParcial(viaje.id, parcial))}
+              onQuitarParcial={(parcial, de, a) =>
+                borrarConAviso(parcial.id, t("el pago de {de} a {a}", { de, a }), () => datos.quitarParcial(parcial.id))
+              }
+              viaje={viaje}
+              onVerGastos={
+                gastos.length >= MINIMO_PARA_FILTRAR
+                  ? (id) => {
+                      setVerDe((antes) => ({ id, vez: (antes?.vez ?? 0) + 1 }));
+                      cambiarPestana("gastos");
+                    }
+                  : undefined
+              }
+              onVerGasto={(id) => {
+                setVerGasto((antes) => ({ id, vez: (antes?.vez ?? 0) + 1 }));
+                cambiarPestana("gastos");
+              }}
+              onVerDia={
+                gastos.length >= MINIMO_PARA_FILTRAR
+                  ? (fecha) => {
+                      setVerDia((antes) => ({ fecha, vez: (antes?.vez ?? 0) + 1 }));
+                      cambiarPestana("gastos");
+                    }
+                  : undefined
+              }
+            />
           )}
-        </div>
-      )}
+          {gastos.length === 0 && (
+            <p className="tarjeta vacio">{t("Cuando apuntéis el primer gasto, aquí veréis quién paga a quién.")}</p>
+          )}
+          {viajeros.length > 0 && (
+            <Bote
+              viajeros={viajeros}
+              aportaciones={aportaciones}
+              gastos={gastos}
+              colores={colores}
+              moneda={viaje.moneda ?? "EUR"}
+              cerrado={fijo}
+              onPoner={(lista) => hacer(() => datos.ponerEnElBote(viaje.id, lista))}
+              onQuitar={(a, nombre) =>
+                borrarConAviso(a.id, t("lo que puso {nombre} en el bote", { nombre }), () => datos.quitarDelBote(a.id))
+              }
+            />
+          )}
+        </section>
+        <section
+          id="panel-viaje"
+          role="tabpanel"
+          aria-labelledby="pestana-viaje"
+          className={`panel panel-viaje ${pestana === "viaje" ? "activo" : ""}`}
+        >
+          <BarraViaje
+            viaje={viaje}
+            onSalir={salirDelViaje}
+            cerrado={cerrado}
+            soloVer={soloVer}
+            onCodigoParaVer={datos.codigoParaVer}
+            onReabrir={reabrirViaje}
+            onRenombrar={(nombre) => hacer(() => datos.renombrarViaje(viaje, nombre))}
+            onCambiarMoneda={(moneda) => hacer(() => datos.cambiarMoneda(viaje, moneda))}
+            discreto={discreto}
+            onDiscreto={() => {
+              ponerDiscreto(!discreto);
+              datos.guardarDiscreto(!discreto);
+            }}
+          />
+          <Viajeros
+            viajeros={viajeros}
+            colores={colores}
+            enfocar={recienCreado === viaje.codigo}
+            soy={soy}
+            onSoyYo={elegirQuienSoy}
+            recienLlegados={novedad?.ids}
+            cerrado={fijo}
+            soloVer={soloVer}
+            onAnadir={(nombre) =>
+              hacer(async () => propios.current.add((await datos.anadirViajero(viaje.id, nombre)).id))
+            }
+            onRenombrar={(id, nombre) => hacer(() => datos.renombrarViajero(id, nombre))}
+            onCobro={(id, cobro) => hacer(() => datos.ponerCobro(id, cobro))}
+            onJuntar={(id, conId) => hacer(() => datos.juntarViajero(id, conId))}
+            onEstancia={(id, desde, hasta) => hacer(() => datos.ponerEstancia(id, desde, hasta))}
+            onQuitar={(id, nombre) =>
+              borrarConAviso(
+                id,
+                queSeVaConViajero({ id, nombre }, gastos, viaje.moneda ?? "EUR"),
+                () => datos.quitarViajero(id)
+              )
+            }
+          />
+          <ListaCompra
+            compras={compras}
+            cerrado={fijo}
+            onApuntar={(textos) => hacer(() => datos.apuntarCompras(viaje.id, textos))}
+            onMarcar={async (cosa, comprado) => {
+              const ponerla = (valor) =>
+                setViaje((v) => ({ ...v, compras: v.compras.map((c) => (c.id === cosa.id ? { ...c, comprado: valor } : c)) }));
+              ponerla(comprado);
+              if (!(await hacer(() => datos.marcarCompra(cosa.id, comprado)))) ponerla(!comprado);
+            }}
+            onQuitar={(cosa) => borrarConAviso(cosa.id, `"${cosa.texto}"`, () => datos.quitarCompras([cosa.id]))}
+            onGasto={(cosas) =>
+              setDeCompra({ ids: cosas.map((c) => c.id), concepto: conceptoDeCompras(cosas), categoria: categoriaDeCompras(cosas) })
+            }
+          />
+          <Actividad actividad={viaje.actividad} viajeros={viajeros} soy={soy} monedaViaje={viaje.moneda ?? "EUR"} />
+          {!soloVer && (viajeros.length > 0 || gastos.length > 0) && (
+            <div className="botones-final">
+              {!cerrado && gastos.length > 0 && (
+                <button className="boton-cerrar-viaje" onClick={cerrarViaje}>
+                  🔒 {t("Cerrar el viaje")}
+                </button>
+              )}
+              {/* Con uno solo no hay grupo que repetir. */}
+              {viajeros.length > 1 && (
+                <button className="boton-repetir-viaje" onClick={() => repetirViaje(viajeros)} disabled={repitiendo}>
+                  {repitiendo ? t("Creando…") : `🔁 ${t("Repetir con la misma gente")}`}
+                </button>
+              )}
+              {!cerrado && (
+                <button className="boton-reiniciar" onClick={vaciarViaje}>
+                  {t("Vaciar este viaje")}
+                </button>
+              )}
+            </div>
+          )}
+          <Pie enViaje />
+        </section>
+      </main>
 
       {novedad && (
         <div className="novedad" role="status" key={novedad.texto}>
@@ -806,29 +891,32 @@ function App() {
         </div>
       )}
 
-      {borrado && (
-        <div className="deshacer">
-          <span>{t("Has quitado {que}", { que: borrado.que })}</span>
-          <button onClick={deshacerBorrado} title={t("También con Ctrl+Z (⌘Z en Mac)")}>
-            {t("Deshacer")}
-          </button>
-        </div>
-      )}
+      {/* Siempre en la página, aunque vacía: así el lector de pantalla lee
+          lo que entra en ella ("Has quitado…", con su Deshacer). */}
+      <div className="avisos-vivos" aria-live="polite">
+        {borrado && (
+          <div className="deshacer">
+            <span>{t("Has quitado {que}", { que: borrado.que })}</span>
+            <button onClick={deshacerBorrado} title={t("También con Ctrl+Z (⌘Z en Mac)")}>
+              {t("Deshacer")}
+            </button>
+          </div>
+        )}
 
-      {!borrado && editado?.viajeId === viaje.id && (
-        <div className="deshacer">
-          <span>{editado.texto}</span>
-          <button onClick={deshacerEditado} title={t("También con Ctrl+Z (⌘Z en Mac)")}>
-            {t("Deshacer")}
-          </button>
-        </div>
-      )}
+        {!borrado && editado?.viajeId === viaje.id && (
+          <div className="deshacer">
+            <span>{editado.texto}</span>
+            <button onClick={deshacerEditado} title={t("También con Ctrl+Z (⌘Z en Mac)")}>
+              {t("Deshacer")}
+            </button>
+          </div>
+        )}
+      </div>
 
-      <Globito cuantos={cuantosMios(pagosDelViaje(balances, viaje), soy)} />
-      <BotonArriba />
-      <BarraPegada viaje={viaje} />
+      <Globito cuantos={misPendientes} />
+      <BotonApuntar visible={pestana === "gastos" && !fijo && viajeros.length > 0} />
+      <BarraPestanas activa={pestana} onCambiar={cambiarPestana} avisos={{ cuentas: misPendientes }} />
       <BotonInstalar />
-      <Pie enViaje />
     </div>
   );
 }
@@ -939,13 +1027,16 @@ function Globito({ cuantos }) {
   return null;
 }
 
-// En el móvil, con muchos gastos, el formulario queda muy lejos.
-function BotonArriba() {
-  const [visible, setVisible] = useState(false);
+// En el móvil, con muchos gastos, el formulario queda muy lejos: este botón,
+// al pulgar, te sube y te deja escribiendo el importe. Es lo mismo que la "N".
+function BotonApuntar({ visible }) {
+  const [lejos, setLejos] = useState(false);
 
   useEffect(() => {
+    // Lejos es que el formulario ya se ha ido por arriba de la pantalla.
     function alBajar() {
-      setVisible(hayQueSubir(window.scrollY, window.innerHeight));
+      const formulario = document.querySelector(".formulario-gasto");
+      setLejos(Boolean(formulario) && formulario.getBoundingClientRect().bottom < 0);
     }
 
     alBajar();
@@ -953,16 +1044,18 @@ function BotonArriba() {
     return () => window.removeEventListener("scroll", alBajar);
   }, []);
 
-  if (!visible) return null;
+  if (!visible || !lejos) return null;
 
-  function subir() {
-    const quieto = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    window.scrollTo({ top: 0, behavior: quieto ? "auto" : "smooth" });
+  function apuntar() {
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "n" }));
   }
 
   return (
-    <button className="boton-arriba" onClick={subir} aria-label={t("Volver arriba")} title={t("Volver arriba")}>
-      ↑
+    <button className="boton-apuntar" onClick={apuntar}>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      {t("Apuntar un gasto")}
     </button>
   );
 }
@@ -996,7 +1089,7 @@ function Pie({ enViaje = false }) {
 }
 
 // El color de la barra del móvil, a juego con el tema.
-const COLOR_BARRA = { claro: "#0e7c7b", oscuro: "#0b1518" };
+const COLOR_BARRA = { claro: "#13294b", oscuro: "#0b1529" };
 
 function BotonTema() {
   const [tema, setTema] = useState(() => temaGuardado(datos.leerTema()));

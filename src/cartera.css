@@ -1,0 +1,1084 @@
+/* ===== La cartera de billetes =====
+   El mundo de la app: una cartera de billetes de avión. Va después de App.css
+   y manda sobre él. Aquí está lo nuevo (el armazón, el talón, las pestañas y
+   el sello) y lo que apaga del mundo de antes: el cristal, las manchas, los
+   degradados y lo que se movía sin parar. */
+
+:root {
+  /* El armazón: la parte de la cartera que siempre está a la vista. */
+  --cartera: #13294b;
+  --cartera-tinta: #ffffff;
+  --cartera-suave: #c9d3e8;
+  /* El cupón del talón, con su raya de troquel. */
+  --cupon: #fbfbf8;
+  --cupon-raya: #b9c0cf;
+  --alto-pestanas: 64px;
+}
+
+:root[data-tema="oscuro"] {
+  --cartera: #0e1a33;
+  --cartera-tinta: #eef1f7;
+  --cartera-suave: #a9b4cc;
+  --cupon: #1b2b4d;
+  --cupon-raya: #3d5079;
+}
+
+/* ===== Lo que se apaga del mundo de antes ===== */
+
+/* Nada entra en cascada al cargar: la pantalla está, sin más. */
+.app > *,
+.app > .tarjeta {
+  animation: none;
+}
+
+.tarjeta {
+  background-color: var(--papel);
+  background-image: none;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-sm);
+}
+
+.tarjeta::before {
+  display: none;
+}
+
+.tarjeta:hover {
+  transform: none;
+  box-shadow: var(--sombra-sm);
+  border-color: var(--linea);
+}
+
+.tarjeta:hover h2 .icono {
+  transform: none;
+}
+
+/* Las cabeceras de tarjeta son cabeceras de cupón: grotesca ancha, en
+   mayúsculas, con una raya fina debajo. */
+.tarjeta h2 {
+  font-family: var(--fuente-titulo);
+  font-stretch: 112%;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--teal-600);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--linea);
+}
+
+/* El nombre del viaje en su tarjeta manda sobre las cabeceras: sin raya. */
+.tarjeta-viaje h2.viaje-nombre,
+.tarjeta-viaje .viaje-nombre {
+  padding-bottom: 0;
+  border-bottom: 0;
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 21px;
+  font-weight: 800;
+  color: var(--tinta);
+}
+
+/* El nombre del viaje, en su propia línea; las pastillas, debajo. */
+.tarjeta-viaje .viaje-titulo {
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+
+.tarjeta-viaje .viaje-titulo .viaje-nombre {
+  flex: 1 1 calc(100% - 40px);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Los avisos con raya de color a un lado, sin la raya. */
+.aviso-codigo {
+  border-left: 0;
+  padding-left: 0;
+}
+
+
+/* Botones de cupón: marino liso, sin brillo que cruce ni onda. */
+.fila-formulario button:not(.codigo):not(.boton-qr),
+.formulario-gasto > button,
+.formulario-gasto .fila-botones button {
+  background: var(--teal-500);
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.fila-formulario button:not(.codigo):not(.boton-qr):hover,
+.formulario-gasto > button:hover,
+.formulario-gasto .fila-botones button:hover {
+  background: color-mix(in srgb, var(--teal-500) 86%, var(--tinta));
+  transform: none;
+  box-shadow: none;
+}
+
+.fila-formulario button:not(.codigo):not(.boton-qr)::before,
+.formulario-gasto > button::before,
+.formulario-gasto .fila-botones button::before,
+.fila-formulario button:not(.codigo):not(.boton-qr)::after,
+.formulario-gasto > button::after,
+.formulario-gasto .fila-botones button::after {
+  display: none;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus {
+  animation: none;
+  border-color: var(--carbon);
+  box-shadow: 0 0 0 3px var(--carbon-fondo);
+}
+
+input[data-salto="a"],
+input[data-salto="b"] {
+  animation: none;
+}
+
+/* El logo de la portada: el "Cero" en rojo de compañía, liso. */
+.cabecera h1 {
+  font-stretch: 112%;
+  letter-spacing: -0.01em;
+  color: var(--teal-500);
+}
+
+:root[data-tema="oscuro"] .cabecera h1 {
+  color: var(--tinta);
+}
+
+.cabecera h1 .cero {
+  background: none;
+  color: var(--naranja-500);
+  animation: entrar-letra 0.7s 0.1s var(--curva-suave) backwards;
+}
+
+.cabecera::after {
+  background: var(--naranja-500);
+  border-radius: 0;
+}
+
+/* Lo que se movía sin parar, quieto. */
+.barra-relleno::after,
+.total-destacado::before {
+  display: none;
+}
+
+.pago:hover .pago-flecha,
+.avatar.latiendo {
+  animation: none;
+}
+
+.avatar.latiendo {
+  box-shadow: 0 0 0 2px var(--papel), 0 0 0 4px var(--naranja-500);
+}
+
+/* Los avatares, de un color liso: la inicial blanca se lee en todos. */
+.avatar {
+  background: var(--color-avatar);
+  box-shadow: none;
+}
+
+@media (hover: hover) {
+  .avatar:hover {
+    translate: none;
+    scale: none;
+    box-shadow: none;
+  }
+}
+
+/* Los rellenos que iban en degradado, lisos. */
+.total-destacado {
+  background: var(--teal-500);
+  border-radius: var(--radio);
+  box-shadow: none;
+  transform: none;
+}
+
+.total-cifra {
+  font-stretch: 100%;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-shadow: none;
+}
+
+.barra-relleno,
+.leer-total-barra > span,
+.por-lugar-barra > span {
+  background: var(--teal-500);
+}
+
+/* Lo tuyo ya lo dice la pastilla "TÚ": sin raya de color al lado. */
+.lista li.soy-yo::before,
+.fila-balance.soy-yo::before {
+  display: none;
+}
+
+.tu-ano {
+  background: var(--teal-50);
+}
+
+.lista-pegada .apuntar-lista,
+.lista-pegada .apuntar-lista:hover {
+  background: var(--teal-500);
+}
+
+.boton-historias {
+  background: var(--naranja-500);
+}
+
+/* Lo que flotaba con cristal, sobre papel liso. */
+.novedad,
+.boton-instalar,
+.elegir-reaccion,
+.historias-final > button,
+.velo,
+.visor-ticket {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.novedad,
+.boton-instalar,
+.elegir-reaccion {
+  background-color: var(--papel);
+  border-color: var(--linea);
+}
+
+/* ===== Las cifras, en morado de calco ===== */
+.gasto-importe,
+.pago-cantidad,
+.dia-total {
+  color: var(--carbon);
+  font-variant-numeric: tabular-nums;
+}
+
+.gasto-importe {
+  font-family: var(--fuente-titulo);
+  font-stretch: 100%;
+  font-weight: 700;
+}
+
+/* Cada día es la cabecera de un cupón. */
+.dia-titulo {
+  font-family: var(--fuente-titulo);
+  font-stretch: 112%;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--teal-600);
+  border-bottom: 1px dashed var(--cupon-raya);
+}
+
+/* ===== La pantalla del viaje ===== */
+
+/* Lo que se busca con scroll no se queda debajo del talón ni de la barra. */
+html:has(.app-viaje) {
+  scroll-padding-top: 170px;
+  scroll-padding-bottom: calc(var(--alto-pestanas) + 80px);
+}
+
+/* La cartera va de borde a borde: el armazón no lleva márgenes. */
+body:has(.app-viaje) {
+  padding: 0 0 calc(var(--alto-pestanas) + env(safe-area-inset-bottom) + 24px);
+}
+
+.app-viaje {
+  max-width: none;
+}
+
+/* El armazón: el nombre del viaje y el talón, pegados arriba. */
+.cartera-cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background-color: var(--cartera);
+  color: var(--cartera-tinta);
+  padding: calc(10px + env(safe-area-inset-top)) 14px 14px;
+}
+
+.cartera-cabecera > * {
+  max-width: 620px;
+  margin-inline: auto;
+}
+
+.cartera-linea {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 32px;
+}
+
+.cartera-nombre {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  padding: 6px 0;
+  color: inherit;
+  text-align: left;
+  font-family: var(--fuente-titulo);
+  font-stretch: 112%;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.cartera-nombre:active {
+  transform: none;
+}
+
+.cartera-marca {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cartera-suave);
+}
+
+.cartera-marca::after {
+  content: "·";
+  margin-left: 8px;
+}
+
+/* En el móvil el nombre del viaje necesita el sitio. */
+@media (max-width: 480px) {
+  .cartera-marca {
+    display: none;
+  }
+}
+
+.cartera-viaje {
+  font-size: 14px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cartera-gente {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border: 1px solid color-mix(in srgb, var(--cartera-tinta) 55%, transparent);
+  border-radius: var(--radio-pastilla);
+}
+
+/* El talón: lo tuyo a la izquierda, la próxima a la derecha, troquel en medio. */
+.talon {
+  display: flex;
+  align-items: stretch;
+  margin-top: 8px;
+  background-color: var(--cupon);
+  color: var(--tinta);
+  border-radius: var(--radio);
+}
+
+.talon button {
+  color: inherit;
+  text-align: left;
+}
+
+.talon button:active {
+  transform: none;
+}
+
+.talon-saldo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px 13px;
+}
+
+.talon-toca {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-width: 118px;
+  max-width: 44%;
+  padding: 12px 14px 13px 12px;
+}
+
+.talon-etiqueta {
+  font-family: var(--fuente-titulo);
+  font-stretch: 112%;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tinta-tenue);
+}
+
+.talon-saldo.debes .talon-etiqueta {
+  color: var(--rojo);
+}
+
+.talon-saldo.te-deben .talon-etiqueta {
+  color: var(--verde);
+}
+
+/* La cifra manda: es lo único grande de toda la pantalla. */
+.talon-cifra {
+  font-family: var(--fuente-titulo);
+  font-stretch: 100%;
+  font-weight: 800;
+  font-size: clamp(30px, 9vw, 40px);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--carbon);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.talon-cifra.a-cero {
+  font-size: 24px;
+  font-stretch: 112%;
+  text-transform: uppercase;
+  color: var(--verde);
+}
+
+.talon-pregunta {
+  font-family: var(--fuente-titulo);
+  font-stretch: 112%;
+  font-weight: 800;
+  font-size: 22px;
+  line-height: 1.1;
+  color: var(--teal-600);
+}
+
+.talon-nota {
+  font-size: 13px;
+  color: var(--tinta-suave);
+}
+
+.talon-quien {
+  font-family: var(--fuente-titulo);
+  font-stretch: 112%;
+  font-weight: 800;
+  font-size: 21px;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--tinta);
+  overflow-wrap: anywhere;
+}
+
+.talon-quien.tu {
+  color: var(--rojo);
+}
+
+/* El troquel: raya de puntos con una muesca arriba y otra abajo, del color
+   del armazón, como si le hubieran hecho dos bocados al papel. */
+.talon-troquel {
+  position: relative;
+  flex-shrink: 0;
+  width: 0;
+  margin-block: 10px;
+  border-left: 2px dotted var(--cupon-raya);
+}
+
+.talon-troquel::before,
+.talon-troquel::after {
+  content: "";
+  position: absolute;
+  left: -8px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: var(--cartera);
+}
+
+.talon-troquel::before {
+  top: -18px;
+}
+
+.talon-troquel::after {
+  bottom: -18px;
+}
+
+@media (hover: hover) {
+  .talon-saldo:hover,
+  .talon-toca:hover {
+    background-color: color-mix(in srgb, var(--teal-50) 70%, transparent);
+  }
+}
+
+/* ===== Las tres partes ===== */
+.paneles {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 4px 14px 0;
+}
+
+.panel {
+  display: none;
+}
+
+.panel.activo {
+  display: block;
+}
+
+/* Las tarjetas de dentro, más juntas: es una cartera, no un escaparate. */
+.panel > .tarjeta:first-child,
+.panel > :first-child .tarjeta:first-child {
+  margin-top: 12px;
+}
+
+.app-viaje > .error,
+.app-viaje > .sin-conexion {
+  max-width: 620px;
+  margin: 12px auto 0;
+}
+
+/* La barra de abajo, al pulgar. */
+.barra-pestanas {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 40;
+  background-color: var(--cartera);
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -1px 0 color-mix(in srgb, var(--cartera-tinta) 12%, transparent);
+}
+
+.barra-pestanas [role="tablist"] {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.pestana {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: var(--alto-pestanas);
+  color: var(--cartera-suave);
+  font-family: var(--fuente-titulo);
+  font-stretch: 112%;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pestana svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pestana.activa {
+  color: var(--cartera-tinta);
+  font-weight: 800;
+}
+
+/* La pestaña en la que estás lleva su lengüeta arriba. */
+.pestana.activa::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 32px;
+  height: 3px;
+  translate: -50% 0;
+  background-color: var(--cartera-tinta);
+}
+
+.pestana:active {
+  transform: none;
+}
+
+.pestana:focus-visible {
+  outline-color: var(--cartera-tinta);
+  outline-offset: -4px;
+}
+
+.pestana-aviso {
+  position: absolute;
+  top: 8px;
+  left: calc(50% + 8px);
+  min-width: 18px;
+  padding: 1px 5px;
+  border-radius: var(--radio-pastilla);
+  background-color: var(--naranja-500);
+  color: #fff;
+  font-family: var(--fuente);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+:root[data-tema="oscuro"] .pestana-aviso {
+  background-color: #d2232a;
+}
+
+/* Apuntar, encima de la barra, cuando el formulario ha quedado lejos. */
+.boton-apuntar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--alto-pestanas) + env(safe-area-inset-bottom) + 12px);
+  z-index: 39;
+  translate: -50% 0;
+  width: min(592px, calc(100% - 28px));
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: var(--radio);
+  background-color: var(--teal-500);
+  color: #fff;
+  font-family: var(--fuente-titulo);
+  font-stretch: 112%;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: var(--sombra-lg);
+  animation: entrar-desde-abajo var(--medio) var(--curva-suave);
+}
+
+.boton-apuntar svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+/* Los avisos que salían abajo, por encima de la barra. */
+.app-viaje .deshacer,
+.app-viaje .novedad {
+  bottom: calc(var(--alto-pestanas) + env(safe-area-inset-bottom) + 12px);
+}
+
+.app-viaje .boton-instalar {
+  bottom: calc(var(--alto-pestanas) + env(safe-area-inset-bottom) + 12px);
+}
+
+/* ===== Los cupones de las deudas, y su sello ===== */
+.pago {
+  position: relative;
+  background-color: var(--papel-hundido);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  animation: none;
+}
+
+/* Pagado no se apaga: lo dicen el sello y la raya, y la letra se sigue
+   leyendo con todo su contraste. */
+.pago.pagado {
+  background-color: var(--papel);
+  opacity: 1;
+}
+
+/* Con el sello en la fila, la cifra va justo detrás. */
+.pago.pagado .pago-final {
+  margin-left: 0;
+}
+
+/* El sello. Pagado, en tinta verde y de trazo entero; enviado y a la espera
+   de que confirme el otro, de trazo punteado: se lee sin mirar el color. */
+.sello {
+  margin-left: auto;
+  padding: 1px 9px;
+  border: 2.5px solid currentColor;
+  border-radius: var(--radio-sm);
+  color: var(--verde);
+  background-color: transparent;
+  font-family: var(--fuente-titulo);
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  pointer-events: none;
+  rotate: -8deg;
+  animation: sellar 0.42s var(--curva-muelle) backwards;
+}
+
+.sello.a-medias {
+  border-style: dashed;
+  color: var(--carbon);
+}
+
+@keyframes sellar {
+  from {
+    opacity: 0;
+    scale: 1.9;
+    rotate: -14deg;
+  }
+  60% {
+    opacity: 1;
+    scale: 0.94;
+    rotate: -8deg;
+  }
+}
+
+/* El último pago: la cartera entera se sella a cero. */
+.sello-final {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  animation: irse 3.5s var(--curva-suave) forwards;
+}
+
+.sello-final span {
+  padding: 10px 22px;
+  border: 5px double currentColor;
+  border-radius: var(--radio);
+  color: var(--verde);
+  background-color: color-mix(in srgb, var(--papel) 88%, transparent);
+  font-family: var(--fuente-titulo);
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: clamp(34px, 11vw, 64px);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transform: rotate(-10deg);
+  animation: sellar-grande 0.5s var(--curva-muelle) backwards;
+}
+
+@keyframes sellar-grande {
+  from {
+    opacity: 0;
+    transform: rotate(-18deg) scale(2.2);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(-10deg) scale(0.95);
+  }
+}
+
+@keyframes irse {
+  80% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ===== En el ordenador: las cuentas al lado de los gastos ===== */
+@media (min-width: 1100px) {
+  .cartera-cabecera > *,
+  .paneles {
+    max-width: 1180px;
+  }
+
+  .talon {
+    max-width: 620px;
+  }
+
+  .cartera-cabecera .talon {
+    margin-inline: max(0px, calc((100% - 1180px) / 2)) auto;
+  }
+
+  .app-viaje.en-gastos .paneles,
+  .app-viaje.en-cuentas .paneles {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  .app-viaje.en-gastos .panel-cuentas,
+  .app-viaje.en-cuentas .panel-gastos {
+    display: block;
+  }
+
+  .app-viaje.en-viaje .paneles {
+    max-width: 760px;
+  }
+
+  .barra-pestanas [role="tablist"] {
+    max-width: 480px;
+  }
+}
+
+/* ===== Las filas: una acción a la vista, el resto tras "⋯" ===== */
+
+/* Lo que asoma al deslizar, traducido y mudo para el lector de pantalla
+   (las mismas acciones están en la fila). Quieta, ni asoma. */
+.deslizable::before {
+  content: attr(data-editar) / "";
+}
+
+.deslizable::after {
+  content: attr(data-quitar) / "";
+}
+
+.deslizable.quieto::before,
+.deslizable.quieto::after {
+  display: none;
+}
+
+/* El gasto que estás editando: todo el borde, no una raya a un lado. */
+.editandose {
+  box-shadow: inset 0 0 0 2px var(--naranja-400);
+}
+
+.acciones {
+  align-items: center;
+  gap: 4px;
+}
+
+/* Los botones de texto de las filas: pequeños de ver, de 44 px al dedo. */
+.boton-editar,
+.boton-soy,
+.boton-saldar,
+.menu-acciones-boton {
+  position: relative;
+  min-height: 32px;
+}
+
+.boton-editar::after,
+.boton-soy::after,
+.boton-saldar::after,
+.menu-acciones-boton::after {
+  content: "";
+  position: absolute;
+  inset: -6px -2px;
+}
+
+.boton-editar {
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--teal-600);
+  border-radius: var(--radio-sm);
+  opacity: 1;
+}
+
+.boton-editar:hover {
+  background-color: var(--teal-50);
+}
+
+.menu-acciones {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.menu-acciones-boton {
+  width: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radio-sm);
+  color: var(--tinta-suave);
+}
+
+.menu-acciones-boton svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.menu-acciones-boton:hover,
+.menu-acciones-boton[aria-expanded="true"] {
+  background-color: var(--teal-50);
+  color: var(--tinta);
+}
+
+.menu-acciones-boton:active {
+  transform: none;
+}
+
+.menu-acciones-lista {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 25;
+  min-width: 232px;
+  padding: 6px;
+  list-style: none;
+  background-color: var(--papel);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-lg);
+  animation: entrar-desde-abajo var(--rapido) var(--curva-suave);
+}
+
+.menu-acciones-opcion {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--radio-sm);
+  color: var(--tinta);
+  font-size: 15px;
+  text-align: left;
+  text-decoration: none;
+}
+
+.menu-acciones-opcion:hover,
+.menu-acciones-opcion:focus-visible {
+  background-color: var(--teal-50);
+}
+
+.menu-acciones-opcion:active {
+  transform: none;
+}
+
+.menu-acciones-opcion[aria-pressed="true"] {
+  font-weight: 600;
+}
+
+/* Lo peligroso, apartado: una raya y aire antes, y en rojo. */
+.menu-acciones-separador {
+  height: 1px;
+  margin: 6px 4px;
+  background-color: var(--linea);
+}
+
+.menu-acciones-opcion.peligro {
+  color: var(--rojo);
+  font-weight: 600;
+}
+
+.menu-acciones-opcion.peligro:hover,
+.menu-acciones-opcion.peligro:focus-visible {
+  background-color: var(--rojo-fondo);
+}
+
+/* "Soy yo" / "Eres tú": un interruptor con palabras, no un ✓ suelto. */
+.boton-soy {
+  padding: 4px 12px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-pastilla);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--teal-600);
+  background-color: var(--papel);
+  opacity: 1;
+}
+
+.boton-soy.puesto {
+  border-color: var(--carbon);
+  background-color: var(--carbon-fondo);
+  color: var(--carbon);
+}
+
+/* Los dos botones de cada deuda, con su palabra. */
+.boton-saldar {
+  width: auto;
+  height: auto;
+  padding: 5px 12px;
+  border-radius: var(--radio-pastilla);
+  border-color: var(--linea);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.boton-saldar:hover {
+  transform: none;
+}
+
+.pago .pago-final {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* "Editar" se ve siempre entero: ya no es un icono que se esconde. */
+.lista li .boton-editar,
+.lista li:hover .boton-editar,
+.lista li:focus-within .boton-editar {
+  opacity: 1;
+}
+
+/* El menú va dentro de una fila de lista: que no herede lo de las filas. */
+.lista .menu-acciones-lista li,
+.menu-acciones-lista li {
+  display: block;
+  padding: 0;
+  border: 0;
+  animation: none;
+  font-size: inherit;
+}
+
+.lista .menu-acciones-lista li.menu-acciones-separador {
+  height: 1px;
+  margin: 6px 4px;
+  background-color: var(--linea);
+}
+
+.menu-acciones-lista.hacia-arriba {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+
+/* Editando un gasto: el formulario lo dice arriba, con su salida. */
+.editando-aviso {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radio-sm);
+  background-color: var(--naranja-100);
+  color: var(--tinta);
+  font-family: var(--fuente-titulo);
+  font-stretch: 112%;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.editando-aviso span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ===== Repasos de la auditoría ===== */
+
+/* Desactivado: gris sobre gris claro, no gris sobre marino. */
+.fila-formulario button:not(.codigo):not(.boton-qr):disabled,
+.formulario-gasto > button:disabled,
+.formulario-gasto .fila-botones button:disabled {
+  background: var(--linea);
+  color: var(--tinta-suave);
+}
+
+/* Nada de letra de 10 px: 11 como mínimo. */
+.etiqueta-tu,
+.desglose-tanto {
+  font-size: 11px;
+}
+
+/* Las cabeceras de tarjeta, un punto por encima del texto. */
+.tarjeta h2 {
+  font-size: 14px;
+}
+
+/* ===== Repaso final ===== */
+
+/* La flecha del desplegable ya no pisa "nadie, el camino corto". */
+.saldar-por-uno select {
+  padding-right: 32px;
+  max-width: 100%;
+}
+
+/* Tapar cifras y salir: iconos sueltos, pero con dedo entero (44 px). */
+.tarjeta-viaje .boton-discreto,
+.tarjeta-viaje .boton-salir {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-grid;
+  place-items: center;
+}

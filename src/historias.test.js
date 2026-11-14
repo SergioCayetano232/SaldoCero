@@ -37,15 +37,15 @@ describe("historiasDelViaje", () => {
   });
 
   it("el total con sus gastos y sus días", () => {
-    expect(una(historias(), "total")).toMatchObject({ cifra: "240.00 €", despues: "en 5 gastos y 3 días" });
+    expect(una(historias(), "total")).toMatchObject({ cifra: "240,00 €", despues: "en 5 gastos y 3 días" });
   });
 
   it("lo más gordo, con quién lo pagó", () => {
-    expect(una(historias(), "grande")).toMatchObject({ cifra: "Hotel", despues: "120.00 €, y lo pagó Ana" });
+    expect(una(historias(), "grande")).toMatchObject({ cifra: "Hotel", despues: "120,00 €, y lo pagó Ana" });
   });
 
   it("lo que más se repitió", () => {
-    expect(una(historias(), "repetido")).toMatchObject({ cifra: "Café", despues: "2 veces, 50.00 € en total" });
+    expect(una(historias(), "repetido")).toMatchObject({ cifra: "Café", despues: "2 veces, 50,00 € en total" });
   });
 
   it("el día más caro, con su nombre entero", () => {

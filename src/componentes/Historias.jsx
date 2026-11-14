@@ -90,7 +90,7 @@ function Historias({ historias, onCerrar }) {
         ))}
       </div>
 
-      <button ref={boton} className="historias-cerrar" onClick={onCerrar} aria-label={t("Cerrar")}>
+      <button ref={boton} className="historias-cerrar" onClick={onCerrar} aria-label={t("Cerrar las historias")}>
         ×
       </button>
 

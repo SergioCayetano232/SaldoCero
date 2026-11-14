@@ -46,6 +46,7 @@ import { descargarGastos } from "../compartir";
 import { DURA_EL_AVISO, textoAlGuardar } from "../apuntado";
 import { esAtajoBuscar, esAtajoGuardar, esAtajoHoy, esAtajoLoMio, esAtajoNuevo, esAtajoOrden, esAtajoQuitarFiltros, esAtajoRepetir, esAtajoFoto, esAtajoNota, escapeEnBuscador, esMac, esOrdenador } from "../teclado";
 import Deslizable from "./Deslizable";
+import MenuAcciones from "./MenuAcciones";
 import VisorTicket from "./VisorTicket";
 import Resaltado from "./Resaltado";
 import Dictado from "./Dictado";
@@ -1055,6 +1056,18 @@ function Gastos({
                 }
               }}
             >
+              {/* Que se note que no es uno nuevo: el formulario es el mismo. */}
+              {editando && (
+                <p className="editando-aviso" role="status">
+                  <span>
+                    {t("Editando «{concepto}»", { concepto: gastos.find((g) => g.id === editando)?.concepto ?? "" })}
+                  </span>
+                  <button className="enlace" onClick={cancelar}>
+                    {t("Cancelar")}
+                  </button>
+                </p>
+              )}
+
               {recuperado && (
                 <p className="borrador-recuperado" role="status">
                   ✍️ {t("Lo dejaste a medias.")}
@@ -1136,6 +1149,7 @@ function Gastos({
               {!entreVarios && (
                 <select
                   ref={campoPagador}
+                  aria-label={devolucion ? t("Quién lo recibió") : t("Quién pagó")}
                   value={pagadorId}
                   onChange={(e) => setPagadorId(e.target.value)}
                 >
@@ -2527,73 +2541,38 @@ function Gastos({
 
                       {!cerrado && (
                         <span className="acciones">
-                          <a
-                            className="boton-avisar"
-                            href={enlaceWhatsApp(
-                              mensajeDeGasto({ gasto, viajeros, moneda: monedaViaje, codigo })
-                            )}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title={t("Contarlo por WhatsApp")}
-                            aria-label={t("Contar {concepto} por WhatsApp", { concepto: gasto.concepto })}
-                          >
-                            💬
-                          </a>
-                          {!gasto.duda && (
-                            <button
-                              className="boton-duda"
-                              onClick={() => abrirPregunta(gasto)}
-                              title={t("Preguntar por este gasto")}
-                              aria-label={t("Preguntar por {concepto}", { concepto: gasto.concepto })}
-                            >
-                              ❓
-                            </button>
-                          )}
-                          <button
-                            className={`boton-fijar ${fijados.includes(gasto.id) ? "puesto" : ""}`}
-                            onClick={() => fijar(gasto.id)}
-                            aria-pressed={fijados.includes(gasto.id)}
-                            title={fijados.includes(gasto.id) ? t("Desfijar") : t("Fijar arriba")}
-                            aria-label={
-                              fijados.includes(gasto.id)
-                                ? t("Desfijar {concepto}", { concepto: gasto.concepto })
-                                : t("Fijar {concepto} arriba", { concepto: gasto.concepto })
-                            }
-                          >
-                            📌
-                          </button>
-                          <button
-                            className="boton-repetir"
-                            onClick={() => repetir(gasto)}
-                            title={t("Apuntar otro igual")}
-                            aria-label={t("Apuntar otro igual")}
-                          >
-                            ⧉
-                          </button>
-                          {destinos.length > 0 && (
-                            <button
-                              className="boton-mover-gasto"
-                              onClick={() => setMoviendo(moviendo === gasto.id ? null : gasto.id)}
-                              title={t("Pasar a otro viaje")}
-                              aria-label={t("Pasar {concepto} a otro viaje", { concepto: gasto.concepto })}
-                            >
-                              ↪
-                            </button>
-                          )}
                           <button
                             className="boton-editar"
                             onClick={() => editar(gasto)}
-                            title={esOrdenador() ? t("Editar gasto (o doble clic en él)") : t("Editar gasto")}
+                            aria-label={t("Editar {concepto}", { concepto: gasto.concepto })}
+                            title={esOrdenador() ? t("Editar gasto (o doble clic en él)") : undefined}
                           >
-                            ✏️
+                            {t("Editar")}
                           </button>
-                          <button
-                            className="boton-quitar"
-                            onClick={() => onQuitar(gasto.id, gasto.concepto, fotosDeGasto(gasto))}
-                            title={t("Borrar {concepto}", { concepto: gasto.concepto })}
-                          >
-                            ✕
-                          </button>
+                          <MenuAcciones
+                            etiqueta={t("Más opciones de {de}", { de: gasto.concepto })}
+                            acciones={[
+                              {
+                                texto: t("Contarlo por WhatsApp"),
+                                href: enlaceWhatsApp(mensajeDeGasto({ gasto, viajeros, moneda: monedaViaje, codigo })),
+                              },
+                              !gasto.duda && { texto: t("Preguntar por este gasto"), alPulsar: () => abrirPregunta(gasto) },
+                              {
+                                texto: fijados.includes(gasto.id) ? t("Desfijar") : t("Fijar arriba"),
+                                alPulsar: () => fijar(gasto.id),
+                              },
+                              { texto: t("Apuntar otro igual"), alPulsar: () => repetir(gasto) },
+                              destinos.length > 0 && {
+                                texto: t("Pasar a otro viaje"),
+                                alPulsar: () => setMoviendo(moviendo === gasto.id ? null : gasto.id),
+                              },
+                              {
+                                texto: t("Borrar el gasto"),
+                                peligro: true,
+                                alPulsar: () => onQuitar(gasto.id, gasto.concepto, fotosDeGasto(gasto)),
+                              },
+                            ]}
+                          />
                         </span>
                       )}
                     </Deslizable>

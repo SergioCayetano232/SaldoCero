@@ -121,9 +121,9 @@ describe("lo pendiente al repetir", () => {
 
   it("la pregunta, con una o con varias", () => {
     expect(preguntaDePendientes([deLuis], "Ibiza 2", "EUR")).toBe(
-      'Queda una deuda sin pagar: Luis le debe 20.00 € a Ana. ¿La pasamos a "Ibiza 2"? Allí saldrá como un gasto y aquí se dará por pagada.'
+      'Queda una deuda sin pagar: Luis le debe 20,00 € a Ana. ¿La pasamos a "Ibiza 2"? Allí saldrá como un gasto y aquí se dará por pagada.'
     );
-    expect(preguntaDePendientes([deLuis, deMarta], "Ibiza 2", "EUR")).toMatch(/^Quedan 2 deudas sin pagar, 32\.35 € en total\./);
+    expect(preguntaDePendientes([deLuis, deMarta], "Ibiza 2", "EUR")).toMatch(/^Quedan 2 deudas sin pagar, 32,35 € en total\./);
   });
 });
 

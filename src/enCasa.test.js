@@ -38,8 +38,8 @@ describe("aCasa", () => {
 
 describe("textoACasa", () => {
   it("con la moneda de casa y el ≈ delante", () => {
-    expect(textoACasa(4000, 0.00612, "EUR")).toBe("≈ 24.48 €");
-    expect(textoACasa(100, 1.08, "USD")).toBe("≈ $108.00");
+    expect(textoACasa(4000, 0.00612, "EUR")).toBe("≈ 24,48 €");
+    expect(textoACasa(100, 1.08, "USD")).toBe("≈ $108,00");
   });
 
   it("sin cambio, nada", () => {
